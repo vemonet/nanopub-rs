@@ -1,3 +1,4 @@
+
 use nanopub_rs::nanopub::Nanopub;
 
 fn main() {
@@ -57,28 +58,23 @@ fn main() {
 
     //         "#;
 
-    // let example = r#"
-    //     @prefix : <http://example.org/>.
-    //     @prefix foaf: <http://xmlns.com/foaf/0.1/>.
-
-    //     :alice foaf:name "Alice";
-    //         foaf:mbox <mailto:alice@work.example> .
-
-    //     :bob foaf:name "Bob".
-    //     "#;
-
     let example = r#"
         @prefix this: <http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74> .
         @prefix sub: <http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74#> .
+        @prefix np: <http://www.nanopub.org/nschema#> .
         this: np:hasAssertion sub:assertion;
             np:hasProvenance sub:provenance;
             np:hasPublicationInfo sub:pubInfo;
             a np:Nanopublication .
         "#;
 
-    let np = Nanopub {
-        rdf: example.to_string(),
-    };
+    // let example = r#"
+    //     <http://s> <http://p> <http://o> .
+    //     "#;
+
+    let np = Nanopub::new(example).unwrap_or_else(|error| {
+        panic!("Problem parsing the RDF: {:?}", error);
+    });
 
     // let np = Nanopub {
     //     rdf: String::from("toast"),

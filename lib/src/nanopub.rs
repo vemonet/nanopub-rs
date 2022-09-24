@@ -58,6 +58,12 @@ impl Nanopub {
             rdf: nt_stringifier.serialize_graph(&mut graph)?.to_string(),
             // graph: &mut graph,
         })
+
+        // let np = match nt_stringifier.serialize_graph(&mut graph)?.to_string() {
+        //     Ok(np) => np,
+        //     Err(error) => panic!("Problem opening the file: {:?}", error),
+        // };
+
         // Self {
         //     rdf: if let Some(rdf) = rdf {
         //         rdf.to_string()
