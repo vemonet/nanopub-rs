@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["nanopub_rs"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.64.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"struct\" href=\"nanopub_rs/nanopub/struct.Nanopub.html\" title=\"struct nanopub_rs::nanopub::Nanopub\">Nanopub</a>","synthetic":false,"types":["nanopub_rs::nanopub::Nanopub"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Getting Started</title>
+        <title>Getting Started - Nanopub-rs</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -104,11 +104,14 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">Nanopub-rs</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/vemonet/nanopub-rs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
                     </div>
                 </div>
@@ -141,7 +144,14 @@
 </span><span class="boring">fn main() {
 </span>use nanopub_rs::nanopub::Nanopub;
 
-let np = Nanopub::new(&quot;&lt;http://s&gt; &lt;http://p&gt; &lt;http://o&gt; .&quot;);
+let np = Nanopub::new(
+    &quot;&lt;http://s&gt; &lt;http://p&gt; &lt;http://o&gt; .&quot;,
+    &quot;PUBKEY&quot;,
+    &quot;PRIVATE_KEY&quot;,
+    &quot;https://orcid.org/0000-0000-0000-0000&quot;,
+    None,
+    None,
+);
 <span class="boring">}
 </span></code></pre></pre>
 <h2 id="working-with-rdf"><a class="header" href="#working-with-rdf">Working with RDF</a></h2>

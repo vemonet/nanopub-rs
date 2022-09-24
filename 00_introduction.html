@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Readme</title>
+        <title>Introduction - Nanopub-rs</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html" class="active"><strong aria-hidden="true">1.</strong> Readme</a></li><li class="chapter-item expanded "><a href="00_introduction.html"><strong aria-hidden="true">2.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="01_getting_started.html"><strong aria-hidden="true">3.</strong> Getting Started</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Readme</a></li><li class="chapter-item expanded "><a href="00_introduction.html" class="active"><strong aria-hidden="true">2.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="01_getting_started.html"><strong aria-hidden="true">3.</strong> Getting Started</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -104,11 +104,14 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">Nanopub-rs</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/vemonet/nanopub-rs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
                     </div>
                 </div>
@@ -134,32 +137,20 @@
 
                 <div id="content" class="content">
                     <main>
-                        <!-- this file is only meant to "import" the README.md into the book -->
-<h1 id="rust-library-for-nanopublications"><a class="header" href="#rust-library-for-nanopublications">Rust library for Nanopublications</a></h1>
-<p>A rust toolkit to sign and publish <a href="https://nanopub.org">Nanopublications</a>.</p>
-<h2 id="build"><a class="header" href="#build">Build</a></h2>
-<pre><code class="language-bash">cargo build
-</code></pre>
-<h2 id="try"><a class="header" href="#try">Try</a></h2>
-<p>Try in the <code>try</code> folder:</p>
-<pre><code class="language-bash">cd ../try
-cargo run
-</code></pre>
-<h2 id="build-docs"><a class="header" href="#build-docs">Build docs</a></h2>
-<pre><code class="language-bash">cargo install mdbook
-</code></pre>
-<p>Docs from markdown:</p>
-<pre><code class="language-bash">mdbook build
-</code></pre>
-<p>Doc from comments:</p>
-<pre><code class="language-bash">rustdoc --crate-name nanopub_rs src/lib.rs -o docs/target/doc -L dependency=docs/target/debug/deps
-</code></pre>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>The <a href="https://crates.io/crates/sophia">nanopub_rs crate</a> aims to provide a comprehensive toolkit for working with Nanopublications and RDF in Rust.</p>
+<p>RDF is a data model designed to exchange knowledge on the Web in an interoperable way. Each piece of knowledge in RDF (a statement) is represented by a triple, made of three terms. A set of triples forms an RDF graph. Finally, several graphs can be grouped in a collection called a dataset, where each graph is identified by a unique name.</p>
+<h2 id="code-reference"><a class="header" href="#code-reference">Code reference</a></h2>
+<p>Checkout the <a href="/nanopub-rs/doc/nanopub_rs">documentation generated from the code</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="next" href="00_introduction.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="01_getting_started.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -168,7 +159,10 @@ cargo run
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="next" href="00_introduction.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="01_getting_started.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

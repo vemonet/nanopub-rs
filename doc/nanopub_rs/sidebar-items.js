@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":[["nanopub","A module to work with nanopublications"]]};

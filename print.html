@@ -3,8 +3,8 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found</title>
-        <base href="/">
+        <title>Nanopub-rs</title>
+        <meta name="robots" content="noindex" />
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
@@ -105,11 +105,14 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title"></h1>
+                    <h1 class="menu-title">Nanopub-rs</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/vemonet/nanopub-rs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
                     </div>
                 </div>
@@ -135,8 +138,89 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="document-not-found-404"><a class="header" href="#document-not-found-404">Document not found (404)</a></h1>
-<p>This URL is invalid, sorry. Please use the navigation bar or search to continue.</p>
+                        <!-- this file is only meant to "import" the README.md into the book -->
+<h1 id="rust-library-for-nanopublications"><a class="header" href="#rust-library-for-nanopublications">Rust library for Nanopublications</a></h1>
+<p>A rust toolkit to sign and publish <a href="https://nanopub.org">Nanopublications</a>.</p>
+<h2 id="build"><a class="header" href="#build">Build</a></h2>
+<pre><code class="language-bash">cargo build
+</code></pre>
+<h2 id="try"><a class="header" href="#try">Try</a></h2>
+<p>Try in the <code>try</code> folder:</p>
+<pre><code class="language-bash">cd ../try
+cargo run
+</code></pre>
+<h2 id="build-docs"><a class="header" href="#build-docs">Build docs</a></h2>
+<pre><code class="language-bash">cargo install mdbook
+</code></pre>
+<p>Docs from markdown:</p>
+<pre><code class="language-bash">mdbook build
+</code></pre>
+<p>Doc from comments:</p>
+<pre><code class="language-bash">rustdoc --crate-name nanopub_rs src/lib.rs -o docs/target/doc -L dependency=docs/target/debug/deps
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>The <a href="https://crates.io/crates/sophia">nanopub_rs crate</a> aims to provide a comprehensive toolkit for working with Nanopublications and RDF in Rust.</p>
+<p>RDF is a data model designed to exchange knowledge on the Web in an interoperable way. Each piece of knowledge in RDF (a statement) is represented by a triple, made of three terms. A set of triples forms an RDF graph. Finally, several graphs can be grouped in a collection called a dataset, where each graph is identified by a unique name.</p>
+<h2 id="code-reference"><a class="header" href="#code-reference">Code reference</a></h2>
+<p>Checkout the <a href="/nanopub-rs/doc/nanopub_rs">documentation generated from the code</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
+<p><code>nanopub_rs</code> is a toolkit to sign and publish <a href="https://nanopub.org">Nanopublications</a>.</p>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use nanopub_rs::nanopub::Nanopub;
+
+let np = Nanopub::new(
+    &quot;&lt;http://s&gt; &lt;http://p&gt; &lt;http://o&gt; .&quot;,
+    &quot;PUBKEY&quot;,
+    &quot;PRIVATE_KEY&quot;,
+    &quot;https://orcid.org/0000-0000-0000-0000&quot;,
+    None,
+    None,
+);
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="working-with-rdf"><a class="header" href="#working-with-rdf">Working with RDF</a></h2>
+<p>Following a short example how to build a graph, mutate it and serialize it back.</p>
+<p>Add these lines of code and run the programm.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">extern crate sophia;
+</span>use sophia::graph::{inmem::FastGraph, *};
+use sophia::ns::Namespace;
+use sophia::parser::turtle;
+use sophia::serializer::nt::NtSerializer;
+use sophia::serializer::*;
+use sophia::triple::stream::TripleSource;
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let example = r#&quot;
+            @prefix : &lt;http://example.org/&gt;.
+            @prefix foaf: &lt;http://xmlns.com/foaf/0.1/&gt;.
+
+            :alice foaf:name &quot;Alice&quot;;
+                foaf:mbox &lt;mailto:alice@work.example&gt; .
+
+            :bob foaf:name &quot;Bob&quot;.
+            &quot;#;
+    let mut graph: FastGraph = turtle::parse_str(example).collect_triples()?;
+
+    let ex = Namespace::new(&quot;http://example.org/&quot;)?;
+    let foaf = Namespace::new(&quot;http://xmlns.com/foaf/0.1/&quot;)?;
+    graph.insert(&amp;ex.get(&quot;bob&quot;)?, &amp;foaf.get(&quot;knows&quot;)?, &amp;ex.get(&quot;alice&quot;)?)?;
+
+    let mut nt_stringifier = NtSerializer::new_stringifier();
+    let example2 = nt_stringifier.serialize_graph(&amp;mut graph)?.as_str();
+    println!(&quot;The resulting graph\n{}&quot;, example2);
+
+    Ok(())
+}
+</code></pre></pre>
+<p>You should the following graph:</p>
+<pre><code class="language-text">The resulting graph
+&lt;http://example.org/alice&gt; &lt;http://xmlns.com/foaf/0.1/name&gt; &quot;Alice&quot;.
+&lt;http://example.org/bob&gt; &lt;http://xmlns.com/foaf/0.1/name&gt; &quot;Bob&quot;.
+&lt;http://example.org/bob&gt; &lt;http://xmlns.com/foaf/0.1/knows&gt; &lt;http://example.org/alice&gt;.
+&lt;http://example.org/alice&gt; &lt;http://xmlns.com/foaf/0.1/mbox&gt; &lt;mailto:alice@work.example&gt;.
+</code></pre>
 
                     </main>
 
@@ -163,5 +247,10 @@
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        <script type="text/javascript">
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
     </body>
 </html>
