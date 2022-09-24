@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["nanopub_rs"] = [{"text":"impl Freeze for <a class=\"struct\" href=\"nanopub_rs/nanopub/struct.Nanopub.html\" title=\"struct nanopub_rs::nanopub::Nanopub\">Nanopub</a>","synthetic":true,"types":["nanopub_rs::nanopub::Nanopub"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
