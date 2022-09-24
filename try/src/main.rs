@@ -3,7 +3,7 @@ use nanopub_rs::nanopub::Nanopub;
 
 fn main() {
     // http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74
-    let example = r#"
+    let rdf = r#"
             @prefix this: <http://purl.org/nanopub/temp/mynanopub> .
             @prefix sub: <http://purl.org/nanopub/temp/mynanopub#> .
             @prefix drugbank: <http://identifiers.org/drugbank/> .
@@ -58,7 +58,7 @@ fn main() {
             }
             "#;
 
-    // let example = r#"
+    // let rdf = r#"
     //     @prefix this: <http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74> .
     //     @prefix sub: <http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74#> .
     //     @prefix np: <http://www.nanopub.org/nschema#> .
@@ -68,11 +68,18 @@ fn main() {
     //         a np:Nanopublication .
     //     "#;
 
-    // let example = r#"
+    // let rdf = r#"
     //     <http://s> <http://p> <http://o> .
     //     "#;
 
-    let np = Nanopub::new(example).unwrap_or_else(|error| {
+    let orcid = "https://orcid.org/0000-0000-0000-0000";
+    let public_key = "PUBKEY";
+    let private_key = "PRIVATEKEY";
+
+    let np = Nanopub::new(
+        rdf, public_key, private_key, orcid,
+        None, None
+    ).unwrap_or_else(|error| {
         panic!("Problem parsing the RDF: {:?}", error);
     });
 
@@ -80,4 +87,5 @@ fn main() {
     //     rdf: String::from("toast"),
     // };
     println!("{}", np.get_rdf());
+    println!("{}", np);
 }

@@ -1,6 +1,10 @@
 // #![extern crate sophia];
 // extern crate sophia;
 
+// use crate::nanopub::co::{Decoder, EncodedQuad, EncodedTerm};
+
+use crate::constants::{TEST_SERVER};
+
 use std::fmt;
 use std::error::Error;
 
@@ -16,15 +20,15 @@ use sophia::serializer::*;
 // use sophia::parser::turtle;
 
 /// A nanopublication object
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Nanopub {
-    pub rdf: String,
-    // graph
-    // pubkey
-    // privkey
-    // orcid
-    // server_url
-    // publish: bool, // false
+    rdf: String,
+    // dataset: FastDataset,
+    public_key: String,
+    private_key: String,
+    orcid: String,
+    server_url: String,
+    publish: bool, // false
 }
 // https://docs.rs/sophia/0.5.3/sophia/dataset/inmem/index.html
 
@@ -41,7 +45,10 @@ impl Nanopub {
     /// use nanopub_rs::nanopub::Nanopub;
     /// let np = Nanopub::new("<http://s> <http://p> <http://o> .");
     /// ```
-    pub fn new(rdf: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn new(
+        rdf: &str, public_key: &str, private_key: &str, orcid: &str,
+        server_url: Option<&str>, publish: Option<&bool>
+    ) -> Result<Self, Box<dyn Error>> {
         // Self::default()
 
         let ex = Namespace::new("http://example.org/")?;
@@ -62,34 +69,23 @@ impl Nanopub {
 
         Ok( Self {
             rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
-            // graph: &mut graph,
+            // dataset: dataset,
+            public_key: public_key.to_string(),
+            private_key: private_key.to_string(),
+            orcid: orcid.to_string(),
+            server_url: if let Some(server_url) = server_url {
+                server_url.to_string()
+            } else{
+                TEST_SERVER.to_string()
+            },
+            publish: if let Some(publish) = publish {
+                publish.clone()
+            } else {
+                false
+            }
         })
 
 
-        // let mut graph: FastGraph = turtle::parse_str(rdf).collect_triples()?;
-
-        // let mut nt_stringifier = NtSerializer::new_stringifier();
-
-        // graph.insert(
-        //     &ex.get("bob")?,
-        //     &foaf.get("knows")?,
-        //     &ex.get("alice")?,
-        // )?;
-
-        // Ok( Self {
-        //     rdf: nt_stringifier.serialize_graph(&mut graph)?.to_string(),
-        //     // graph: &mut graph,
-        // })
-
-
-
-        // Self {
-        //     rdf: if let Some(rdf) = rdf {
-        //         rdf.to_string()
-        //     } else {
-        //         "Default toast".to_string()
-        //     }
-        // }
     }
 
     // - preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear;
@@ -122,6 +118,11 @@ impl fmt::Display for Nanopub {
         //     writeln!(f, "{}", t)?;
         // }
         writeln!(f, "RDF: {}", self.rdf)?;
+        writeln!(f, "ORCID: {}", self.orcid)?;
+        writeln!(f, "Public key: {}", self.public_key)?;
+        writeln!(f, "Private key: {}", self.private_key)?;
+        writeln!(f, "Publish: {}", self.publish)?;
+        writeln!(f, "Server URL: {}", self.server_url)?;
         Ok(())
     }
 }

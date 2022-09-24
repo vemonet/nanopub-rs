@@ -9,9 +9,21 @@
     <script type="module">
       import init, { Nanopub } from "./pkg/nanopub_js.js";
       const rdfText = document.getElementById('rdf-text');
+
+      const public_key="PUBLICKEY";
+      const private_key="PRIVATEKEY";
+      const orcid="https://orcid.org/0000-0000-0000-0000";
+      // TODO: Defaults don't work
+      const server_url='';
+      const publish=false;
+
       init().then(() => {
-        const np = new Nanopub(`<http://s> <http://p> <http://o> .`);
-        rdfText.innerText = np.get_rdf()
+        const np = new Nanopub(
+          `<http://s> <http://p> <http://o> .`,
+          public_key, private_key, orcid,
+          server_url, publish
+        );
+        rdfText.innerText = np.toString();
         console.log(np.get_rdf());
         console.log(np.toString())
       });
