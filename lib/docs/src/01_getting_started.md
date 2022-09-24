@@ -16,13 +16,6 @@ let np = Nanopub::new("<http://s> <http://p> <http://o> .");
 Following a short example how to build a graph, mutate it and serialize it back.
 
 
-Add the sophia crate to your dependencies in `Cargo.toml`
-```bash
-[dependencies]
-sophia = "0.7.2"
-```
-
-
 Add these lines of code and run the programm.
 ```rust
 # extern crate sophia;
