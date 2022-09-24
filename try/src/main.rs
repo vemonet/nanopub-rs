@@ -2,9 +2,10 @@ use nanopub_rs::nanopub::Nanopub;
 
 fn main() {
     // http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74
+    // http://purl.org/nanopub/temp/mynanopub
     let rdf = r#"
-            @prefix this: <http://purl.org/nanopub/temp/mynanopub> .
-            @prefix sub: <http://purl.org/nanopub/temp/mynanopub#> .
+            @prefix this: <http://purl.org/np> .
+            @prefix sub: <http://purl.org/np#> .
             @prefix drugbank: <http://identifiers.org/drugbank/> .
             @prefix np: <http://www.nanopub.org/nschema#> .
             @prefix pav: <http://purl.org/pav/> .
@@ -19,41 +20,34 @@ fn main() {
             @prefix npx: <http://purl.org/nanopub/x/> .
 
             sub:Head {
-            this: np:hasAssertion sub:assertion;
-                np:hasProvenance sub:provenance;
-                np:hasPublicationInfo sub:pubInfo;
-                a np:Nanopublication .
+                this: np:hasAssertion sub:assertion;
+                    np:hasProvenance sub:provenance;
+                    np:hasPublicationInfo sub:pubInfo;
+                    a np:Nanopublication .
             }
 
             sub:assertion {
-            drugbank:DB10771 a biolink:Drug;
-                biolink:category biolink:Drug .
+                drugbank:DB10771 a biolink:Drug .
 
-            <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease;
-                biolink:category biolink:Disease .
+                <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
 
-            sub:association rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
-                rdf:predicate biolink:treats;
-                rdf:subject drugbank:DB10771;
-                a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation;
-                biolink:aggregator_knowledge_source infores:knowledge-collaboratory;
-                biolink:category biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation;
-                biolink:publications pmid:PMC3159979;
-                biolink:relation <http://purl.obolibrary.org/obo/RO_0002606> .
+                sub:association rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
+                    rdf:predicate biolink:treats;
+                    rdf:subject drugbank:DB10771;
+                    a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
             }
 
             sub:provenance {
-            sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime;
-                prov:wasAttributedTo orcid:0000-0001-7769-4272 .
+                sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
             }
 
             sub:pubInfo {
-            sub:sig npx:hasAlgorithm "RSA";
-                npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB";
-                npx:hasSignatureTarget this: .
+                sub:sig npx:hasAlgorithm "RSA";
+                    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB";
+                    npx:hasSignatureTarget this: .
 
-            this: prov:generatedAtTime "2022-09-16T18:18:46.871040"^^xsd:dateTime;
-                prov:wasAttributedTo orcid:0000-0002-1501-1082 .
+                this: prov:generatedAtTime "2022-09-16T18:18:46.871040"^^xsd:dateTime;
+                    prov:wasAttributedTo orcid:0000-0000-0000-0000 .
             }
             "#;
 
@@ -83,6 +77,6 @@ fn main() {
     // let np = Nanopub {
     //     rdf: String::from("toast"),
     // };
-    println!("{}", np.get_rdf());
+    // println!("{}", np.get_rdf());
     println!("{}", np);
 }
