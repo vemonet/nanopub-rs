@@ -8,7 +8,14 @@
 ```rust
 use nanopub_rs::nanopub::Nanopub;
 
-let np = Nanopub::new("<http://s> <http://p> <http://o> .");
+let np = Nanopub::new(
+    "<http://s> <http://p> <http://o> .",
+    "PUBKEY",
+    "PRIVATE_KEY",
+    "https://orcid.org/0000-0000-0000-0000",
+    None,
+    None,
+);
 ```
 
 ## Working with RDF

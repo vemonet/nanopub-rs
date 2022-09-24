@@ -14,16 +14,17 @@ then
 fi
 
 for folder in ${PROCESS[@]}; do
+    cd $folder
     echo ""
     if [ $folder == "lib" ] ;then
-        echo "${bold}🦀 Testing the Rust lib 🦀${normal}"
+        echo "        ${bold}🦀 Testing the Rust lib 🦀${normal}"
     elif [ $folder == "python" ]; then
-        echo "${bold}🐍 Testing the Python bindings 🐍${normal}"
+        echo "        ${bold}🐍 Testing the Python bindings 🐍${normal}"
     elif [ $folder == "js" ]; then
-        echo "${bold}☕️ Testing the JavaScript bindings ☕️${normal}"
+        echo "        ${bold}☕️ Testing the JavaScript bindings ☕️${normal}"
     fi
     echo ""
-    cd $folder
+
     cargo fmt -- --check
     cargo clippy --all --all-targets --all-features
     cargo test --verbose --all --all-features

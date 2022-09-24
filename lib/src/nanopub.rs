@@ -1,7 +1,5 @@
 // #![extern crate sophia];
-// extern crate sophia;
-
-// use crate::nanopub::co::{Decoder, EncodedQuad, EncodedTerm};
+// #extern crate sophia;
 
 use crate::constants::TEST_SERVER;
 
@@ -43,7 +41,14 @@ impl Nanopub {
     ///
     /// ```
     /// use nanopub_rs::nanopub::Nanopub;
-    /// let np = Nanopub::new("<http://s> <http://p> <http://o> .");
+    /// let np = Nanopub::new(
+    ///     "<http://s> <http://p> <http://o> .",
+    ///     "PUBKEY",
+    ///     "PRIVATE_KEY",
+    ///     "https://orcid.org/0000-0000-0000-0000",
+    ///     None,
+    ///     None,
+    /// );
     /// ```
     pub fn new(
         rdf: &str,

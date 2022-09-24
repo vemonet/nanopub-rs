@@ -14,14 +14,15 @@ then
 fi
 
 for folder in ${PROCESS[@]}; do
-    if [ $folder == "lib" ] ;then
-        echo "${bold}🦀 Formatting the Rust lib 🦀${normal}"
-    elif [ $folder == "python" ]; then
-        echo "${bold}🐍 Formatting the Python bindings 🐍${normal}"
-    elif [ $folder == "js" ]; then
-        echo "${bold}☕️ Formatting the JavaScript bindings ☕️${normal}"
-    fi
     cd $folder
     cargo fmt
     cd ..
+
+    if [ $folder == "lib" ] ;then
+        echo "🦀 Formatted the Rust lib"
+    elif [ $folder == "python" ]; then
+        echo "🐍 Formatted the Python bindings"
+    elif [ $folder == "js" ]; then
+        echo "☕️ Formatted the JavaScript bindings"
+    fi
 done
