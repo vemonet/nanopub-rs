@@ -2,7 +2,7 @@
 
 set -e
 
-pip install maturin
+pip install maturin pre-commit
 
 cargo install mdbook
 
@@ -14,3 +14,5 @@ echo "🦪 Make sure you have perl installed on your machine (required for opens
 # dnf install perl
 
 cargo install wasm-pack
+
+pre-commit install
