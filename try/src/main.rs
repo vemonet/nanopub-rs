@@ -1,4 +1,3 @@
-
 use nanopub_rs::nanopub::Nanopub;
 
 fn main() {
@@ -76,12 +75,10 @@ fn main() {
     let public_key = "PUBKEY";
     let private_key = "PRIVATEKEY";
 
-    let np = Nanopub::new(
-        rdf, public_key, private_key, orcid,
-        None, None
-    ).unwrap_or_else(|error| {
-        panic!("Problem parsing the RDF: {:?}", error);
-    });
+    let np =
+        Nanopub::new(rdf, public_key, private_key, orcid, None, None).unwrap_or_else(|error| {
+            panic!("Problem parsing the RDF: {:?}", error);
+        });
 
     // let np = Nanopub {
     //     rdf: String::from("toast"),
