@@ -10,7 +10,6 @@ pub struct PyNanopub {
 
 #[pymethods]
 impl PyNanopub {
-
     #[new]
     fn new(
         rdf: &str,
@@ -41,8 +40,8 @@ impl PyNanopub {
                     // } else {
                     //     None
                     // }
-                ).unwrap(),
-
+                )
+                .unwrap(),
             })
 
             // Ok( Self {
@@ -63,7 +62,6 @@ impl PyNanopub {
             //     }
             // })
 
-
             // Ok(Self {
             //     np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
             // })
@@ -77,7 +75,6 @@ impl PyNanopub {
             // })
         })
     }
-
 
     // #[new]
     // fn new(rdf: Option<&str>, py: Python<'_>) -> PyResult<Self> {

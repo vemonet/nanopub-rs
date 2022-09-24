@@ -3,10 +3,10 @@
 
 // use crate::nanopub::co::{Decoder, EncodedQuad, EncodedTerm};
 
-use crate::constants::{TEST_SERVER};
+use crate::constants::TEST_SERVER;
 
-use std::fmt;
 use std::error::Error;
+use std::fmt;
 
 use sophia::dataset::{inmem::FastDataset, *};
 use sophia::ns::Namespace;
@@ -46,8 +46,12 @@ impl Nanopub {
     /// let np = Nanopub::new("<http://s> <http://p> <http://o> .");
     /// ```
     pub fn new(
-        rdf: &str, public_key: &str, private_key: &str, orcid: &str,
-        server_url: Option<&str>, publish: Option<&bool>
+        rdf: &str,
+        public_key: &str,
+        private_key: &str,
+        orcid: &str,
+        server_url: Option<&str>,
+        publish: Option<&bool>,
     ) -> Result<Self, Box<dyn Error>> {
         // Self::default()
 
@@ -67,7 +71,7 @@ impl Nanopub {
 
         // println!("The resulting graph\n{}", example2);
 
-        Ok( Self {
+        Ok(Self {
             rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
             // dataset: dataset,
             public_key: public_key.to_string(),
@@ -75,17 +79,15 @@ impl Nanopub {
             orcid: orcid.to_string(),
             server_url: if let Some(server_url) = server_url {
                 server_url.to_string()
-            } else{
+            } else {
                 TEST_SERVER.to_string()
             },
             publish: if let Some(publish) = publish {
                 publish.clone()
             } else {
                 false
-            }
+            },
         })
-
-
     }
 
     // - preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear;
@@ -95,7 +97,6 @@ impl Nanopub {
     // - Signature triple is added
     // - Trusty URI code is calculated on normalized representation that includes signature
     // - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
-
 
     /// Returns the RDF of the nanopub
     pub fn get_rdf(&self) -> String {

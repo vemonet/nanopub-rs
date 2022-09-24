@@ -28,7 +28,8 @@ impl JsNanopub {
                 orcid,
                 Some(server_url),
                 Some(&publish),
-            ).expect_throw("Error parsing the RDF"),
+            )
+            .expect_throw("Error parsing the RDF"),
         })
     }
 
@@ -46,8 +47,6 @@ impl JsNanopub {
     //     self.store.update(update).map_err(to_err)
     // }
 }
-
-
 
 // let store = Self {
 //     store: Store::new().map_err(to_err)?,

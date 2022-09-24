@@ -2,6 +2,7 @@
 // # extern crate sophia;
 // #![doc = include_str!("01_getting_started.md")]
 
+mod constants;
 /// A module to work with nanopublications
 ///
 /// ## Usage
@@ -11,4 +12,3 @@
 /// let np = Nanopub::new("<http://s> <http://p> <http://o> .");
 /// ```
 pub mod nanopub;
-mod constants;

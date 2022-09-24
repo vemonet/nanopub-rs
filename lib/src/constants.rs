@@ -1,4 +1,3 @@
-
 pub const TEST_SERVER: &str = "http://test-server.nanopubs.lod.labs.vu.nl/";
 
 // /// Checkout the list of available servers at https://monitor.petapico.org
