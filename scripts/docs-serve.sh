@@ -2,7 +2,7 @@
 
 set -e
 
-rm -r target/doc
+rm -rf target/doc
 
 mdbook build --open
 
