@@ -1,6 +1,6 @@
 #![doc = include_str!("../docs/src/01_getting_started.md")]
+// # extern crate sophia;
 // #![doc = include_str!("01_getting_started.md")]
-
 
 /// A module to work with nanopublications
 ///

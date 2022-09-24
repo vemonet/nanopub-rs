@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "lib",
+    "python",
+    "js",
+    "try",
+]
+
+[profile.release]
+lto = true

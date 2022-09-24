@@ -1,7 +1,8 @@
+// #![extern crate sophia];
+// extern crate sophia;
 
 use std::fmt;
 
-// # extern crate sophia;
 use sophia::graph::{inmem::FastGraph, *};
 use sophia::ns::Namespace;
 use sophia::parser::turtle;
@@ -9,7 +10,6 @@ use sophia::serializer::nt::NtSerializer;
 // use sophia::serializer::nq::QuadSerializer;
 use sophia::serializer::*;
 use sophia::triple::stream::TripleSource;
-
 
 /// A nanopublication object
 #[derive(Debug, Default)]
@@ -59,13 +59,15 @@ impl Nanopub {
         // Ok(())
 
         Self {
-            rdf: rdf.to_string()
-            // rdf: if let Some(rdf) = rdf {
-            //     rdf.to_string()
-            // } else {
-            //     "Default toast".to_string()
-            // }
+            rdf: rdf.to_string(),
         }
+        // Self {
+        //     rdf: if let Some(rdf) = rdf {
+        //         rdf.to_string()
+        //     } else {
+        //         "Default toast".to_string()
+        //     }
+        // }
     }
     // pub fn new(rdf: Option<&str>) -> Self {
     //     // Self::default()
@@ -83,7 +85,6 @@ impl Nanopub {
         self.parse_rdf();
         self.rdf.clone()
     }
-
 
     fn parse_rdf(&self) -> Result<(), Box<dyn std::error::Error>> {
         // let example = r#"
@@ -164,7 +165,6 @@ impl Nanopub {
         Ok(())
     }
 
-
     // /// Returns all the quads contained by the nanopub.
     // pub fn iter(&self) -> Iter<'_> {
     //     let iter = self.spog.iter();
@@ -173,9 +173,7 @@ impl Nanopub {
     //         inner: iter,
     //     }
     // }
-
 }
-
 
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

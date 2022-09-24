@@ -1,6 +1,5 @@
-use wasm_bindgen::prelude::*;
 use nanopub_rs::nanopub::Nanopub;
-
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(js_name = Nanopub)]
 pub struct JsNanopub {
@@ -10,7 +9,6 @@ pub struct JsNanopub {
 // Maybe try https://rustwasm.github.io/wasm-bindgen/reference/arbitrary-data-with-serde.html
 #[wasm_bindgen(js_class = Nanopub)]
 impl JsNanopub {
-
     // pub fn new(rdf: Option<&str>) -> Result<JsNanopub, JsValue> {
 
     #[wasm_bindgen(constructor)]
@@ -19,17 +17,17 @@ impl JsNanopub {
         //     store: Store::new().map_err(to_err)?,
         // };
         Ok(Self {
-            np: Nanopub::new(rdf)
-            // np: Nanopub::new(rdf.unwrap_or("default in js"))
-
-            // .map_err(map_storage_error)?,
-            // np: if let Some(rdf) = rdf {
-            //     Nanopub::new(rdf.unwrap_or("default in js"))
-            // } else {
-            //     Nanopub::new()
-            // }
-            // .map_err(map_storage_error)?,
+            np: Nanopub::new(rdf),
         })
+        // Ok(Self {
+        //     np: Nanopub::new(rdf.unwrap_or("default in js"))
+        //     // np: if let Some(rdf) = rdf {
+        //     //     Nanopub::new(rdf.unwrap_or("default in js"))
+        //     // } else {
+        //     //     Nanopub::new()
+        //     // }
+        //     // .map_err(map_storage_error)?,
+        // })
     }
 
     // - preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear;
@@ -39,7 +37,6 @@ impl JsNanopub {
     // - Signature triple is added
     // - Trusty URI code is calculated on normalized representation that includes signature
     // - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
-
 
     // #[wasm_bindgen]
     pub fn get_rdf(&self) -> Result<String, JsValue> {
@@ -54,7 +51,4 @@ impl JsNanopub {
     // pub fn update(&self, update: &str) -> Result<(), JsValue> {
     //     self.store.update(update).map_err(to_err)
     // }
-
-
 }
-

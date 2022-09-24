@@ -9,8 +9,6 @@ pub fn main() {
     console_error_panic_hook::set_once();
 }
 
-
-
 // #[wasm_bindgen]
 // extern {
 //     pub fn alert(s: &str);

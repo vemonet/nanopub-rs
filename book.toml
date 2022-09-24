@@ -1,0 +1,14 @@
+
+[book]
+authors = [""]
+language = "en"
+multilingual = false
+src = "./lib/docs/src"
+title = "Nanopub-rs"
+
+[build]
+build-dir = "./lib/docs/target"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/vemonet/nanopub-rs"
