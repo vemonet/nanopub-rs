@@ -7,7 +7,7 @@ src = "./lib/docs/src"
 title = "Nanopub-rs"
 
 [build]
-build-dir = "./lib/docs/target"
+build-dir = "./target/doc"
 create-missing = false
 
 [output.html]

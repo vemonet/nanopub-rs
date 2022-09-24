@@ -2,11 +2,13 @@
 
 set -e
 
-mdbook build
-# mdbook build docs --dest-dir target
+rm -r target/doc
 
-# cd lib
-# rustdoc --crate-name nanopub_rs src/lib.rs -o docs/target/doc -L dependency=docs/target/debug/deps
+mdbook build
+
+cargo doc --workspace --no-deps --exclude try-nanopub-rs --exclude nanopub-js --exclude nanopub_py --target-dir target/doc
+
+echo "📖 Docs generated in the target/doc folder"
 
 # rustdoc --extend-css custom.css src/lib.rs
 # rustdoc --theme awesome.css src/lib.rs
