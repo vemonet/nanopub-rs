@@ -1,0 +1,12 @@
+/home/runner/work/nanopub-rs/nanopub-rs/target/doc/debug/deps/libthiserror_impl-5d7fc1ced1de5644.so: /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/lib.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/ast.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/attr.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/expand.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/fmt.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/generics.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/prop.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/valid.rs
+
+/home/runner/work/nanopub-rs/nanopub-rs/target/doc/debug/deps/thiserror_impl-5d7fc1ced1de5644.d: /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/lib.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/ast.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/attr.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/expand.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/fmt.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/generics.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/prop.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/valid.rs
+
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/lib.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/ast.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/attr.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/expand.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/fmt.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/generics.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/prop.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.35/src/valid.rs:
