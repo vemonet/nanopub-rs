@@ -139,23 +139,15 @@
                     <main>
                         <!-- this file is only meant to "import" the README.md into the book -->
 <h1 id="rust-library-for-nanopublications"><a class="header" href="#rust-library-for-nanopublications">Rust library for Nanopublications</a></h1>
+<p><a href="https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml"><img src="https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg" alt="Lint and Test" /></a> <a href="https://github.com/vemonet/nanopub-rs/actions/workflows/deploy-docs.yml"><img src="https://github.com/vemonet/nanopub-rs/actions/workflows/deploy-docs.yml/badge.svg" alt="Deploy docs to GitHub Pages" /></a></p>
 <p>A rust toolkit to sign and publish <a href="https://nanopub.org">Nanopublications</a>.</p>
 <h2 id="build"><a class="header" href="#build">Build</a></h2>
 <pre><code class="language-bash">cargo build
 </code></pre>
 <h2 id="try"><a class="header" href="#try">Try</a></h2>
-<p>Try in the <code>try</code> folder:</p>
+<p>Try with the basic application in the <code>try</code> folder:</p>
 <pre><code class="language-bash">cd ../try
 cargo run
-</code></pre>
-<h2 id="build-docs"><a class="header" href="#build-docs">Build docs</a></h2>
-<pre><code class="language-bash">cargo install mdbook
-</code></pre>
-<p>Docs from markdown:</p>
-<pre><code class="language-bash">mdbook build
-</code></pre>
-<p>Doc from comments:</p>
-<pre><code class="language-bash">rustdoc --crate-name nanopub_rs src/lib.rs -o docs/target/doc -L dependency=docs/target/debug/deps
 </code></pre>
 
                     </main>
