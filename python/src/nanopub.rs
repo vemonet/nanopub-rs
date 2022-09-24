@@ -5,7 +5,7 @@ use pyo3::prelude::*;
 #[pyo3(text_signature = "(rdf = None)")]
 // #[derive(Clone)]
 pub struct PyNanopub {
-    inner: Nanopub,
+    np: Nanopub,
 }
 
 #[pymethods]
@@ -14,10 +14,13 @@ impl PyNanopub {
     fn new(rdf: Option<&str>, py: Python<'_>) -> PyResult<Self> {
         py.allow_threads(|| {
             Ok(Self {
-                inner: Nanopub::new(rdf.unwrap_or("default in py")),
+                np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()).unwrap(),
             })
             // Ok(Self {
-            //     inner: if let Some(rdf) = rdf {
+            //     np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
+            // })
+            // Ok(Self {
+            //     np: if let Some(rdf) = rdf {
             //         Nanopub::new(rdf.unwrap_or("default in py"))
             //     } else {
             //         Nanopub::new()
@@ -27,9 +30,27 @@ impl PyNanopub {
         })
     }
 
+
+    // #[new]
+    // fn new(rdf: Option<&str>, py: Python<'_>) -> PyResult<Self> {
+    //     py.allow_threads(|| {
+    //         Ok(Self {
+    //             np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
+    //         })
+    //         // Ok(Self {
+    //         //     np: if let Some(rdf) = rdf {
+    //         //         Nanopub::new(rdf.unwrap_or("default in py"))
+    //         //     } else {
+    //         //         Nanopub::new()
+    //         //     }
+    //         //     .map_err(map_storage_error)?,
+    //         // })
+    //     })
+    // }
+
     #[pyo3(text_signature = "($self)")]
     fn get_rdf(&self, py: Python<'_>) -> PyResult<String> {
-        py.allow_threads(|| Ok(self.inner.get_rdf()))
+        py.allow_threads(|| Ok(self.np.get_rdf()))
     }
 
     // /// >>> store.update('DELETE WHERE { <http://example.com> ?p ?o }')
@@ -39,7 +60,7 @@ impl PyNanopub {
     //     py.allow_threads(|| {
     //         let update =
     //             Update::parse(update, base_iri).map_err(|e| map_evaluation_error(e.into()))?;
-    //         self.inner.update(update).map_err(map_evaluation_error)
+    //         self.np.update(update).map_err(map_evaluation_error)
     //     })
     // }
 }

@@ -10,7 +10,7 @@
       import init, { Nanopub } from "./pkg/nanopub_js.js";
       const rdfText = document.getElementById('rdf-text');
       init().then(() => {
-        const np = new Nanopub("toasting js");
+        const np = new Nanopub(`<http://s> <http://p> <http://o> .`);
         rdfText.innerText = np.get_rdf()
         console.log(np.get_rdf());
         console.log(np.toString())
