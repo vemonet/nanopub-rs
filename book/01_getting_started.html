@@ -146,10 +146,6 @@ let np = Nanopub::new(&quot;&lt;http://s&gt; &lt;http://p&gt; &lt;http://o&gt; .
 </span></code></pre></pre>
 <h2 id="working-with-rdf"><a class="header" href="#working-with-rdf">Working with RDF</a></h2>
 <p>Following a short example how to build a graph, mutate it and serialize it back.</p>
-<p>Add the sophia crate to your dependencies in <code>Cargo.toml</code></p>
-<pre><code class="language-bash">[dependencies]
-sophia = &quot;0.7.2&quot;
-</code></pre>
 <p>Add these lines of code and run the programm.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">extern crate sophia;
 </span>use sophia::graph::{inmem::FastGraph, *};
