@@ -2,16 +2,26 @@
 
 set -e
 
-cd lib
-cargo fmt
+bold=$(tput bold)
+normal=$(tput sgr0)
 
-# cargo clippy --all --all-targets --all-features
-# cargo test --verbose --all --all-features
+# Format all if no arg passed
+PROCESS=( "lib" "python" "js" )
 
+if [ ! -z "$1" ]
+then
+  PROCESS=( $1)
+fi
 
-cd ../python
-cargo fmt
-
-
-cd ../js
-cargo fmt
+for folder in ${PROCESS[@]}; do
+    if [ $folder == "lib" ] ;then
+        echo "${bold}🦀 Formatting the Rust lib 🦀${normal}"
+    elif [ $folder == "python" ]; then
+        echo "${bold}🐍 Formatting the Python bindings 🐍${normal}"
+    elif [ $folder == "js" ]; then
+        echo "${bold}☕️ Formatting the JavaScript bindings ☕️${normal}"
+    fi
+    cd $folder
+    cargo fmt
+    cd ..
+done
