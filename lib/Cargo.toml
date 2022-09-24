@@ -1,0 +1,49 @@
+[package]
+name = "nanopub_rs"
+version = "0.1.0"
+authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/vemonet/nanopub-rs/tree/main/lib"
+homepage = "https://github.com/vemonet/nanopub-rs"
+description = """
+A rust toolkit to sign and publish Nanopublications
+"""
+edition = "2021"
+keywords = ["RDF", "nanopublications"]
+# categories = ["database-implementations"]
+
+# [package.metadata.docs.rs]
+# all-features = true
+
+
+[dependencies]
+sophia = "0.7.2"
+
+
+# regex = "1"
+# oxrdf = { version = "0.1.0-beta.4", path="oxrdf", features = ["rdf-star"] }
+# spargebra = { version = "0.2.0-beta.4", path="spargebra", features = ["rdf-star"] }
+# sparesults = { version = "0.1.0-beta.4", path="sparesults", features = ["rdf-star"] }
+# oxilangtag = "0.1"
+# oxiri = "0.2"
+# rio_api = "0.7"
+# rio_turtle = "0.7"
+# rio_xml = "0.7"
+# hex = "0.4"
+# nom = "7"
+# siphasher = "0.3"
+# lazy_static = "1"
+# sysinfo = "0.23"
+
+# [dev-dependencies]
+# criterion = "0.3"
+# oxhttp = "0.1"
+# zstd = "0.10"
+
+# [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+# wasm-bindgen-test = "0.3"
+
+# [[bench]]
+# name = "store"
+# harness = false

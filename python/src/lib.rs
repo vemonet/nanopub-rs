@@ -1,15 +1,28 @@
+// #![deny(
+//     future_incompatible,
+//     nonstandard_style,
+//     rust_2018_idioms,
+//     trivial_casts,
+//     trivial_numeric_casts,
+//     unsafe_code,
+//     unused_qualifications
+// )]
+
+mod nanopub;
+
+use crate::nanopub::*;
 use pyo3::prelude::*;
 
-/// Formats the sum of two numbers as string.
-#[pyfunction]
-fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-    Ok((a + b).to_string())
-}
-
-/// A Python module implemented in Rust.
+/// Nanopub Python bindings
 #[pymodule]
-fn string_sum(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+// fn nanopub_py(_py: Python<'_>, module: &PyModule) -> PyResult<()> {
+fn nanopub_py(_py: Python<'_>, module: &PyModule) -> PyResult<()> {
+    module.add("__package__", "nanopub_py")?;
+    module.add("__version__", env!("CARGO_PKG_VERSION"))?;
+    module.add("__author__", env!("CARGO_PKG_AUTHORS").replace(':', "\n"))?;
 
-    Ok(())
+    module.add_class::<PyNanopub>()
+
+    // module.add_class::<PyNanopub>()?;
+    // io::add_to_module(module)
 }

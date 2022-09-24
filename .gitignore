@@ -1,2 +1,5 @@
 .venv
 target
+pkg
+
+Cargo.lock
