@@ -4,14 +4,16 @@
 use std::fmt;
 use std::error::Error;
 
-use sophia::graph::{inmem::FastGraph, *};
-// use sophia::dataset::{inmem::FastDataset, *};
+use sophia::dataset::{inmem::FastDataset, *};
 use sophia::ns::Namespace;
-use sophia::parser::turtle;
-use sophia::serializer::nt::NtSerializer;
-// use sophia::serializer::nq::QuadSerializer;
+use sophia::parser::trig;
+use sophia::quad::stream::QuadSource;
+use sophia::serializer::nq::NqSerializer;
 use sophia::serializer::*;
-use sophia::triple::stream::TripleSource;
+// use sophia::graph::{inmem::FastGraph, *};
+// use sophia::triple::stream::TripleSource;
+// use sophia::serializer::nt::NtSerializer;
+// use sophia::parser::turtle;
 
 /// A nanopublication object
 #[derive(Debug, Default)]
@@ -42,27 +44,44 @@ impl Nanopub {
     pub fn new(rdf: &str) -> Result<Self, Box<dyn Error>> {
         // Self::default()
 
-        let mut graph: FastGraph = turtle::parse_str(rdf).collect_triples()?;
-
         let ex = Namespace::new("http://example.org/")?;
         let foaf = Namespace::new("http://xmlns.com/foaf/0.1/")?;
-        graph.insert(&ex.get("bob")?, &foaf.get("knows")?, &ex.get("alice")?)?;
 
-        let mut nt_stringifier = NtSerializer::new_stringifier();
-        // let mut nt_stringifier = QuadSerializer::new_stringifier();
+        let mut dataset: FastDataset = trig::parse_str(rdf).collect_quads()?;
 
-        // let example2 = nt_stringifier.serialize_graph(&mut graph)?.as_str();
+        dataset.insert(
+            &ex.get("bob")?,
+            &foaf.get("knows")?,
+            &ex.get("alice")?,
+            Some(&ex.get("bob")?),
+        )?;
+
+        let mut nq_stringifier = NqSerializer::new_stringifier();
+
         // println!("The resulting graph\n{}", example2);
 
         Ok( Self {
-            rdf: nt_stringifier.serialize_graph(&mut graph)?.to_string(),
+            rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
             // graph: &mut graph,
         })
 
-        // let np = match nt_stringifier.serialize_graph(&mut graph)?.to_string() {
-        //     Ok(np) => np,
-        //     Err(error) => panic!("Problem opening the file: {:?}", error),
-        // };
+
+        // let mut graph: FastGraph = turtle::parse_str(rdf).collect_triples()?;
+
+        // let mut nt_stringifier = NtSerializer::new_stringifier();
+
+        // graph.insert(
+        //     &ex.get("bob")?,
+        //     &foaf.get("knows")?,
+        //     &ex.get("alice")?,
+        // )?;
+
+        // Ok( Self {
+        //     rdf: nt_stringifier.serialize_graph(&mut graph)?.to_string(),
+        //     // graph: &mut graph,
+        // })
+
+
 
         // Self {
         //     rdf: if let Some(rdf) = rdf {
