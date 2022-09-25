@@ -3,6 +3,7 @@ use nanopub_rs::nanopub::Nanopub;
 fn main() {
     // http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74
     // http://purl.org/nanopub/temp/mynanopub
+    // http://purl.org/nanopub/temp/
     let rdf = r#"
             @prefix this: <http://purl.org/np> .
             @prefix sub: <http://purl.org/np#> .

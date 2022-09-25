@@ -6,12 +6,14 @@ use crate::constants::TEST_SERVER;
 use std::error::Error;
 use std::fmt;
 
-use sophia::dataset::{inmem::FastDataset, *};
+use sophia::dataset::{inmem::LightDataset, *};
 use sophia::ns::Namespace;
-use sophia::parser::trig;
+use sophia::parser::{nq, trig};
 use sophia::quad::stream::QuadSource;
+use sophia::quad::Quad;
 use sophia::serializer::nq::NqSerializer;
 use sophia::serializer::*;
+use sophia::term::TTerm;
 // use sophia::graph::{inmem::FastGraph, *};
 // use sophia::triple::stream::TripleSource;
 // use sophia::serializer::nt::NtSerializer;
@@ -21,7 +23,7 @@ use sophia::serializer::*;
 #[derive(Default)]
 pub struct Nanopub {
     rdf: String,
-    // dataset: FastDataset,
+    // dataset: LightDataset,
     public_key: String,
     private_key: String,
     orcid: String,
@@ -63,7 +65,7 @@ impl Nanopub {
         let ex = Namespace::new("http://example.org/")?;
         let foaf = Namespace::new("http://xmlns.com/foaf/0.1/")?;
 
-        let mut dataset: FastDataset = trig::parse_str(rdf).collect_quads()?;
+        let mut dataset: LightDataset = trig::parse_str(rdf).collect_quads()?;
 
         dataset.insert(
             &ex.get("bob")?,
@@ -71,10 +73,62 @@ impl Nanopub {
             &ex.get("alice")?,
             Some(&ex.get("bob")?),
         )?;
-
         let mut nq_stringifier = NqSerializer::new_stringifier();
 
-        // println!("The resulting graph\n{}", example2);
+        // TODO: add all statements required for nanopubs (signature, algo, etc)
+
+        // Serialize the RDF as nquad string, generate a list from the lines, and sort alphabetically
+        let nquads_str = nq_stringifier.serialize_dataset(&mut dataset)?.to_string();
+        let split = nquads_str.split("\n");
+        let mut quads_sorted: Vec<&str> = split.collect();
+        quads_sorted.sort_by_key(|name| name.to_lowercase());
+        let mut norm_quads: String = "".to_owned();
+
+        // Normalize the quads like done for the trusty URI
+        // // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15
+        for quad in quads_sorted {
+            println!("{}", quad);
+            let quad_dataset: LightDataset = nq::parse_str(quad).collect_quads()?;
+
+            for q in quad_dataset.quads() {
+                let q = q?;
+                let s = q.s().to_string();
+                let p = q.p().to_string();
+                let mut o = q.o().to_string();
+                // If lang tag, add @en or @fr in front of the object
+                let lang = q.o().language();
+                if let Some(lang) = lang {
+                    let lang_tag = ['@'.to_string(), lang.to_string()].join("");
+                    o = [lang_tag, o].join(" ");
+                }
+
+                let g = q.g();
+                if let Some(g) = g {
+                    norm_quads = [norm_quads, s, p, o, g.to_string()].join("\n");
+                    // println!("{}", g);
+                }
+            }
+
+            // let item = self.quads().oks().position(|q| {
+            //     term_eq(q.s(), s) && term_eq(q.p(), p) && term_eq(q.o(), o) && same_graph_name(g, q.g())
+            // });
+        }
+        println!("NORMED QUADDDDDS");
+        println!("{}", norm_quads);
+
+        // TODO: Sign the file with the private_key
+        // Add signature to the graph
+        // Generate trusty-uri
+
+        // for quad in
+        // dataset.quads().for_each_quad(|q| {
+        //     println!("{}", q);
+        // })?;
+        //  {
+        //     for elem in quad.iter() {
+        //         println!("{}", elem);
+        //     }
+        // }
 
         Ok(Self {
             rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),

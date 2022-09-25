@@ -11,6 +11,6 @@ pub const TEST_SERVER: &str = "http://test-server.nanopubs.lod.labs.vu.nl/";
 // ];
 
 // /// The URI used as placeholder for the Nanopub when signing it
-// pub const NORMALIZED_NP_URI: &str = "http://purl.org/np";
+// pub const NORMALIZED_NP_URI: &str = "http://purl.org/np/ARTIFACTCODE-PLACEHOLDER/";
 
-// pub const TEMP_NP_URI: &str = "http://purl.org/nanopub/temp/mynanopub";
+// pub const TEMP_NP_URI: &str = "http://purl.org/nanopub/temp/";

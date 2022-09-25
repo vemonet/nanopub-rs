@@ -2,6 +2,9 @@
 
 set -e
 
+# Script to install dependencies for development and enable pre-commit hooks
+# Make sure you have enabled a venv before running this script
+
 pip install maturin pre-commit
 
 cargo install mdbook
