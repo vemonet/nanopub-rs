@@ -8,6 +8,7 @@
 // #![ no_implicit_prelude ]
 
 mod constants;
+mod namespaces;
 /// A module to work with nanopublications
 ///
 /// ## Usage

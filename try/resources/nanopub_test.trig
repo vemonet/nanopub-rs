@@ -1,0 +1,40 @@
+# java -jar /opt/nanopub-1.38-jar-with-dependencies.jar sign nanopub_test.trig -k id_rsa
+@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
+@prefix drugbank: <http://identifiers.org/drugbank/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix infores: <https://w3id.org/biolink/infores/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix orcid: <https://orcid.org/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix pmid: <http://www.ncbi.nlm.nih.gov/pubmed/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+
+:Head {
+    : a np:Nanopublication ;
+        np:hasAssertion :assertion;
+        np:hasProvenance :provenance;
+        np:hasPublicationInfo :pubInfo .
+}
+
+:assertion {
+    drugbank:DB10771 a biolink:Drug .
+
+    <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
+
+    :association rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB10771;
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+}
+
+:provenance {
+    :assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
+}
+
+:pubInfo {
+    : prov:wasAttributedTo orcid:0000-0000-0000-0000 .
+}
