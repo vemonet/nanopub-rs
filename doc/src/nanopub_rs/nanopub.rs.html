@@ -338,25 +338,16 @@
 <span id="338">338</span>
 <span id="339">339</span>
 <span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
-<span id="350">350</span>
 </pre><pre class="rust"><code><span class="comment">// #![extern crate sophia];</span>
 <span class="comment">// #extern crate sophia;</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::constants</span>::{<span class="ident">NORMALIZED_NS</span>, <span class="ident">NORMALIZED_URI</span>, <span class="ident">TEMP_NP_NS</span>, <span class="ident">TEMP_NP_URI</span>, <span class="ident">TEST_SERVER</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::namespaces::NPX</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::namespaces</span>::{<span class="ident">get_prefixes</span>, <span class="ident">NPX</span>};
 
 <span class="kw">use</span> <span class="ident">base64</span>;
 <span class="kw">use</span> <span class="ident">std::error::Error</span>;
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
+<span class="kw">use</span> <span class="ident">std::str</span>;
 
 <span class="comment">// use openssl::sign::{Signer, Verifier};</span>
 <span class="kw">use</span> <span class="ident">openssl::rsa::Rsa</span>;
@@ -412,10 +403,12 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use nanopub_rs::nanopub::Nanopub;</span>
+    <span class="doccomment">/// let private_key = r#&quot;-----BEGIN PRIVATE KEY-----</span>
+    <span class="doccomment">/// MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxmak6SOCouJPuEzHNForkqFhgfHE3aAIAx+Y5q6UDEDM9Q0EksheNffJB4iPqsAfiFpY0ARQY92K5r8P4+a78eu9reYrb2WxZb1qPJmvR7XZ6sN1oHD7dd/EyQoJmQsmOKdrqaLRbzR7tZrf52yvKkwNWXcIVhW8uxe7iUgxiojZpW9srKoK/qFRpaUZSKn7Z/zgtDH9FJkYbBsGPDMqp78Kzt+sJb+U2W+wCSSy34jIUxx6QRbzvn6uexc/emFw/1DU5y7zBudhgC7mVk8vX1gUNKyjZBzlOmRcretrANgffqs5fx/TMHN1xtkA/H1u1IKBfKoyk/xThMLAgMBAAECggEAECuG0GZA3HF8OaqFgMG+W+agOvH04h4Pqv4cHjYNxnxpFcNV9nEssTKWSOvCwYy7hrwZBGV3PQzbjFmmrxVFs20+8yCD7KbyKKQZPVC0zf84bj6NTNgvr6DpGtDxINxuGaMjCt7enqhoRyRRuZ0fj2gD3Wqae/Ds8cpDCefkyMg0TvauHSUj244vGq5nt93txUv1Sa+/8tWZ77Dm0s5a3wUYB2IeAMl5WrO2GMvgzwH+zT+4kvNWg5S0Ze4KE+dG3lSIYZjo99h14LcQS9eALC/VBcAJ6pRXaCTT/TULtcLNeOpoc9Fu25f0yTsDt6Ga5ApliYkb7rDhV+OFrw1sYQKBgQDCE9so+dPg7qbp0cV+lbb7rrV43m5s9Klq0riS7u8m71oTwhmvm6gSLfjzqb8GLrmflCK4lKPDSTdwyvd+2SSmOXySw94zr1Pvc7sHdmMRyA7mH3m+zSOOgyCTTKyhDRCNcRIkysoL+DecDhNo4Fumf71tsqDYogfxpAQhn0re8wKBgQDXhMmmT2oXiMnYHhi2k7CJe3HUqkZgmW4W44SWqKHp0V6sjcHm0N0RT5Hz1BFFUd5Y0ZB3JLcah19myD1kKYCj7xz6oVLb8O7LeAZNlb0FsrtD7NU+Hciywo8qESiA7UYDkU6+hsmxaI01DsttMIdG4lSBbEjA7t4IQC5lyr7xiQKBgQCN87YGJ40Y5ZXCSgOZDepz9hqX2KGOIfnUv2HvXsIfiUwqTXs6HbD18xg3KL4myIBOvywSM+4ABYp+foY+Cpcq2btLIeZhiWjsKIrw71+Q/vIe0YDb1PGf6DsoYhmWBpdHzR9HN+hGjvwlsYny2L9Qbfhgxxmsuf7zeFLpQLijjwKBgH7TD28k8IOk5VKec2CNjKd600OYaA3UfCpP/OhDl/RmVtYoHWDcrBrRvkvEEd2/DZ8qw165Zl7gJs3vK+FTYvYVcfIzGPWA1KU7nkntwewmf3i7V8lT8ZTwVRsmObWU60ySJ8qKuwoBQodki2VX12NpMN1wgWe3qUUlr6gLJU4xAoGAet6nD3QKwk6TTmcGVfSWOzvpaDEzGkXjCLaxLKh9GreM/OE+h5aN2gUoFeQapG5rUwI/7Qq0xiLbRXw+OmfAoV2XKv7iI8DjdIh0F06mlEAwQ/B0CpbqkuuxphIbchtdcz/5ra233r3BMNIqBl3VDDVoJlgHPg9msOTRy13lFqc=</span>
+    <span class="doccomment">/// -----END PRIVATE KEY-----&quot;#;</span>
     <span class="doccomment">/// let np = Nanopub::new(</span>
-    <span class="doccomment">///     &quot;&lt;http://s&gt; &lt;http://p&gt; &lt;http://o&gt; .&quot;,</span>
-    <span class="doccomment">///     &quot;PUBKEY&quot;,</span>
-    <span class="doccomment">///     &quot;PRIVATE_KEY&quot;,</span>
+    <span class="doccomment">///     &quot;&lt;http://s&gt; &lt;http://p&gt; &lt;http://o&gt; &lt;http://g&gt; .&quot;,</span>
+    <span class="doccomment">///     private_key,</span>
     <span class="doccomment">///     &quot;https://orcid.org/0000-0000-0000-0000&quot;,</span>
     <span class="doccomment">///     None,</span>
     <span class="doccomment">///     None,</span>
@@ -423,7 +416,6 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">rdf</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-        <span class="ident">public_key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">private_key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">orcid</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">server_url</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
@@ -437,22 +429,18 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dataset</span>: <span class="ident">LightDataset</span> <span class="op">=</span> <span class="ident">trig::parse_str</span>(<span class="ident">rdf</span>).<span class="ident">collect_quads</span>()<span class="question-mark">?</span>;
 
-        <span class="comment">// Generate the temp np URI based on the temp NS (remove trailing # and /)</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">temp_np_uri</span> <span class="op">=</span> <span class="ident">TEMP_NP_NS</span>;
-        <span class="kw">let</span> <span class="ident">escape_last_chars</span> <span class="op">=</span> [<span class="string">&#39;#&#39;</span>, <span class="string">&#39;/&#39;</span>];
-        <span class="kw">for</span> <span class="ident">escape_char</span> <span class="kw">in</span> <span class="ident">escape_last_chars</span> {
-            <span class="kw">let</span> <span class="ident">last_char</span> <span class="op">=</span> <span class="ident">temp_np_uri</span>.<span class="ident">chars</span>().<span class="ident">last</span>().<span class="ident">unwrap</span>();
-            <span class="kw">if</span> <span class="ident">last_char</span> <span class="op">==</span> <span class="ident">escape_char</span> {
-                <span class="ident">temp_np_uri</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">temp_np_uri</span>[..<span class="ident">temp_np_uri</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>];
-                <span class="comment">// temp_np_uri = temp_np_uri.substring(0, temp_np_uri.len() - 1);</span>
-            }
-        }
+        <span class="kw">let</span> <span class="ident">norm_quads</span> <span class="op">=</span> <span class="ident">normalize_dataset</span>(<span class="kw-2">&amp;</span><span class="ident">dataset</span>)<span class="question-mark">?</span>;
+        <span class="macro">println!</span>(<span class="string">&quot;      NORMED QUADS&quot;</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">norm_quads</span>);
+
+        <span class="comment">// Get the keypair</span>
+        <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="ident">Rsa::private_key_from_pem</span>(<span class="ident">private_key</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="ident">PKey::from_rsa</span>(<span class="ident">keypair</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">pub_key_vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">keypair</span>.<span class="ident">public_key_to_pem</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">normalize_key</span>(<span class="ident">str::from_utf8</span>(<span class="ident">pub_key_vec</span>.<span class="ident">as_slice</span>()).<span class="ident">unwrap</span>()).<span class="ident">unwrap</span>();
+        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">public_key</span>);
 
         <span class="comment">// Add triples about the signature in the pubinfo</span>
-        <span class="comment">// let base64_pubkey = base64::encode(public_key);</span>
-        <span class="comment">// sub:sig npx:hasAlgorithm &quot;RSA&quot;;</span>
-        <span class="comment">//             npx:hasPublicKey &quot;MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB&quot;;</span>
-        <span class="comment">//             npx:hasSignatureTarget this: .</span>
         <span class="ident">dataset</span>.<span class="ident">insert</span>(
             <span class="kw-2">&amp;</span><span class="ident">tmp_ns</span>.<span class="ident">get</span>(<span class="string">&quot;sig&quot;</span>)<span class="question-mark">?</span>,
             <span class="kw-2">&amp;</span><span class="ident">npx</span>.<span class="ident">get</span>(<span class="string">&quot;hasPublicKey&quot;</span>)<span class="question-mark">?</span>,
@@ -472,81 +460,6 @@
             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">tmp_ns</span>.<span class="ident">get</span>(<span class="string">&quot;pubinfo&quot;</span>)<span class="question-mark">?</span>),
         )<span class="question-mark">?</span>;
 
-        <span class="comment">// START NORMALIZE DATASET</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nq_stringifier</span> <span class="op">=</span> <span class="ident">NqSerializer::new_stringifier</span>();
-
-        <span class="comment">// TODO: add all statements required for nanopubs (signature, algo, etc)</span>
-
-        <span class="comment">// Serialize the RDF as nquad string, generate a list from the lines, and sort alphabetically</span>
-        <span class="kw">let</span> <span class="ident">nquads_str</span> <span class="op">=</span> <span class="ident">nq_stringifier</span>.<span class="ident">serialize_dataset</span>(<span class="kw-2">&amp;mut</span> <span class="ident">dataset</span>)<span class="question-mark">?</span>.<span class="ident">to_string</span>();
-        <span class="kw">let</span> <span class="ident">split</span> <span class="op">=</span> <span class="ident">nquads_str</span>.<span class="ident">split</span>(<span class="string">&quot;\n&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">quads_sorted</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">split</span>.<span class="ident">collect</span>();
-        <span class="ident">quads_sorted</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">name</span>.<span class="ident">to_lowercase</span>());
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">norm_quads</span>: <span class="ident">String</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_owned</span>();
-
-        <span class="comment">// Normalize the quads like done for the trusty URI</span>
-        <span class="comment">// // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15</span>
-        <span class="kw">for</span> <span class="ident">quad</span> <span class="kw">in</span> <span class="ident">quads_sorted</span> {
-            <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">quad</span>);
-            <span class="kw">let</span> <span class="ident">quad_dataset</span>: <span class="ident">LightDataset</span> <span class="op">=</span> <span class="ident">nq::parse_str</span>(<span class="ident">quad</span>).<span class="ident">collect_quads</span>()<span class="question-mark">?</span>;
-
-            <span class="kw">for</span> <span class="ident">q</span> <span class="kw">in</span> <span class="ident">quad_dataset</span>.<span class="ident">quads</span>() {
-                <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">q</span><span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">s</span>().<span class="ident">value</span>().<span class="ident">to_string</span>();
-                <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">p</span>().<span class="ident">value</span>().<span class="ident">to_string</span>();
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">o</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">value</span>().<span class="ident">to_string</span>();
-
-                <span class="kw">if</span> <span class="ident">q</span>.<span class="ident">s</span>().<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">TermKind::Iri</span> {
-                    <span class="comment">// Replace temp np URIs with normalized URI in subject URIs</span>
-                    <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">replace</span>(<span class="ident">TEMP_NP_NS</span>, <span class="ident">NORMALIZED_NS</span>);
-                    <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">replace</span>(<span class="ident">temp_np_uri</span>, <span class="ident">NORMALIZED_URI</span>);
-                }
-
-                <span class="kw">if</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">TermKind::Iri</span> {
-                    <span class="comment">// Replace temp np URIs with normalized URI in object URIs</span>
-                    <span class="ident">o</span> <span class="op">=</span> <span class="ident">o</span>.<span class="ident">replace</span>(<span class="ident">TEMP_NP_NS</span>, <span class="ident">NORMALIZED_NS</span>);
-                    <span class="ident">o</span> <span class="op">=</span> <span class="ident">o</span>.<span class="ident">replace</span>(<span class="ident">temp_np_uri</span>, <span class="ident">NORMALIZED_URI</span>);
-                } <span class="kw">else</span> {
-                    <span class="comment">// If lang tag, add @en or @fr in front of the object</span>
-                    <span class="kw">let</span> <span class="ident">lang</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">language</span>();
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">lang</span>) <span class="op">=</span> <span class="ident">lang</span> {
-                        <span class="kw">let</span> <span class="ident">lang_tag</span> <span class="op">=</span> [<span class="string">&#39;@&#39;</span>.<span class="ident">to_string</span>(), <span class="ident">lang</span>.<span class="ident">to_string</span>()].<span class="ident">join</span>(<span class="string">&quot;&quot;</span>);
-                        <span class="ident">o</span> <span class="op">=</span> [<span class="ident">lang_tag</span>, <span class="ident">o</span>].<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
-                    } <span class="kw">else</span> {
-                        <span class="comment">// If no lang type, we add the datatype</span>
-                        <span class="kw">let</span> <span class="ident">datatype</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">datatype</span>();
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">datatype</span>) <span class="op">=</span> <span class="ident">datatype</span> {
-                            <span class="kw">let</span> <span class="ident">datatype_tag</span> <span class="op">=</span>
-                                [<span class="string">&quot;^&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">datatype</span>.<span class="ident">value</span>().<span class="ident">to_string</span>()].<span class="ident">join</span>(<span class="string">&quot;&quot;</span>);
-                            <span class="ident">o</span> <span class="op">=</span> [<span class="ident">datatype_tag</span>, <span class="ident">o</span>].<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
-                        } <span class="kw">else</span> {
-                            <span class="ident">o</span> <span class="op">=</span> [<span class="string">&quot;^http://www.w3.org/2001/XMLSchema#string&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">o</span>]
-                                .<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
-                        }
-                    }
-                }
-
-                <span class="kw">let</span> <span class="ident">g_term</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">g</span>();
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">g_term</span>) <span class="op">=</span> <span class="ident">g_term</span> {
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">g_term</span>.<span class="ident">value</span>().<span class="ident">to_string</span>();
-                    <span class="kw">if</span> <span class="ident">g_term</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">TermKind::Iri</span> {
-                        <span class="comment">// Replace temp np URIs with normalized URI in URIs</span>
-                        <span class="ident">g</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">replace</span>(<span class="ident">TEMP_NP_NS</span>, <span class="ident">NORMALIZED_NS</span>);
-                        <span class="ident">g</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">replace</span>(<span class="ident">temp_np_uri</span>, <span class="ident">NORMALIZED_URI</span>);
-                    }
-                    <span class="ident">norm_quads</span> <span class="op">=</span> [<span class="ident">norm_quads</span>, <span class="ident">s</span>, <span class="ident">p</span>, <span class="ident">o</span>, <span class="ident">g</span>].<span class="ident">join</span>(<span class="string">&quot;\n&quot;</span>);
-                    <span class="comment">// println!(&quot;{}&quot;, g);</span>
-                }
-            }
-        }
-        <span class="macro">println!</span>(<span class="string">&quot;      NORMED QUADS&quot;</span>);
-        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">norm_quads</span>);
-        <span class="comment">// END NORMALIZE DATASET</span>
-
-        <span class="comment">// Get the keypair</span>
-        <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="ident">Rsa::private_key_from_pem</span>(<span class="ident">private_key</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="ident">PKey::from_rsa</span>(<span class="ident">keypair</span>).<span class="ident">unwrap</span>();
-
         <span class="comment">// In python for trusty URI: return re.sub(r&#39;=&#39;, &#39;&#39;, base64.b64encode(s, b&#39;-_&#39;).decode(&#39;utf-8&#39;))</span>
         <span class="comment">// In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll(&quot;\\s&quot;, &quot;&quot;);</span>
         <span class="comment">// Sign the data</span>
@@ -555,6 +468,8 @@
         <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">signer</span>.<span class="ident">sign_to_vec</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">signature_base64</span> <span class="op">=</span> <span class="ident">base64::encode</span>(<span class="ident">signature</span>);
         <span class="macro">println!</span>(<span class="string">&quot;\nSignature:\n{}\n&quot;</span>, <span class="ident">signature_base64</span>);
+
+        <span class="comment">// TODO: clone trusty-python, uncomment the print, and call trustyuri.rdf.RdfHasher.make_hash(quads)</span>
 
         <span class="comment">// let signature_str = signature_base64.as_str();</span>
 
@@ -590,48 +505,7 @@
         <span class="comment">// }</span>
 
         <span class="comment">// Prepare the trig serializer</span>
-        <span class="kw">let</span> <span class="ident">prefixes</span> <span class="op">=</span> [
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;rdf&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;rdfs&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://www.w3.org/2000/01/rdf-schema#&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;xsd&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://www.w3.org/2001/XMLSchema#&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;schema&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://schema.org/&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;foaf&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://xmlns.com/foaf/0.1/&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;biolink&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;https://w3id.org/biolink/vocab/&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;np&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://www.nanopub.org/nschema#&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;prov&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://www.w3.org/ns/prov#&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;npx&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://purl.org/nanopub/x/&quot;</span>),
-            ),
-            (
-                <span class="ident">Prefix::new_unchecked</span>(<span class="string">&quot;nptemp&quot;</span>),
-                <span class="ident">Iri::new_unchecked</span>(<span class="string">&quot;http://purl.org/nanopub/temp/mynanopub#&quot;</span>),
-            ),
-        ];
+        <span class="kw">let</span> <span class="ident">prefixes</span> <span class="op">=</span> <span class="ident">get_prefixes</span>();
         <span class="comment">// TrigConfig</span>
         <span class="kw">let</span> <span class="ident">trig_config</span> <span class="op">=</span> <span class="ident">TrigConfig::new</span>()
             .<span class="ident">with_pretty</span>(<span class="bool-val">true</span>)
@@ -645,7 +519,7 @@
                 .<span class="ident">to_string</span>(),
             <span class="comment">// rdf: nq_stringifier.serialize_dataset(&amp;mut dataset)?.to_string(),</span>
             <span class="comment">// dataset: dataset,</span>
-            <span class="ident">public_key</span>: <span class="ident">public_key</span>.<span class="ident">to_string</span>(),
+            <span class="ident">public_key</span>: <span class="ident">public_key</span>,
             <span class="ident">private_key</span>: <span class="ident">private_key</span>.<span class="ident">to_string</span>(),
             <span class="ident">orcid</span>: <span class="ident">orcid</span>.<span class="ident">to_string</span>(),
             <span class="ident">server_url</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">server_url</span>) <span class="op">=</span> <span class="ident">server_url</span> {
@@ -697,6 +571,112 @@
         <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;Server URL: {}&quot;</span>, <span class="self">self</span>.<span class="ident">server_url</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
+}
+
+<span class="kw">fn</span> <span class="ident">normalize_key</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">normed_key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">trim</span>();
+    <span class="macro">println!</span>(<span class="string">&quot;Normalize&quot;</span>);
+    <span class="kw">let</span> <span class="ident">rm_prefix</span> <span class="op">=</span> <span class="string">&quot;-----BEGIN PUBLIC KEY-----&quot;</span>;
+    <span class="kw">if</span> <span class="ident">normed_key</span>.<span class="ident">starts_with</span>(<span class="ident">rm_prefix</span>) {
+        <span class="ident">normed_key</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">normed_key</span>[<span class="ident">rm_prefix</span>.<span class="ident">len</span>()..].<span class="ident">trim</span>();
+    }
+    <span class="comment">// let rm_suffix = format!(&quot;-----BEGIN {} KEY-----&quot;, key_type);</span>
+    <span class="kw">let</span> <span class="ident">rm_suffix</span> <span class="op">=</span> <span class="string">&quot;-----END PUBLIC KEY-----&quot;</span>;
+    <span class="kw">if</span> <span class="ident">normed_key</span>.<span class="ident">ends_with</span>(<span class="ident">rm_suffix</span>) {
+        <span class="ident">normed_key</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">normed_key</span>[..<span class="ident">normed_key</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">rm_suffix</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>].<span class="ident">trim</span>();
+    }
+    <span class="comment">// normed_key = str::replace(normed_key, &quot;\n&quot;, &quot;&quot;);</span>
+    <span class="comment">// TODO: split on \n and join? We might need to move to String type anyway</span>
+    <span class="comment">// normed_key = normed_key.split(&quot;\n&quot;).collect().join(&quot;&quot;);</span>
+    <span class="comment">// normed_key = normed_key.replace(&quot;\n&quot;, &quot;&quot;);</span>
+    <span class="comment">// key = key.trim();</span>
+    <span class="prelude-val">Ok</span>(<span class="ident">normed_key</span>.<span class="ident">replace</span>(<span class="string">&quot;\n&quot;</span>, <span class="string">&quot;&quot;</span>))
+}
+
+<span class="doccomment">/// Returns all the quads contained by the nanopub.</span>
+<span class="kw">fn</span> <span class="ident">normalize_dataset</span>(<span class="ident">dataset</span>: <span class="kw-2">&amp;</span><span class="ident">LightDataset</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="comment">// Generate the temp np URI based on the temp NS (remove trailing # and /)</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">temp_np_uri</span> <span class="op">=</span> <span class="ident">TEMP_NP_NS</span>;
+    <span class="kw">let</span> <span class="ident">escape_last_chars</span> <span class="op">=</span> [<span class="string">&#39;#&#39;</span>, <span class="string">&#39;/&#39;</span>];
+    <span class="kw">for</span> <span class="ident">escape_char</span> <span class="kw">in</span> <span class="ident">escape_last_chars</span> {
+        <span class="kw">let</span> <span class="ident">last_char</span> <span class="op">=</span> <span class="ident">temp_np_uri</span>.<span class="ident">chars</span>().<span class="ident">last</span>().<span class="ident">unwrap</span>();
+        <span class="kw">if</span> <span class="ident">last_char</span> <span class="op">==</span> <span class="ident">escape_char</span> {
+            <span class="ident">temp_np_uri</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">temp_np_uri</span>[..<span class="ident">temp_np_uri</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>];
+            <span class="comment">// temp_np_uri = temp_np_uri.substring(0, temp_np_uri.len() - 1);</span>
+        }
+    }
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nq_stringifier</span> <span class="op">=</span> <span class="ident">NqSerializer::new_stringifier</span>();
+
+    <span class="comment">// Serialize the RDF as nquad string, generate a list from the lines, and sort alphabetically</span>
+    <span class="comment">// TODO: better ordering with comparator https://stackoverflow.com/questions/46512227/sort-a-vector-with-a-comparator-which-changes-its-behavior-dynamically</span>
+    <span class="kw">let</span> <span class="ident">nquads_str</span> <span class="op">=</span> <span class="ident">nq_stringifier</span>.<span class="ident">serialize_dataset</span>(<span class="ident">dataset</span>)<span class="question-mark">?</span>.<span class="ident">to_string</span>();
+    <span class="kw">let</span> <span class="ident">split</span> <span class="op">=</span> <span class="ident">nquads_str</span>.<span class="ident">split</span>(<span class="string">&quot;\n&quot;</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">quads_sorted</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">split</span>.<span class="ident">collect</span>();
+    <span class="ident">quads_sorted</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">name</span>.<span class="ident">to_lowercase</span>());
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">norm_quads</span>: <span class="ident">String</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_owned</span>();
+
+    <span class="comment">// Normalize the quads like done for the trusty URI</span>
+    <span class="comment">// // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15</span>
+    <span class="kw">for</span> <span class="ident">quad</span> <span class="kw">in</span> <span class="ident">quads_sorted</span> {
+        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">quad</span>);
+        <span class="kw">let</span> <span class="ident">quad_dataset</span>: <span class="ident">LightDataset</span> <span class="op">=</span> <span class="ident">nq::parse_str</span>(<span class="ident">quad</span>).<span class="ident">collect_quads</span>()<span class="question-mark">?</span>;
+
+        <span class="kw">for</span> <span class="ident">q</span> <span class="kw">in</span> <span class="ident">quad_dataset</span>.<span class="ident">quads</span>() {
+            <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">q</span><span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">s</span>().<span class="ident">value</span>().<span class="ident">to_string</span>();
+            <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">p</span>().<span class="ident">value</span>().<span class="ident">to_string</span>();
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">o</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">value</span>().<span class="ident">to_string</span>();
+
+            <span class="kw">if</span> <span class="ident">q</span>.<span class="ident">s</span>().<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">TermKind::Iri</span> {
+                <span class="comment">// Replace temp np URIs with normalized URI in subject URIs</span>
+                <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">replace</span>(<span class="ident">TEMP_NP_NS</span>, <span class="ident">NORMALIZED_NS</span>);
+                <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">replace</span>(<span class="ident">temp_np_uri</span>, <span class="ident">NORMALIZED_URI</span>);
+            }
+
+            <span class="kw">if</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">TermKind::Iri</span> {
+                <span class="comment">// Replace temp np URIs with normalized URI in object URIs</span>
+                <span class="ident">o</span> <span class="op">=</span> <span class="ident">o</span>.<span class="ident">replace</span>(<span class="ident">TEMP_NP_NS</span>, <span class="ident">NORMALIZED_NS</span>);
+                <span class="ident">o</span> <span class="op">=</span> <span class="ident">o</span>.<span class="ident">replace</span>(<span class="ident">temp_np_uri</span>, <span class="ident">NORMALIZED_URI</span>);
+            } <span class="kw">else</span> {
+                <span class="comment">// If lang tag, add @en or @fr in front of the object</span>
+                <span class="kw">let</span> <span class="ident">lang</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">language</span>();
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">lang</span>) <span class="op">=</span> <span class="ident">lang</span> {
+                    <span class="kw">let</span> <span class="ident">lang_tag</span> <span class="op">=</span> [<span class="string">&#39;@&#39;</span>.<span class="ident">to_string</span>(), <span class="ident">lang</span>.<span class="ident">to_string</span>()].<span class="ident">join</span>(<span class="string">&quot;&quot;</span>);
+                    <span class="ident">o</span> <span class="op">=</span> [<span class="ident">lang_tag</span>, <span class="ident">o</span>].<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
+                } <span class="kw">else</span> {
+                    <span class="comment">// If no lang type, we add the datatype</span>
+                    <span class="kw">let</span> <span class="ident">datatype</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">o</span>().<span class="ident">datatype</span>();
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">datatype</span>) <span class="op">=</span> <span class="ident">datatype</span> {
+                        <span class="kw">let</span> <span class="ident">datatype_tag</span> <span class="op">=</span> [<span class="string">&quot;^&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">datatype</span>.<span class="ident">value</span>().<span class="ident">to_string</span>()].<span class="ident">join</span>(<span class="string">&quot;&quot;</span>);
+                        <span class="ident">o</span> <span class="op">=</span> [<span class="ident">datatype_tag</span>, <span class="ident">o</span>].<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
+                    } <span class="kw">else</span> {
+                        <span class="ident">o</span> <span class="op">=</span> [<span class="string">&quot;^http://www.w3.org/2001/XMLSchema#string&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">o</span>].<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
+                    }
+                }
+            }
+
+            <span class="kw">let</span> <span class="ident">g_term</span> <span class="op">=</span> <span class="ident">q</span>.<span class="ident">g</span>();
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">g_term</span>) <span class="op">=</span> <span class="ident">g_term</span> {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">g_term</span>.<span class="ident">value</span>().<span class="ident">to_string</span>();
+                <span class="kw">if</span> <span class="ident">g_term</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">TermKind::Iri</span> {
+                    <span class="comment">// Replace temp np URIs with normalized URI in URIs</span>
+                    <span class="ident">g</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">replace</span>(<span class="ident">TEMP_NP_NS</span>, <span class="ident">NORMALIZED_NS</span>);
+                    <span class="ident">g</span> <span class="op">=</span> <span class="ident">g</span>.<span class="ident">replace</span>(<span class="ident">temp_np_uri</span>, <span class="ident">NORMALIZED_URI</span>);
+                }
+                <span class="ident">norm_quads</span> <span class="op">=</span> [<span class="ident">norm_quads</span>, <span class="ident">s</span>, <span class="ident">p</span>, <span class="ident">o</span>, <span class="ident">g</span>].<span class="ident">join</span>(<span class="string">&quot;\n&quot;</span>);
+                <span class="comment">// println!(&quot;{}&quot;, g);</span>
+            }
+        }
+    }
+    <span class="macro">println!</span>(<span class="string">&quot;      NORMED QUADS&quot;</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">norm_quads</span>);
+    <span class="prelude-val">Ok</span>(<span class="ident">norm_quads</span>)
+    <span class="comment">// let iter = self.spog.iter();</span>
+    <span class="comment">// Iter {</span>
+    <span class="comment">//     dataset: self,</span>
+    <span class="comment">//     inner: iter,</span>
+    <span class="comment">// }</span>
 }
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="nanopub_rs" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
