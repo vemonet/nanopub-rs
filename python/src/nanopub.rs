@@ -2,7 +2,7 @@ use nanopub_rs::nanopub::Nanopub;
 use pyo3::prelude::*;
 
 #[pyclass(name = "Nanopub", module = "nanopub_py")]
-#[pyo3(text_signature = "(rdf, public_key, private_key, orcid, server_url=None, publish=False)")]
+#[pyo3(text_signature = "(rdf, private_key, orcid, server_url=None, publish=False)")]
 // #[derive(Clone)]
 pub struct PyNanopub {
     np: Nanopub,
@@ -13,7 +13,6 @@ impl PyNanopub {
     #[new]
     fn new(
         rdf: &str,
-        public_key: &str,
         private_key: &str,
         orcid: &str,
         server_url: &str,
@@ -25,7 +24,6 @@ impl PyNanopub {
                 np: Nanopub::new(
                     // &rdf.unwrap_or("default in py").to_string(),
                     rdf,
-                    public_key,
                     private_key,
                     orcid,
                     Some(server_url),

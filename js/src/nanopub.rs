@@ -14,22 +14,14 @@ impl JsNanopub {
     #[wasm_bindgen(constructor)]
     pub fn new(
         rdf: &str,
-        public_key: &str,
         private_key: &str,
         orcid: &str,
         server_url: &str,
         publish: bool,
     ) -> Result<JsNanopub, JsValue> {
         Ok(Self {
-            np: Nanopub::new(
-                &rdf,
-                public_key,
-                private_key,
-                orcid,
-                Some(server_url),
-                Some(&publish),
-            )
-            .expect_throw("Error parsing the RDF"),
+            np: Nanopub::new(&rdf, private_key, orcid, Some(server_url), Some(&publish))
+                .expect_throw("Error parsing the RDF"),
         })
     }
 

@@ -11,6 +11,8 @@ echo ""
 echo "        ${bold}🐍 Trying the Python bindings 🐍${normal}"
 ./scripts/run-python.sh
 
-echo ""
-echo "        ${bold}☕️ Trying the JavaScript bindings ☕️${normal}"
-./scripts/run-js.sh
+# OpenSSL can't target wasm yet apparently
+# Latest tries here: https://github.com/sfackler/rust-openssl/issues/1016
+# echo ""
+# echo "        ${bold}☕️ Trying the JavaScript bindings ☕️${normal}"
+# ./scripts/run-js.sh

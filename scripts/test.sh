@@ -27,6 +27,7 @@ for folder in ${PROCESS[@]}; do
 
     cargo fmt -- --check
     cargo clippy --all --all-targets --all-features
+    # cargo build
     cargo test --verbose --all --all-features
     cd ..
 done
