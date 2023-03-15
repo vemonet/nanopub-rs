@@ -18,3 +18,15 @@ A rust toolkit to sign and publish [Nanopublications](https://nanopub.org), with
 ```bash
 ./scripts/docs-serve.sh
 ```
+
+## Useful links
+
+
+
+https://github.com/briansmith/ring
+
+https://github.com/Vanethos/rust-wasm-example-rsa
+
+https://github.com/Harzu/wasm-rsa
+
+https://github.com/frehberg/wasm-sign
