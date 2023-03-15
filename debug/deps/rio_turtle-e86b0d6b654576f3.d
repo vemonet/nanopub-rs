@@ -1,0 +1,13 @@
+/home/runner/work/nanopub-rs/nanopub-rs/target/doc/debug/deps/rio_turtle-e86b0d6b654576f3.rmeta: /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/lib.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/error.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/formatters.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/ntriples.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/shared.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/triple_allocator.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/turtle.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/utils.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/gtrig.rs
+
+/home/runner/work/nanopub-rs/nanopub-rs/target/doc/debug/deps/rio_turtle-e86b0d6b654576f3.d: /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/lib.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/error.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/formatters.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/ntriples.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/shared.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/triple_allocator.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/turtle.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/utils.rs /home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/gtrig.rs
+
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/lib.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/error.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/formatters.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/ntriples.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/shared.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/triple_allocator.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/turtle.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/utils.rs:
+/home/runner/.cargo/registry/src/github.com-1ecc6299db9ec823/rio_turtle-0.6.2/src/gtrig.rs:
