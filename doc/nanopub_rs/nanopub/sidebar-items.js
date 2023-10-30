@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Nanopub","A nanopublication object"]]};
+window.SIDEBAR_ITEMS = {"struct":["Nanopub"]};
