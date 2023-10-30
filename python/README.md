@@ -7,7 +7,7 @@ Install maturin:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install maturin
+pip install "maturin[patchelf]"
 ```
 
 ## Develop
@@ -18,7 +18,7 @@ Start in dev:
 maturin develop
 ```
 
-Try the python lib by running `python`:
+Try the python lib by running `python try.py`:
 
 ```python
 from nanopub_py import Nanopub

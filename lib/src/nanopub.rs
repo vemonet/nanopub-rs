@@ -329,7 +329,7 @@ fn normalize_dataset(dataset: &LightDataset) -> Result<String, Box<dyn Error>> {
             }
         }
     }
-    println!("      NORMED QUADS");
+    println!("      NORMED QUADS!");
     println!("{}", norm_quads);
     Ok(norm_quads)
     // let iter = self.spog.iter();

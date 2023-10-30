@@ -13,6 +13,16 @@ A rust toolkit to sign and publish [Nanopublications](https://nanopub.org), with
 - Trusty URI code is calculated on normalized representation that includes signature
 - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
 
+## Run the library to test
+
+```bash
+cd try/
+cargo build
+cargo run
+```
+
+Checkout the README in the `python` and `js` folder for the instructions for each language 
+
 ## Generate docs
 
 ```bash
@@ -21,8 +31,6 @@ A rust toolkit to sign and publish [Nanopublications](https://nanopub.org), with
 
 ## Useful links
 
-
-
 https://github.com/briansmith/ring
 
 https://github.com/Vanethos/rust-wasm-example-rsa
@@ -30,3 +38,5 @@ https://github.com/Vanethos/rust-wasm-example-rsa
 https://github.com/Harzu/wasm-rsa
 
 https://github.com/frehberg/wasm-sign
+
+Building artefacts for many targets: https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
