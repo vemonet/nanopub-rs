@@ -21,7 +21,7 @@ impl JsNanopub {
     ) -> Result<JsNanopub, JsValue> {
         Ok(Self {
             np: Nanopub::new(&rdf, private_key, orcid, Some(server_url), Some(&publish))
-                .expect_throw("Error parsing the RDF"),
+                .expect_throw("Error signing the Nanopub"),
         })
     }
 
