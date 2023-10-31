@@ -5,16 +5,13 @@ use crate::constants::{NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, T
 use crate::namespaces::{get_prefixes, NPX};
 
 use base64;
+// use rsa::pkcs1::DecodeRsaPrivateKey;
+// use rsa::pkcs8::FromPrivateKey;
 use std::error::Error;
 use std::fmt;
 use std::str;
 
-// use openssl::sign::{Signer, Verifier};
-use openssl::rsa::Rsa;
-use openssl::sign::Signer;
-// use openssl::rsa::{RsaPrivateKeyBuilder};
-use openssl::hash::MessageDigest;
-use openssl::pkey::PKey;
+use rsa::{Pkcs1v15Sign, RsaPublicKey, RsaPrivateKey, pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Sha256, sha2::Digest};
 use sophia::dataset::{inmem::LightDataset, *};
 use sophia::iri::Iri;
 use sophia::ns::{xsd, Namespace};
@@ -93,18 +90,37 @@ impl Nanopub {
         println!("      NORMED QUADS");
         println!("{}", norm_quads);
 
-        // Get the keypair
-        let keypair = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
-        let keypair = PKey::from_rsa(keypair).unwrap();
-        let pub_key_vec: Vec<u8> = keypair.public_key_to_pem().unwrap();
-        let public_key = normalize_key(str::from_utf8(pub_key_vec.as_slice()).unwrap()).unwrap();
-        println!("{}", public_key);
+        // DEPRECATED: Get the keypair with OpenSSL
+        // let keypair = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
+        // let keypair = PKey::from_rsa(keypair).unwrap();
+
+        openssl_probe::init_ssl_cert_env_vars();
+        println!("GETTING READY");
+        // let priv_key = RsaPrivateKey::from_pkcs1_pem(private_key)?;
+
+        let priv_key_bytes = base64::decode(private_key).expect("Failed to decode base64 private key");
+        let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes).expect("Failed to parse RSA private key");
+        // let priv_key = RsaPrivateKey::from_pkcs1_der(private_key).expect("Failed to parse RSA private key");
+
+        println!("private_key GOOD");
+
+        let public_key = RsaPublicKey::from(&priv_key);
+        // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
+        // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
+        let pub_key_str = normalize_key(&RsaPublicKey::to_public_key_pem(&public_key, rsa::pkcs8::LineEnding::LF).unwrap()).unwrap();
+
+        println!("Public key: {:?}", pub_key_str);
+
+        // println!("Public Key:\n{}", public_key_string);
+        // let pub_key_vec: Vec<u8> = keypair.public_key_to_pem().unwrap();
+        // let public_key = normalize_key(str::from_utf8(pub_key_vec.as_slice()).unwrap()).unwrap();
+        // println!("PUBLIC KEY: {}", public_key);
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
             &tmp_ns.get("sig")?,
             &npx.get("hasPublicKey")?,
-            &public_key.as_literal(),
+            &pub_key_str.as_literal(),
             Some(&tmp_ns.get("pubinfo")?),
         )?;
         dataset.insert(
@@ -122,12 +138,26 @@ impl Nanopub {
 
         // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
         // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
+
+
         // Sign the data
-        let mut signer = Signer::new(MessageDigest::sha256(), &keypair).unwrap();
-        signer.update(norm_quads.as_bytes()).unwrap();
-        let signature = signer.sign_to_vec().unwrap();
-        let signature_base64 = base64::encode(signature);
-        println!("\nSignature:\n{}\n", signature_base64);
+        // let mut signer = Signer::new(MessageDigest::sha256(), &keypair).unwrap();
+        // signer.update(norm_quads.as_bytes()).unwrap();
+        // let signature = signer.sign_to_vec().unwrap();
+        // let signature_base64 = base64::encode(signature);
+        // println!("\nSignature:\n{}\n", signature_base64);
+
+        // let signature = priv_key
+        //     .sign(PaddingScheme::PKCS1v15Sign { hash: () }, norm_quads.as_bytes())
+        //     .expect("Failed to sign nanopub");
+
+        let signature_vec = priv_key
+            .sign(Pkcs1v15Sign::new::<Sha256>(), &Sha256::digest(norm_quads.as_bytes().to_vec()))
+            .expect("Failed to sign nanopub");
+        let signature = base64::encode(signature_vec);
+        println!("Signature: {:?}", signature);
+
+
 
         // TODO: clone trusty-python, uncomment the print, and call trustyuri.rdf.RdfHasher.make_hash(quads)
 
@@ -179,7 +209,7 @@ impl Nanopub {
                 .to_string(),
             // rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
             // dataset: dataset,
-            public_key: public_key,
+            public_key: pub_key_str,
             private_key: private_key.to_string(),
             orcid: orcid.to_string(),
             server_url: if let Some(server_url) = server_url {
@@ -329,7 +359,7 @@ fn normalize_dataset(dataset: &LightDataset) -> Result<String, Box<dyn Error>> {
             }
         }
     }
-    println!("      NORMED QUADS!");
+    println!("      NORMED QUADS in normalize");
     println!("{}", norm_quads);
     Ok(norm_quads)
     // let iter = self.spog.iter();

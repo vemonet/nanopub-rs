@@ -19,8 +19,10 @@ keywords = ["RDF", "nanopublications"]
 
 [dependencies]
 base64 = "0.13.0"
-openssl = "0.10.41"
+# openssl = "0.10.41"
 sophia = "0.7.2"
+rsa = { version = "0.9.3", default-features = false, features = ["pem", "sha2"] }
+openssl-probe = "0.1.5"
 
 
 # regex = "1"
