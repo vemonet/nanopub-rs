@@ -5,8 +5,6 @@ https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm
 ## Install
 
 ```bash
-dnf install perl
-# cf. https://github.com/openssl/openssl/issues/13761
 cargo install wasm-pack
 ```
 
@@ -16,7 +14,9 @@ cargo install wasm-pack
 wasm-pack build --target web
 ```
 
-## Try
+## Try it
+
+Code in the `index.html` file
 
 ```bash
 python3 -m http.server

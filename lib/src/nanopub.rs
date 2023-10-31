@@ -78,10 +78,9 @@ impl Nanopub {
         server_url: Option<&str>,
         publish: Option<&bool>,
     ) -> Result<Self, Box<dyn Error>> {
-        // Self::default()
+        openssl_probe::init_ssl_cert_env_vars();
 
         let tmp_ns = Namespace::new(TEMP_NP_NS)?;
-        // let tmp_uri = Namespace::new(TEMP_NP_URI)?;
         let npx: Namespace<&str> = Namespace::new(NPX)?;
 
         let mut dataset: LightDataset = trig::parse_str(rdf).collect_quads()?;
@@ -90,19 +89,8 @@ impl Nanopub {
         println!("      NORMED QUADS");
         println!("{}", norm_quads);
 
-        // DEPRECATED: Get the keypair with OpenSSL
-        // let keypair = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
-        // let keypair = PKey::from_rsa(keypair).unwrap();
-
-        openssl_probe::init_ssl_cert_env_vars();
-        println!("GETTING READY");
-        // let priv_key = RsaPrivateKey::from_pkcs1_pem(private_key)?;
-
-        let priv_key_bytes = base64::decode(private_key).expect("Failed to decode base64 private key");
+        let priv_key_bytes = base64::decode(private_key)?;
         let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes).expect("Failed to parse RSA private key");
-        // let priv_key = RsaPrivateKey::from_pkcs1_der(private_key).expect("Failed to parse RSA private key");
-
-        println!("private_key GOOD");
 
         let public_key = RsaPublicKey::from(&priv_key);
         // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
@@ -173,16 +161,11 @@ impl Nanopub {
         //     Some(&tmp_ns.get("pubinfo")?),
         // )?;
 
-        // TODO: add the signature and re sign
+        // TODO: add the signature to ubinfo graph, and re-sign
         let trusty_str = base64::encode_config(norm_quads, base64::URL_SAFE);
         println!("Trusty URI artefact:\n{}\n", trusty_str);
 
-        // https://stackoverflow.com/questions/73716046/how-to-display-an-openssl-signature
-        // println!("{}", signature.to_);
-
-        // TODO: Sign the file with the private_key
-        // Add signature to the graph
-        // Generate trusty-uri
+        // TODO: Generate trusty-uri
 
         // for quad in
         // dataset.quads().for_each_quad(|q| {
@@ -196,13 +179,13 @@ impl Nanopub {
 
         // Prepare the trig serializer
         let prefixes = get_prefixes();
-        // TrigConfig
         let trig_config = TrigConfig::new()
             .with_pretty(true)
             .with_prefix_map(&prefixes[..]);
         let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
         // TODO: replace all }GRAPH by }\n ? Or fix pretty code
 
+        // Return the Nanopub object
         Ok(Self {
             rdf: trig_stringifier
                 .serialize_dataset(&mut dataset)?
