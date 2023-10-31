@@ -338,6 +338,36 @@
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
 </pre></div><pre class="rust"><code><span class="comment">// #![extern crate sophia];
 // #extern crate sophia;
 
@@ -345,16 +375,13 @@
 <span class="kw">use </span><span class="kw">crate</span>::namespaces::{get_prefixes, NPX};
 
 <span class="kw">use </span>base64;
-<span class="kw">use </span>std::error::Error;
+<span class="comment">// use rsa::pkcs1::DecodeRsaPrivateKey;
+// use rsa::pkcs8::FromPrivateKey;
+</span><span class="kw">use </span>std::error::Error;
 <span class="kw">use </span>std::fmt;
 <span class="kw">use </span>std::str;
 
-<span class="comment">// use openssl::sign::{Signer, Verifier};
-</span><span class="kw">use </span>openssl::rsa::Rsa;
-<span class="kw">use </span>openssl::sign::Signer;
-<span class="comment">// use openssl::rsa::{RsaPrivateKeyBuilder};
-</span><span class="kw">use </span>openssl::hash::MessageDigest;
-<span class="kw">use </span>openssl::pkey::PKey;
+<span class="kw">use </span>rsa::{Pkcs1v15Sign, RsaPublicKey, RsaPrivateKey, pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Sha256, sha2::Digest};
 <span class="kw">use </span>sophia::dataset::{inmem::LightDataset, <span class="kw-2">*</span>};
 <span class="kw">use </span>sophia::iri::Iri;
 <span class="kw">use </span>sophia::ns::{xsd, Namespace};
@@ -433,18 +460,37 @@
         <span class="macro">println!</span>(<span class="string">&quot;      NORMED QUADS&quot;</span>);
         <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, norm_quads);
 
-        <span class="comment">// Get the keypair
-        </span><span class="kw">let </span>keypair = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
-        <span class="kw">let </span>keypair = PKey::from_rsa(keypair).unwrap();
-        <span class="kw">let </span>pub_key_vec: Vec&lt;u8&gt; = keypair.public_key_to_pem().unwrap();
-        <span class="kw">let </span>public_key = normalize_key(str::from_utf8(pub_key_vec.as_slice()).unwrap()).unwrap();
-        <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, public_key);
+        <span class="comment">// DEPRECATED: Get the keypair with OpenSSL
+        // let keypair = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
+        // let keypair = PKey::from_rsa(keypair).unwrap();
 
-        <span class="comment">// Add triples about the signature in the pubinfo
+        </span>openssl_probe::init_ssl_cert_env_vars();
+        <span class="macro">println!</span>(<span class="string">&quot;GETTING READY&quot;</span>);
+        <span class="comment">// let priv_key = RsaPrivateKey::from_pkcs1_pem(private_key)?;
+
+        </span><span class="kw">let </span>priv_key_bytes = base64::decode(private_key).expect(<span class="string">&quot;Failed to decode base64 private key&quot;</span>);
+        <span class="kw">let </span>priv_key = RsaPrivateKey::from_pkcs8_der(<span class="kw-2">&amp;</span>priv_key_bytes).expect(<span class="string">&quot;Failed to parse RSA private key&quot;</span>);
+        <span class="comment">// let priv_key = RsaPrivateKey::from_pkcs1_der(private_key).expect(&quot;Failed to parse RSA private key&quot;);
+
+        </span><span class="macro">println!</span>(<span class="string">&quot;private_key GOOD&quot;</span>);
+
+        <span class="kw">let </span>public_key = RsaPublicKey::from(<span class="kw-2">&amp;</span>priv_key);
+        <span class="comment">// let pub_key_str = normalize_key(&amp;ToRsaPublicKey::to_pkcs1_pem(&amp;public_key).unwrap()).unwrap();
+        // let pub_key_str = normalize_key(&amp;ToRsaPublicKey::to_pkcs1_pem(&amp;public_key).unwrap()).unwrap();
+        </span><span class="kw">let </span>pub_key_str = normalize_key(<span class="kw-2">&amp;</span>RsaPublicKey::to_public_key_pem(<span class="kw-2">&amp;</span>public_key, rsa::pkcs8::LineEnding::LF).unwrap()).unwrap();
+
+        <span class="macro">println!</span>(<span class="string">&quot;Public key: {:?}&quot;</span>, pub_key_str);
+
+        <span class="comment">// println!(&quot;Public Key:\n{}&quot;, public_key_string);
+        // let pub_key_vec: Vec&lt;u8&gt; = keypair.public_key_to_pem().unwrap();
+        // let public_key = normalize_key(str::from_utf8(pub_key_vec.as_slice()).unwrap()).unwrap();
+        // println!(&quot;PUBLIC KEY: {}&quot;, public_key);
+
+        // Add triples about the signature in the pubinfo
         </span>dataset.insert(
             <span class="kw-2">&amp;</span>tmp_ns.get(<span class="string">&quot;sig&quot;</span>)<span class="question-mark">?</span>,
             <span class="kw-2">&amp;</span>npx.get(<span class="string">&quot;hasPublicKey&quot;</span>)<span class="question-mark">?</span>,
-            <span class="kw-2">&amp;</span>public_key.as_literal(),
+            <span class="kw-2">&amp;</span>pub_key_str.as_literal(),
             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>tmp_ns.get(<span class="string">&quot;pubinfo&quot;</span>)<span class="question-mark">?</span>),
         )<span class="question-mark">?</span>;
         dataset.insert(
@@ -462,12 +508,26 @@
 
         <span class="comment">// In python for trusty URI: return re.sub(r&#39;=&#39;, &#39;&#39;, base64.b64encode(s, b&#39;-_&#39;).decode(&#39;utf-8&#39;))
         // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll(&quot;\\s&quot;, &quot;&quot;);
+
+
         // Sign the data
-        </span><span class="kw">let </span><span class="kw-2">mut </span>signer = Signer::new(MessageDigest::sha256(), <span class="kw-2">&amp;</span>keypair).unwrap();
-        signer.update(norm_quads.as_bytes()).unwrap();
-        <span class="kw">let </span>signature = signer.sign_to_vec().unwrap();
-        <span class="kw">let </span>signature_base64 = base64::encode(signature);
-        <span class="macro">println!</span>(<span class="string">&quot;\nSignature:\n{}\n&quot;</span>, signature_base64);
+        // let mut signer = Signer::new(MessageDigest::sha256(), &amp;keypair).unwrap();
+        // signer.update(norm_quads.as_bytes()).unwrap();
+        // let signature = signer.sign_to_vec().unwrap();
+        // let signature_base64 = base64::encode(signature);
+        // println!(&quot;\nSignature:\n{}\n&quot;, signature_base64);
+
+        // let signature = priv_key
+        //     .sign(PaddingScheme::PKCS1v15Sign { hash: () }, norm_quads.as_bytes())
+        //     .expect(&quot;Failed to sign nanopub&quot;);
+
+        </span><span class="kw">let </span>signature_vec = priv_key
+            .sign(Pkcs1v15Sign::new::&lt;Sha256&gt;(), <span class="kw-2">&amp;</span>Sha256::digest(norm_quads.as_bytes().to_vec()))
+            .expect(<span class="string">&quot;Failed to sign nanopub&quot;</span>);
+        <span class="kw">let </span>signature = base64::encode(signature_vec);
+        <span class="macro">println!</span>(<span class="string">&quot;Signature: {:?}&quot;</span>, signature);
+
+
 
         <span class="comment">// TODO: clone trusty-python, uncomment the print, and call trustyuri.rdf.RdfHasher.make_hash(quads)
 
@@ -519,7 +579,7 @@
                 </span>.to_string(),
             <span class="comment">// rdf: nq_stringifier.serialize_dataset(&amp;mut dataset)?.to_string(),
             // dataset: dataset,
-            </span>public_key: public_key,
+            </span>public_key: pub_key_str,
             private_key: private_key.to_string(),
             orcid: orcid.to_string(),
             server_url: <span class="kw">if let </span><span class="prelude-val">Some</span>(server_url) = server_url {
@@ -669,7 +729,7 @@
             </span>}
         }
     }
-    <span class="macro">println!</span>(<span class="string">&quot;      NORMED QUADS!&quot;</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;      NORMED QUADS in normalize&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, norm_quads);
     <span class="prelude-val">Ok</span>(norm_quads)
     <span class="comment">// let iter = self.spog.iter();

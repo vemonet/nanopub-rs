@@ -1,0 +1,11 @@
+/home/runner/work/nanopub-rs/nanopub-rs/target/doc/debug/deps/const_oid-159694c888ca5902.rmeta: /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/lib.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/checked.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/arcs.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/encoder.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/error.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/parser.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/../README.md
+
+/home/runner/work/nanopub-rs/nanopub-rs/target/doc/debug/deps/const_oid-159694c888ca5902.d: /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/lib.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/checked.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/arcs.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/encoder.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/error.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/parser.rs /home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/../README.md
+
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/lib.rs:
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/checked.rs:
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/arcs.rs:
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/encoder.rs:
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/error.rs:
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/parser.rs:
+/home/runner/.cargo/registry/src/index.crates.io-6f17d22bba15001f/const-oid-0.9.5/src/../README.md:
