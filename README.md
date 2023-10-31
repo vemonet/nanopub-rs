@@ -21,9 +21,36 @@ cargo build
 cargo run
 ```
 
-Checkout the README in the `python` and `js` folder for the instructions for each language 
+> Checkout the README in the `python` and `js` folder for the instructions to build and test for each language 
 
-## Generate docs
+## Development
+
+Install development dependencies:
+```bash
+rustup update
+rustup component add rustfmt clippy
+cargo install mdbook wasm-pack
+```
+
+### Format
+
+```bash
+cargo fmt
+```
+
+### Lint
+
+```bash
+cargo clippy --all --all-targets --all-features
+```
+
+### Run tests
+
+```bash
+cargo test --verbose --all --all-features
+```
+
+### Generate docs
 
 ```bash
 ./scripts/docs-serve.sh

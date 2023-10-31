@@ -11,7 +11,10 @@ use std::error::Error;
 use std::fmt;
 use std::str;
 
-use rsa::{Pkcs1v15Sign, RsaPublicKey, RsaPrivateKey, pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Sha256, sha2::Digest};
+use rsa::{
+    pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Digest, sha2::Sha256, Pkcs1v15Sign,
+    RsaPrivateKey, RsaPublicKey,
+};
 use sophia::dataset::{inmem::LightDataset, *};
 use sophia::iri::Iri;
 use sophia::ns::{xsd, Namespace};
@@ -90,12 +93,16 @@ impl Nanopub {
         println!("{}", norm_quads);
 
         let priv_key_bytes = base64::decode(private_key)?;
-        let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes).expect("Failed to parse RSA private key");
+        let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes)
+            .expect("Failed to parse RSA private key");
 
         let public_key = RsaPublicKey::from(&priv_key);
         // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
         // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
-        let pub_key_str = normalize_key(&RsaPublicKey::to_public_key_pem(&public_key, rsa::pkcs8::LineEnding::LF).unwrap()).unwrap();
+        let pub_key_str = normalize_key(
+            &RsaPublicKey::to_public_key_pem(&public_key, rsa::pkcs8::LineEnding::LF).unwrap(),
+        )
+        .unwrap();
 
         println!("Public key: {:?}", pub_key_str);
 
@@ -127,7 +134,6 @@ impl Nanopub {
         // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
         // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
 
-
         // Sign the data
         // let mut signer = Signer::new(MessageDigest::sha256(), &keypair).unwrap();
         // signer.update(norm_quads.as_bytes()).unwrap();
@@ -140,12 +146,13 @@ impl Nanopub {
         //     .expect("Failed to sign nanopub");
 
         let signature_vec = priv_key
-            .sign(Pkcs1v15Sign::new::<Sha256>(), &Sha256::digest(norm_quads.as_bytes().to_vec()))
+            .sign(
+                Pkcs1v15Sign::new::<Sha256>(),
+                &Sha256::digest(norm_quads.as_bytes().to_vec()),
+            )
             .expect("Failed to sign nanopub");
         let signature = base64::encode(signature_vec);
         println!("Signature: {:?}", signature);
-
-
 
         // TODO: clone trusty-python, uncomment the print, and call trustyuri.rdf.RdfHasher.make_hash(quads)
 
