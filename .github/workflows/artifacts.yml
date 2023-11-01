@@ -1,12 +1,14 @@
 name: Build
-
 on: [push]
 env:
+  # The project name specified in your Cargo.toml
   PROJECT_NAME: nanopub_rs_py
 jobs:
   build:
+    # Set the job to run on the platform specified by the matrix below
     runs-on: ${{ matrix.runner }}
 
+    # Define the build matrix for cross-compilation
     strategy:
       matrix:
         include:
@@ -22,14 +24,19 @@ jobs:
           - name: macos-arm64
             runner: macos-latest
             target: aarch64-apple-darwin
+
+    # The steps to run for each matrix item
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: "${{ matrix.target }}"
+
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2
+
       - name: Build Binary
-        uses: maturin build --release -m python/Cargo.toml
+        run: cargo build --verbose --locked --manifest-path ./python/Cargo.toml --release --target ${{ matrix.target }}
