@@ -39,4 +39,4 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build Binary
-        run: cargo build --verbose --locked --release --manifest-path ./python/Cargo.toml --target ${{ matrix.target }}
+        run: cargo build --verbose --release --manifest-path ./python/Cargo.toml --target ${{ matrix.target }}
