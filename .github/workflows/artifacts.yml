@@ -51,8 +51,10 @@ jobs:
         working-directory: ./python
 
       - name: Setup node for JS
-        run: cargo install wasm-pack || true
         uses: actions/setup-node@v3
+
+      - name: Install wasm-pack for JS
+        run: cargo install wasm-pack || true
         with:
           node-version: 18
           cache: npm
