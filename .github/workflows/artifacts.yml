@@ -6,8 +6,6 @@ on:
     release:
       types:
         - published
-concurrency:
-  cancel-in-progress: true
 
 jobs:
   build:
