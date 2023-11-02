@@ -1,0 +1,24 @@
+{
+  "name": "nanopub-js",
+  "collaborators": [
+    "Vincent Emonet <vincent.emonet@gmail.com>"
+  ],
+  "description": "JavaScript bindings for the Nanopub rust toolkit",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vemonet/nanopub-rs/tree/main/js"
+  },
+  "files": [
+    "nanopub_js_bg.wasm",
+    "nanopub_js.js",
+    "nanopub_js.d.ts"
+  ],
+  "module": "nanopub_js.js",
+  "homepage": "https://github.com/vemonet/nanopub-rs",
+  "types": "nanopub_js.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
