@@ -48,29 +48,29 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
         working-directory: ./python
 
-    npm_tarball:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Setup node for JS
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18
-            cache: npm
-        - name: Install wasm-pack for JS
-          run: cargo install wasm-pack || true
-        - name: Build for JS
-          run: wasm-pack build --target bundler
-          working-directory: ./js
-        - name: NPM packing
-          run: npm run pack
-          working-directory: ./js/pkg
-        - name: NPM release
-          uses: actions/upload-artifact@v3
-          with:
-            name: nanopub_rs_npm
-            path: ./js/pkg/*.tgz
-        # - run: npm run release
-        #  working-directory: ./js/pkg
-        #  env:
-        #    NODE_AUTH_TOKE: ${{ secrets.NPM_TOKEN }}
-        #  if: github.event_name == 'release'
+  npm_tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup node for JS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - name: Install wasm-pack for JS
+        run: cargo install wasm-pack || true
+      - name: Build for JS
+        run: wasm-pack build --target bundler
+        working-directory: ./js
+      - name: NPM packing
+        run: npm run pack
+        working-directory: ./js/pkg
+      - name: NPM release
+        uses: actions/upload-artifact@v3
+        with:
+          name: nanopub_rs_npm
+          path: ./js/pkg/*.tgz
+      # - run: npm run release
+      #  working-directory: ./js/pkg
+      #  env:
+      #    NODE_AUTH_TOKE: ${{ secrets.NPM_TOKEN }}
+      #  if: github.event_name == 'release'
