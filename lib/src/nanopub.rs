@@ -1,12 +1,7 @@
-// #![extern crate sophia];
-// #extern crate sophia;
-
 use crate::constants::{NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER};
 use crate::namespaces::{get_prefixes, NPX};
 
 use base64;
-// use rsa::pkcs1::DecodeRsaPrivateKey;
-// use rsa::pkcs8::FromPrivateKey;
 use std::error::Error;
 use std::fmt;
 use std::str;
@@ -23,16 +18,13 @@ use sophia::quad::stream::QuadSource;
 use sophia::quad::Quad;
 use sophia::serializer::nq::NqSerializer;
 use sophia::serializer::trig::{TrigConfig, TrigSerializer};
-// use sophia::parser::TripleParser;
-use sophia::prefix::Prefix;
-// use sophia::serializer::turtle::TrigSerializer;
 use sophia::serializer::*;
 use sophia::term::{StaticTerm, TTerm, TermKind};
+use sophia::term::literal::convert::AsLiteral;
+// use sophia::serializer::turtle::TrigSerializer;
 // use sophia::term::matcher::TermMatcher;
-
 // use sophia::iri::AsIri;
 // use sophia::term::iri::convert::AsLiteral;
-use sophia::term::literal::convert::AsLiteral;
 // use sophia::term::*;
 // use sophia::graph::{inmem::FastGraph, *};
 // use sophia::triple::stream::TripleSource;
@@ -131,9 +123,6 @@ impl Nanopub {
             Some(&tmp_ns.get("pubinfo")?),
         )?;
 
-        // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
-        // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
-
         // Sign the data
         // let mut signer = Signer::new(MessageDigest::sha256(), &keypair).unwrap();
         // signer.update(norm_quads.as_bytes()).unwrap();
@@ -154,12 +143,8 @@ impl Nanopub {
         let signature = base64::encode(signature_vec);
         println!("Signature: {:?}", signature);
 
-        // TODO: clone trusty-python, uncomment the print, and call trustyuri.rdf.RdfHasher.make_hash(quads)
-
-        // let signature_str = signature_base64.as_str();
-
+        // Add signature to the dataset
         // let signature_lit = StaticTerm::new_literal_dt(signature_str, xsd::string);
-
         // dataset.insert(
         //     &tmp_ns.get("sig")?,
         //     &npx.get("hasSignature")?,
@@ -168,11 +153,14 @@ impl Nanopub {
         //     Some(&tmp_ns.get("pubinfo")?),
         // )?;
 
-        // TODO: add the signature to ubinfo graph, and re-sign
-        let trusty_str = base64::encode_config(norm_quads, base64::URL_SAFE);
+        // Generate TrustyURI
+        // TODO: add the signature to pubinfo graph, and re-sign
+        // https://github.com/fair-workflows/nanopub/blob/main/nanopub/trustyuri/rdf/RdfHasher.py
+        // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
+        // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
+        let sha256_str = base64::encode_config(Sha256::digest(norm_quads.as_bytes().to_vec()), base64::URL_SAFE);
+        let trusty_str = format!("RA{}", sha256_str);
         println!("Trusty URI artefact:\n{}\n", trusty_str);
-
-        // TODO: Generate trusty-uri
 
         // for quad in
         // dataset.quads().for_each_quad(|q| {
