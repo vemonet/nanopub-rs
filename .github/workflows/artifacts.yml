@@ -69,7 +69,7 @@ jobs:
             #  working-directory: ./js
       - name: NPM packing
         run: npm run pack
-        working-directory: ./js/pkg
+        working-directory: js/pkg
       - name: NPM release
         uses: actions/upload-artifact@v3
         with:
