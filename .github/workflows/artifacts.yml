@@ -1,8 +1,14 @@
 name: Build
-on: [push]
-env:
-  # The project name specified in your Cargo.toml
-  PROJECT_NAME: nanopub_rs_py
+on:
+  push:
+    branches:
+      - main
+    release:
+      types:
+        - published
+concurrency:
+  cancel-in-progress: true
+
 jobs:
   build:
     # Set the job to run on the platform specified by the matrix below
@@ -29,6 +35,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          submodules: true
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -38,5 +46,16 @@ jobs:
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build Binary
-        run: cargo build --verbose --release --manifest-path ./python/Cargo.toml --target ${{ matrix.target }}
+      - name: Build Binary for Python
+        run: cargo build --release --target ${{ matrix.target }}
+        working-directory: ./python
+
+      - name: Setup node for JS
+        run: cargo install wasm-pack || true
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - name: Build for JS
+        run: npm run pack
+        working-directory: ./js
