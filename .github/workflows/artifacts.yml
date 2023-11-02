@@ -50,12 +50,11 @@ jobs:
 
       - name: Setup node for JS
         uses: actions/setup-node@v3
-
-      - name: Install wasm-pack for JS
-        run: cargo install wasm-pack || true
         with:
           node-version: 18
           cache: npm
+      - name: Install wasm-pack for JS
+        run: cargo install wasm-pack || true
       - name: Build for JS
         run: npm run pack
         working-directory: ./js
