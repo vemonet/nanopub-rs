@@ -51,17 +51,22 @@ jobs:
   npm_tarball:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodule: true
+      - run: rustup update
+      - uses: Swatinem/rust-cache@v2
+      - name: Install wasm-pack for JS
+        run: cargo install wasm-pack || true
       - name: Setup node for JS
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: npm
-          cache-dependency-path: "js/package.json"
-      - name: Install wasm-pack for JS
-        run: cargo install wasm-pack || true
-      - name: Build for JS
-        run: wasm-pack build --target bundler
-        working-directory: ./js
+          cache-dependency-path: "./js/package.json"
+            #- name: Build for JS
+            #  run: wasm-pack build --target bundler
+            #  working-directory: ./js
       - name: NPM packing
         run: npm run pack
         working-directory: ./js/pkg
