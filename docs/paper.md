@@ -36,7 +36,7 @@ authors_short: Vincent Emonet, Shashank Chakravarthy
 
 # Introduction
 
-In the realm of making software libraries FAIR (Findable, Accessible, Interoperable, and Reusable) [@fair2016], one crucial yet often overlooked aspect is the diversity of programming languages and platforms. To truly qualify as *reusable* and *interoperable*, a library should seamlessly run across various languages and environments. Imagine a data scientist effortlessly installing a library via `pip` for Python projects or a web developer using `npm` to integrate the same library into a web application running in the browser.
+In the realm of making software libraries FAIR (Findable, Accessible, Interoperable, and Reusable) [@wilkinson2016fair], one crucial yet often overlooked aspect is the diversity of programming languages and platforms. To truly qualify as *reusable* and *interoperable*, a library should seamlessly run across various languages and environments. Imagine a data scientist effortlessly installing a library via `pip` for Python projects or a web developer using `npm` to integrate the same library into a web application running in the browser.
 
 The challenge, however, lies in the arduous and time-consuming process of re-implementing a library in multiple languages. Not only does it demand significant effort and expertise, but it also multiplies the potential for bugs, making future maintenance an intricate task. The ideal solution is to have a single-language implementation that transcends these limitations.
 
