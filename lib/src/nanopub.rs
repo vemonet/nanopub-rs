@@ -1,6 +1,3 @@
-// #![extern crate sophia];
-// #extern crate sophia;
-
 use crate::constants::{NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER};
 use crate::namespaces::{get_prefixes, NPX};
 
@@ -19,6 +16,15 @@ use sophia::serializer::trig::{TrigConfig, TrigSerializer};
 use sophia::serializer::*;
 use sophia::term::{StaticTerm, TTerm, TermKind};
 use sophia::term::literal::convert::AsLiteral;
+// use sophia::serializer::turtle::TrigSerializer;
+// use sophia::term::matcher::TermMatcher;
+// use sophia::iri::AsIri;
+// use sophia::term::iri::convert::AsLiteral;
+// use sophia::term::*;
+// use sophia::graph::{inmem::FastGraph, *};
+// use sophia::triple::stream::TripleSource;
+// use sophia::serializer::nt::NtSerializer;
+// use sophia::parser::turtle;
 
 /// A nanopublication object
 #[derive(Default)]
@@ -65,8 +71,9 @@ impl Nanopub {
     ) -> Result<Self, Box<dyn Error>> {
         // Self::default()
         log::trace!("Starting nanopub creation ....");
+        openssl_probe::init_ssl_cert_env_vars();
+      
         let tmp_ns = Namespace::new(TEMP_NP_NS)?;
-        // let tmp_uri = Namespace::new(TEMP_NP_URI)?;
         let npx: Namespace<&str> = Namespace::new(NPX)?;
 
         let mut dataset: LightDataset = trig::parse_str(rdf).collect_quads()
@@ -87,6 +94,7 @@ impl Nanopub {
         // println!("GETTING READY");
         // let priv_key = RsaPrivateKey::from_pkcs1_pem(private_key)?;
 
+        // let priv_key_bytes = base64::decode(private_key)?;
         let priv_key_bytes = base64::decode(private_key).expect("Failed to decode base64 private key");
         let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes).expect("Failed to parse RSA private key");
         // let priv_key = RsaPrivateKey::from_pkcs1_der(private_key).expect("Failed to parse RSA private key");
@@ -96,7 +104,10 @@ impl Nanopub {
         let public_key = RsaPublicKey::from(&priv_key);
         // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
         // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
-        let pub_key_str = normalize_key(&RsaPublicKey::to_public_key_pem(&public_key, rsa::pkcs8::LineEnding::LF).unwrap()).unwrap();
+        let pub_key_str = normalize_key(
+            &RsaPublicKey::to_public_key_pem(&public_key, rsa::pkcs8::LineEnding::LF).unwrap(),
+        )
+        .unwrap();
 
         log::info!("Public key: {:?}", pub_key_str);
 
@@ -125,10 +136,6 @@ impl Nanopub {
             Some(&tmp_ns.get("pubinfo")?),
         )?;
 
-        // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
-        // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
-
-
         // Sign the data
         // let mut signer = Signer::new(MessageDigest::sha256(), &keypair).unwrap();
         // signer.update(norm_quads.as_bytes()).unwrap();
@@ -141,19 +148,16 @@ impl Nanopub {
         //     .expect("Failed to sign nanopub");
 
         let signature_vec = priv_key
-            .sign(Pkcs1v15Sign::new::<Sha256>(), &Sha256::digest(norm_quads.as_bytes().to_vec()))
+            .sign(
+                Pkcs1v15Sign::new::<Sha256>(),
+                &Sha256::digest(norm_quads.as_bytes().to_vec()),
+            )
             .expect("Failed to sign nanopub");
         let signature = base64::encode(signature_vec);
         log::info!("Signature: {:?}", signature);
 
-
-
-        // TODO: clone trusty-python, uncomment the print, and call trustyuri.rdf.RdfHasher.make_hash(quads)
-
-        // let signature_str = signature_base64.as_str();
-
+        // Add signature to the dataset
         // let signature_lit = StaticTerm::new_literal_dt(signature_str, xsd::string);
-
         // dataset.insert(
         //     &tmp_ns.get("sig")?,
         //     &npx.get("hasSignature")?,
@@ -162,16 +166,14 @@ impl Nanopub {
         //     Some(&tmp_ns.get("pubinfo")?),
         // )?;
 
-        // TODO: add the signature and re sign
-        let trusty_str = base64::encode_config(norm_quads, base64::URL_SAFE);
-        log::info!("Trusty URI artefact:\n{}\n", trusty_str);
-
-        // https://stackoverflow.com/questions/73716046/how-to-display-an-openssl-signature
-        // println!("{}", signature.to_);
-
-        // TODO: Sign the file with the private_key
-        // Add signature to the graph
-        // Generate trusty-uri
+        // Generate TrustyURI
+        // TODO: add the signature to pubinfo graph, and re-sign
+        // https://github.com/fair-workflows/nanopub/blob/main/nanopub/trustyuri/rdf/RdfHasher.py
+        // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
+        // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
+        let sha256_str = base64::encode_config(Sha256::digest(norm_quads.as_bytes().to_vec()), base64::URL_SAFE);
+        let trusty_str = format!("RA{}", sha256_str);
+        println!("Trusty URI artefact:\n{}\n", trusty_str);
 
         // for quad in
         // dataset.quads().for_each_quad(|q| {
@@ -185,13 +187,13 @@ impl Nanopub {
 
         // Prepare the trig serializer
         let prefixes = get_prefixes();
-        // TrigConfig
         let trig_config = TrigConfig::new()
             .with_pretty(true)
             .with_prefix_map(&prefixes[..]);
         let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
         // TODO: replace all }GRAPH by }\n ? Or fix pretty code
 
+        // Return the Nanopub object
         Ok(Self {
             rdf: trig_stringifier
                 .serialize_dataset(&mut dataset)

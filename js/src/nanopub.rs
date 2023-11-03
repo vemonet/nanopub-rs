@@ -2,13 +2,13 @@ use nanopub_rs::nanopub::Nanopub;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(js_name = Nanopub)]
-pub struct JsNanopub {
+pub struct NanopubJs {
     np: Nanopub,
 }
 
 // Maybe try https://rustwasm.github.io/wasm-bindgen/reference/arbitrary-data-with-serde.html
 #[wasm_bindgen(js_class = Nanopub)]
-impl JsNanopub {
+impl NanopubJs {
     // pub fn new(rdf: Option<&str>) -> Result<JsNanopub, JsValue> {
 
     #[wasm_bindgen(constructor)]
@@ -18,7 +18,8 @@ impl JsNanopub {
         orcid: &str,
         server_url: &str,
         publish: bool,
-    ) -> Result<JsNanopub, JsValue> {
+    ) -> Result<NanopubJs, JsValue> {
+        console_error_panic_hook::set_once();
         Ok(Self {
             np: Nanopub::new(&rdf, private_key, orcid, Some(server_url), Some(&publish))
                 .expect_throw("Error signing the Nanopub"),

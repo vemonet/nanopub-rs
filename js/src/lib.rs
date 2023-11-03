@@ -5,16 +5,8 @@ mod nanopub;
 mod utils;
 
 #[wasm_bindgen(start)]
-pub fn main() {
+pub fn set_panic_hook() {
+    // https://github.com/rustwasm/console_error_panic_hook#readme
+    #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
 }
-
-// #[wasm_bindgen]
-// extern {
-//     pub fn alert(s: &str);
-// }
-
-// #[wasm_bindgen]
-// pub fn greet(name: &str) {
-//     alert(&format!("Hello, {}!", name));
-// }
