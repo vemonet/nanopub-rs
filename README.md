@@ -1,6 +1,6 @@
 # 🔬🦀 Nanopub rs
 
-[![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/deploy-docs.yml)
+[![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/artifacts.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/artifacts.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml)
 
 A rust toolkit to sign and publish [Nanopublications](https://nanopub.org), with bindings to python and javascript (wasm).
 
@@ -21,7 +21,7 @@ cargo build
 cargo run
 ```
 
-> Checkout the README in the `python` and `js` folder for the instructions to build and test for each language 
+> Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
 
 ## Development
 
