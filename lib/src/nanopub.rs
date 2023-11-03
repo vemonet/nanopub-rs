@@ -3,16 +3,11 @@ use crate::namespaces::{get_prefixes, NPX};
 
 use base64;
 use std::error::Error;
-use std::fmt;
-use std::str;
-
-use rsa::{
-    pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Digest, sha2::Sha256, Pkcs1v15Sign,
-    RsaPrivateKey, RsaPublicKey,
-};
+use std::{fmt, str};
+use log;
+use rsa::{Pkcs1v15Sign, RsaPublicKey, RsaPrivateKey, pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Sha256, sha2::Digest};
 use sophia::dataset::{inmem::LightDataset, *};
-use sophia::iri::Iri;
-use sophia::ns::{xsd, Namespace};
+use sophia::ns::Namespace;
 use sophia::parser::{nq, trig};
 use sophia::quad::stream::QuadSource;
 use sophia::quad::Quad;
@@ -66,6 +61,7 @@ impl Nanopub {
     ///     None,
     /// );
     /// ```
+
     pub fn new(
         rdf: &str,
         private_key: &str,
@@ -73,20 +69,37 @@ impl Nanopub {
         server_url: Option<&str>,
         publish: Option<&bool>,
     ) -> Result<Self, Box<dyn Error>> {
+        // Self::default()
+        log::trace!("Starting nanopub creation ....");
         openssl_probe::init_ssl_cert_env_vars();
-
+      
         let tmp_ns = Namespace::new(TEMP_NP_NS)?;
         let npx: Namespace<&str> = Namespace::new(NPX)?;
 
-        let mut dataset: LightDataset = trig::parse_str(rdf).collect_quads()?;
+        let mut dataset: LightDataset = trig::parse_str(rdf).collect_quads()
+            .ok()
+            .expect("Failed to parse RDF");
 
-        let norm_quads = normalize_dataset(&dataset)?;
-        println!("      NORMED QUADS");
-        println!("{}", norm_quads);
+        let norm_quads = normalize_dataset(&dataset)
+            .ok()
+            .expect("Failed to normalise RDF");
+        // println!("      NORMED QUADS");
+        // println!("{}", norm_quads);
 
-        let priv_key_bytes = base64::decode(private_key)?;
-        let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes)
-            .expect("Failed to parse RSA private key");
+        // DEPRECATED: Get the keypair with OpenSSL
+        // let keypair = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
+        // let keypair = PKey::from_rsa(keypair).unwrap();
+
+        // openssl_probe::init_ssl_cert_env_vars();
+        // println!("GETTING READY");
+        // let priv_key = RsaPrivateKey::from_pkcs1_pem(private_key)?;
+
+        // let priv_key_bytes = base64::decode(private_key)?;
+        let priv_key_bytes = base64::decode(private_key).expect("Failed to decode base64 private key");
+        let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes).expect("Failed to parse RSA private key");
+        // let priv_key = RsaPrivateKey::from_pkcs1_der(private_key).expect("Failed to parse RSA private key");
+
+        log::info!("private_key GOOD");
 
         let public_key = RsaPublicKey::from(&priv_key);
         // let pub_key_str = normalize_key(&ToRsaPublicKey::to_pkcs1_pem(&public_key).unwrap()).unwrap();
@@ -96,7 +109,7 @@ impl Nanopub {
         )
         .unwrap();
 
-        println!("Public key: {:?}", pub_key_str);
+        log::info!("Public key: {:?}", pub_key_str);
 
         // println!("Public Key:\n{}", public_key_string);
         // let pub_key_vec: Vec<u8> = keypair.public_key_to_pem().unwrap();
@@ -141,7 +154,7 @@ impl Nanopub {
             )
             .expect("Failed to sign nanopub");
         let signature = base64::encode(signature_vec);
-        println!("Signature: {:?}", signature);
+        log::info!("Signature: {:?}", signature);
 
         // Add signature to the dataset
         // let signature_lit = StaticTerm::new_literal_dt(signature_str, xsd::string);
@@ -183,7 +196,9 @@ impl Nanopub {
         // Return the Nanopub object
         Ok(Self {
             rdf: trig_stringifier
-                .serialize_dataset(&mut dataset)?
+                .serialize_dataset(&mut dataset)
+                .ok()
+                .expect("Unable to serialize dataset to trig")
                 .to_string(),
             // rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
             // dataset: dataset,
@@ -229,9 +244,9 @@ impl Nanopub {
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // for t in self {
-        //     writeln!(f, "{}", t)?;
+        //     info!(f, "{}", t)?;
         // }
-        writeln!(f, "RDF: {}", self.rdf)?;
+        writeln!(f, "RDF to publish: \n{}", self.rdf)?;
         writeln!(f, "ORCID: {}", self.orcid)?;
         writeln!(f, "Public key: {}", self.public_key)?;
         writeln!(f, "Private key: {}", self.private_key)?;
@@ -243,7 +258,7 @@ impl fmt::Display for Nanopub {
 
 fn normalize_key(key: &str) -> Result<String, Box<dyn Error>> {
     let mut normed_key = key.trim();
-    println!("Normalize");
+    //println!("Normalize");
     let rm_prefix = "-----BEGIN PUBLIC KEY-----";
     if normed_key.starts_with(rm_prefix) {
         normed_key = &normed_key[rm_prefix.len()..].trim();
@@ -278,7 +293,9 @@ fn normalize_dataset(dataset: &LightDataset) -> Result<String, Box<dyn Error>> {
 
     // Serialize the RDF as nquad string, generate a list from the lines, and sort alphabetically
     // TODO: better ordering with comparator https://stackoverflow.com/questions/46512227/sort-a-vector-with-a-comparator-which-changes-its-behavior-dynamically
-    let nquads_str = nq_stringifier.serialize_dataset(dataset)?.to_string();
+    let nquads_str = nq_stringifier.serialize_dataset(dataset)
+        .ok()
+        .expect("Unable to serialize provided RDF").to_string();
     let split = nquads_str.split("\n");
     let mut quads_sorted: Vec<&str> = split.collect();
     quads_sorted.sort_by_key(|name| name.to_lowercase());
@@ -287,8 +304,8 @@ fn normalize_dataset(dataset: &LightDataset) -> Result<String, Box<dyn Error>> {
     // Normalize the quads like done for the trusty URI
     // // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15
     for quad in quads_sorted {
-        println!("{}", quad);
-        let quad_dataset: LightDataset = nq::parse_str(quad).collect_quads()?;
+        // println!("{}", quad);
+        let quad_dataset: LightDataset = nq::parse_str(quad).collect_quads().ok().expect("Unable to parse quad");
 
         for q in quad_dataset.quads() {
             let q = q?;
@@ -337,8 +354,8 @@ fn normalize_dataset(dataset: &LightDataset) -> Result<String, Box<dyn Error>> {
             }
         }
     }
-    println!("      NORMED QUADS in normalize");
-    println!("{}", norm_quads);
+    //println!("      NORMED QUADS in normalize");
+    //println!("{}", norm_quads);
     Ok(norm_quads)
     // let iter = self.spog.iter();
     // Iter {
