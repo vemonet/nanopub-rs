@@ -7,6 +7,9 @@ pub const TEMP_NP_NS: &str = "http://purl.org/nanopub/temp/mynanopub#";
 
 pub const TEST_SERVER: &str = "http://test-server.nanopubs.lod.labs.vu.nl/";
 
+pub const BOLD: &str = "\x1b[1;96m";
+pub const END: &str = "\x1b[0m";
+
 // /// Checkout the list of available servers at https://monitor.petapico.org
 // pub const LIST_SERVERS: [&str; 6] = [
 //     "http://server.nanopubs.lod.labs.vu.nl/",

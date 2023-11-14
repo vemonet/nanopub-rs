@@ -1,18 +1,18 @@
 name: Build
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
   release:
     types:
       - published
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
-  build:
+  build-python:
+    name: Build python binaries
     # Set the job to run on the platform specified by the matrix below
     runs-on: ${{ matrix.runner }}
-
     # Define the build matrix for cross-compilation
     strategy:
       matrix:
@@ -49,7 +49,9 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
         working-directory: ./python
 
+
   npm_tarball:
+    name: Build npm package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -57,21 +59,22 @@ jobs:
           submodule: true
       - run: rustup update
       - uses: Swatinem/rust-cache@v2
+
       - name: Install wasm-pack for JS
         run: cargo install wasm-pack || true
+
       - name: Setup node for JS
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
           cache-dependency-path: "./js/package.json"
-            #- name: Build for JS
-            #  run: wasm-pack build --target bundler
-            #  working-directory: ./js
-      - name: NPM packing
+
+      - name: Build npm package
         run: npm run pack
         working-directory: ./js
-      - name: NPM upload
+
+      - name: Upload tarball
         uses: actions/upload-artifact@v3
         with:
           name: nanopub_rs_npm

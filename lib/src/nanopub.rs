@@ -1,5 +1,5 @@
-use crate::constants::{NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER};
-use crate::namespaces::{get_prefixes, NPX};
+use crate::constants::{NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER, BOLD, END};
+use crate::namespaces::{get_prefixes, NPX, NP_NS};
 
 use base64;
 use base64::{alphabet, engine, Engine as _};
@@ -7,12 +7,13 @@ use rsa::{
     pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Digest, sha2::Sha256, Pkcs1v15Sign,
     RsaPrivateKey, RsaPublicKey,
 };
+use regex::Regex;
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::Namespace;
+use sophia::api::ns::{Namespace, rdf};
 use sophia::api::quad::Quad;
 use sophia::api::serializer::{QuadSerializer, Stringifier};
 use sophia::api::source::QuadSource;
-use sophia::api::term::{Term, TermKind};
+use sophia::api::term::{Term, TermKind, matcher::Any, matcher::GraphNameMatcher};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::turtle::parser::{nq, trig};
@@ -21,20 +22,128 @@ use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::error::Error;
 use std::{fmt, str};
 
+pub struct NpMetadata {
+    pub np_url: Iri<String>,
+    pub np_ns: Namespace<String>,
+    pub head: Iri<String>,
+    pub assertion: Iri<String>,
+    pub prov: Iri<String>,
+    pub pubinfo: Iri<String>,
+    pub base_uri: String,
+    pub separator_char: String,
+    pub trusty_hash: String,
+}
+
+impl fmt::Display for NpMetadata {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "\n{}Nanopub URL:{} {}", BOLD, END, self.np_url)?;
+        writeln!(f, "{}Nanopub Namespace:{} {}", BOLD, END, self.np_ns.to_string())?;
+        writeln!(f, "{}Base URI:{} {}", BOLD, END, self.base_uri)?;
+        writeln!(f, "{}Trusty Hash:{} {}", BOLD, END, self.trusty_hash)?;
+        writeln!(f, "{}Assertion Graph:{} {}", BOLD, END, self.assertion)?;
+        Ok(())
+    }
+}
+
+
 /// A nanopublication object
 #[derive(Default)]
 pub struct Nanopub {
     rdf: String,
+    // pub metadata: NpMetadata,
     pub trusty_hash: String,
     pub signature_hash: String,
-    // dataset: LightDataset,
     pub public_key: String,
     private_key: String,
     pub orcid: String,
     pub server_url: String,
     pub publish: bool, // false
+    // dataset: LightDataset,
 }
 // https://docs.rs/sophia/0.5.3/sophia/dataset/inmem/index.html
+
+#[derive(Debug)]
+struct NanopubError(String);
+
+impl Error for NanopubError {}
+
+impl fmt::Display for NanopubError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+
+fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubError> {
+    // Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
+    let np_ns: Namespace<&str> = Namespace::new(NP_NS).unwrap();
+    let mut np_url: Option<String> = None;
+    let mut head: Option<String> = None;
+    let mut assertion: Option<String> = None;
+    let mut prov: Option<String> = None;
+    let mut pubinfo: Option<String> = None;
+
+    // Extract nanopub URL and head graph
+    for q in dataset.quads_matching(Any, [&rdf::type_], [np_ns.get("Nanopublication").unwrap()], Any) {
+        if np_url.is_some() {
+            return Err(NanopubError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
+        } else {
+            np_url = Some(q.unwrap().s().iri().unwrap().to_string());
+            head = Some(q.unwrap().g().unwrap().iri().unwrap().to_string());
+        }
+    }
+    if !np_url.is_some() {
+        return Err(NanopubError("The provided RDF does not contain a Nanopublication.".to_string()));
+    }
+    let np_iri: Iri<String> = Iri::new_unchecked(np_url.unwrap());
+    let head_iri: Iri<String> = Iri::new_unchecked(head.unwrap());
+
+    // Extract assertion, prov, pubinfo, and head graphs URLs
+    for q in dataset.quads_matching([&np_iri], [np_ns.get("hasAssertion").unwrap()], Any, [Some(&head_iri)]) {
+        assertion = Some(q.unwrap().o().iri().unwrap().to_string());
+    }
+    for q in dataset.quads_matching([&np_iri], [np_ns.get("hasProvenance").unwrap()], Any, [Some(&head_iri)]) {
+        prov = Some(q.unwrap().o().iri().unwrap().to_string());
+    }
+    for q in dataset.quads_matching([&np_iri], [np_ns.get("hasPublicationInfo").unwrap()], Any, [Some(&head_iri)]) {
+        pubinfo = Some(q.unwrap().o().iri().unwrap().to_string());
+    }
+
+    // Extract base URI, separator character (# or /), and trusty hash (if present) from the np URL
+    // Default to empty strings when nothing found
+    let mut base_uri: Option<String> = None;
+    let mut separator_char: Option<String> = None;
+    let mut trusty_hash: Option<String> = None;
+    let re = Regex::new(r"^(.*?)(/|#)?(RA.*)?$").unwrap();
+    if let Some(caps) = re.captures(&np_iri) {
+        // The first group captures everything up to a '/' or '#', non-greedy.
+        base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
+        // The second group captures '/' or '#' if present.
+        separator_char = Some(caps.get(2).map_or("", |m| m.as_str()).to_string());
+        // The third group captures everything after 'RA', if present.
+        trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
+    }
+
+    // Get np namespace from the np URL (add # if not ending with / or #)
+    let mut namespace: String = np_iri.to_string();
+    if !namespace.ends_with('#') && !namespace.ends_with('/') {
+        namespace.push('#');
+    }
+    // TODO: extract signature, algo, public key here too?
+
+    Ok(NpMetadata {
+        np_url: np_iri,
+        np_ns: Namespace::new(namespace).unwrap(),
+        head: head_iri,
+        assertion: Iri::new_unchecked(assertion.unwrap()),
+        prov: Iri::new_unchecked(prov.unwrap()),
+        pubinfo: Iri::new_unchecked(pubinfo.unwrap()),
+        base_uri: base_uri.unwrap(),
+        separator_char: separator_char.unwrap(),
+        trusty_hash: trusty_hash.unwrap(),
+    })
+}
+
 
 impl Nanopub {
     /// Creates a new nanopub
@@ -88,33 +197,34 @@ impl Nanopub {
         )
         .unwrap();
 
+        // Extract graph URLs from the nanopub (fails if np not valid)
+        let np_meta = extract_np_metadata(&dataset).expect("The provided Nanopublication is not valid");
+        println!("{}", np_meta);
+
         // TODO: check the np is valid and extract required metadata (baseuri/trusty_hash if there)
         // cf. utils.py extract_np_metadata(): baseuri, hash_fragment
         // 1. We should be able to detect if it is an unsigned np, and extract the dummy URI used
         // 2. If the np is incomplete we add the missing triples
         // We always replace the hashstr to " " when normalizing
-        // Regex to extract base URI, separator and trusty URI (if any):
-        // extract_trusty = re.search(r'^(.*?)(\/|#)?(RA.*)?$', str(np_meta.np_uri))
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
-            tmp_ns.get("sig")?,
+            np_meta.np_ns.get("sig")?,
             npx.get("hasPublicKey")?,
             &*pub_key_str,
-            Some(&tmp_ns.get("pubinfo")?),
+            Some(&np_meta.pubinfo),
         )?;
         dataset.insert(
-            tmp_ns.get("sig")?,
+            np_meta.np_ns.get("sig")?,
             npx.get("hasAlgorithm")?,
             "RSA",
-            Some(&tmp_ns.get("pubinfo")?),
+            Some(&np_meta.pubinfo),
         )?;
         dataset.insert(
-            tmp_ns.get("sig")?,
+            np_meta.np_ns.get("sig")?,
             npx.get("hasSignatureTarget")?,
-            // &GenericTerm::new_iri(TEMP_NP_URI)?,
             Iri::new_unchecked(TEMP_NP_URI),
-            Some(&tmp_ns.get("pubinfo")?),
+            Some(&np_meta.pubinfo),
         )?;
 
         // Normalized nanopub nquads to a string
@@ -133,10 +243,10 @@ impl Nanopub {
 
         // Add the signature to the pubinfo graph
         dataset.insert(
-            tmp_ns.get("sig")?,
+            np_meta.np_ns.get("sig")?,
             npx.get("hasSignature")?,
             &*signature_hash,
-            Some(&tmp_ns.get("pubinfo")?),
+            Some(&np_meta.pubinfo),
         )?;
 
         // Generate TrustyURI
@@ -154,19 +264,6 @@ impl Nanopub {
             "RA{}",
             base64_engine.encode(Sha256::digest(norm_quads_signed.as_bytes()))
         );
-        // https://github.com/fair-workflows/nanopub/blob/main/nanopub/trustyuri/rdf/RdfHasher.py
-        // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
-        // In java: String publicKeyString = DatatypeConverter.printBase64Binary(c.getKey().getPublic().getEncoded()).replaceAll("\\s", "");
-
-        // for quad in
-        // dataset.quads().for_each_quad(|q| {
-        //     println!("{}", q);
-        // })?;
-        //  {
-        //     for elem in quad.iter() {
-        //         println!("{}", elem);
-        //     }
-        // }
 
         // Now we serialize the Nanopub to RDF Trig format
         // Prepare the trig serializer
@@ -228,19 +325,17 @@ impl Nanopub {
 
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let bold = "\x1b[1;96m";
-        let end = "\x1b[0m";
+        writeln!(f, "\n{}Nanopublication RDF:{} \n{}", BOLD, END, self.rdf)?;
+        writeln!(f, "{}ORCID:{} {}", BOLD, END, self.orcid)?;
+        writeln!(f, "{}Public key:{} {}", BOLD, END, self.public_key)?;
+        writeln!(f, "{}Private key:{} {}", BOLD, END, self.private_key)?;
+        writeln!(f, "{}Trusty hash:{} {}", BOLD, END, self.trusty_hash)?;
+        writeln!(f, "{}Signature hash:{} {}", BOLD, END, self.signature_hash)?;
+        writeln!(f, "{}Publish:{} {}", BOLD, END, self.publish)?;
+        writeln!(f, "{}Server URL:{} {}", BOLD, END, self.server_url)?;
         // for t in self {
         //     info!(f, "{}", t)?;
         // }
-        writeln!(f, "\n{}Nanopublication RDF:{} \n{}", bold, end, self.rdf)?;
-        writeln!(f, "{}ORCID:{} {}", bold, end, self.orcid)?;
-        writeln!(f, "{}Public key:{} {}", bold, end, self.public_key)?;
-        writeln!(f, "{}Private key:{} {}", bold, end, self.private_key)?;
-        writeln!(f, "{}Trusty hash:{} {}", bold, end, self.trusty_hash)?;
-        writeln!(f, "{}Signature hash:{} {}", bold, end, self.signature_hash)?;
-        writeln!(f, "{}Publish:{} {}", bold, end, self.publish)?;
-        writeln!(f, "{}Server URL:{} {}", bold, end, self.server_url)?;
         Ok(())
     }
 }

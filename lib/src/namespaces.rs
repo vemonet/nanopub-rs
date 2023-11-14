@@ -5,6 +5,7 @@ use sophia::iri::Iri;
 // pub const NPX: Namespace<&str> = Namespace::new("http://purl.org/nanopub/x/").unwrap();
 
 pub const NPX: &str = "http://purl.org/nanopub/x/";
+pub const NP_NS: &str = "http://www.nanopub.org/nschema#";
 
 pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
     [
@@ -34,7 +35,7 @@ pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
         ),
         (
             Prefix::new_unchecked("np"),
-            Iri::new_unchecked("http://www.nanopub.org/nschema#"),
+            Iri::new_unchecked(NP_NS),
         ),
         (
             Prefix::new_unchecked("prov"),
@@ -42,7 +43,7 @@ pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
         ),
         (
             Prefix::new_unchecked("npx"),
-            Iri::new_unchecked("http://purl.org/nanopub/x/"),
+            Iri::new_unchecked(NPX),
         ),
         (
             Prefix::new_unchecked("nptemp"),
