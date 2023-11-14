@@ -30,7 +30,7 @@ fn main() {
             :assertion {
                 drugbank:DB10771 a biolink:Drug .
 
-                <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
+                <http://purl.obolibrary.org/obo/OMIM_130000aazzz> a biolink:Disease .
 
                 :association rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
                     rdf:predicate biolink:treats;

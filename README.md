@@ -29,7 +29,21 @@ Install development dependencies:
 ```bash
 rustup update
 rustup component add rustfmt clippy
-cargo install mdbook wasm-pack
+```
+
+### Build and run all packages
+
+All packages at once:
+
+```bash
+cargo build --all
+cargo run --all-features
+```
+
+Just the rust package:
+
+```bash
+cargo run try
 ```
 
 ### Format

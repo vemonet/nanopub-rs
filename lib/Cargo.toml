@@ -18,11 +18,17 @@ keywords = ["RDF", "nanopublications"]
 
 
 [dependencies]
-base64 = "0.13.0"
-sophia = "0.7.2"
+base64 = "0.21.5"
 rsa = { version = "0.9.3", default-features = false, features = ["pem", "sha2"] }
-openssl-probe = "0.1.2"
-log = {features = ["std"]}
+openssl-probe = "0.1.5"
+log = { version = "0.4.20", features = ["std"] }
+sophia = "0.7.2"
+# sophia = "0.8.0-alpha.2"
+# sophia = { git = "https://github.com/pchampin/sophia_rs.git" }
+
+[dev-dependencies]
+mdbook = "0.4.35"
+wasm-pack = "0.12.1"
 # openssl-probe = "0.1.5"
 
 
