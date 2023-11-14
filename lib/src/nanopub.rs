@@ -1,7 +1,7 @@
 use crate::constants::{
     BOLD, END, NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER,
 };
-use crate::namespaces::{get_prefixes, NPX, NP_NS};
+use crate::namespaces::{get_prefixes, NPX, NP_SCHEMA};
 
 use base64;
 use base64::{alphabet, engine, Engine as _};
@@ -39,13 +39,7 @@ pub struct NpMetadata {
 impl fmt::Display for NpMetadata {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "\n{}Nanopub URL:{} {}", BOLD, END, self.np_url)?;
-        writeln!(
-            f,
-            "{}Nanopub Namespace:{} {}",
-            BOLD,
-            END,
-            self.np_ns.to_string()
-        )?;
+        writeln!(f, "{}Namespace:{} {}", BOLD, END, self.np_ns.to_string())?;
         writeln!(f, "{}Base URI:{} {}", BOLD, END, self.base_uri)?;
         writeln!(f, "{}Trusty Hash:{} {}", BOLD, END, self.trusty_hash)?;
         writeln!(f, "{}Assertion Graph:{} {}", BOLD, END, self.assertion)?;
@@ -82,7 +76,7 @@ impl fmt::Display for NanopubError {
 
 fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubError> {
     // Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
-    let np_ns: Namespace<&str> = Namespace::new(NP_NS).unwrap();
+    let np_schema: Namespace<&str> = Namespace::new(NP_SCHEMA).unwrap();
     let mut np_url: Option<String> = None;
     let mut head: Option<String> = None;
     let mut assertion: Option<String> = None;
@@ -93,7 +87,7 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
     for q in dataset.quads_matching(
         Any,
         [&rdf::type_],
-        [np_ns.get("Nanopublication").unwrap()],
+        [np_schema.get("Nanopublication").unwrap()],
         Any,
     ) {
         if np_url.is_some() {
@@ -114,7 +108,7 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_matching(
         [&np_iri],
-        [np_ns.get("hasAssertion").unwrap()],
+        [np_schema.get("hasAssertion").unwrap()],
         Any,
         [Some(&head_iri)],
     ) {
@@ -122,7 +116,7 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
     }
     for q in dataset.quads_matching(
         [&np_iri],
-        [np_ns.get("hasProvenance").unwrap()],
+        [np_schema.get("hasProvenance").unwrap()],
         Any,
         [Some(&head_iri)],
     ) {
@@ -130,7 +124,7 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
     }
     for q in dataset.quads_matching(
         [&np_iri],
-        [np_ns.get("hasPublicationInfo").unwrap()],
+        [np_schema.get("hasPublicationInfo").unwrap()],
         Any,
         [Some(&head_iri)],
     ) {
@@ -202,10 +196,7 @@ impl Nanopub {
         server_url: Option<&str>,
         publish: Option<&bool>,
     ) -> Result<Self, Box<dyn Error>> {
-        // Self::default()
         openssl_probe::init_ssl_cert_env_vars();
-
-        let tmp_ns = Namespace::new(TEMP_NP_NS)?;
         let npx: Namespace<&str> = Namespace::new(NPX)?;
 
         let mut dataset: LightDataset = trig::parse_str(rdf)
@@ -258,9 +249,9 @@ impl Nanopub {
         // Normalized nanopub nquads to a string
         let norm_quads = normalize_dataset(&dataset, Some(""), Some(""))
             .expect("Failed to normalise RDF before adding signature");
-        // println!("      NORMED QUADS\n{}", norm_quads);
+        // println!("NORMED QUADS\n{}", norm_quads);
 
-        // Generate signature using the private and normalized RDF
+        // Generate signature using the private key and normalized RDF
         let signature_vec = priv_key
             .sign(
                 Pkcs1v15Sign::new::<Sha256>(),
@@ -300,7 +291,6 @@ impl Nanopub {
             .with_pretty(true)
             .with_prefix_map(&prefixes[..]);
         let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
-        // TODO: replace all }GRAPH by }\n ? Or fix pretty code
 
         // Return the Nanopub object
         Ok(Self {
@@ -482,8 +472,7 @@ fn normalize_dataset(
             }
         }
     }
-    //println!("      NORMED QUADS in normalize");
-    //println!("{}", norm_quads);
+    //println!("NORMED QUADS in normalize\n{}", norm_quads);
     Ok(norm_quads)
     // let iter = self.spog.iter();
     // Iter {

@@ -5,7 +5,7 @@ use sophia::iri::Iri;
 // pub const NPX: Namespace<&str> = Namespace::new("http://purl.org/nanopub/x/").unwrap();
 
 pub const NPX: &str = "http://purl.org/nanopub/x/";
-pub const NP_NS: &str = "http://www.nanopub.org/nschema#";
+pub const NP_SCHEMA: &str = "http://www.nanopub.org/nschema#";
 
 pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
     [
@@ -33,7 +33,7 @@ pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
             Prefix::new_unchecked("biolink"),
             Iri::new_unchecked("https://w3id.org/biolink/vocab/"),
         ),
-        (Prefix::new_unchecked("np"), Iri::new_unchecked(NP_NS)),
+        (Prefix::new_unchecked("np"), Iri::new_unchecked(NP_SCHEMA)),
         (
             Prefix::new_unchecked("prov"),
             Iri::new_unchecked("http://www.w3.org/ns/prov#"),
