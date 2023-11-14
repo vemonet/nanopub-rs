@@ -33,18 +33,12 @@ pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
             Prefix::new_unchecked("biolink"),
             Iri::new_unchecked("https://w3id.org/biolink/vocab/"),
         ),
-        (
-            Prefix::new_unchecked("np"),
-            Iri::new_unchecked(NP_NS),
-        ),
+        (Prefix::new_unchecked("np"), Iri::new_unchecked(NP_NS)),
         (
             Prefix::new_unchecked("prov"),
             Iri::new_unchecked("http://www.w3.org/ns/prov#"),
         ),
-        (
-            Prefix::new_unchecked("npx"),
-            Iri::new_unchecked(NPX),
-        ),
+        (Prefix::new_unchecked("npx"), Iri::new_unchecked(NPX)),
         (
             Prefix::new_unchecked("nptemp"),
             Iri::new_unchecked("http://purl.org/nanopub/temp/mynanopub#"),

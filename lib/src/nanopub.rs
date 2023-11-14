@@ -1,19 +1,21 @@
-use crate::constants::{NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER, BOLD, END};
+use crate::constants::{
+    BOLD, END, NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER,
+};
 use crate::namespaces::{get_prefixes, NPX, NP_NS};
 
 use base64;
 use base64::{alphabet, engine, Engine as _};
+use regex::Regex;
 use rsa::{
     pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Digest, sha2::Sha256, Pkcs1v15Sign,
     RsaPrivateKey, RsaPublicKey,
 };
-use regex::Regex;
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::{Namespace, rdf};
+use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
 use sophia::api::serializer::{QuadSerializer, Stringifier};
 use sophia::api::source::QuadSource;
-use sophia::api::term::{Term, TermKind, matcher::Any, matcher::GraphNameMatcher};
+use sophia::api::term::{matcher::Any, matcher::GraphNameMatcher, Term, TermKind};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::turtle::parser::{nq, trig};
@@ -37,14 +39,19 @@ pub struct NpMetadata {
 impl fmt::Display for NpMetadata {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "\n{}Nanopub URL:{} {}", BOLD, END, self.np_url)?;
-        writeln!(f, "{}Nanopub Namespace:{} {}", BOLD, END, self.np_ns.to_string())?;
+        writeln!(
+            f,
+            "{}Nanopub Namespace:{} {}",
+            BOLD,
+            END,
+            self.np_ns.to_string()
+        )?;
         writeln!(f, "{}Base URI:{} {}", BOLD, END, self.base_uri)?;
         writeln!(f, "{}Trusty Hash:{} {}", BOLD, END, self.trusty_hash)?;
         writeln!(f, "{}Assertion Graph:{} {}", BOLD, END, self.assertion)?;
         Ok(())
     }
 }
-
 
 /// A nanopublication object
 #[derive(Default)]
@@ -58,7 +65,7 @@ pub struct Nanopub {
     pub orcid: String,
     pub server_url: String,
     pub publish: bool, // false
-    // dataset: LightDataset,
+                       // dataset: LightDataset,
 }
 // https://docs.rs/sophia/0.5.3/sophia/dataset/inmem/index.html
 
@@ -73,7 +80,6 @@ impl fmt::Display for NanopubError {
     }
 }
 
-
 fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubError> {
     // Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
     let np_ns: Namespace<&str> = Namespace::new(NP_NS).unwrap();
@@ -84,7 +90,12 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
     let mut pubinfo: Option<String> = None;
 
     // Extract nanopub URL and head graph
-    for q in dataset.quads_matching(Any, [&rdf::type_], [np_ns.get("Nanopublication").unwrap()], Any) {
+    for q in dataset.quads_matching(
+        Any,
+        [&rdf::type_],
+        [np_ns.get("Nanopublication").unwrap()],
+        Any,
+    ) {
         if np_url.is_some() {
             return Err(NanopubError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
@@ -93,19 +104,36 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
         }
     }
     if !np_url.is_some() {
-        return Err(NanopubError("The provided RDF does not contain a Nanopublication.".to_string()));
+        return Err(NanopubError(
+            "The provided RDF does not contain a Nanopublication.".to_string(),
+        ));
     }
     let np_iri: Iri<String> = Iri::new_unchecked(np_url.unwrap());
     let head_iri: Iri<String> = Iri::new_unchecked(head.unwrap());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
-    for q in dataset.quads_matching([&np_iri], [np_ns.get("hasAssertion").unwrap()], Any, [Some(&head_iri)]) {
+    for q in dataset.quads_matching(
+        [&np_iri],
+        [np_ns.get("hasAssertion").unwrap()],
+        Any,
+        [Some(&head_iri)],
+    ) {
         assertion = Some(q.unwrap().o().iri().unwrap().to_string());
     }
-    for q in dataset.quads_matching([&np_iri], [np_ns.get("hasProvenance").unwrap()], Any, [Some(&head_iri)]) {
+    for q in dataset.quads_matching(
+        [&np_iri],
+        [np_ns.get("hasProvenance").unwrap()],
+        Any,
+        [Some(&head_iri)],
+    ) {
         prov = Some(q.unwrap().o().iri().unwrap().to_string());
     }
-    for q in dataset.quads_matching([&np_iri], [np_ns.get("hasPublicationInfo").unwrap()], Any, [Some(&head_iri)]) {
+    for q in dataset.quads_matching(
+        [&np_iri],
+        [np_ns.get("hasPublicationInfo").unwrap()],
+        Any,
+        [Some(&head_iri)],
+    ) {
         pubinfo = Some(q.unwrap().o().iri().unwrap().to_string());
     }
 
@@ -143,7 +171,6 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
         trusty_hash: trusty_hash.unwrap(),
     })
 }
-
 
 impl Nanopub {
     /// Creates a new nanopub
@@ -198,7 +225,8 @@ impl Nanopub {
         .unwrap();
 
         // Extract graph URLs from the nanopub (fails if np not valid)
-        let np_meta = extract_np_metadata(&dataset).expect("The provided Nanopublication is not valid");
+        let np_meta =
+            extract_np_metadata(&dataset).expect("The provided Nanopublication is not valid");
         println!("{}", np_meta);
 
         // TODO: check the np is valid and extract required metadata (baseuri/trusty_hash if there)
