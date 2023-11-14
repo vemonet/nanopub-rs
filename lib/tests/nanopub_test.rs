@@ -1,6 +1,5 @@
 use nanopub_rs::nanopub::Nanopub;
 use std::fs;
-use std::io;
 
 pub const ORCID: &str = "http://orcid.org/0000-0002-1267-0234";
 
@@ -8,8 +7,6 @@ pub const ORCID: &str = "http://orcid.org/0000-0002-1267-0234";
 fn it_sign_nanopub() {
     let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
-    println!("{}", private_key);
-    println!("{}", np_rdf);
     let np = Nanopub::new(np_rdf.as_str(), private_key.as_str(), ORCID, None, None).unwrap();
 
     println!("{}", np);

@@ -60,6 +60,14 @@ cargo clippy --all --all-targets --all-features
 
 ### Run tests
 
+Display prints:
+
+```bash
+cargo test -- --nocapture
+```
+
+Run all tests:
+
 ```bash
 cargo test --verbose --all --all-features
 ```

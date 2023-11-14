@@ -1,13 +1,12 @@
+use sophia::api::prefix::Prefix;
 use sophia::iri::Iri;
-use sophia::prefix::Prefix;
-// use sophia::ns::Namespace;
+// use sophia::api::ns::Namespace;
 
-// pub const NPX: Namespace<&str> = Namespace::new("http://purl.org/nanopub/x/")?;
+// pub const NPX: Namespace<&str> = Namespace::new("http://purl.org/nanopub/x/").unwrap();
 
 pub const NPX: &str = "http://purl.org/nanopub/x/";
 
-// fn normalize_key(key: &str) -> Result<String, Box<dyn Error>> {
-pub fn get_prefixes() -> [(Prefix<'static>, Iri<'static>); 10] {
+pub fn get_prefixes() -> [(Prefix<&'static str>, Iri<&'static str>); 10] {
     [
         (
             Prefix::new_unchecked("rdf"),

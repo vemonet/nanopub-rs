@@ -3,32 +3,23 @@ use crate::namespaces::{get_prefixes, NPX};
 
 use base64;
 use base64::{alphabet, engine, Engine as _};
-use log;
 use rsa::{
     pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Digest, sha2::Sha256, Pkcs1v15Sign,
     RsaPrivateKey, RsaPublicKey,
 };
-use sophia::dataset::{inmem::LightDataset, *};
-use sophia::ns::{xsd, Namespace};
-use sophia::parser::{nq, trig};
-use sophia::quad::stream::QuadSource;
-use sophia::quad::Quad;
-use sophia::serializer::nq::NqSerializer;
-use sophia::serializer::trig::{TrigConfig, TrigSerializer};
-use sophia::serializer::*;
-use sophia::term::literal::convert::AsLiteral;
-use sophia::term::{StaticTerm, TTerm, TermKind};
+use sophia::api::dataset::{Dataset, MutableDataset};
+use sophia::api::ns::Namespace;
+use sophia::api::quad::Quad;
+use sophia::api::serializer::{QuadSerializer, Stringifier};
+use sophia::api::source::QuadSource;
+use sophia::api::term::{Term, TermKind};
+use sophia::inmem::dataset::LightDataset;
+use sophia::iri::Iri;
+use sophia::turtle::parser::{nq, trig};
+use sophia::turtle::serializer::nq::NqSerializer;
+use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::error::Error;
 use std::{fmt, str};
-// use sophia::serializer::turtle::TrigSerializer;
-// use sophia::term::matcher::TermMatcher;
-// use sophia::iri::AsIri;
-// use sophia::term::iri::convert::AsLiteral;
-// use sophia::term::*;
-// use sophia::graph::{inmem::FastGraph, *};
-// use sophia::triple::stream::TripleSource;
-// use sophia::serializer::nt::NtSerializer;
-// use sophia::parser::turtle;
 
 /// A nanopublication object
 #[derive(Default)]
@@ -83,7 +74,6 @@ impl Nanopub {
 
         let mut dataset: LightDataset = trig::parse_str(rdf)
             .collect_quads()
-            .ok()
             .expect("Failed to parse RDF");
 
         let priv_key_bytes = engine::general_purpose::STANDARD
@@ -99,33 +89,36 @@ impl Nanopub {
         .unwrap();
 
         // TODO: check the np is valid and extract required metadata (baseuri/trusty_hash if there)
-        // cf. utils.py extract_np_metadata()
+        // cf. utils.py extract_np_metadata(): baseuri, hash_fragment
         // 1. We should be able to detect if it is an unsigned np, and extract the dummy URI used
         // 2. If the np is incomplete we add the missing triples
+        // We always replace the hashstr to " " when normalizing
+        // Regex to extract base URI, separator and trusty URI (if any):
+        // extract_trusty = re.search(r'^(.*?)(\/|#)?(RA.*)?$', str(np_meta.np_uri))
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
-            &tmp_ns.get("sig")?,
-            &npx.get("hasPublicKey")?,
-            &pub_key_str.as_literal(),
+            tmp_ns.get("sig")?,
+            npx.get("hasPublicKey")?,
+            &*pub_key_str,
             Some(&tmp_ns.get("pubinfo")?),
         )?;
         dataset.insert(
-            &tmp_ns.get("sig")?,
-            &npx.get("hasAlgorithm")?,
-            &"RSA".as_literal(),
+            tmp_ns.get("sig")?,
+            npx.get("hasAlgorithm")?,
+            "RSA",
             Some(&tmp_ns.get("pubinfo")?),
         )?;
         dataset.insert(
-            &tmp_ns.get("sig")?,
-            &npx.get("hasSignatureTarget")?,
-            &StaticTerm::new_iri(TEMP_NP_URI)?,
+            tmp_ns.get("sig")?,
+            npx.get("hasSignatureTarget")?,
+            // &GenericTerm::new_iri(TEMP_NP_URI)?,
+            Iri::new_unchecked(TEMP_NP_URI),
             Some(&tmp_ns.get("pubinfo")?),
         )?;
 
         // Normalized nanopub nquads to a string
         let norm_quads = normalize_dataset(&dataset, Some(""), Some(""))
-            .ok()
             .expect("Failed to normalise RDF before adding signature");
         // println!("      NORMED QUADS\n{}", norm_quads);
 
@@ -133,24 +126,23 @@ impl Nanopub {
         let signature_vec = priv_key
             .sign(
                 Pkcs1v15Sign::new::<Sha256>(),
-                &Sha256::digest(norm_quads.as_bytes().to_vec()),
+                &Sha256::digest(norm_quads.as_bytes()),
             )
             .expect("Failed to sign nanopub");
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
 
         // Add the signature to the pubinfo graph
         dataset.insert(
-            &tmp_ns.get("sig")?,
-            &npx.get("hasSignature")?,
-            &signature_hash.as_literal(),
+            tmp_ns.get("sig")?,
+            npx.get("hasSignature")?,
+            &*signature_hash,
             Some(&tmp_ns.get("pubinfo")?),
         )?;
 
         // Generate TrustyURI
         let norm_quads_signed = normalize_dataset(&dataset, Some(""), Some(""))
-            .ok()
             .expect("Failed to normalise RDF after adding signature");
-        println!("      NORMED QUADS AFTER SIGN\n{}", norm_quads);
+        println!("NORMED QUADS AFTER SIGNING\n{}", norm_quads);
 
         let base64_engine = engine::GeneralPurpose::new(
             &alphabet::Alphabet::new(
@@ -160,7 +152,7 @@ impl Nanopub {
         );
         let trusty_hash = format!(
             "RA{}",
-            base64_engine.encode(Sha256::digest(norm_quads_signed.as_bytes().to_vec()))
+            base64_engine.encode(Sha256::digest(norm_quads_signed.as_bytes()))
         );
         // https://github.com/fair-workflows/nanopub/blob/main/nanopub/trustyuri/rdf/RdfHasher.py
         // In python for trusty URI: return re.sub(r'=', '', base64.b64encode(s, b'-_').decode('utf-8'))
@@ -188,8 +180,7 @@ impl Nanopub {
         // Return the Nanopub object
         Ok(Self {
             rdf: trig_stringifier
-                .serialize_dataset(&mut dataset)
-                .ok()
+                .serialize_dataset(&dataset)
                 .expect("Unable to serialize dataset to trig")
                 .to_string(),
             // rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
@@ -205,7 +196,7 @@ impl Nanopub {
                 TEST_SERVER.to_string()
             },
             publish: if let Some(publish) = publish {
-                publish.clone()
+                *publish
             } else {
                 false
             },
@@ -242,7 +233,7 @@ impl fmt::Display for Nanopub {
         // for t in self {
         //     info!(f, "{}", t)?;
         // }
-        writeln!(f, "\n{}Nanopublication RDF:{} \n{}\n", bold, end, self.rdf)?;
+        writeln!(f, "\n{}Nanopublication RDF:{} \n{}", bold, end, self.rdf)?;
         writeln!(f, "{}ORCID:{} {}", bold, end, self.orcid)?;
         writeln!(f, "{}Public key:{} {}", bold, end, self.public_key)?;
         writeln!(f, "{}Private key:{} {}", bold, end, self.private_key)?;
@@ -271,16 +262,16 @@ fn normalize_key(key: &str) -> Result<String, Box<dyn Error>> {
     // normed_key = normed_key.split("\n").collect().join("");
     // normed_key = normed_key.replace("\n", "");
     // key = key.trim();
-    Ok(normed_key.replace("\n", ""))
+    Ok(normed_key.replace('\n', ""))
 }
 
 /// Returns all the quads contained by the nanopub.
 fn normalize_dataset(
     dataset: &LightDataset,
-    baseuri: Option<&str>,
-    hashstr: Option<&str>,
+    _baseuri: Option<&str>,
+    _hashstr: Option<&str>,
 ) -> Result<String, Box<dyn Error>> {
-    let baseuri = baseuri.unwrap_or("http://purl.org/np/");
+    // let baseuri = baseuri.unwrap_or("http://purl.org/np/");
     // let hashstr = hashstr.unwrap_or(" ");
 
     // baseuri=str(dummy_namespace),
@@ -302,28 +293,25 @@ fn normalize_dataset(
     // TODO: better ordering with comparator https://stackoverflow.com/questions/46512227/sort-a-vector-with-a-comparator-which-changes-its-behavior-dynamically
     let nquads_str = nq_stringifier
         .serialize_dataset(dataset)
-        .ok()
         .expect("Unable to serialize provided RDF")
         .to_string();
-    let split = nquads_str.split("\n");
+    let split = nquads_str.split('\n');
     let mut quads_sorted: Vec<&str> = split.collect();
     quads_sorted.sort_by_key(|name| name.to_lowercase());
     let mut norm_quads: String = "".to_owned();
 
     // Normalize the quads like done for the trusty URI
-    // // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15
+    // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15
     for quad in quads_sorted {
         // println!("{}", quad);
         let quad_dataset: LightDataset = nq::parse_str(quad)
             .collect_quads()
-            .ok()
             .expect("Unable to parse quad");
 
         for q in quad_dataset.quads() {
             let q = q?;
-            let mut s = q.s().value().to_string();
-            let p = q.p().value().to_string();
-            let mut o: String = q.o().value().to_string();
+            let mut s = q.s().iri().unwrap().to_string();
+            let p = q.p().iri().unwrap().to_string();
 
             if q.s().kind() == TermKind::Iri {
                 // Replace temp np URIs with normalized URI in subject URIs
@@ -331,13 +319,17 @@ fn normalize_dataset(
                 s = s.replace(temp_np_uri, NORMALIZED_URI);
             }
 
+            // let mut o: String = q.o().iri().unwrap().to_string();
+            let mut o: String;
             if q.o().kind() == TermKind::Iri {
                 // Replace temp np URIs with normalized URI in object URIs
+                o = q.o().iri().unwrap().to_string();
                 o = o.replace(TEMP_NP_NS, NORMALIZED_NS);
                 o = o.replace(temp_np_uri, NORMALIZED_URI);
             } else {
                 // If lang tag, add @en or @fr in front of the object
-                let lang = q.o().language();
+                o = q.o().lexical_form().unwrap().to_string();
+                let lang = q.o().language_tag();
                 if let Some(lang) = lang {
                     let lang_tag = ['@'.to_string(), lang.to_string()].join("");
                     o = [lang_tag, o].join(" ");
@@ -345,7 +337,8 @@ fn normalize_dataset(
                     // If no lang type, we add the datatype
                     let datatype = q.o().datatype();
                     if let Some(datatype) = datatype {
-                        let datatype_tag = ["^".to_string(), datatype.value().to_string()].join("");
+                        let datatype_tag =
+                            ["^".to_string(), datatype.iri().unwrap().to_string()].join("");
                         o = [datatype_tag, o].join(" ");
                     } else {
                         o = ["^http://www.w3.org/2001/XMLSchema#string".to_string(), o].join(" ");
@@ -355,7 +348,7 @@ fn normalize_dataset(
 
             let g_term = q.g();
             if let Some(g_term) = g_term {
-                let mut g = g_term.value().to_string();
+                let mut g = g_term.iri().unwrap().to_string();
                 if g_term.kind() == TermKind::Iri {
                     // Replace temp np URIs with normalized URI in URIs
                     g = g.replace(TEMP_NP_NS, NORMALIZED_NS);
