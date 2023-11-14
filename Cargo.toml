@@ -4,7 +4,6 @@ members = [
     "lib",
     "python",
     "js",
-    "try",
 ]
 
 [profile.release]

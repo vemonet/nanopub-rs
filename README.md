@@ -16,9 +16,8 @@ A rust toolkit to sign and publish [Nanopublications](https://nanopub.net), with
 ## Run the library to test
 
 ```bash
-cd try/
-cargo build
-cargo run
+cd lib/
+cargo test
 ```
 
 > Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
@@ -43,7 +42,7 @@ cargo run --all-features
 Just the rust package:
 
 ```bash
-cargo run try
+cargo test lib
 ```
 
 ### Format
