@@ -1,4 +1,4 @@
-from nanopub_py import Nanopub
+from nanopub_rs import Nanopub
 
 rdf_str = """@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix drugbank: <http://identifiers.org/drugbank/> .

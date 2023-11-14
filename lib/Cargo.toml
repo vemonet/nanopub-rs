@@ -1,5 +1,5 @@
 [package]
-name = "nanopub_rs"
+name = "nanopub"
 version = "0.1.0"
 authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
 license = "MIT"

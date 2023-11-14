@@ -6,7 +6,7 @@ rm -rf target/doc
 
 mdbook build --open
 
-cargo doc --open --workspace --no-deps --exclude try-nanopub-rs --exclude nanopub-js --exclude nanopub_py --target-dir target/doc
+cargo doc --open --workspace --no-deps --exclude try-nanopub-rs --exclude nanopub-js --exclude nanopub_rs --target-dir target/doc
 
 echo "📖 Docs generated in the target/doc folder"
 

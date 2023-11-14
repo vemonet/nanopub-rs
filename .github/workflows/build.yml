@@ -69,8 +69,8 @@ jobs:
             #  working-directory: ./js
       - name: NPM packing
         run: npm run pack
-        working-directory: js/pkg
-      - name: NPM release
+        working-directory: ./js
+      - name: NPM upload
         uses: actions/upload-artifact@v3
         with:
           name: nanopub_rs_npm

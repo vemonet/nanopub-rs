@@ -1,11 +1,14 @@
 {
+  "version": "0.1.0",
   "name": "nanopub-js",
+  "description": "JavaScript bindings for the Nanopub rust toolkit",
+  "license": "MIT",
+  "homepage": "https://github.com/vemonet/nanopub-rs",
+  "module": "nanopub_js.js",
+  "types": "nanopub_js.d.ts",
   "collaborators": [
     "Vincent Emonet <vincent.emonet@gmail.com>"
   ],
-  "description": "JavaScript bindings for the Nanopub rust toolkit",
-  "version": "0.1.0",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/vemonet/nanopub-rs/tree/main/js"
@@ -15,10 +18,35 @@
     "nanopub_js.js",
     "nanopub_js.d.ts"
   ],
-  "module": "nanopub_js.js",
-  "homepage": "https://github.com/vemonet/nanopub-rs",
-  "types": "nanopub_js.d.ts",
   "sideEffects": [
     "./snippets/*"
-  ]
+  ],
+  "scripts": {
+    "fmt": "prettier \"**/*.{ts,tsx,js,cjs,json,md,html}\" --ignore-path .gitignore --write",
+    "test": "wasm-pack build --debug --target nodejs && mocha",
+    "build": "rm -rf pkg && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web && rm -r pkg-node",
+    "release": "npm run build && npm publish ./pkg",
+    "pack": "npm run build && npm pack ./pkg"
+  },
+  "standard": {
+    "ignore": [
+      "pkg*"
+    ]
+  },
+  "devDependencies": {
+    "prettier": "^3.1.0"
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "semi": false,
+    "tabWidth": 2,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "arrowParens": "avoid",
+    "useTabs": false,
+    "printWidth": 120,
+    "pluginSearchDirs": [
+      "."
+    ]
+  }
 }

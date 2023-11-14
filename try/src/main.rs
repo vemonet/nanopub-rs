@@ -1,4 +1,4 @@
-use nanopub_rs::nanopub::Nanopub;
+use nanopub::nanopub::Nanopub;
 
 fn main() {
     // http://purl.org/np/RA5IWUwPmx_chibRuDOMfby6Sz8I0n76xnB3BiAm6ZP74

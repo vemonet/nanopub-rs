@@ -18,7 +18,7 @@ keywords = ["RDF", "nanopublications"]
 
 
 [dependencies]
-nanopub_rs = { path = "../lib" }
+nanopub = { path = "../lib" }
 
 # sophia = "0.7.2"
 # regex = "1"

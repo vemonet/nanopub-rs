@@ -1,4 +1,4 @@
-use nanopub_rs::nanopub::Nanopub;
+use nanopub::nanopub::Nanopub;
 use std::fs;
 
 pub const ORCID: &str = "http://orcid.org/0000-0002-1267-0234";

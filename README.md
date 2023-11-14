@@ -1,8 +1,8 @@
 # 🔬🦀 Nanopub rs
 
-[![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/artifacts.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/artifacts.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml)
+[![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml)
 
-A rust toolkit to sign and publish [Nanopublications](https://nanopub.org), with bindings to python and javascript (wasm).
+A rust toolkit to sign and publish [Nanopublications](https://nanopub.net), with bindings to python and javascript (wasm).
 
 ## Nanopub signing process
 
@@ -88,4 +88,4 @@ https://github.com/Harzu/wasm-rsa
 
 https://github.com/frehberg/wasm-sign
 
-Building artefacts for many targets: https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
+Building artefacts for many targets: https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/build.yml

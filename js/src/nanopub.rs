@@ -1,4 +1,4 @@
-use nanopub_rs::nanopub::Nanopub;
+use nanopub::nanopub::Nanopub;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(js_name = Nanopub)]

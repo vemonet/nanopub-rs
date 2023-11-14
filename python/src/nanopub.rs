@@ -1,15 +1,15 @@
-use nanopub_rs::nanopub::Nanopub;
+use nanopub::nanopub::Nanopub;
 use pyo3::prelude::*;
 
-#[pyclass(name = "Nanopub", module = "nanopub_py")]
+#[pyclass(name = "Nanopub", module = "nanopub_rs")]
 #[pyo3(text_signature = "(rdf, private_key, orcid, server_url=None, publish=False)")]
 // #[derive(Clone)]
-pub struct PyNanopub {
+pub struct NanopubPy {
     np: Nanopub,
 }
 
 #[pymethods]
-impl PyNanopub {
+impl NanopubPy {
     #[new]
     fn new(
         rdf: &str,
