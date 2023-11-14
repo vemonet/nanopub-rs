@@ -14,6 +14,12 @@ cargo install wasm-pack
 wasm-pack build --target web
 ```
 
+Build for browser and node:
+
+```bash
+npm run build
+```
+
 ## Try it
 
 Code in the `index.html` file

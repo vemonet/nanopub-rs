@@ -5,17 +5,14 @@
 
 A rust toolkit to sign and publish [Nanopublications](https://nanopub.net).
 
+## Test
+
+```bash
+cargo test
+```
+
 ## Build
 
 ```bash
 cargo build
-```
-
-## Try
-
-Try with the basic application in the `try` folder:
-
-```bash
-cd ../try
-cargo run
 ```
