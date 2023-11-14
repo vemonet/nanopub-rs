@@ -2,7 +2,7 @@
 
 [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml)
 
-A rust toolkit to sign and publish [Nanopublications](https://nanopub.net), with bindings to python and javascript (wasm).
+A Rust toolkit to sign and publish [Nanopublications](https://nanopub.net), with bindings to Python and JavaScript (using WebAssembly).
 
 ## Nanopub signing process
 
@@ -13,37 +13,44 @@ A rust toolkit to sign and publish [Nanopublications](https://nanopub.net), with
 - Trusty URI code is calculated on normalized representation that includes signature
 - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
 
-## Run the library to test
-
-```bash
-cd lib/
-cargo test
-```
-
-> Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
-
 ## Development
 
+[Rust](https://www.rust-lang.org/tools/install), python and NodeJS are required for development.
+
 Install development dependencies:
+
 ```bash
 rustup update
 rustup component add rustfmt clippy
 ```
 
-### Build and run all packages
+### Run tests
 
-All packages at once:
+Run tests for all packages:
 
 ```bash
-cargo build --all
-cargo run --all-features
+cargo test
 ```
 
-Just the rust package:
+Display prints:
+
+```bash
+cargo test -- --nocapture
+```
+
+Run all tests?
+
+```bash
+cargo test --verbose --all --all-features
+```
+
+Test a specific package:
 
 ```bash
 cargo test lib
 ```
+
+> Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
 
 ### Format
 
@@ -57,24 +64,19 @@ cargo fmt
 cargo clippy --all --all-targets --all-features
 ```
 
-### Run tests
-
-Display prints:
-
-```bash
-cargo test -- --nocapture
-```
-
-Run all tests:
-
-```bash
-cargo test --verbose --all --all-features
-```
-
 ### Generate docs
 
 ```bash
 ./scripts/docs-serve.sh
+```
+
+### Build and run all packages
+
+All packages at once:
+
+```bash
+cargo build --all
+cargo run --all-features
 ```
 
 ## Useful links

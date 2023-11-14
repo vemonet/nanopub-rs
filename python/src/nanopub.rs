@@ -1,4 +1,4 @@
-use nanopub::nanopub::Nanopub;
+use nanopub::Nanopub;
 use pyo3::prelude::*;
 
 #[pyclass(name = "Nanopub", module = "nanopub_rs")]

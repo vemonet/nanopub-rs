@@ -4,12 +4,15 @@ set -e
 
 rm -rf target/doc
 
-mdbook build --open
+mdbook build
 
-cargo doc --open --workspace --no-deps --exclude try-nanopub-rs --exclude nanopub-js --exclude nanopub_rs --target-dir target/doc
+cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-py --target-dir target/doc
 
 echo "📖 Docs generated in the target/doc folder"
+echo "MdBook at http://0.0.0.0:3000"
+echo "Rust doc at http://0.0.0.0:3000/doc/nanopub"
 
+python -m http.server 3000 --directory ./target/doc
 
 # mdbook serve --open
 
@@ -17,6 +20,4 @@ echo "📖 Docs generated in the target/doc folder"
 # # rustdoc --crate-name nanopub_rs src/lib.rs -o docs/target/doc -L dependency=docs/target/debug/deps
 # # rustdoc --crate-name nanopub_rs src/lib.rs -o docs/target/doc
 
-# python3 -m webbrowser ./docs/target/doc/nanopub_rs/index.html
-
-# file:///home/vemonet/develop/perso/nanopub-rs/lib/docs/target/doc/nanopub_rs/index.html
+# python3 -m webbrowser ./target/doc/

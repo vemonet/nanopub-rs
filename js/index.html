@@ -58,6 +58,7 @@
       const publish=false;
       const rdfText = document.getElementById('rdf-text');
 
+      // WebAssembly binary needs to be initialized before use
       init().then(() => {
         const np = new Nanopub(
           rdfStr,
