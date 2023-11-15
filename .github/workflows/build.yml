@@ -129,6 +129,133 @@ jobs:
             nanopub_${{ github.event.release.tag_name }}_x86_64_windows_msvc.exe
 
 
+  wheel_linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [ "x86_64", "aarch64" ]
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: docker/setup-qemu-action@v2
+        with:
+          platforms: linux/${{ matrix.architecture }}
+        if: github.event_name == 'release' && matrix.architecture != 'x86_64'
+      - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/manylinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/manylinux_build_script.sh
+      - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/manylinux2014_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/manylinux_build_script.sh
+        if: github.event_name == 'release' || matrix.architecture == 'x86_64'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nanopub_wheel_x86_64_linux
+          path: target/wheels/*.whl
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
+          packages-dir: target/wheels
+        if: github.event_name == 'release'
+
+  wheel_linux_musl:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [ "x86_64", "aarch64" ]
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: docker/setup-qemu-action@v2
+        with:
+          platforms: linux/${{ matrix.architecture }}
+        if: github.event_name == 'release' && matrix.architecture != 'x86_64'
+      - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/musllinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/musllinux_build_script.sh
+      - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/musllinux_1_1_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/musllinux_build_script.sh
+        if: github.event_name == 'release' || matrix.architecture == 'x86_64'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nanopub_wheel_x86_64_linux_musl
+          path: target/wheels/*.whl
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
+          packages-dir: target/wheels
+        if: github.event_name == 'release'
+
+  wheel_mac:
+    runs-on: macos-latest
+    env:
+      DEVELOPER_DIR: '/Applications/Xcode.app/Contents/Developer'
+      SDKROOT: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk'
+      MACOSX_DEPLOYMENT_TARGET: '10.14'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: rustup update && rustup target add aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: '**/requirements.dev.txt'
+      - run: pip install -r python/requirements.dev.txt
+      - run: maturin build --release -m python/Cargo.toml --features abi3
+      - run: pip install --no-index --find-links=target/wheels/ nanopub
+      - run: rm -r target/wheels
+      # - run: python generate_stubs.py pyoxigraph pyoxigraph.pyi --black
+      #   working-directory: ./python
+      - run: maturin build --release --target universal2-apple-darwin -m python/Cargo.toml --features abi3
+      - run: maturin build --release -m python/Cargo.toml --features abi3
+        if: github.event_name == 'release'
+      - run: maturin build --release --target aarch64-apple-darwin -m python/Cargo.toml --features abi3
+        if: github.event_name == 'release'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nanopub_wheel_universal2_mac
+          path: target/wheels/*.whl
+      - run: pip install twine && twine upload target/wheels/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        if: github.event_name == 'release'
+
+  wheel_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: rustup update
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: '**/requirements.dev.txt'
+      - run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
+      - run: pip install -r python/requirements.dev.txt
+      - run: maturin build --release -m python/Cargo.toml --features abi3
+      - run: pip install --no-index --find-links=target/wheels/ nanopub
+      - run: rm -r target/wheels
+      # - run: python generate_stubs.py pyoxigraph pyoxigraph.pyi --black
+      #   working-directory: ./python
+      - run: maturin build --release -m python/Cargo.toml --features abi3
+      - run: maturin sdist -m python/Cargo.toml
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nanopub_wheel_x86_64_windows
+          path: target/wheels/*.whl
+      - run: pip install twine && twine upload target/wheels/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        if: github.event_name == 'release'
+
+
   npm_tarball:
     name: Build npm package
     runs-on: ubuntu-latest
@@ -157,12 +284,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: nanopub_rs_npm
-          path: ./js/pkg/*.tgz
+          path: ./js/pkg
 
       # - run: npm run release
       #  working-directory: ./js/pkg
       #  env:
-      #    NODE_AUTH_TOKE: ${{ secrets.NPM_TOKEN }}
+      #    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       #  if: github.event_name == 'release'
 
 
