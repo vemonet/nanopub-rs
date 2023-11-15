@@ -1,6 +1,6 @@
 black~=23.1
 furo
-maturin[patchelf]~=1.0
+maturin[patchelf]
 mypy~=1.0
 ruff~=0.0.255
 sphinx~=5.3
