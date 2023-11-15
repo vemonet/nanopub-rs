@@ -8,6 +8,10 @@ on:
   #   branches:
   #     - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # cf. https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
 jobs:
 
@@ -148,7 +152,7 @@ jobs:
         # if: github.event_name == 'release' || matrix.architecture == 'x86_64'
       - uses: actions/upload-artifact@v3
         with:
-          name: nanopub_wheel_x86_64_linux
+          name: nanopub_wheel_${{ matrix.architecture }}_linux
           path: target/wheels/*.whl
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -176,8 +180,9 @@ jobs:
         # if: github.event_name == 'release' || matrix.architecture == 'x86_64'
       - uses: actions/upload-artifact@v3
         with:
-          name: nanopub_wheel_x86_64_linux_musl
+          name: nanopub_wheel_${{ matrix.architecture }}_linux_musl
           path: target/wheels/*.whl
+
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__

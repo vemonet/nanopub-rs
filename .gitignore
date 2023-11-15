@@ -12,3 +12,7 @@ package-lock.json
 lib/docs/docs
 
 Cargo.lock
+
+# Build scripts
+.github/workflows/manylinux_build_script.sh
+.github/workflows/musllinux_build_script.sh
