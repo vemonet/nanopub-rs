@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 # Most of the metadata are in Cargo.toml and injected by maturin
-name = "oxigraph_rs"
+name = "nanopub_rs"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
