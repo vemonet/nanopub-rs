@@ -6,7 +6,7 @@ rm -rf target/doc
 
 mdbook build
 
-cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-py --target-dir target/doc
+cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-rs --target-dir target/doc
 
 echo "📖 Docs generated in the target/doc folder"
 echo "MdBook at http://0.0.0.0:3000"

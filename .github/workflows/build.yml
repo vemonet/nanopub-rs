@@ -203,15 +203,15 @@ jobs:
           cache: pip
           cache-dependency-path: '**/requirements.dev.txt'
       - run: pip install -r python/requirements.dev.txt
-      - run: maturin build --release -m python/Cargo.toml --features abi3
-      - run: pip install --no-index --find-links=target/wheels/ nanopub
+      - run: maturin build --release -m python/Cargo.toml
+      - run: pip install --no-index --find-links=target/wheels/ nanopub_rs
       - run: rm -r target/wheels
       # - run: python generate_stubs.py pyoxigraph pyoxigraph.pyi --black
       #   working-directory: ./python
-      - run: maturin build --release --target universal2-apple-darwin -m python/Cargo.toml --features abi3
-      - run: maturin build --release -m python/Cargo.toml --features abi3
+      - run: maturin build --release --target universal2-apple-darwin -m python/Cargo.toml
+      - run: maturin build --release -m python/Cargo.toml
         if: github.event_name == 'release'
-      - run: maturin build --release --target aarch64-apple-darwin -m python/Cargo.toml --features abi3
+      - run: maturin build --release --target aarch64-apple-darwin -m python/Cargo.toml
         if: github.event_name == 'release'
       - uses: actions/upload-artifact@v3
         with:
@@ -238,12 +238,12 @@ jobs:
           cache-dependency-path: '**/requirements.dev.txt'
       - run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
       - run: pip install -r python/requirements.dev.txt
-      - run: maturin build --release -m python/Cargo.toml --features abi3
-      - run: pip install --no-index --find-links=target/wheels/ nanopub
+      - run: maturin build --release -m python/Cargo.toml
+      - run: pip install --no-index --find-links=target/wheels/ nanopub_rs
       - run: rm -r target/wheels
       # - run: python generate_stubs.py pyoxigraph pyoxigraph.pyi --black
       #   working-directory: ./python
-      - run: maturin build --release -m python/Cargo.toml --features abi3
+      - run: maturin build --release -m python/Cargo.toml
       - run: maturin sdist -m python/Cargo.toml
       - uses: actions/upload-artifact@v3
         with:
