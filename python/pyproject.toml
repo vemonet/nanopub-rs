@@ -1,0 +1,56 @@
+[build-system]
+requires = ["maturin~=1.0"]
+build-backend = "maturin"
+
+[project]
+# Most of the metadata are in Cargo.toml and injected by maturin
+name = "oxigraph_rs"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Rust",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.7"
+
+[project.urls]
+Changelog = "https://github.com/vemonet/nanopub-rs/blob/main/CHANGELOG.md"
+Documentation = "https://vemonet.github.io/nanopub-rs"
+Homepage = "https://vemonet.github.io/nanopub-rs"
+Source = "https://github.com/vemonet/nanopub-rs/tree/main/python"
+Tracker = "https://github.com/vemonet/nanopub-rs/issues"
+
+[tool.ruff]
+line-length = 120
+select = [
+    "ARG",
+    "B",
+    "C40",
+    "E",
+    "F",
+    "FBT",
+    "I",
+    "ICN",
+    "ISC",
+    "N",
+    "PIE",
+    "PTH",
+    "RET",
+    "RUF",
+    "SIM",
+    "T10",
+    "TCH",
+    "TID",
+    "UP",
+    "W",
+    "YTT"
+]
