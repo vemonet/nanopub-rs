@@ -1,5 +1,5 @@
 use crate::constants::{
-    BOLD, END, NORMALIZED_NS, NORMALIZED_URI, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER,
+    BOLD, END, NORMALIZED_NS, NORMALIZED_URI, NP_PREF_NS, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER,
 };
 use crate::namespaces::{get_prefixes, NPX, NP_SCHEMA};
 
@@ -15,14 +15,17 @@ use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
 use sophia::api::serializer::{QuadSerializer, Stringifier};
 use sophia::api::source::QuadSource;
-use sophia::api::term::{matcher::Any, matcher::GraphNameMatcher, Term, TermKind};
+use sophia::api::term::{matcher::Any, Term, TermKind};
+use sophia::api::term::{IriRef, LanguageTag};
+use sophia::api::MownStr;
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::turtle::parser::{nq, trig};
 use sophia::turtle::serializer::nq::NqSerializer;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
+use std::collections::HashMap;
 use std::error::Error;
-use std::{fmt, str};
+use std::{cmp::Ordering, fmt, str};
 
 pub struct NpMetadata {
     pub np_url: Iri<String>,
@@ -50,7 +53,8 @@ impl fmt::Display for NpMetadata {
 /// A nanopublication object
 #[derive(Default)]
 pub struct Nanopub {
-    rdf: String,
+    pub uri: String,
+    pub rdf: String,
     // pub metadata: NpMetadata,
     pub trusty_hash: String,
     pub signature_hash: String,
@@ -74,8 +78,8 @@ impl fmt::Display for NanopubError {
     }
 }
 
+/// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
 fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubError> {
-    // Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
     let np_schema: Namespace<&str> = Namespace::new(NP_SCHEMA).unwrap();
     let mut np_url: Option<String> = None;
     let mut head: Option<String> = None;
@@ -97,7 +101,7 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
             head = Some(q.unwrap().g().unwrap().iri().unwrap().to_string());
         }
     }
-    if !np_url.is_some() {
+    if np_url.is_none() {
         return Err(NanopubError(
             "The provided RDF does not contain a Nanopublication.".to_string(),
         ));
@@ -141,7 +145,7 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
         // The first group captures everything up to a '/' or '#', non-greedy.
         base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
         // The second group captures '/' or '#' if present.
-        separator_char = Some(caps.get(2).map_or("", |m| m.as_str()).to_string());
+        separator_char = Some(caps.get(2).map_or("#", |m| m.as_str()).to_string());
         // The third group captures everything after 'RA', if present.
         trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
     }
@@ -164,6 +168,133 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
         separator_char: separator_char.unwrap(),
         trusty_hash: trusty_hash.unwrap(),
     })
+}
+
+/// Replace bnodes by URI ending with `_1` in the RDF dataset
+fn replace_bnodes(dataset: &LightDataset, base_ns: &str) -> Result<LightDataset, NanopubError> {
+    let mut new_dataset = LightDataset::new();
+    let mut bnode_map: HashMap<String, usize> = HashMap::new();
+    let mut bnode_counter = 1;
+    let re_underscore_uri = Regex::new(&format!(r"{}(_+\d+)$", base_ns)).unwrap();
+
+    for quad in dataset.quads() {
+        let quad = quad.unwrap();
+
+        // Replace bnode in subjects
+        let subject = if quad.s().is_blank_node() {
+            let bnode_id = quad.s().bnode_id().unwrap().to_string();
+            bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
+                let counter = bnode_counter;
+                bnode_counter += 1;
+                counter
+            });
+            format!("{}_{}", base_ns, bnode_map[&bnode_id])
+        } else if let Some(mat) = re_underscore_uri.find(&quad.s().iri().unwrap().as_ref()) {
+            let mut subject_iri = quad.s().iri().unwrap().to_string();
+            let new_ending = mat.as_str().replacen('_', "__", 1);
+            subject_iri.truncate(subject_iri.len() - mat.as_str().len()); // Remove the original ending
+            subject_iri.push_str(&new_ending);
+            subject_iri
+        } else {
+            quad.s().iri().unwrap().to_string()
+        };
+
+        // Replace bnode in objects
+        if quad.o().is_blank_node() {
+            let bnode_id = quad.o().bnode_id().unwrap().to_string();
+            bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
+                let counter = bnode_counter;
+                bnode_counter += 1;
+                counter
+            });
+            let object = format!("{}_{}", base_ns, bnode_map[&bnode_id]);
+            new_dataset
+                .insert(
+                    &Iri::new_unchecked(subject),
+                    quad.p(),
+                    &Iri::new_unchecked(object),
+                    quad.g(),
+                )
+                .unwrap();
+        } else if quad.o().is_iri() {
+            // Handle URI ending with #_1 to double _
+            if let Some(mat) = re_underscore_uri.find(&quad.o().iri().unwrap().as_ref()) {
+                let mut object_iri = quad.s().iri().unwrap().to_string();
+                let new_ending = mat.as_str().replacen('_', "__", 1);
+                object_iri.truncate(object_iri.len() - mat.as_str().len()); // Remove the original ending
+                object_iri.push_str(&new_ending);
+                new_dataset
+                    .insert(
+                        &Iri::new_unchecked(subject),
+                        quad.p(),
+                        &Iri::new_unchecked(object_iri),
+                        quad.g(),
+                    )
+                    .unwrap();
+            } else {
+                new_dataset
+                    .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), quad.g())
+                    .unwrap();
+            }
+        } else {
+            new_dataset
+                .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), quad.g())
+                .unwrap();
+        };
+    }
+    Ok(new_dataset)
+}
+
+/// Replace the dummy nanopub URI by the new one in the RDF dataset
+fn replace_np_uri(
+    dataset: &LightDataset,
+    old_ns: &str,
+    new_ns: &str,
+    new_uri: &str,
+) -> Result<LightDataset, NanopubError> {
+    let mut new_dataset = LightDataset::new();
+    for quad in dataset.quads() {
+        let quad = quad.unwrap();
+        // Replace URI in subjects
+        let subject = if quad.s().iri().unwrap().to_string() == old_ns {
+            Iri::new_unchecked(new_uri.to_string())
+        } else {
+            Iri::new_unchecked(quad.s().iri().unwrap().to_string().replace(old_ns, new_ns))
+        };
+        // Replace URI in graphs
+        let graph = Some(Iri::new_unchecked(
+            quad.g()
+                .unwrap()
+                .iri()
+                .unwrap()
+                .to_string()
+                .replace(old_ns, new_ns),
+        ));
+
+        // Replace URI in objects
+        if quad.o().is_iri() {
+            if quad.o().iri().unwrap().to_string() == old_ns {
+                new_dataset
+                    .insert(
+                        &subject,
+                        quad.p(),
+                        &Iri::new_unchecked(new_uri.to_string()),
+                        graph,
+                    )
+                    .unwrap();
+            } else {
+                let object = quad.o().iri().unwrap().to_string().replace(old_ns, new_ns);
+                new_dataset
+                    .insert(&subject, quad.p(), &Iri::new_unchecked(object), graph)
+                    .unwrap();
+            }
+        } else {
+            new_dataset
+                .insert(&subject, quad.p(), quad.o(), graph)
+                .unwrap();
+        };
+    }
+    Ok(new_dataset)
 }
 
 impl Nanopub {
@@ -220,11 +351,10 @@ impl Nanopub {
             extract_np_metadata(&dataset).expect("The provided Nanopublication is not valid");
         println!("{}", np_meta);
 
-        // TODO: check the np is valid and extract required metadata (baseuri/trusty_hash if there)
-        // cf. utils.py extract_np_metadata(): baseuri, hash_fragment
-        // 1. We should be able to detect if it is an unsigned np, and extract the dummy URI used
-        // 2. If the np is incomplete we add the missing triples
-        // We always replace the hashstr to " " when normalizing
+        // TODO: handle when we parse an already signed nanopub?
+        // fetch function that returns Nanopub object
+
+        dataset = replace_bnodes(&dataset, &np_meta.np_ns).unwrap();
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
@@ -246,8 +376,8 @@ impl Nanopub {
             Some(&np_meta.pubinfo),
         )?;
 
-        // Normalized nanopub nquads to a string
-        let norm_quads = normalize_dataset(&dataset, Some(""), Some(""))
+        // Normalize nanopub nquads to a string
+        let norm_quads = normalize_dataset(&dataset, np_meta.np_ns.as_str(), "")
             .expect("Failed to normalise RDF before adding signature");
         // println!("NORMED QUADS\n{}", norm_quads);
 
@@ -259,7 +389,6 @@ impl Nanopub {
             )
             .expect("Failed to sign nanopub");
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
-
         // Add the signature to the pubinfo graph
         dataset.insert(
             np_meta.np_ns.get("sig")?,
@@ -268,14 +397,14 @@ impl Nanopub {
             Some(&np_meta.pubinfo),
         )?;
 
-        // Generate TrustyURI
-        let norm_quads_signed = normalize_dataset(&dataset, Some(""), Some(""))
+        // Generate TrustyURI using base64 encoding
+        let norm_quads_signed = normalize_dataset(&dataset, np_meta.np_ns.as_str(), "")
             .expect("Failed to normalise RDF after adding signature");
-        println!("NORMED QUADS AFTER SIGNING\n{}", norm_quads);
+        println!("NORMED QUADS AFTER SIGNING\n{}", norm_quads_signed);
 
         let base64_engine = engine::GeneralPurpose::new(
             &alphabet::Alphabet::new(
-                "-_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",
             )?,
             engine::GeneralPurposeConfig::new().with_encode_padding(false),
         );
@@ -284,9 +413,12 @@ impl Nanopub {
             base64_engine.encode(Sha256::digest(norm_quads_signed.as_bytes()))
         );
 
-        // Now we serialize the Nanopub to RDF Trig format
+        let trusty_uri = format!("{}{}", NP_PREF_NS, trusty_hash);
+        let trusty_ns = format!("{}{}", trusty_uri, np_meta.separator_char);
+        dataset = replace_np_uri(&dataset, &np_meta.np_ns, &trusty_ns, &trusty_uri).unwrap();
+
         // Prepare the trig serializer
-        let prefixes = get_prefixes();
+        let prefixes = get_prefixes(&trusty_uri, &trusty_ns);
         let trig_config = TrigConfig::new()
             .with_pretty(true)
             .with_prefix_map(&prefixes[..]);
@@ -294,6 +426,7 @@ impl Nanopub {
 
         // Return the Nanopub object
         Ok(Self {
+            uri: trusty_uri,
             rdf: trig_stringifier
                 .serialize_dataset(&dataset)
                 .expect("Unable to serialize dataset to trig")
@@ -318,14 +451,6 @@ impl Nanopub {
         })
     }
 
-    // - preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear;
-    // this includes the signature part, except the triple that is stating the actual signature
-    // - preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
-    // - Signature is calculated on this normalized representation
-    // - Signature triple is added
-    // - Trusty URI code is calculated on normalized representation that includes signature
-    // - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
-
     /// Returns the RDF of the nanopub
     pub fn get_rdf(&self) -> String {
         self.rdf.clone()
@@ -343,7 +468,11 @@ impl Nanopub {
 
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "\n{}Nanopublication RDF:{} \n{}", BOLD, END, self.rdf)?;
+        writeln!(
+            f,
+            "\n{}Nanopublication:{} {} \n{}",
+            BOLD, self.uri, END, self.rdf
+        )?;
         writeln!(f, "{}ORCID:{} {}", BOLD, END, self.orcid)?;
         writeln!(f, "{}Public key:{} {}", BOLD, END, self.public_key)?;
         writeln!(f, "{}Private key:{} {}", BOLD, END, self.private_key)?;
@@ -358,125 +487,163 @@ impl fmt::Display for Nanopub {
     }
 }
 
+/// Normalize private/public keys (no prefix, no suffix, no newline)
 fn normalize_key(key: &str) -> Result<String, Box<dyn Error>> {
     let mut normed_key = key.trim();
-    //println!("Normalize");
     let rm_prefix = "-----BEGIN PUBLIC KEY-----";
     if normed_key.starts_with(rm_prefix) {
         normed_key = &normed_key[rm_prefix.len()..].trim();
     }
-    // let rm_suffix = format!("-----BEGIN {} KEY-----", key_type);
     let rm_suffix = "-----END PUBLIC KEY-----";
     if normed_key.ends_with(rm_suffix) {
         normed_key = &normed_key[..normed_key.len() - rm_suffix.len() - 1].trim();
     }
-    // normed_key = str::replace(normed_key, "\n", "");
-    // TODO: split on \n and join? We might need to move to String type anyway
-    // normed_key = normed_key.split("\n").collect().join("");
-    // normed_key = normed_key.replace("\n", "");
-    // key = key.trim();
-    Ok(normed_key.replace('\n', ""))
+    Ok(normed_key.trim().replace('\n', ""))
 }
 
-/// Returns all the quads contained by the nanopub.
+#[derive(Debug, Copy, Clone)]
+enum Field {
+    Graph,
+    Subject,
+    Predicate,
+    Object,
+    Datatype,
+    // Lang,
+}
+
+struct NormQuad {
+    graph: String,
+    subject: String,
+    predicate: String,
+    object: String,
+    datatype: String,
+    lang: String,
+}
+
+/// Returns all the quads contained in the nanopub.
 fn normalize_dataset(
     dataset: &LightDataset,
-    _baseuri: Option<&str>,
-    _hashstr: Option<&str>,
+    base_ns: &str,
+    _hash_str: &str,
 ) -> Result<String, Box<dyn Error>> {
-    // let baseuri = baseuri.unwrap_or("http://purl.org/np/");
-    // let hashstr = hashstr.unwrap_or(" ");
+    let mut quads_vec: Vec<NormQuad> = vec![];
+    // let norm_base = "http://purl.org/np/ ";
+    let norm_base = "https://w3id.org/np/ ";
+    let base_uri = match base_ns.chars().last() {
+        Some(_) => &base_ns[..base_ns.len() - 1],
+        None => base_ns,
+    };
 
-    // baseuri=str(dummy_namespace),
-    // hashstr=" "
-    // Generate the temp np URI based on the temp NS (remove trailing # and /)
-    let mut temp_np_uri = TEMP_NP_NS;
-    let escape_last_chars = ['#', '/'];
-    for escape_char in escape_last_chars {
-        let last_char = temp_np_uri.chars().last().unwrap();
-        if last_char == escape_char {
-            temp_np_uri = &temp_np_uri[..temp_np_uri.len() - 1];
-            // temp_np_uri = temp_np_uri.substring(0, temp_np_uri.len() - 1);
-        }
-    }
+    // Convert dataset to a list of NormQuad struct
+    for quad in dataset.quads() {
+        let quad = quad.unwrap();
 
-    let mut nq_stringifier = NqSerializer::new_stringifier();
+        // Extract components of the quad and convert them to strings. Replace the base URI if present
+        let graph = if quad.g().unwrap().iri().unwrap().to_string() == base_ns {
+            norm_base.to_string()
+        } else {
+            quad.g()
+                .unwrap()
+                .iri()
+                .unwrap()
+                .to_string()
+                .replace(base_uri, norm_base)
+        };
 
-    // Serialize the RDF as nquad string, generate a list from the lines, and sort alphabetically
-    // TODO: better ordering with comparator https://stackoverflow.com/questions/46512227/sort-a-vector-with-a-comparator-which-changes-its-behavior-dynamically
-    let nquads_str = nq_stringifier
-        .serialize_dataset(dataset)
-        .expect("Unable to serialize provided RDF")
-        .to_string();
-    let split = nquads_str.split('\n');
-    let mut quads_sorted: Vec<&str> = split.collect();
-    quads_sorted.sort_by_key(|name| name.to_lowercase());
-    let mut norm_quads: String = "".to_owned();
+        let subject = if quad.s().is_blank_node() {
+            quad.s().bnode_id().unwrap().to_string()
+        } else if quad.s().iri().unwrap().to_string() == base_ns {
+            norm_base.to_string()
+        } else {
+            quad.s()
+                .iri()
+                .unwrap()
+                .to_string()
+                .replace(base_uri, norm_base)
+        };
 
-    // Normalize the quads like done for the trusty URI
-    // https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15
-    for quad in quads_sorted {
-        // println!("{}", quad);
-        let quad_dataset: LightDataset = nq::parse_str(quad)
-            .collect_quads()
-            .expect("Unable to parse quad");
+        let predicate = if quad.p().iri().unwrap().to_string() == base_ns {
+            norm_base.to_string()
+        } else {
+            quad.p()
+                .iri()
+                .unwrap()
+                .to_string()
+                .replace(base_uri, norm_base)
+        };
 
-        for q in quad_dataset.quads() {
-            let q = q?;
-            let mut s = q.s().iri().unwrap().to_string();
-            let p = q.p().iri().unwrap().to_string();
-
-            if q.s().kind() == TermKind::Iri {
-                // Replace temp np URIs with normalized URI in subject URIs
-                s = s.replace(TEMP_NP_NS, NORMALIZED_NS);
-                s = s.replace(temp_np_uri, NORMALIZED_URI);
-            }
-
-            // let mut o: String = q.o().iri().unwrap().to_string();
-            let mut o: String;
-            if q.o().kind() == TermKind::Iri {
-                // Replace temp np URIs with normalized URI in object URIs
-                o = q.o().iri().unwrap().to_string();
-                o = o.replace(TEMP_NP_NS, NORMALIZED_NS);
-                o = o.replace(temp_np_uri, NORMALIZED_URI);
+        let object = if quad.o().is_iri() {
+            if quad.o().iri().unwrap().to_string() == base_ns {
+                norm_base.to_string()
             } else {
-                // If lang tag, add @en or @fr in front of the object
-                o = q.o().lexical_form().unwrap().to_string();
-                let lang = q.o().language_tag();
-                if let Some(lang) = lang {
-                    let lang_tag = ['@'.to_string(), lang.to_string()].join("");
-                    o = [lang_tag, o].join(" ");
-                } else {
-                    // If no lang type, we add the datatype
-                    let datatype = q.o().datatype();
-                    if let Some(datatype) = datatype {
-                        let datatype_tag =
-                            ["^".to_string(), datatype.iri().unwrap().to_string()].join("");
-                        o = [datatype_tag, o].join(" ");
-                    } else {
-                        o = ["^http://www.w3.org/2001/XMLSchema#string".to_string(), o].join(" ");
-                    }
-                }
+                quad.o()
+                    .iri()
+                    .unwrap()
+                    .to_string()
+                    .replace(base_uri, norm_base)
             }
+        } else if quad.o().is_blank_node() {
+            quad.o().bnode_id().unwrap().to_string()
+        } else {
+            quad.o().lexical_form().unwrap().to_string()
+        };
 
-            let g_term = q.g();
-            if let Some(g_term) = g_term {
-                let mut g = g_term.iri().unwrap().to_string();
-                if g_term.kind() == TermKind::Iri {
-                    // Replace temp np URIs with normalized URI in URIs
-                    g = g.replace(TEMP_NP_NS, NORMALIZED_NS);
-                    g = g.replace(temp_np_uri, NORMALIZED_URI);
-                }
-                norm_quads = [norm_quads, s, p, o, g].join("\n");
-                // println!("{}", g);
-            }
-        }
+        // Extract datatype and language if available
+        let datatype = if quad.o().datatype().is_some() {
+            quad.o().datatype().unwrap().to_string()
+        } else {
+            "".to_string()
+        };
+        let lang = if quad.o().language_tag().is_some() {
+            quad.o().language_tag().unwrap().to_string()
+        } else {
+            "".to_string()
+        };
+
+        // Create a NormQuad struct and push it to the vector
+        quads_vec.push(NormQuad {
+            graph,
+            subject,
+            predicate,
+            object,
+            datatype,
+            lang,
+        });
     }
-    //println!("NORMED QUADS in normalize\n{}", norm_quads);
-    Ok(norm_quads)
-    // let iter = self.spog.iter();
-    // Iter {
-    //     dataset: self,
-    //     inner: iter,
-    // }
+
+    // Order the list of nquads
+    use Field::*;
+    let orders = [Graph, Subject, Predicate, Object, Datatype];
+    quads_vec.sort_by(|a, b| {
+        orders.iter().fold(Ordering::Equal, |acc, &field| {
+            acc.then_with(|| match field {
+                Graph => a.graph.cmp(&b.graph),
+                Subject => a.subject.cmp(&b.subject),
+                Predicate => a.predicate.cmp(&b.predicate),
+                Object => a.object.cmp(&b.object),
+                Datatype => a.datatype.cmp(&b.datatype),
+                Lang => a.lang.cmp(&b.lang),
+            })
+        })
+    });
+    // println!(quads_vec);
+
+    // Format the ordered list in the normalized string that will be encrypted
+    let mut normed_quads = String::new();
+    for quad in quads_vec {
+        normed_quads.push_str(&format!("{}\n", quad.graph));
+        normed_quads.push_str(&format!("{}\n", quad.subject));
+        normed_quads.push_str(&format!("{}\n", quad.predicate));
+
+        let formatted_object = if !quad.lang.is_empty() {
+            format!("@{} {}", quad.lang, quad.object)
+        } else if !quad.datatype.is_empty() {
+            format!("^{} {}", quad.datatype, quad.object)
+        } else {
+            quad.object
+        };
+        normed_quads.push_str(&formatted_object);
+        normed_quads.push('\n');
+    }
+    Ok(normed_quads)
 }

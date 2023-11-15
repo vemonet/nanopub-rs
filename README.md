@@ -38,7 +38,13 @@ Display prints:
 cargo test -- --nocapture
 ```
 
-Run all tests?
+Run a specific test:
+
+```bash
+cargo test sign_nanopub_test_blank -- --nocapture
+```
+
+Run all tests:
 
 ```bash
 cargo test --verbose --all --all-features

@@ -1,4 +1,4 @@
-# java -jar /opt/nanopub-1.38-jar-with-dependencies.jar sign nanopub_test.trig -k id_rsa
+# java -jar /opt/nanopub-1.53-SNAPSHOT-jar-with-dependencies.jar sign nanopub_test_blank.trig -k id_rsa
 @prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix drugbank: <http://identifiers.org/drugbank/> .
 @prefix np: <http://www.nanopub.org/nschema#> .
@@ -28,7 +28,16 @@
     :association rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
         rdf:predicate biolink:treats;
         rdf:subject drugbank:DB10771;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
         a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    [] a biolink:Thing .
+    [] a biolink:Date .
+    [] a biolink:Context .
+    :_1 a biolink:Thing .
+    :__2 a biolink:Thing .
 }
 
 :provenance {

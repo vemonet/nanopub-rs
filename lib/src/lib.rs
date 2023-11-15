@@ -30,3 +30,5 @@ mod namespaces;
 pub mod nanopub;
 
 pub use nanopub::Nanopub;
+
+// TODO: add CLI: sign, publish, verify
