@@ -21,7 +21,7 @@ impl NanopubJs {
     ) -> Result<NanopubJs, JsValue> {
         console_error_panic_hook::set_once();
         Ok(Self {
-            np: Nanopub::new(&rdf, private_key, orcid, Some(server_url), Some(&publish))
+            np: Nanopub::new(&rdf, private_key, orcid, Some(server_url), &publish)
                 .expect_throw("Error signing the Nanopub"),
         })
     }

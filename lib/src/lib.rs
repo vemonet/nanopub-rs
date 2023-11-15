@@ -24,11 +24,9 @@ mod namespaces;
 ///     private_key,
 ///     "https://orcid.org/0000-0000-0000-0000",
 ///     None,
-///     None,
+///     &false,
 /// );
 /// ```
 pub mod nanopub;
 
 pub use nanopub::Nanopub;
-
-// TODO: add CLI: sign, publish, verify

@@ -45,7 +45,7 @@ fn main() {
             let orcid = "http://orcid.org/0000-0000-0000-0000";
             println!("Signing {} with {}", np_file, key_file);
             let np =
-                Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, None).unwrap();
+                Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, &false).unwrap();
             println!("{}", np);
 
             // Prefix the nanopub filename with "signed."
@@ -64,7 +64,7 @@ fn main() {
             let orcid = "http://orcid.org/0000-0000-0000-0000";
             println!("Signing {} with {}", np_file, key_file);
             let np =
-                Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, None).unwrap();
+                Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, &true).unwrap();
             println!("{}", np);
         }
         // TODO: verify

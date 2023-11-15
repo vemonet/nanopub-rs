@@ -1,9 +1,4 @@
-// /// The URI used as placeholder for the Nanopub when signing it
-pub const NORMALIZED_URI: &str = "http://purl.org/np/ARTIFACTCODE-PLACEHOLDER";
-pub const NORMALIZED_NS: &str = "http://purl.org/np/ARTIFACTCODE-PLACEHOLDER/";
-
 pub const TEMP_NP_URI: &str = "http://purl.org/nanopub/temp/mynanopub";
-pub const TEMP_NP_NS: &str = "http://purl.org/nanopub/temp/mynanopub#";
 
 pub const NP_PREF_NS: &str = "https://w3id.org/np/";
 

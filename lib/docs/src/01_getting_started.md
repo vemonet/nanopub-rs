@@ -18,6 +18,6 @@ let np = Nanopub::new(
     private_key,
     "https://orcid.org/0000-0000-0000-0000",
     None,
-    None,
+    &false,
 );
 ```

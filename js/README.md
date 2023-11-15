@@ -25,7 +25,7 @@ npm run build
 Code in the `index.html` file
 
 ```bash
-python3 -m http.server
+npm run start
 ```
 
 ## Build for publishing

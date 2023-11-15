@@ -1,11 +1,10 @@
-use crate::constants::{
-    BOLD, END, NORMALIZED_NS, NORMALIZED_URI, NP_PREF_NS, TEMP_NP_NS, TEMP_NP_URI, TEST_SERVER,
-};
+use crate::constants::{BOLD, END, NP_PREF_NS, TEMP_NP_URI, TEST_SERVER};
 use crate::namespaces::{get_prefixes, NPX, NP_SCHEMA};
 
 use base64;
 use base64::{alphabet, engine, Engine as _};
 use regex::Regex;
+use reqwest::header;
 use rsa::{
     pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, sha2::Digest, sha2::Sha256, Pkcs1v15Sign,
     RsaPrivateKey, RsaPublicKey,
@@ -15,13 +14,10 @@ use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
 use sophia::api::serializer::{QuadSerializer, Stringifier};
 use sophia::api::source::QuadSource;
-use sophia::api::term::{matcher::Any, Term, TermKind};
-use sophia::api::term::{IriRef, LanguageTag};
-use sophia::api::MownStr;
+use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
-use sophia::turtle::parser::{nq, trig};
-use sophia::turtle::serializer::nq::NqSerializer;
+use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::collections::HashMap;
 use std::error::Error;
@@ -170,6 +166,21 @@ fn extract_np_metadata(dataset: &LightDataset) -> Result<NpMetadata, NanopubErro
     })
 }
 
+/// Send nanopub RDF to be published to a server
+fn publish_np(np_rdf: &str, server_url: &str) -> Result<(), reqwest::Error> {
+    let client = reqwest::blocking::Client::new();
+    let res = client
+        .post(server_url)
+        .body(np_rdf.to_string())
+        .header(header::CONTENT_TYPE, "application/trig")
+        // .header(header::ACCEPT, "application/json")
+        .send()?;
+
+    println!("{:#?}", res);
+    println!("{:#?}", res.text());
+    Ok(())
+}
+
 /// Replace bnodes by URI ending with `_1` in the RDF dataset
 fn replace_bnodes(dataset: &LightDataset, base_ns: &str) -> Result<LightDataset, NanopubError> {
     let mut new_dataset = LightDataset::new();
@@ -316,7 +327,7 @@ impl Nanopub {
     ///     private_key,
     ///     "https://orcid.org/0000-0000-0000-0000",
     ///     None,
-    ///     None,
+    ///     &false,
     /// );
     /// ```
 
@@ -325,10 +336,15 @@ impl Nanopub {
         private_key: &str,
         orcid: &str,
         server_url: Option<&str>,
-        publish: Option<&bool>,
+        publish: &bool,
     ) -> Result<Self, Box<dyn Error>> {
         openssl_probe::init_ssl_cert_env_vars();
         let npx: Namespace<&str> = Namespace::new(NPX)?;
+        let server_url = if let Some(server_url) = server_url {
+            server_url.to_string()
+        } else {
+            TEST_SERVER.to_string()
+        };
 
         let mut dataset: LightDataset = trig::parse_str(rdf)
             .collect_quads()
@@ -424,13 +440,19 @@ impl Nanopub {
             .with_prefix_map(&prefixes[..]);
         let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
 
+        let rdf_str = trig_stringifier
+            .serialize_dataset(&dataset)
+            .expect("Unable to serialize dataset to trig")
+            .to_string();
+
+        if *publish {
+            let _ = publish_np(&rdf_str, &server_url);
+        }
+
         // Return the Nanopub object
         Ok(Self {
             uri: trusty_uri,
-            rdf: trig_stringifier
-                .serialize_dataset(&dataset)
-                .expect("Unable to serialize dataset to trig")
-                .to_string(),
+            rdf: rdf_str,
             // rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
             // dataset: dataset,
             trusty_hash,
@@ -438,16 +460,8 @@ impl Nanopub {
             public_key: pub_key_str,
             private_key: private_key.to_string(),
             orcid: orcid.to_string(),
-            server_url: if let Some(server_url) = server_url {
-                server_url.to_string()
-            } else {
-                TEST_SERVER.to_string()
-            },
-            publish: if let Some(publish) = publish {
-                *publish
-            } else {
-                false
-            },
+            server_url,
+            publish: *publish,
         })
     }
 

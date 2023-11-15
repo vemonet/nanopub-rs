@@ -134,6 +134,7 @@ jobs:
 
 
   wheel_linux:
+    name: Build wheel for Linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -161,7 +162,9 @@ jobs:
           packages-dir: target/wheels
         if: github.event_name == 'release'
 
+
   wheel_linux_musl:
+    name: Build wheel for MUSL Linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -190,7 +193,9 @@ jobs:
           packages-dir: target/wheels
         if: github.event_name == 'release'
 
+
   wheel_mac:
+    name: Build wheel for MacOS
     runs-on: macos-latest
     env:
       DEVELOPER_DIR: '/Applications/Xcode.app/Contents/Developer'
@@ -228,7 +233,9 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         if: github.event_name == 'release'
 
+
   wheel_windows:
+    name: Build wheel for Windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3

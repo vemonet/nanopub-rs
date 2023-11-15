@@ -27,7 +27,7 @@ impl NanopubPy {
                     private_key,
                     orcid,
                     Some(server_url),
-                    Some(&publish),
+                    &publish,
                     // if let Some(server_url) = server_url {
                     //     server_url.to_string()
                     // } else{
