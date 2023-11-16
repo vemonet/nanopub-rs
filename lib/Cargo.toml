@@ -24,15 +24,14 @@ openssl-probe = "0.1.5"
 sophia = { git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628" }
 regex = "1.10.2"
 clap = { version = "4.4.8", features = ["derive"] }
-# reqwest = { version = "0.11", features = ["blocking", "json"] }
+reqwest = { version = "0.11", features = ["blocking", "rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9.27"
-reqwest-wasm = { version = "0.11", features = ["blocking"] }
+# reqwest-wasm = { version = "0.11", features = ["blocking"] }
 # sophia = { git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld", "xml"] }
 # log = { version = "0.4.20", features = ["std"] }
 
 [dev-dependencies]
-mdbook = "0.4.35"
 wasm-pack = "0.12.1"
 
 

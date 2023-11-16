@@ -182,11 +182,11 @@ impl Nanopub {
             // Use test server if None provided
             TEST_SERVER.to_string()
         };
-        let client = reqwest_wasm::blocking::Client::new();
+        let client = reqwest::blocking::Client::new();
         let res = client
             .post(server_url)
             .body(np.get_rdf())
-            .header(reqwest_wasm::header::CONTENT_TYPE, "application/trig")
+            .header(reqwest::header::CONTENT_TYPE, "application/trig")
             // .header(header::ACCEPT, "application/json")
             .send()?;
         println!("{:#?}", res);

@@ -22,7 +22,7 @@ rustup update
 rustup component add rustfmt clippy
 ```
 
-### Run tests
+### ✅ Run tests
 
 Run tests for all packages:
 
@@ -63,25 +63,25 @@ cd lib
 cargo run -- sign tests/resources/nanopub_test_blank.trig
 ```
 
-### Format
+### ✨ Format
 
 ```bash
 cargo fmt
 ```
 
-### Lint
+### 🧹 Lint
 
 ```bash
 cargo clippy --all --all-targets --all-features
 ```
 
-### Generate docs
+### 📖 Generate docs
 
 ```bash
 ./scripts/docs-serve.sh
 ```
 
-### Build and run
+### 📦️ Build and run
 
 All packages at once:
 
@@ -89,6 +89,19 @@ All packages at once:
 cargo build --all
 cargo run --all-features
 ```
+
+### 🏷️ New release
+
+1. Bump the version in the `Cargo.toml` file in folders `lib/`, `python`, `js`
+
+   ```bash
+   # patch, minor, major
+   cargo bump patch
+   ```
+
+2. Commit, push, and create a new release on GitHub
+
+3. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
 
 ## ✒️ Nanopub signing process
 
