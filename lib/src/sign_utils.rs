@@ -139,7 +139,6 @@ pub fn replace_ns_in_quads(
         // Replace URI in objects
         if quad.o().is_iri() {
             let o = quad.o().iri().unwrap().to_string();
-            println!("URI! {} {}", o, old_uri);
             if o == old_ns || o == old_uri {
                 new.insert(
                     &subject,
