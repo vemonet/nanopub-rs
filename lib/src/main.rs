@@ -10,7 +10,7 @@ fn main() {
         .bin_name("np")
         // .version("1.0")
         // .author("Vincent Emonet. <vincent.emonet@gmail.com>")
-        .about("Sign and publish Nanopublications")
+        .about("Sign, publish, and check Nanopublications.")
         .subcommand_required(true)
         .arg_required_else_help(true)
         .subcommand(
@@ -56,11 +56,9 @@ fn main() {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
-            println!("profile_file {}", profile_file);
 
-            // Read files
+            // Read RDF from file and get profile
             let np_rdf = fs::read_to_string(np_file).unwrap();
-
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file).unwrap();
                 NpProfile::new(orcid, "", &private_key, None).unwrap()
@@ -69,7 +67,7 @@ fn main() {
             } else {
                 NpProfile::from_file(&get_default_profile_path()).unwrap()
             };
-            println!("Signing {} with {}", np_file, key_file);
+            println!("✍️  Signing {}", np_file);
             let np = Nanopub::sign(np_rdf.as_str(), profile).unwrap();
             println!("{}", np);
 
@@ -79,6 +77,10 @@ fn main() {
             let file_name = path.file_name().unwrap().to_str().unwrap();
             let new_file_name = format!("signed.{}", file_name);
             let signed_path = parent.join(new_file_name);
+            println!(
+                "📁 Signed Nanopub stored to {}",
+                signed_path.to_str().unwrap()
+            );
             let _ = fs::write(signed_path, np.get_rdf());
         }
         Some(("publish", sub)) => {
@@ -87,7 +89,7 @@ fn main() {
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
 
-            // Read files
+            // Read RDF from file and get profile
             let np_rdf = fs::read_to_string(np_file).unwrap();
 
             let profile = if !key_file.is_empty() {
@@ -98,17 +100,17 @@ fn main() {
             } else {
                 NpProfile::from_file(&get_default_profile_path()).unwrap()
             };
-            println!("Publishing {} with {}", np_file, key_file);
-            let np = Nanopub::publish(np_rdf.as_str(), profile, None).unwrap();
-            println!("{}", np);
+            println!("📬️ Publishing {}", np_file);
+            let _ = Nanopub::publish(np_rdf.as_str(), profile, None);
+            // println!("{}", np);
         }
         Some(("check", sub)) => {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             // Read RDF file
             let np_rdf = fs::read_to_string(np_file).unwrap();
-            println!("Checking {}", np_file);
-            let np = Nanopub::check(np_rdf.as_str()).unwrap();
-            println!("{}", np);
+            println!("🔎 Checking {}", np_file);
+            Nanopub::check(np_rdf.as_str()).unwrap();
+            // println!("{}", np);
         }
         // TODO: verify
         _ => {}
