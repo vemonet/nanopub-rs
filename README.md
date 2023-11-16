@@ -2,18 +2,16 @@
 
 [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml)
 
-A Rust toolkit to sign and publish [Nanopublications](https://nanopub.net), with bindings to Python and JavaScript (using WebAssembly).
+The `nanopub` crate aims to provide a comprehensive toolkit to sign and publish [Nanopublications](https://nanopub.net).
 
-## Nanopub signing process
+It is available under multi form for all platforms (Linux, MacOS, Windows):
 
-- preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `http://purl.org/np/ARTIFACTCODE-PLACEHOLDER/`, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
-- preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
-- Signature is calculated on this normalized representation (cf. most of the process in the [trusty-uri python lib](https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15), see also [SignatureUtils](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/extra/security/SignatureUtils.java#L196) and [trusty-uri](https://github.com/trustyuri/trustyuri-java/blob/08b61fbb13d20a5cbefde617bd9a9e9b0b03d780/src/main/java/net/trustyuri/rdf/RdfHasher.java#L86))
-- Signature triple is added
-- Trusty URI code is calculated on normalized representation that includes signature
-- Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
+- ⌨️ Binary with a CLI for use in the terminal
+- 🦀 Crate for Rust
+- 🐍 Pip package `nanopub_sign` for Python
+- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser or with NodeJS
 
-## Development
+## 🧑‍💻 Development
 
 [Rust](https://www.rust-lang.org/tools/install), python and NodeJS are required for development.
 
@@ -58,6 +56,13 @@ cargo test lib
 
 > Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
 
+Test signing a nanopublication with the CLI:
+
+```bash
+cd lib
+cargo run -- sign tests/resources/nanopub_test_blank.trig
+```
+
 ### Format
 
 ```bash
@@ -76,7 +81,7 @@ cargo clippy --all --all-targets --all-features
 ./scripts/docs-serve.sh
 ```
 
-### Build and run all packages
+### Build and run
 
 All packages at once:
 
@@ -85,14 +90,12 @@ cargo build --all
 cargo run --all-features
 ```
 
-## Useful links
+## ✒️ Nanopub signing process
 
-https://github.com/briansmith/ring
+- preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `http://purl.org/np/ARTIFACTCODE-PLACEHOLDER/`, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
+- preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
+- Signature is calculated on this normalized representation (cf. most of the process in the [trusty-uri python lib](https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15), see also [SignatureUtils](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/extra/security/SignatureUtils.java#L196) and [trusty-uri](https://github.com/trustyuri/trustyuri-java/blob/08b61fbb13d20a5cbefde617bd9a9e9b0b03d780/src/main/java/net/trustyuri/rdf/RdfHasher.java#L86))
+- Signature triple is added
+- Trusty URI code is calculated on normalized representation that includes signature
+- Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
 
-https://github.com/Vanethos/rust-wasm-example-rsa
-
-https://github.com/Harzu/wasm-rsa
-
-https://github.com/frehberg/wasm-sign
-
-Building artefacts for many targets: https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/build.yml

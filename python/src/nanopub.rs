@@ -1,4 +1,4 @@
-use nanopub::Nanopub;
+use nanopub::{Nanopub, NpProfile};
 use pyo3::prelude::*;
 
 #[pyclass(name = "Nanopub", module = "nanopub_rs")]
@@ -20,17 +20,17 @@ impl NanopubPy {
         py: Python<'_>,
     ) -> PyResult<Self> {
         py.allow_threads(|| {
+            let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
             let np = if publish {
                 Nanopub::publish(
                     // &rdf.unwrap_or("default in py").to_string(),
                     rdf,
-                    private_key,
-                    orcid,
+                    profile,
                     Some(server_url),
                 )
                 .unwrap()
             } else {
-                Nanopub::sign(rdf, private_key, orcid).unwrap()
+                Nanopub::sign(rdf, profile).unwrap()
             };
             Ok(Self { np })
 

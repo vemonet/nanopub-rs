@@ -4,6 +4,8 @@ pub const NP_PREF_NS: &str = "https://w3id.org/np/";
 
 pub const TEST_SERVER: &str = "http://test-server.nanopubs.lod.labs.vu.nl/";
 
+pub const DEFAULT_NP_PROFILE: &str = "~/.nanopub/profile.yml";
+
 pub const BOLD: &str = "\x1b[1;96m";
 pub const END: &str = "\x1b[0m";
 

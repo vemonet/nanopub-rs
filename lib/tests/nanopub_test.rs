@@ -1,4 +1,4 @@
-use nanopub::Nanopub;
+use nanopub::{Nanopub, NpProfile};
 use std::fs;
 
 #[test]
@@ -8,7 +8,8 @@ fn sign_nanopub_simple_rsa() {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
     // let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig").unwrap();
 
-    let np = Nanopub::publish(np_rdf.as_str(), private_key.as_str(), orcid, None).unwrap();
+    let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
+    let np = Nanopub::publish(np_rdf.as_str(), profile, None).unwrap();
 
     println!("{}", np);
     // Values compiled with the nanopub java lib using the exact same RDF
@@ -25,7 +26,8 @@ fn sign_nanopub_test_blank() {
     let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig").unwrap();
 
-    let np = Nanopub::sign(np_rdf.as_str(), private_key.as_str(), orcid).unwrap();
+    let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
+    let np = Nanopub::sign(np_rdf.as_str(), profile).unwrap();
 
     println!("{}", np);
     // Values compiled with the nanopub java lib using the exact same RDF

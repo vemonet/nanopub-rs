@@ -1,4 +1,4 @@
-use nanopub::Nanopub;
+use nanopub::{Nanopub, NpProfile};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(js_name = Nanopub)]
@@ -20,17 +20,17 @@ impl NanopubJs {
         publish: bool,
     ) -> Result<NanopubJs, JsValue> {
         console_error_panic_hook::set_once();
+        let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
         let np = if publish {
             Nanopub::publish(
                 // &rdf.unwrap_or("default in py").to_string(),
                 rdf,
-                private_key,
-                orcid,
+                profile,
                 Some(server_url),
             )
             .expect_throw("Error publishing the Nanopub")
         } else {
-            Nanopub::sign(rdf, private_key, orcid).expect_throw("Error signing the Nanopub")
+            Nanopub::sign(rdf, profile).expect_throw("Error signing the Nanopub")
         };
         Ok(Self { np })
     }
