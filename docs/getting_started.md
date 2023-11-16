@@ -17,9 +17,13 @@ Download the binary adapted to your platform:
 - MacOS
 - Windows
 
-Rename the binary to `np` and put it in your path
+Rename the binary to `np` and put it in your path.
 
-> TODO: add one-liner to install for every platform
+You can do it easily on Linux, MacOS, and Windows WSL, by using our install script:
+
+```bash
+curl -sSL https://raw.github.com/vemonet/nanopub-rs/main/install_binary.sh | bash
+```
 
 ### ✍️ Sign
 

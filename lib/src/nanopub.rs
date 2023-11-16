@@ -6,7 +6,6 @@ use crate::utils::{get_ns, get_prefixes, NpError};
 use base64;
 use base64::{engine, Engine as _};
 use regex::Regex;
-use reqwest::header;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
@@ -183,11 +182,11 @@ impl Nanopub {
             // Use test server if None provided
             TEST_SERVER.to_string()
         };
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest_wasm::blocking::Client::new();
         let res = client
             .post(server_url)
             .body(np.get_rdf())
-            .header(header::CONTENT_TYPE, "application/trig")
+            .header(reqwest_wasm::header::CONTENT_TYPE, "application/trig")
             // .header(header::ACCEPT, "application/json")
             .send()?;
         println!("{:#?}", res);
