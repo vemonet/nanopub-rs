@@ -1,11 +1,13 @@
-use sophia::api::prefix::Prefix;
+use sophia::api::{ns::Namespace, prefix::Prefix};
 use sophia::iri::Iri;
-// use sophia::api::ns::Namespace;
 
-// pub const NPX: Namespace<&str> = Namespace::new("http://purl.org/nanopub/x/").unwrap();
-
-pub const NPX: &str = "http://purl.org/nanopub/x/";
-pub const NP_SCHEMA: &str = "http://www.nanopub.org/nschema#";
+pub fn get_ns(ns: &str) -> Namespace<String> {
+    match ns {
+        "npx" => Namespace::new("http://purl.org/nanopub/x/".to_string()).unwrap(),
+        "np" => Namespace::new("http://www.nanopub.org/nschema#".to_string()).unwrap(),
+        _ => panic!("Unknown namespace"), // or return an error
+    }
+}
 
 pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>); 13] {
     [
@@ -43,7 +45,7 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
         ),
         (
             Prefix::new_unchecked("np".to_string()),
-            Iri::new_unchecked(NP_SCHEMA.to_string()),
+            Iri::new_unchecked(get_ns("np").to_string()),
         ),
         (
             Prefix::new_unchecked("prov".to_string()),
@@ -59,7 +61,7 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
         ),
         (
             Prefix::new_unchecked("npx".to_string()),
-            Iri::new_unchecked(NPX.to_string()),
+            Iri::new_unchecked(get_ns("npx").to_string()),
         ),
     ]
 }

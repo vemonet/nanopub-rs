@@ -8,7 +8,7 @@ fn sign_nanopub_simple_rsa() {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
     // let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig").unwrap();
 
-    let np = Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, &false).unwrap();
+    let np = Nanopub::publish(np_rdf.as_str(), private_key.as_str(), orcid, None).unwrap();
 
     println!("{}", np);
     // Values compiled with the nanopub java lib using the exact same RDF
@@ -23,11 +23,9 @@ fn sign_nanopub_simple_rsa() {
 fn sign_nanopub_test_blank() {
     let orcid = "http://orcid.org/0000-0000-0000-0000";
     let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
-
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig").unwrap();
-    // let np_rdf = fs::read_to_string("./tests/resources/signed.nanopub_test_blank.trig").unwrap();
 
-    let np = Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, &false).unwrap();
+    let np = Nanopub::sign(np_rdf.as_str(), private_key.as_str(), orcid).unwrap();
 
     println!("{}", np);
     // Values compiled with the nanopub java lib using the exact same RDF
@@ -36,6 +34,12 @@ fn sign_nanopub_test_blank() {
         "RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI"
     );
     assert_eq!(np.signature_hash, "SVG82DiaVebC48kV/o3uOTlI///60YbICvRHEp5kXuuw2HXn4v5S42vcTNiyo75a3DT8dBxty8anDFgVjMEFh9fgzN+yKQekP/P5L3JGHEg+F2kPtR+y7bW3zfBp2erV+V8dsbq8xps36i8sZxVFgKup3R5zUYm43GfDnG4YCpI=");
+}
+
+#[test]
+fn check_nanopub_test_blank() {
+    let np_rdf = fs::read_to_string("./tests/resources/signed.nanopub_test_blank.trig").unwrap();
+    Nanopub::check(np_rdf.as_str()).unwrap();
 }
 
 // #[test]

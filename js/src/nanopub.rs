@@ -20,10 +20,19 @@ impl NanopubJs {
         publish: bool,
     ) -> Result<NanopubJs, JsValue> {
         console_error_panic_hook::set_once();
-        Ok(Self {
-            np: Nanopub::new(&rdf, private_key, orcid, Some(server_url), &publish)
-                .expect_throw("Error signing the Nanopub"),
-        })
+        let np = if publish {
+            Nanopub::publish(
+                // &rdf.unwrap_or("default in py").to_string(),
+                rdf,
+                private_key,
+                orcid,
+                Some(server_url),
+            )
+            .expect_throw("Error publishing the Nanopub")
+        } else {
+            Nanopub::sign(rdf, private_key, orcid).expect_throw("Error signing the Nanopub")
+        };
+        Ok(Self { np })
     }
 
     // #[wasm_bindgen]

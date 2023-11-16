@@ -20,27 +20,19 @@ impl NanopubPy {
         py: Python<'_>,
     ) -> PyResult<Self> {
         py.allow_threads(|| {
-            Ok(Self {
-                np: Nanopub::new(
+            let np = if publish {
+                Nanopub::publish(
                     // &rdf.unwrap_or("default in py").to_string(),
                     rdf,
                     private_key,
                     orcid,
                     Some(server_url),
-                    &publish,
-                    // if let Some(server_url) = server_url {
-                    //     server_url.to_string()
-                    // } else{
-                    //     None
-                    // },
-                    // if let Some(publish) = publish {
-                    //     publish.clone()
-                    // } else {
-                    //     None
-                    // }
                 )
-                .unwrap(),
-            })
+                .unwrap()
+            } else {
+                Nanopub::sign(rdf, private_key, orcid).unwrap()
+            };
+            Ok(Self { np })
 
             // Ok( Self {
             //     rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),

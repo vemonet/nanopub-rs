@@ -13,11 +13,9 @@ let private_key = r#"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxm
 
 let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
 
-let np = Nanopub::new(
+let np = Nanopub::sign(
     np_rdf.as_str(),
     private_key,
     "https://orcid.org/0000-0000-0000-0000",
-    None,
-    &false,
 );
 ```

@@ -31,6 +31,11 @@ fn main() {
                         .default_value("~/.nanopub/id_rsa")
                 )
                 .arg_required_else_help(true),
+        ).subcommand(
+            Command::new("check")
+                .about("Check a Nanopub is valid")
+                .arg(arg!(<NANOPUB_FILE> "The file to check"))
+                .arg_required_else_help(true),
         );
 
     let matches = cmd.get_matches();
@@ -38,14 +43,14 @@ fn main() {
     // TODO: get ORCID from ~/.nanopub/profile.yml
     match matches.subcommand() {
         Some(("sign", sub)) => {
+            let orcid = "http://orcid.org/0000-0000-0000-0000";
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             let key_file = sub.get_one::<String>("key").unwrap();
+            // Read files
             let np_rdf = fs::read_to_string(np_file).unwrap();
             let private_key = fs::read_to_string(key_file).unwrap();
-            let orcid = "http://orcid.org/0000-0000-0000-0000";
             println!("Signing {} with {}", np_file, key_file);
-            let np =
-                Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, &false).unwrap();
+            let np = Nanopub::sign(np_rdf.as_str(), private_key.as_str(), orcid).unwrap();
             println!("{}", np);
 
             // Prefix the nanopub filename with "signed."
@@ -57,14 +62,22 @@ fn main() {
             let _ = fs::write(signed_path, np.get_rdf());
         }
         Some(("publish", sub)) => {
+            let orcid = "http://orcid.org/0000-0000-0000-0000";
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             let key_file = sub.get_one::<String>("key").unwrap();
+            // Read files
             let np_rdf = fs::read_to_string(np_file).unwrap();
             let private_key = fs::read_to_string(key_file).unwrap();
-            let orcid = "http://orcid.org/0000-0000-0000-0000";
-            println!("Signing {} with {}", np_file, key_file);
-            let np =
-                Nanopub::new(np_rdf.as_str(), private_key.as_str(), orcid, None, &true).unwrap();
+            println!("Publishing {} with {}", np_file, key_file);
+            let np = Nanopub::publish(np_rdf.as_str(), private_key.as_str(), orcid, None).unwrap();
+            println!("{}", np);
+        }
+        Some(("check", sub)) => {
+            let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
+            // Read RDF file
+            let np_rdf = fs::read_to_string(np_file).unwrap();
+            println!("Checking {}", np_file);
+            let np = Nanopub::check(np_rdf.as_str()).unwrap();
             println!("{}", np);
         }
         // TODO: verify
