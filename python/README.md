@@ -21,7 +21,7 @@ maturin develop
 Try the python lib by running `python try.py`:
 
 ```python
-from nanopub_rs import Nanopub
+from nanopub_sign import Nanopub
 np = Nanopub(rdf="tiii")
 print(np.get_rdf())
 ```

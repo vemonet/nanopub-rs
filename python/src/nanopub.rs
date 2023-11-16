@@ -1,7 +1,7 @@
 use nanopub::{Nanopub, NpProfile};
 use pyo3::prelude::*;
 
-#[pyclass(name = "Nanopub", module = "nanopub_rs")]
+#[pyclass(name = "Nanopub", module = "nanopub_sign")]
 #[pyo3(text_signature = "(rdf, private_key, orcid, server_url=None, publish=False)")]
 // #[derive(Clone)]
 pub struct NanopubPy {

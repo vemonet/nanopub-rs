@@ -15,9 +15,8 @@ use pyo3::prelude::*;
 
 /// Nanopub Python bindings
 #[pymodule]
-// fn nanopub_rs(_py: Python<'_>, module: &PyModule) -> PyResult<()> {
-fn nanopub_rs(_py: Python<'_>, module: &PyModule) -> PyResult<()> {
-    module.add("__package__", "nanopub_rs")?;
+fn nanopub_sign(_py: Python<'_>, module: &PyModule) -> PyResult<()> {
+    module.add("__package__", "nanopub-sign")?;
     module.add("__version__", env!("CARGO_PKG_VERSION"))?;
     module.add("__author__", env!("CARGO_PKG_AUTHORS").replace(':', "\n"))?;
 

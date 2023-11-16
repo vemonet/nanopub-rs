@@ -4,7 +4,7 @@ set -e
 
 rm -rf target/doc
 
-cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-rs --target-dir target
+cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-sign --target-dir target
 
 echo "Docs generated in the target/doc folder"
 
