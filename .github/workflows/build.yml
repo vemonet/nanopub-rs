@@ -25,7 +25,7 @@ jobs:
       - run: rustup update && rustup target add aarch64-unknown-linux-gnu
 
       - run: |
-          sudo apt update && sudo apt install -y g++-aarch64-linux-gnu openssl-dev
+          sudo apt update && sudo apt install -y g++-aarch64-linux-gnu libssl-dev
           echo -e "\n\n[target.aarch64-unknown-linux-gnu]\nlinker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config.toml
 
       - uses: Swatinem/rust-cache@v2
@@ -168,7 +168,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        architecture: [ "x86_64", "aarch64" ]
+        architecture:
+          - "x86_64"
+          # - "aarch64" # Takes too long (1h30)
     continue-on-error: true
     steps:
       - uses: actions/checkout@v3
@@ -271,7 +273,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodule: true
-      - run: sudo apt update && sudo apt install -y openssl-dev
+      - run: sudo apt update && sudo apt install -y libssl-dev
       - run: rustup update
       - uses: Swatinem/rust-cache@v2
 
