@@ -77,4 +77,3 @@ jobs:
         hyperfine -m 100 --warmup 10 java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa
         hyperfine -m 100 --warmup 10 np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa
         hyperfine -m 100 --warmup 10 nanopub sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa
-        target/release/nanopub -h
