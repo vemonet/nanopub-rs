@@ -1,76 +1,4 @@
-# Getting Started
-
-This project aims to provide a comprehensive cross-platform toolkit to sign, publish, and check [Nanopublications](https://nanopub.net).
-
-It is packaged to be used easily through various popular interfaces:
-
-- ⌨️ Binary with a CLI for use in the terminal
-- 🦀 Crate `nanopub` for Rust
-- 🐍 Pip package `nanopub_sign` for Python
-- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser, or with NodeJS
-
-On all platforms:
-
-- 🐧 Linux
-- 🍎 MacOS
-- 🪟 Windows
-- 🦊 Web browsers
-
-## ⌨️ Use from the CLI
-
-Download the binary adapted to your platform:
-
-- Linux
-- MacOS
-- Windows
-
-Rename the binary to `np` and put it in your path.
-
-You can do it easily on Linux, MacOS, and Windows WSL, by using our install script:
-
-```bash
-curl -sSL https://raw.github.com/vemonet/nanopub-rs/main/install_binary.sh | bash
-```
-
-### ✍️ Sign
-
-Signing a Nanopub, by default it will try to use the profile available at `~/.nanopub/profile.yml`
-
-```bash
-np sign nanopub.trig
-```
-
-Signing a Nanopub, using a specific private key file:
-
-```bash
-np sign nanopub.trig -k ~/.nanopub/id_rsa
-```
-
-Signing a Nanopub, using a `profile.yml` file:
-
-```bash
-np sign nanopub.trig -p ~/.nanopub/profile.yml
-```
-
-### 📬️ Publish
-
-Check and publish a signed nanopub, or sign and publish an unsigned nanopub:
-
-```bash
-np publish signed.nanopub.trig
-```
-
-You can use the same `-p` and `-k` options that are available for the `np sign` command
-
-### ✅ Check
-
-Check if a signed nanopub is valid. It will check the Trusty hash, and signature based on the public key:
-
-```bash
-np check signed.nanopub.trig
-```
-
-## 🦀 Use with Rust
+# 🦀 Use with Rust
 
 You can use the Rust crate to easily sign, publish, or check a Nanopub:
 
@@ -90,6 +18,6 @@ let checked_np = Nanopub::check(&signed_np.rdf).unwrap();
 println!("{}", published_np)
 ```
 
-## 🛠️ Contributing
+## 📖 API reference
 
-Checkout our repository [README](https://github.com/vemonet/nanopub-rs) for more details on how to develop and contribute to this project.
+Checkout the **[API documentation](/doc/nanopub)** for more details on how to use the different components of the rust crate.

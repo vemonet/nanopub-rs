@@ -4,7 +4,9 @@ set -e
 
 rm -rf target/doc
 
-cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-sign --target-dir target
+mdbook build
+
+cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc
 
 echo "Docs generated in the target/doc folder"
 
