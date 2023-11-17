@@ -68,7 +68,7 @@ fn main() {
                 NpProfile::from_file(&get_default_profile_path()).unwrap()
             };
             println!("✍️  Signing {}", np_file);
-            let np = Nanopub::sign(np_rdf.as_str(), profile).unwrap();
+            let np = Nanopub::sign(&np_rdf, &profile).unwrap();
             println!("{}", np);
 
             // Prefix the nanopub filename with "signed."
@@ -101,7 +101,7 @@ fn main() {
                 NpProfile::from_file(&get_default_profile_path()).unwrap()
             };
             println!("📬️ Publishing {}", np_file);
-            let _ = Nanopub::publish(np_rdf.as_str(), profile, None);
+            let _ = Nanopub::publish(&np_rdf, &profile, None);
             // println!("{}", np);
         }
         Some(("check", sub)) => {
@@ -109,7 +109,7 @@ fn main() {
             // Read RDF file
             let np_rdf = fs::read_to_string(np_file).unwrap();
             println!("🔎 Checking {}", np_file);
-            Nanopub::check(np_rdf.as_str()).unwrap();
+            Nanopub::check(&np_rdf).unwrap();
             // println!("{}", np);
         }
         // TODO: verify

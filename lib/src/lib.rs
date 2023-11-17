@@ -19,8 +19,8 @@
 /// let orcid = "https://orcid.org/0000-0000-0000-0000";
 /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
 /// let np = Nanopub::sign(
-///     np_rdf.as_str(),
-///     profile,
+///     &np_rdf,
+///     &profile,
 /// );
 /// ```
 mod constants;

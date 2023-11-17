@@ -79,7 +79,7 @@ impl Nanopub {
     /// let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig").unwrap();
     /// let orcid = "https://orcid.org/0000-0000-0000-0000";
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    /// let np = Nanopub::check(np_rdf.as_str()).unwrap();
+    /// let np = Nanopub::check(&np_rdf).unwrap();
     /// ```
     ///
     pub fn check(rdf: &str) -> Result<Self, Box<dyn Error>> {
@@ -161,11 +161,11 @@ impl Nanopub {
     /// let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
     /// let orcid = "https://orcid.org/0000-0000-0000-0000";
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    /// let np = Nanopub::publish(np_rdf.as_str(), profile, None).unwrap();
+    /// let np = Nanopub::publish(&np_rdf, &profile, None).unwrap();
     /// ```
     pub fn publish(
         rdf: &str,
-        profile: NpProfile,
+        profile: &NpProfile,
         server_url: Option<&str>,
     ) -> Result<Self, Box<dyn Error>> {
         // If the nanopub is already signed we verify it, then publish it
@@ -223,9 +223,9 @@ impl Nanopub {
     /// let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
     /// let orcid = "https://orcid.org/0000-0000-0000-0000";
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    /// let np = Nanopub::sign(np_rdf.as_str(), profile).unwrap();
+    /// let np = Nanopub::sign(&np_rdf, &profile).unwrap();
     /// ```
-    pub fn sign(rdf: &str, profile: NpProfile) -> Result<Self, Box<dyn Error>> {
+    pub fn sign(rdf: &str, profile: &NpProfile) -> Result<Self, Box<dyn Error>> {
         openssl_probe::init_ssl_cert_env_vars();
 
         let (priv_key, pubkey) = get_keys(&profile.private_key);

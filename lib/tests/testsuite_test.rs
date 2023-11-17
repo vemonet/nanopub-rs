@@ -15,7 +15,7 @@ fn publish_testsuite_valid_plain() -> Result<(), Box<dyn Error>> {
             println!("\n☑️  Testing file: {}", filename);
             let profile = NpProfile::new(ORCID, "", &private_key, None)?;
             let np_rdf = fs::read_to_string(file.path())?;
-            let np = Nanopub::publish(np_rdf.as_str(), profile, None)?;
+            let np = Nanopub::publish(&np_rdf, &profile, None)?;
             // assert!(np.published);
         }
     }
@@ -27,9 +27,9 @@ fn check_valid_signed() {
     let np_rdf =
         fs::read_to_string("./tests/testsuite/valid/signed/Darwin-Core-schema-resource.trig")
             .unwrap();
-    Nanopub::check(np_rdf.as_str()).expect("Failed check");
+    Nanopub::check(&np_rdf).expect("Failed check");
     // let np_rdf = fs::read_to_string("./tests/testsuite/valid/signed/python-step-1.trig").unwrap();
-    // Nanopub::check(np_rdf.as_str()).expect("Failed check");
+    // Nanopub::check(&np_rdf).expect("Failed check");
 }
 // TODO: check tests/testsuite/valid/signed
 // check tests/testsuite/valid/trusty

@@ -9,7 +9,7 @@ fn publish_nanopub_simple_rsa() {
     // let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig").unwrap();
 
     let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    let np = Nanopub::publish(np_rdf.as_str(), profile, None).unwrap();
+    let np = Nanopub::publish(&np_rdf, &profile, None).unwrap();
 
     println!("{}", np);
     assert!(np.published);
@@ -28,7 +28,7 @@ fn sign_nanopub_test_blank() {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig").unwrap();
 
     let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    let np = Nanopub::sign(np_rdf.as_str(), profile).unwrap();
+    let np = Nanopub::sign(&np_rdf, &profile).unwrap();
     println!("{}", np);
     assert!(!np.published);
     // Values compiled with the nanopub java lib using the exact same RDF
@@ -42,7 +42,7 @@ fn sign_nanopub_test_blank() {
 #[test]
 fn check_nanopub_test_blank() {
     let np_rdf = fs::read_to_string("./tests/resources/signed.nanopub_test_blank.trig").unwrap();
-    Nanopub::check(np_rdf.as_str()).unwrap();
+    Nanopub::check(&np_rdf).unwrap();
 }
 
 // #[test]

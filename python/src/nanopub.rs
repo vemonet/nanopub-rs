@@ -25,12 +25,12 @@ impl NanopubPy {
                 Nanopub::publish(
                     // &rdf.unwrap_or("default in py").to_string(),
                     rdf,
-                    profile,
+                    &profile,
                     Some(server_url),
                 )
                 .unwrap()
             } else {
-                Nanopub::sign(rdf, profile).unwrap()
+                Nanopub::sign(rdf, &profile).unwrap()
             };
             Ok(Self { np })
 

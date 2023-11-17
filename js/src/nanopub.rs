@@ -25,12 +25,12 @@ impl NanopubJs {
             Nanopub::publish(
                 // &rdf.unwrap_or("default in py").to_string(),
                 rdf,
-                profile,
+                &profile,
                 Some(server_url),
             )
             .expect_throw("Error publishing the Nanopub")
         } else {
-            Nanopub::sign(rdf, profile).expect_throw("Error signing the Nanopub")
+            Nanopub::sign(rdf, &profile).expect_throw("Error signing the Nanopub")
         };
         Ok(Self { np })
     }
