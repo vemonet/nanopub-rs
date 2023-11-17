@@ -2,7 +2,7 @@ use nanopub::{Nanopub, NpProfile};
 use std::fs;
 
 #[test]
-fn sign_nanopub_simple_rsa() {
+fn publish_nanopub_simple_rsa() {
     let orcid = "http://orcid.org/0000-0002-1267-0234";
     let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
@@ -12,6 +12,7 @@ fn sign_nanopub_simple_rsa() {
     let np = Nanopub::publish(np_rdf.as_str(), profile, None).unwrap();
 
     println!("{}", np);
+    assert!(np.published);
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
         np.trusty_hash,
@@ -28,8 +29,8 @@ fn sign_nanopub_test_blank() {
 
     let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
     let np = Nanopub::sign(np_rdf.as_str(), profile).unwrap();
-
     println!("{}", np);
+    assert!(!np.published);
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
         np.trusty_hash,

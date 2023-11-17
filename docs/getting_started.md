@@ -1,13 +1,20 @@
 # Getting Started
 
-The `nanopub` crate aims to provide a comprehensive toolkit to check, sign, and publish [Nanopublications](https://nanopub.net).
+This project aims to provide a comprehensive cross-platform toolkit to sign, publish, and check [Nanopublications](https://nanopub.net).
 
-It is available under multiple forms, for all platforms (Linux, MacOS, Windows):
+It is packaged to be used easily through various popular interfaces:
 
 - ⌨️ Binary with a CLI for use in the terminal
-- 🦀 Crate for Rust
+- 🦀 Crate `nanopub` for Rust
 - 🐍 Pip package `nanopub_sign` for Python
-- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser or with NodeJS
+- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser, or with NodeJS
+
+On all platforms:
+
+- 🐧 Linux
+- 🍎 MacOS
+- 🪟 Windows
+- 🦊 Web browsers
 
 ## ⌨️ Use from the CLI
 
@@ -83,4 +90,4 @@ let checked_np = Nanopub::check(&np.rdf).unwrap();
 
 ## 🛠️ Contributing
 
-Checkout our repository [README](https://github.com/vemonet/nanopub-rs) for more details on how to develop on this project.
+Checkout our repository [README](https://github.com/vemonet/nanopub-rs) for more details on how to develop and contribute to this project.

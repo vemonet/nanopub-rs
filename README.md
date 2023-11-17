@@ -1,19 +1,26 @@
-# 🔬🦀 Nanopub rs
+# ✍️⚔️ Nanopub cross-platform toolkit
 
 [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Deploy docs to GitHub Pages](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/docs.yml)
 
-The `nanopub` crate aims to provide a comprehensive toolkit to sign and publish [Nanopublications](https://nanopub.net).
+This project aims to provide a comprehensive cross-platform toolkit to sign, publish, and check [Nanopublications](https://nanopub.net).
 
-It is available under multi form for all platforms (Linux, MacOS, Windows):
+It is packaged to be used easily through various popular interfaces:
 
 - ⌨️ Binary with a CLI for use in the terminal
-- 🦀 Crate for Rust
+- 🦀 Crate `nanopub` for Rust
 - 🐍 Pip package `nanopub_sign` for Python
-- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser or with NodeJS
+- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser, or with NodeJS
+
+On all platforms:
+
+- 🐧 Linux
+- 🍎 MacOS
+- 🪟 Windows
+- 🦊 Web browsers
 
 ## 🧑‍💻 Development
 
-[Rust](https://www.rust-lang.org/tools/install), python and NodeJS are required for development.
+[Rust](https://www.rust-lang.org/tools/install), python, and NodeJS are required for development.
 
 Install development dependencies:
 
@@ -92,16 +99,32 @@ cargo run --all-features
 
 ### 🏷️ New release
 
-1. Bump the version in the `Cargo.toml` file in folders `lib/`, `python`, `js`
+```bash
+cargo install cargo-release
+```
+
+1. Make sure dependencies have been updated:
+
+   ```bash
+   cargo update
+   cargo outdated
+   ```
+
+2. Bump the version in the `Cargo.toml` file in folders `lib/`, `python`, `js`
 
    ```bash
    # patch, minor, major
-   cargo bump patch
+   cargo release patch --no-tag --no-publish
    ```
 
-2. Commit, push, and create a new release on GitHub
+3. Commit, push, and create a new release on GitHub
 
-3. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
+4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
+
+## ☑️ To do
+
+- [ ] Add Nanopub test suite
+- [ ] Add brew packaging (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))
 
 ## ✒️ Nanopub signing process
 
@@ -111,4 +134,3 @@ cargo run --all-features
 - Signature triple is added
 - Trusty URI code is calculated on normalized representation that includes signature
 - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
-

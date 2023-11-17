@@ -6,5 +6,17 @@ members = [
     "js",
 ]
 
+[workspace.package]
+# version = "0.0.1"
+authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
+edition = "2021"
+repository = "https://github.com/vemonet/nanopub-rs"
+readme = "./README.md"
+license = "MIT"
+keywords = ["nanopublications", "rdf", "linked-data", "semantic-web"]
+
+# [workspace.dependencies]
+
+
 [profile.release]
 lto = true

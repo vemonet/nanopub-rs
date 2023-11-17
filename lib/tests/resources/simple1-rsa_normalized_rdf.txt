@@ -1,4 +1,3 @@
-NORMED RDF STARTS
 http://purl.org/np/ #Head
 http://purl.org/np/
 http://www.nanopub.org/nschema#hasAssertion
@@ -47,5 +46,3 @@ http://purl.org/np/ #pubinfo
 http://purl.org/np/ #sig
 http://purl.org/nanopub/x/hasSignatureTarget
 http://purl.org/np/
-
-NORMED RDF ENDS

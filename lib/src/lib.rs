@@ -26,7 +26,8 @@
 mod constants;
 pub mod nanopub;
 pub mod profile;
-mod sign_utils;
+mod publish;
+mod sign;
 mod utils;
 
 pub use nanopub::Nanopub;

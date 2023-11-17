@@ -7,58 +7,35 @@ readme = "README.md"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/lib"
 homepage = "https://github.com/vemonet/nanopub-rs"
 description = """
-A rust toolkit to sign and publish Nanopublications
+A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
 """
-edition = "2021"
 keywords = ["RDF", "nanopublications"]
 # categories = ["database-implementations"]
+edition = "2021"
+# rust-version = "1.60"
 
-# [package.metadata.docs.rs]
-# all-features = true
-
+[package.metadata.docs.rs]
+all-features = true
 
 [dependencies]
 base64 = "0.21.5"
 rsa = { version = "0.9.3", default-features = false, features = ["pem", "sha2"] }
 openssl-probe = "0.1.5"
 sophia = { git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628" }
+# sophia = { git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld", "xml"] }
 regex = "1.10.2"
 clap = { version = "4.4.8", features = ["derive"] }
 reqwest = { version = "0.11", features = ["blocking", "rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9.27"
-tokio = { version = "1.34", features = ["rt"] }
-wasm-bindgen-futures = "0.4.38"
-# reqwest-wasm = { version = "0.11", features = ["blocking"] }
-# sophia = { git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld", "xml"] }
 # log = { version = "0.4.20", features = ["std"] }
+# wasm-bindgen-futures = "0.4.38"
 
 [dev-dependencies]
 wasm-pack = "0.12.1"
 
-
-# regex = "1"
-# oxrdf = { version = "0.1.0-beta.4", path="oxrdf", features = ["rdf-star"] }
-# spargebra = { version = "0.2.0-beta.4", path="spargebra", features = ["rdf-star"] }
-# sparesults = { version = "0.1.0-beta.4", path="sparesults", features = ["rdf-star"] }
-# oxilangtag = "0.1"
-# oxiri = "0.2"
-# rio_api = "0.7"
-# rio_turtle = "0.7"
-# rio_xml = "0.7"
-# hex = "0.4"
-# nom = "7"
-# siphasher = "0.3"
-# lazy_static = "1"
-# sysinfo = "0.23"
-
-# [dev-dependencies]
-# criterion = "0.3"
-# oxhttp = "0.1"
-# zstd = "0.10"
-
-# [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-# wasm-bindgen-test = "0.3"
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures = "0.4.38"
 
 # [[bench]]
 # name = "store"

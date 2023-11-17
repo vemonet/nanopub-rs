@@ -14,8 +14,12 @@ use std::error::Error;
 use std::{cmp::Ordering, str};
 
 /// Generate TrustyURI using base64 encoding
-pub fn make_trusty(dataset: &LightDataset, base_ns: &str) -> Result<String, NpError> {
-    let norm_quads = normalize_dataset(&dataset, base_ns, "")
+pub fn make_trusty(
+    dataset: &LightDataset,
+    base_ns: &str,
+    norm_ns: &str,
+) -> Result<String, NpError> {
+    let norm_quads = normalize_dataset(dataset, base_ns, norm_ns)
         .expect("Failed to normalise RDF after adding signature");
     // println!("NORMED QUADS AFTER SIGNING\n{}", norm_quads);
 
@@ -186,11 +190,10 @@ struct NormQuad {
 pub fn normalize_dataset(
     dataset: &LightDataset,
     base_ns: &str,
-    _hash_str: &str,
+    norm_ns: &str,
 ) -> Result<String, Box<dyn Error>> {
     let mut quads_vec: Vec<NormQuad> = vec![];
-    // let norm_base = "http://purl.org/np/ ";
-    let norm_base = "https://w3id.org/np/ ";
+    let norm_base = format!("{} ", norm_ns);
     let base_uri = match base_ns.chars().last() {
         Some(_) => &base_ns[..base_ns.len() - 1],
         None => base_ns,
@@ -209,7 +212,7 @@ pub fn normalize_dataset(
                 .iri()
                 .unwrap()
                 .to_string()
-                .replace(base_uri, norm_base)
+                .replace(base_uri, &norm_base)
         };
 
         let subject = if quad.s().is_blank_node() {
@@ -221,7 +224,7 @@ pub fn normalize_dataset(
                 .iri()
                 .unwrap()
                 .to_string()
-                .replace(base_uri, norm_base)
+                .replace(base_uri, &norm_base)
         };
 
         let predicate = if quad.p().iri().unwrap().to_string() == base_ns {
@@ -231,7 +234,7 @@ pub fn normalize_dataset(
                 .iri()
                 .unwrap()
                 .to_string()
-                .replace(base_uri, norm_base)
+                .replace(base_uri, &norm_base)
         };
 
         let object = if quad.o().is_iri() {
@@ -242,7 +245,7 @@ pub fn normalize_dataset(
                     .iri()
                     .unwrap()
                     .to_string()
-                    .replace(base_uri, norm_base)
+                    .replace(base_uri, &norm_base)
             }
         } else if quad.o().is_blank_node() {
             quad.o().bnode_id().unwrap().to_string()

@@ -1,35 +1,42 @@
-@prefix this: <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o> .
-@prefix sub: <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o#> .
-@prefix np: <http://www.nanopub.org/nschema#> .
-@prefix ex: <http://example.org/> .
-@prefix pav: <http://purl.org/pav/> .
-@prefix npx: <http://purl.org/nanopub/x/> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix dc: <http://purl.org/dc/terms/> .
+PREFIX this: <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o>
+PREFIX sub: <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX schema: <http://schema.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX np: <http://www.nanopub.org/nschema#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX orcid: <https://orcid.org/>
+PREFIX npx: <http://purl.org/nanopub/x/>
 
-sub:Head {
-  this: a np:Nanopublication;
+GRAPH sub:Head {
+  <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o> a np:Nanopublication;
     np:hasAssertion sub:assertion;
     np:hasProvenance sub:provenance;
-    np:hasPublicationInfo sub:pubinfo .
+    np:hasPublicationInfo sub:pubinfo.
 }
 
-sub:assertion {
-  ex:mosquito ex:transmits ex:malaria .
+GRAPH sub:assertion {
+  <http://example.org/mosquito>
+    <http://example.org/transmits> <http://example.org/malaria>.
 }
 
-sub:provenance {
-  sub:assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
+GRAPH sub:provenance {
+  sub:assertion
+    prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613>.
 }
 
-sub:pubinfo {
-  sub:sig npx:hasAlgorithm "RSA";
+GRAPH sub:pubinfo {
+  <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o> a npx:ExampleNanopub;
+    dcterms:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime;
+    <http://purl.org/pav/createdBy> <http://orcid.org/0000-0002-1267-0234>.
+
+  sub:sig
+    npx:hasAlgorithm "RSA";
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
     npx:hasSignature "aG7rda/gmsu8hx1fTds9oqvogs4gv8xxkc/SJCtqJjUfgbtH6P3QMafIBdRApFI1WT7qrkYqg3Qs9ugTkOjwq2EJ+IoTJq1lgeo+66th3y2LnSdsI/Lsoa/mE6TIVbjpXvwYAqPGUI4BISISJhAslFFlP54obeBarh2nsiELdf4=";
-    npx:hasSignatureTarget this: .
-
-  this: a npx:ExampleNanopub;
-    dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime;
-    pav:createdBy <http://orcid.org/0000-0002-1267-0234> .
+    npx:hasSignatureTarget <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o>.
 }

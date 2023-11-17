@@ -1,12 +1,12 @@
 use crate::constants::{BOLD, END, NP_PREF_NS, TEMP_NP_URI, TEST_SERVER};
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
-use crate::sign_utils::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
+use crate::publish::publish_np;
+use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
 use crate::utils::{get_ns, get_prefixes, NpError};
 
 use base64;
 use base64::{engine, Engine as _};
 use regex::Regex;
-use reqwest;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
@@ -21,8 +21,6 @@ use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::error::Error;
 use std::{fmt, str};
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{spawn_local, wasm_bindgen};
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
 pub struct NpInfo {
@@ -90,8 +88,14 @@ impl Nanopub {
             .expect("Failed to parse RDF");
         let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
 
+        let norm_ns = if !np_info.trusty_hash.is_empty() {
+            format!("{}{}", np_info.base_uri, np_info.separator_char)
+        } else {
+            NP_PREF_NS.to_string()
+        };
+
         // Check Trusty hash
-        let expected_hash = make_trusty(&dataset, &np_info.ns).unwrap();
+        let expected_hash = make_trusty(&dataset, &np_info.ns, &norm_ns).unwrap();
         assert_eq!(expected_hash, np_info.trusty_hash);
 
         // Remove the signature from the graph before re-generating it
@@ -102,7 +106,7 @@ impl Nanopub {
             Some(&np_info.pubinfo),
         )?;
         // Normalize nanopub nquads to a string
-        let norm_quads = normalize_dataset(&dataset, &np_info.ns, "")
+        let norm_quads = normalize_dataset(&dataset, &np_info.ns, &norm_ns)
             .expect("Failed to normalise RDF before adding signature");
         // println!("NORMED QUADS\n{}", norm_quads);
 
@@ -187,13 +191,6 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
-        // let client = reqwest::blocking::Client::new();
-        // let res = client
-        //     .post(server_url)
-        //     .body(np.get_rdf())
-        //     .header(reqwest::header::CONTENT_TYPE, "application/trig")
-        //     // .header(header::ACCEPT, "application/json")
-        //     .send()?;
         let published = publish_np(&server_url, &np.get_rdf());
         if published {
             println!(
@@ -207,27 +204,6 @@ impl Nanopub {
             );
         }
         np.set_published(published);
-
-        // Create a new Tokio runtime, and use it to block on asynchronous code
-        // let rt = Runtime::new()?;
-        // rt.block_on(async {
-        //     let client = reqwest::Client::new();
-        //     let res = client.post(server_url)
-        //         .body(np.get_rdf())
-        //         .header(reqwest::header::CONTENT_TYPE, "application/trig")
-        //         // .header(header::ACCEPT, "application/json")
-        //         .send()
-        //         .await
-        //         .unwrap();
-
-        //     if res.status() == 201 {
-        //         println!("\n🎉 Nanopublication published at {}{}{}", BOLD, np.uri, END);
-        //         np.set_published(true);
-        //     } else {
-        //         println!("\n❌ Issue publishing the Nanopublication {}{}{}: {:#?}", BOLD, np.uri, END, res);
-        //         // println!("{:#?}", res.text());
-        //     }
-        // });
         Ok(np)
     }
 
@@ -287,7 +263,8 @@ impl Nanopub {
         )?;
 
         // Normalize nanopub nquads to a string
-        let norm_quads = normalize_dataset(&dataset, np_info.ns.as_str(), "")
+        let norm_ns = NP_PREF_NS;
+        let norm_quads = normalize_dataset(&dataset, np_info.ns.as_str(), norm_ns)
             .expect("Failed to normalise RDF before adding signature");
         // println!("NORMED QUADS\n{}", norm_quads);
 
@@ -308,7 +285,7 @@ impl Nanopub {
         )?;
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
-        let trusty_hash = make_trusty(&dataset, np_info.ns.as_str()).unwrap();
+        let trusty_hash = make_trusty(&dataset, np_info.ns.as_str(), norm_ns).unwrap();
         let trusty_uri = format!("{}{}", NP_PREF_NS, trusty_hash);
         let trusty_ns = format!("{}{}", trusty_uri, np_info.separator_char);
         dataset = replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)
@@ -505,55 +482,4 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),
     })
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn publish_np(url: &str, np: &str) -> bool {
-    let url = url.to_string();
-    let np = np.to_string();
-    let client = reqwest::blocking::Client::new();
-    let res = client
-        .post(url)
-        .body(np)
-        .header(reqwest::header::CONTENT_TYPE, "application/trig")
-        // .header(header::ACCEPT, "application/json")
-        .send()
-        .unwrap();
-    res.status() == 201
-}
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-pub fn publish_np(url: &str, np: &str) -> bool {
-    let url = url.to_string();
-    let np = np.to_string();
-    let mut published: bool = false;
-    spawn_local(async move {
-        let client = reqwest::Client::new();
-        let res = client
-            .post(url)
-            .body(np)
-            .header(reqwest::header::CONTENT_TYPE, "application/trig")
-            // .header(header::ACCEPT, "application/json")
-            .send()
-            .await;
-
-        match res {
-            Ok(res) => {
-                // Handle successful response
-                if res.status() == 201 {
-                    // println!("\n🎉 Nanopublication published at {}{}{}", BOLD, np.uri, END);
-                    // np.set_published(true);
-                    published = true;
-                } else {
-                    println!("\n❌ Issue publishing the Nanopublication {:#?}", res);
-                    // println!("{:#?}", res.text());
-                }
-            }
-            Err(_e) => {
-                // Handle error
-            }
-        }
-    });
-    published
 }
