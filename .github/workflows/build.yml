@@ -159,7 +159,7 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_PASSWORD }}
+          password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: target/wheels
         if: github.event_name == 'release'
 
@@ -192,7 +192,7 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_PASSWORD }}
+          password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: target/wheels
         if: github.event_name == 'release'
 
@@ -231,7 +231,7 @@ jobs:
       - run: pip install twine && twine upload target/wheels/*
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         if: github.event_name == 'release'
 
 
@@ -263,7 +263,7 @@ jobs:
       - run: pip install twine && twine upload target/wheels/*
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         if: github.event_name == 'release'
 
 
@@ -297,24 +297,24 @@ jobs:
           name: nanopub_rs_npm
           path: ./js/pkg
 
-      # - run: npm run release
-      #  working-directory: ./js/pkg
-      #  env:
-      #    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #  if: github.event_name == 'release'
+      - run: npm run release
+        working-directory: ./js/pkg
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: github.event_name == 'release'
 
 
-  # publish_crates:
-  #   if: github.event_name == 'release'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         submodules: true
-  #     - run: rustup update
-  #     - run: cargo login $CRATES_IO_TOKEN
-  #       env:
-  #         CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-  #     - run: cargo publish
-  #       working-directory: ./lib
-  #       continue-on-error: true
+  publish_crates:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - run: rustup update
+      - run: cargo login $CRATES_IO_TOKEN
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      - run: cargo publish
+        working-directory: ./lib
+        continue-on-error: true

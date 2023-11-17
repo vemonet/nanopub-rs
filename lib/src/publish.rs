@@ -14,14 +14,13 @@ pub fn publish_np(url: &str, np: &str) -> bool {
 }
 
 #[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
+#[wasm_bindgen_futures::wasm_bindgen]
 pub fn publish_np(url: &str, np: &str) -> bool {
     use wasm_bindgen::prelude::*;
-    use wasm_bindgen_futures::{spawn_local, wasm_bindgen};
     let url = url.to_string();
     let np = np.to_string();
     let mut published: bool = false;
-    spawn_local(async move {
+    wasm_bindgen_futures::spawn_local(async move {
         let client = reqwest::Client::new();
         let res = client
             .post(url)
