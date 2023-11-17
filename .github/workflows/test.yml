@@ -38,3 +38,43 @@ jobs:
       - run: cargo test --verbose --all --all-features
         env:
           RUST_BACKTRACE: 1
+
+  compare:
+    name: Compare speed with java and python implementations
+    runs-on: ubuntu-latest
+    env:
+      HYPERFINE_VERSION: '1.12.0'
+      STABLE_PYTHON_VERSION: '3.12'
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ env.STABLE_PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.STABLE_PYTHON_VERSION }}
+
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin' # See 'Supported distributions' for available options
+        java-version: '21'
+
+    - name: Install hyperfine
+      run: |
+        wget https://github.com/sharkdp/hyperfine/releases/download/v${HYPERFINE_VERSION}/hyperfine_${HYPERFINE_VERSION}_amd64.deb
+        sudo dpkg -i hyperfine_${HYPERFINE_VERSION}_amd64.deb
+
+    - name: Install java and python tools
+      run: |
+        pip install --upgrade nanopub
+        wget -O nanopub.jar https://github.com/Nanopublication/nanopub-java/releases/latest/download/nanopub-1.47-jar-with-dependencies.jar
+
+    - name: Install ourself
+      run: cargo install --path lib
+      # Build would go to target/release/nanopub
+
+    - name: Benchmark
+      run: |
+        hyperfine -m 100 --warmup 10 java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa
+        hyperfine -m 100 --warmup 10 np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa
+        hyperfine -m 100 --warmup 10 nanopub sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa
+        target/release/nanopub -h
