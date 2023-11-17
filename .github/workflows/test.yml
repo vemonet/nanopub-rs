@@ -74,6 +74,12 @@ jobs:
 
     - name: Benchmark
       run: |
-        hyperfine -m 100 --warmup 10 'java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
-        hyperfine -m 100 --warmup 10 'np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
-        hyperfine -m 100 --warmup 10 'nanopub sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+        hyperfine -m 100 --warmup 10 --export-markdown benchmark.md 'java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+        hyperfine -m 100 --warmup 10 --export-markdown benchmark.md 'np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+        hyperfine -m 100 --warmup 10 --export-markdown benchmark.md 'nanopub sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+
+    - name: Upload benchmark markdown
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark.md
+        path: ./benchmark.md
