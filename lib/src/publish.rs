@@ -1,3 +1,10 @@
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen_futures::{spawn_local, wasm_bindgen};
+
+// Blocking API not available on wasm, we need to use async with wasm_bindgen_futures
+
 #[cfg(not(target_arch = "wasm32"))]
 pub fn publish_np(url: &str, np: &str) -> bool {
     let url = url.to_string();
@@ -14,13 +21,12 @@ pub fn publish_np(url: &str, np: &str) -> bool {
 }
 
 #[cfg(target_arch = "wasm32")]
-#[wasm_bindgen_futures::wasm_bindgen]
+#[wasm_bindgen]
 pub fn publish_np(url: &str, np: &str) -> bool {
-    use wasm_bindgen::prelude::*;
     let url = url.to_string();
     let np = np.to_string();
     let mut published: bool = false;
-    wasm_bindgen_futures::spawn_local(async move {
+    spawn_local(async move {
         let client = reqwest::Client::new();
         let res = client
             .post(url)
