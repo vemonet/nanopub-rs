@@ -1,69 +1,62 @@
-PREFIX this: <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RApptxYhhHKm1Xdnt3tTwQox19yfYa_4F6WkTj2tqSH6I>
-PREFIX sub: <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RApptxYhhHKm1Xdnt3tTwQox19yfYa_4F6WkTj2tqSH6I#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX schema: <http://schema.org/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX biolink: <https://w3id.org/biolink/vocab/>
-PREFIX np: <http://www.nanopub.org/nschema#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX orcid: <https://orcid.org/>
-PREFIX npx: <http://purl.org/nanopub/x/>
+@prefix this: <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RA17kILxyG46VelvFd0N8LH6yYlxEfwumczTYMu3X5QA0> .
+@prefix sub: <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RA17kILxyG46VelvFd0N8LH6yYlxEfwumczTYMu3X5QA0#> .
+@prefix : <http://www.proteinatlas.org/about/nanopubs/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix pav: <http://swan.mindinformatics.org/ontologies/1.2/pav/> .
+@prefix hpas: <http://www.proteinatlas.org/search/> .
+@prefix tissue: <http://purl.obolibrary.org/obo/caloha.obo#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix nif: <http://ontology.neuinfo.org/NIF/Backend/NIF-Quality.owl#> .
+@prefix wi: <http://purl.org/ontology/wi/core#> .
+@prefix prv: <http://purl.org/net/provenance/ns#> .
+@prefix hpa: <http://www.proteinatlas.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
 
-GRAPH <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__assertion> {
-  <http://www.proteinatlas.org/ENSG00000000003>
-    <http://ontology.neuinfo.org/NIF/Backend/NIF-Quality.owl#nlx_qual_1010003> "Not_detected";
-    <http://purl.obolibrary.org/obo/BFO_0000066> <http://www.proteinatlas.org/TS-0030>.
-
-  <http://www.proteinatlas.org/TS-0030> a <http://purl.obolibrary.org/obo/caloha.obo#TS-0030>.
+sub:__head {
+  sub:__assertion a np:Assertion;
+    rdfs:comment "IHC shows Not_detected protein expression of ENSG00000000003 in lung(macrophages) with a Approved evidence/reliability" .
+  
+  sub:__provenance a np:Provenance .
+  
+  sub:__publicationInfo a np:PublicationInfo .
+  
+  this: a np:Nanopublication;
+    np:hasAssertion sub:__assertion;
+    np:hasProvenance sub:__provenance;
+    np:hasPublicationInfo sub:__publicationInfo .
 }
 
-GRAPH <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__head> {
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RApptxYhhHKm1Xdnt3tTwQox19yfYa_4F6WkTj2tqSH6I> a np:Nanopublication;
-    np:hasAssertion <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003___assertion>;
-    np:hasProvenance <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003__provenance>;
-    np:hasPublicationInfo <http://www.proteinatlas.org/about/nanopubs/ENSG000000__publicationInfo>.
-
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__assertion> a np:Assertion;
-    rdfs:comment "IHC shows Not_detected protein expression of ENSG00000000003 in lung(macrophages) with a Approved evidence/reliability".
-
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__provenance> a np:Provenance.
-
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__publicationInfo> a np:PublicationInfo.
+sub:__assertion {
+  hpa:ENSG00000000003 nif:nlx_qual_1010003 "Not_detected";
+    bfo:BFO_0000066 hpa:TS-0030 .
+  
+  hpa:TS-0030 a tissue:TS-0030 .
 }
 
-GRAPH <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__provenance> {
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RApptxYhhHKm1Xdnt3tTwQox19yfYa_4F6WkTj2tqSH6I>
-    <http://purl.org/net/provenance/ns#usedData> <http://www.proteinatlas.org/ENSG00000000003>,
-      <http://www.proteinatlas.org/search/HPA004109>;
-    <http://purl.org/ontology/wi/core#evidence> "Approved";
-    prov:wasDerivedFrom <http://www.proteinatlas.org/about/nanopubs/IHCAssay>;
-    prov:wasGeneratedBy <http://www.proteinatlas.org/about/nanopubs/ConclusionalEvidence>,
-      <http://www.proteinatlas.org/about/nanopubs/ManualCuration>.
-
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__assertion> a <http://www.proteinatlas.org/about/nanopubs/IHCEvidence>.
+sub:__provenance {
+  sub:__assertion a :IHCEvidence .
+  
+  this: prv:usedData hpa:ENSG00000000003, hpas:HPA004109;
+    wi:evidence "Approved";
+    prov:wasDerivedFrom :IHCAssay;
+    prov:wasGeneratedBy :ConclusionalEvidence, :ManualCuration .
 }
 
-GRAPH <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030__publicationInfo> {
-  <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RApptxYhhHKm1Xdnt3tTwQox19yfYa_4F6WkTj2tqSH6I>
-    dcterms:contributor <http://orcid.org/0000-0001-6818-334X>,
-      <http://orcid.org/0000-0002-8777-5612>,
-      <http://orcid.org/0000-0003-3014-5502>,
-      <http://www.researcherid.com/rid/E-7370-2012>,
+sub:__publicationInfo {
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
+    npx:hasSignature "XU9+aFGZ8PZbvc0yljHDiGGfTC0qtyC7j4wT/xLIOn56kahbeIc2t1cgCT1Dpvrv12V3j4nsTy92Vfb5W0c5XCObYoHJZDdWaymez6+hZ8RqSGdmBkMYTFY8sBo3l5ZvZtuXbsS3ZoX6yQm0omySO/RcTcxsx76RE1SHkA9o+m0=";
+    npx:hasSignatureTarget this: .
+  
+  this: dcterms:contributor <http://orcid.org/0000-0001-6818-334X>, <http://orcid.org/0000-0002-8777-5612>,
+      <http://orcid.org/0000-0003-3014-5502>, <http://www.researcherid.com/rid/E-7370-2012>,
       <http://www.researcherid.com/rid/J-7843-2013>;
     dcterms:rights <http://creativecommons.org/licenses/by/3.0/>;
     dcterms:rightsHolder <http://www.proteinatlas.org>;
-    <http://purl.org/net/provenance/ns#usedData> <http://www.proteinatlas.org/about/nanopubs/HumanProteinAtlas>;
-    <http://swan.mindinformatics.org/ontologies/1.2/pav/authoredBy> "Human Protein Atlas project";
-    <http://swan.mindinformatics.org/ontologies/1.2/pav/createdBy> "Kalle von Feilitzen".
-}
-
-GRAPH <http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_publicationInfo> {
-  sub:sig
-    npx:hasAlgorithm "RSA";
-    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "EMLGu79MWfd7WfWgy/qSrPFB5YMgUgjRuXb5RjwLN0183lvJq6PpQB1K7RXHfa2AznmUtncvapfNGkoLQ2bI9TtlZ6U9G7QKQdhP4bU/r+IKCuS5EDB8xTbWyFQN83xrcbcf7G70slvJoFgOMpN+1y2tnPyCpU64xjBsd+KRqeQ=";
-    npx:hasSignatureTarget <http://purl.org/nanopub/temp/mynanopub>.
+    prv:usedData :HumanProteinAtlas;
+    pav:authoredBy "Human Protein Atlas project";
+    pav:createdBy "Kalle von Feilitzen" .
 }

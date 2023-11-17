@@ -259,6 +259,16 @@ pub fn normalize_dataset(
                 .to_string()
                 .replace(base_uri, &norm_base)
         };
+        // Fix normed URIs with fragment that starts with / to use # in the normed
+        // let subject = if let Some(last_slash_index) = subject.rfind(' ') {
+        //     if subject[last_slash_index..].contains('#') {
+        //         subject.to_string()
+        //     } else {
+        //         format!("{}#{}", &subject[..last_slash_index], &subject[last_slash_index + 1..])
+        //     }
+        // } else {
+        //     subject.to_string()
+        // };
 
         let predicate = if quad.p().iri().unwrap().to_string() == base_ns {
             norm_base.to_string()
