@@ -3,7 +3,7 @@ name = "nanopub-sign"
 description = "Python bindings for the Nanopub rust toolkit"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/python"
 homepage = "https://github.com/vemonet/nanopub-rs"
-version = "0.0.1"
+version = "0.0.0"
 edition = "2018"
 
 [lib]

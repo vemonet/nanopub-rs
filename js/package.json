@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.0",
   "name": "@nanopub/sign",
   "description": "JavaScript bindings for the Nanopub rust toolkit",
   "license": "MIT",
