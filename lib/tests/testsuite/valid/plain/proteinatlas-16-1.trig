@@ -21,6 +21,9 @@
 @prefix wp: <http://vocabularies.wikipathways.org/wp#> .
 @prefix nih: <http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#> .
 
+# http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
+# http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030
+
 :ENSG00000000003_ih_TS_0030_head {
 :ENSG00000000003_ih_TS_0030 a np:Nanopublication .
 :ENSG00000000003_ih_TS_0030_assertion a np:Assertion ;
@@ -32,11 +35,11 @@
 	np:hasPublicationInfo :ENSG00000000003_ih_TS_0030_publicationInfo .
 }
 :ENSG00000000003_ih_TS_0030_assertion {
-	hpa:ENSG00000000003 bfo:BFO_0000066 hpa:TS-0030 ;	# Occurs in 
-		nif:nlx_qual_1010003 "Not_detected"^^xsd:string .	# Expression level 
+	hpa:ENSG00000000003 bfo:BFO_0000066 hpa:TS-0030 ;	# Occurs in
+		nif:nlx_qual_1010003 "Not_detected"^^xsd:string .	# Expression level
 	hpa:TS-0030 a tissue:TS-0030 .
 }
-:ENSG00000000003_ih_TS_0030_provenance { 
+:ENSG00000000003_ih_TS_0030_provenance {
 	:ENSG00000000003_ih_TS_0030_assertion a :IHCEvidence .
 	:ENSG00000000003_ih_TS_0030 prov:wasGeneratedBy :ConclusionalEvidence ;
 	prov:wasDerivedFrom :IHCAssay ;
@@ -45,7 +48,7 @@
 	prv:usedData hpa:ENSG00000000003 ;
 	wi:evidence "Approved"^^xsd:string .
 }
-:ENSG00000000003_ih_TS_0030_publicationInfo { 
+:ENSG00000000003_ih_TS_0030_publicationInfo {
 	:ENSG00000000003_ih_TS_0030 prv:usedData :HumanProteinAtlas ;
 	pav:authoredBy "Human Protein Atlas project";
 	pav:createdBy  "Kalle von Feilitzen";

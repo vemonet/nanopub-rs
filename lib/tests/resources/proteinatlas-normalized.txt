@@ -1,0 +1,128 @@
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.proteinatlas.org/ENSG00000000003
+http://ontology.neuinfo.org/NIF/Backend/NIF-Quality.owl#nlx_qual_1010003
+^http://www.w3.org/2001/XMLSchema#string Not_detected
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.proteinatlas.org/ENSG00000000003
+http://purl.obolibrary.org/obo/BFO_0000066
+http://www.proteinatlas.org/TS-0030
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.proteinatlas.org/TS-0030
+http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+http://purl.obolibrary.org/obo/caloha.obo#TS-0030
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.nanopub.org/nschema#hasAssertion
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.nanopub.org/nschema#hasProvenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.nanopub.org/nschema#hasPublicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+http://www.nanopub.org/nschema#Nanopublication
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+http://www.nanopub.org/nschema#Assertion
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.w3.org/2000/01/rdf-schema#comment
+^http://www.w3.org/2001/XMLSchema#string IHC shows Not_detected protein expression of ENSG00000000003 in lung(macrophages) with a Approved evidence/reliability
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+http://www.nanopub.org/nschema#Provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+http://www.nanopub.org/nschema#PublicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/net/provenance/ns#usedData
+http://www.proteinatlas.org/ENSG00000000003
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/net/provenance/ns#usedData
+http://www.proteinatlas.org/search/HPA004109
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/ontology/wi/core#evidence
+^http://www.w3.org/2001/XMLSchema#string Approved
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.w3.org/ns/prov#wasDerivedFrom
+http://www.proteinatlas.org/about/nanopubs/IHCAssay
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.w3.org/ns/prov#wasGeneratedBy
+http://www.proteinatlas.org/about/nanopubs/ConclusionalEvidence
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://www.w3.org/ns/prov#wasGeneratedBy
+http://www.proteinatlas.org/about/nanopubs/ManualCuration
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__provenance
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__assertion
+http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+http://www.proteinatlas.org/about/nanopubs/IHCEvidence
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/contributor
+http://orcid.org/0000-0001-6818-334X
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/contributor
+http://orcid.org/0000-0002-8777-5612
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/contributor
+http://orcid.org/0000-0003-3014-5502
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/contributor
+http://www.researcherid.com/rid/E-7370-2012
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/contributor
+http://www.researcherid.com/rid/J-7843-2013
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/rights
+http://creativecommons.org/licenses/by/3.0/
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/dc/terms/rightsHolder
+http://www.proteinatlas.org
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://purl.org/net/provenance/ns#usedData
+http://www.proteinatlas.org/about/nanopubs/HumanProteinAtlas
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://swan.mindinformatics.org/ontologies/1.2/pav/authoredBy
+^http://www.w3.org/2001/XMLSchema#string Human Protein Atlas project
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.
+http://swan.mindinformatics.org/ontologies/1.2/pav/createdBy
+^http://www.w3.org/2001/XMLSchema#string Kalle von Feilitzen
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #sig
+http://purl.org/nanopub/x/hasAlgorithm
+^http://www.w3.org/2001/XMLSchema#string RSA
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #sig
+http://purl.org/nanopub/x/hasPublicKey
+^http://www.w3.org/2001/XMLSchema#string MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #sig
+http://purl.org/nanopub/x/hasSignature
+^http://www.w3.org/2001/XMLSchema#string XU9+aFGZ8PZbvc0yljHDiGGfTC0qtyC7j4wT/xLIOn56kahbeIc2t1cgCT1Dpvrv12V3j4nsTy92Vfb5W0c5XCObYoHJZDdWaymez6+hZ8RqSGdmBkMYTFY8sBo3l5ZvZtuXbsS3ZoX6yQm0omySO/RcTcxsx76RE1SHkA9o+m0=
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__publicationInfo
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #sig
+http://purl.org/nanopub/x/hasSignatureTarget
+http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.

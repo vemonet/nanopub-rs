@@ -88,6 +88,7 @@ impl Nanopub {
             .expect("Failed to parse RDF");
         let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
 
+        println!("CHAR {}", np_info.separator_char);
         let norm_ns = if !np_info.trusty_hash.is_empty() {
             format!("{}{}", np_info.base_uri, np_info.separator_char)
         } else {
@@ -108,7 +109,9 @@ impl Nanopub {
         // Normalize nanopub nquads to a string
         let norm_quads = normalize_dataset(&dataset, &np_info.ns, &norm_ns)
             .expect("Failed to normalise RDF before adding signature");
-        // println!("NORMED QUADS\n{}", norm_quads);
+        println!("NORMED QUADS CHECK\n{}", norm_quads);
+
+        println!("PUBKEY {}", np_info.public_key);
 
         // Load public key
         let pubkey_bytes = engine::general_purpose::STANDARD
@@ -240,7 +243,7 @@ impl Nanopub {
         let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
         // println!("{}", np_info);
 
-        dataset = replace_bnodes(&dataset, &np_info.ns).unwrap();
+        dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri).unwrap();
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
@@ -262,11 +265,29 @@ impl Nanopub {
             Some(&np_info.pubinfo),
         )?;
 
+        // TODO: fix handling of base_uri in normalize
+        // http://purl.org/nanopub/temp/ANYTHING# becomes auto https://w3id.org/np/
+        // Otherwise we reuse the existing base URI:
+        // http://example.org/nanopub-validator-example/pubinfo
+        //   becomes "http://example.org/nanopub-validator-example/ #pubinfo"
+        // http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
+        //   has URI http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030
+        //   becomes "http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head"
+        //   with trusty: http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RA17kILxyG46VelvFd0N8LH6yYlxEfwumczTYMu3X5QA0
+
+        let norm_ns = if np_info.ns.starts_with("http://purl.org/nanopub/temp/") {
+            NP_PREF_NS
+        } else {
+            &np_info.ns
+        };
+        // If np URI don't end with # or / or . we add a . at the end
+        println!("norm_nsnorm_nsnorm_ns {}", norm_ns);
+
         // Normalize nanopub nquads to a string
-        let norm_ns = NP_PREF_NS;
+        // let norm_ns = NP_PREF_NS;
         let norm_quads = normalize_dataset(&dataset, np_info.ns.as_str(), norm_ns)
             .expect("Failed to normalise RDF before adding signature");
-        // println!("NORMED QUADS\n{}", norm_quads);
+        println!("NORMED QUADS\n{}", norm_quads);
 
         // Generate signature using the private key and normalized RDF
         let signature_vec = priv_key
@@ -286,8 +307,8 @@ impl Nanopub {
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
         let trusty_hash = make_trusty(&dataset, np_info.ns.as_str(), norm_ns).unwrap();
-        let trusty_uri = format!("{}{}", NP_PREF_NS, trusty_hash);
-        let trusty_ns = format!("{}{}", trusty_uri, np_info.separator_char);
+        let trusty_uri = format!("{}{}", norm_ns, trusty_hash);
+        let trusty_ns = format!("{}{}", trusty_uri, "#");
         dataset = replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)
             .unwrap();
 
@@ -402,37 +423,49 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         pubinfo = Some(q.unwrap().o().iri().unwrap().to_string());
     }
 
-    // Extract base URI, separator character (# or /), and trusty hash (if present) from the np URL
+    // Remove last char if it is # or / to get the URI
+    let np_iri: Iri<String> =
+        if np_iri.ends_with('#') || np_iri.ends_with('/') || np_iri.ends_with('.') {
+            match np_iri.chars().last() {
+                Some(_) => Iri::new_unchecked(np_iri.to_string()[..np_iri.len() - 1].to_string()),
+                None => np_iri,
+            }
+        } else {
+            np_iri
+        };
+
+    // Make sure namespace ends with the right char
+    let np_ns_str = &head_iri[..np_iri.len() + 1];
+    println!("np_ns_str!!! {}", np_ns_str);
+    let np_ns =
+        if !np_ns_str.ends_with('#') && !np_ns_str.ends_with('/') && !np_ns_str.ends_with('.') {
+            Namespace::new_unchecked(format!("{}.", np_ns_str))
+        } else {
+            Namespace::new_unchecked(np_ns_str.to_string())
+        };
+
+    // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
     let mut base_uri: Option<String> = None;
     let mut separator_char: Option<String> = None;
     let mut trusty_hash: Option<String> = None;
-    let re = Regex::new(r"^(.*?)(/|#)?(RA.*)?$").unwrap();
+    let re = Regex::new(r"^(.*?)(/|#|\.)?(RA.*)?$").unwrap();
+    // let re = Regex::new(r"^(.*?)(RA.*)?$").unwrap();
     if let Some(caps) = re.captures(&np_iri) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
         // The second group captures '/' or '#' if present.
-        separator_char = Some(caps.get(2).map_or("#", |m| m.as_str()).to_string());
+        separator_char = Some(caps.get(2).map_or(".", |m| m.as_str()).to_string());
         // The third group captures everything after 'RA', if present.
         trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
     }
 
     // Get np namespace from the np URL (add # if not ending with / or #)
-    let mut namespace: String = np_iri.to_string();
-    if !namespace.ends_with('#') && !namespace.ends_with('/') {
-        namespace.push('#');
-    }
-    let np_ns = Namespace::new(namespace).unwrap();
-
-    // Remove last char if it is # or / to get the URI
-    let np_iri: Iri<String> = if np_iri.ends_with('#') || np_iri.ends_with('/') {
-        match np_iri.chars().last() {
-            Some(_) => Iri::new_unchecked(np_iri.to_string()[..np_iri.len() - 1].to_string()),
-            None => np_iri,
-        }
-    } else {
-        np_iri
-    };
+    // let mut namespace: String = np_iri.to_string();
+    // if !namespace.ends_with('#') && !namespace.ends_with('/') && !namespace.ends_with('.') {
+    //     namespace.push_str(&separator_char.clone().unwrap());
+    // }
+    // let np_ns = Namespace::new(namespace).unwrap();
 
     // Extract signature
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo.unwrap());
@@ -445,6 +478,7 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     ) {
         signature = Some(q.unwrap().o().lexical_form().unwrap().to_string());
     }
+    // println!("SIG! {}", np_ns.get("sig").unwrap());
 
     // Extract public key
     let mut pubkey: Option<String> = None;

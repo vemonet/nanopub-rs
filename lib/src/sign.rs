@@ -38,11 +38,17 @@ pub fn make_trusty(
 }
 
 /// Replace bnodes by URI ending with `_1` in the RDF dataset
-pub fn replace_bnodes(dataset: &LightDataset, base_ns: &str) -> Result<LightDataset, NpError> {
+pub fn replace_bnodes(
+    dataset: &LightDataset,
+    base_ns: &str,
+    base_uri: &str,
+) -> Result<LightDataset, NpError> {
     let mut new_dataset = LightDataset::new();
     let mut bnode_map: HashMap<String, usize> = HashMap::new();
     let mut bnode_counter = 1;
     let re_underscore_uri = Regex::new(&format!(r"{}(_+\d+)$", base_ns)).unwrap();
+    // let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[a-zA-Z0-9^_]+)$", base_uri)).unwrap();
+    // let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[0-9^_]+)$", base_uri)).unwrap();
 
     for quad in dataset.quads() {
         let quad = quad.unwrap();
@@ -56,14 +62,30 @@ pub fn replace_bnodes(dataset: &LightDataset, base_ns: &str) -> Result<LightData
                 counter
             });
             format!("{}_{}", base_ns, bnode_map[&bnode_id])
-        } else if let Some(mat) = re_underscore_uri.find(&quad.s().iri().unwrap().as_ref()) {
+        } else if let Some(caps) = re_underscore_uri.captures(&quad.s().iri().unwrap().as_ref()) {
             let mut subject_iri = quad.s().iri().unwrap().to_string();
-            let new_ending = mat.as_str().replacen('_', "__", 1);
-            subject_iri.truncate(subject_iri.len() - mat.as_str().len()); // Remove the original ending
+            println!("MATCH SUBJECT UNDERSCORE URI: {}", subject_iri);
+            let new_ending = caps.get(1).unwrap().as_str().replacen('_', "__", 1);
+            subject_iri.truncate(subject_iri.len() - caps.get(1).unwrap().as_str().len()); // Remove the original ending
             subject_iri.push_str(&new_ending);
             subject_iri
+            // concat!(base_ns.to_owned(), new_ending.to_owned())
         } else {
             quad.s().iri().unwrap().to_string()
+        };
+
+        let graph = if let Some(caps) =
+            re_underscore_uri.captures(&quad.g().unwrap().iri().unwrap().as_ref())
+        {
+            let mut graph_iri = quad.g().unwrap().iri().unwrap().to_string();
+            let new_ending = caps.get(1).unwrap().as_str().replacen('_', "__", 1);
+            graph_iri.truncate(graph_iri.len() - caps.get(1).unwrap().as_str().len()); // Remove the original ending
+            graph_iri.push_str(&new_ending);
+            Some(Iri::new_unchecked(graph_iri))
+        } else {
+            Some(Iri::new_unchecked(
+                quad.g().unwrap().iri().unwrap().to_string(),
+            ))
         };
 
         // Replace bnode in objects
@@ -80,32 +102,42 @@ pub fn replace_bnodes(dataset: &LightDataset, base_ns: &str) -> Result<LightData
                     &Iri::new_unchecked(subject),
                     quad.p(),
                     &Iri::new_unchecked(object),
-                    quad.g(),
+                    graph,
                 )
                 .unwrap();
         } else if quad.o().is_iri() {
             // Handle URI ending with #_1 to double _
-            if let Some(mat) = re_underscore_uri.find(&quad.o().iri().unwrap().as_ref()) {
+            println!(
+                "NOOORM {} {}",
+                &quad.o().iri().unwrap().as_ref(),
+                re_underscore_uri
+            );
+            if let Some(caps) = re_underscore_uri.captures(&quad.o().iri().unwrap().as_ref()) {
+                // captures
+                // base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
+                // matches.
                 let mut object_iri = quad.s().iri().unwrap().to_string();
-                let new_ending = mat.as_str().replacen('_', "__", 1);
-                object_iri.truncate(object_iri.len() - mat.as_str().len()); // Remove the original ending
+                println!("MATCH OBJECT UNDERSCORE URI: {}", object_iri);
+                let new_ending = caps.get(1).unwrap().as_str().replacen('_', "__", 1);
+                object_iri.truncate(object_iri.len() - caps.get(1).unwrap().as_str().len()); // Remove the original ending
                 object_iri.push_str(&new_ending);
+                println!("OBJECT CHANGED {} {}", object_iri, new_ending);
                 new_dataset
                     .insert(
                         &Iri::new_unchecked(subject),
                         quad.p(),
                         &Iri::new_unchecked(object_iri),
-                        quad.g(),
+                        graph,
                     )
                     .unwrap();
             } else {
                 new_dataset
-                    .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), quad.g())
+                    .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)
                     .unwrap();
             }
         } else {
             new_dataset
-                .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), quad.g())
+                .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)
                 .unwrap();
         };
     }
@@ -198,6 +230,7 @@ pub fn normalize_dataset(
         Some(_) => &base_ns[..base_ns.len() - 1],
         None => base_ns,
     };
+    println!("IN normalize_dataset {} {}", norm_ns, base_uri);
 
     // Convert dataset to a list of NormQuad struct
     for quad in dataset.quads() {

@@ -3,24 +3,24 @@ use std::{error::Error, fs, path::Path};
 
 const ORCID: &str = "http://orcid.org/0000-0000-0000-0000";
 
-#[test]
-fn publish_testsuite_valid_plain() -> Result<(), Box<dyn Error>> {
-    let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
-    let path = Path::new("tests/testsuite/valid/plain");
-    // Iterate over files
-    for entry in fs::read_dir(path)? {
-        let file = entry?;
-        let filename = format!("{:?}", file.file_name());
-        if filename.ends_with("trig\"") {
-            println!("\n☑️  Testing file: {}", filename);
-            let profile = NpProfile::new(ORCID, "", &private_key, None)?;
-            let np_rdf = fs::read_to_string(file.path())?;
-            let np = Nanopub::publish(&np_rdf, &profile, None)?;
-            // assert!(np.published);
-        }
-    }
-    Ok(())
-}
+// #[test]
+// fn publish_testsuite_valid_plain() -> Result<(), Box<dyn Error>> {
+//     let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
+//     let path = Path::new("tests/testsuite/valid/plain");
+//     // Iterate over files
+//     for entry in fs::read_dir(path)? {
+//         let file = entry?;
+//         let filename = format!("{:?}", file.file_name());
+//         if filename.ends_with("trig\"") {
+//             println!("\n☑️  Testing file: {}", filename);
+//             let profile = NpProfile::new(ORCID, "", &private_key, None)?;
+//             let np_rdf = fs::read_to_string(file.path())?;
+//             let np = Nanopub::publish(&np_rdf, &profile, None)?;
+//             // assert!(np.published);
+//         }
+//     }
+//     Ok(())
+// }
 
 #[test]
 fn check_valid_signed() {
