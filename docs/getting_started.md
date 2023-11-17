@@ -84,8 +84,10 @@ let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
 let orcid = "https://orcid.org/0000-0000-0000-0000";
 let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
 
-let np = Nanopub::sign(&np_rdf, profile).unwrap();
-let checked_np = Nanopub::check(&np.rdf).unwrap();
+let signed_np = Nanopub::sign(&np_rdf, profile).unwrap();
+let published_np = Nanopub::publish(&np_rdf, profile).unwrap();
+let checked_np = Nanopub::check(&signed_np.rdf).unwrap();
+println!("{}", published_np)
 ```
 
 ## 🛠️ Contributing
