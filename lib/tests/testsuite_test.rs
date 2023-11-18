@@ -40,6 +40,22 @@ fn testsuite_check_valid_signed() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[test]
+fn testsuite_check_valid_trusty() -> Result<(), Box<dyn Error>> {
+    let path = Path::new("tests/testsuite/valid/trusty");
+    // Iterate over files
+    for (index, entry) in fs::read_dir(path)?.enumerate() {
+        let file = entry?;
+        let filename = format!("{:?}", file.file_name());
+        if filename.ends_with("trig\"") && !filename.contains("simple1-signed-dsa") {
+            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            let np_rdf = fs::read_to_string(file.path())?;
+            let _np = Nanopub::check(&np_rdf).expect("Failed check");
+        }
+    }
+    Ok(())
+}
+
 // TODO: check tests/testsuite/valid/signed
 // check tests/testsuite/valid/trusty
 

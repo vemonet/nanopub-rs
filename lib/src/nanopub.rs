@@ -20,6 +20,7 @@ use sophia::iri::Iri;
 use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::error::Error;
+use std::fmt::format;
 use std::{fmt, str};
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
@@ -99,38 +100,46 @@ impl Nanopub {
         // Check Trusty hash
         let expected_hash = make_trusty(&dataset, &np_info.ns, &norm_ns).unwrap();
         assert_eq!(expected_hash, np_info.trusty_hash);
+        let mut msg: String = "1 trusty".to_string();
 
-        // Remove the signature from the graph before re-generating it
-        dataset.remove(
-            &np_info.signature_iri,
-            get_ns("npx").get("hasSignature")?,
-            np_info.signature.as_str(),
-            Some(&np_info.pubinfo),
-        )?;
-        // Normalize nanopub nquads to a string
-        let norm_quads = normalize_dataset(&dataset, &np_info.ns, &norm_ns)
-            .expect("Failed to normalise RDF before adding signature");
-        println!("NORMED QUADS CHECK\n{}", norm_quads);
+        // TODO: also handle when no signature is present? Only check trusty
 
-        // Load public key
-        let pubkey_bytes = engine::general_purpose::STANDARD
-            .decode(&np_info.public_key)
-            .expect("Error decoding public key");
-        let pubkey = RsaPublicKey::from_public_key_der(&pubkey_bytes)
-            .expect("Failed to parse RSA public key");
+        if !np_info.signature.is_empty() {
+            // Remove the signature from the graph before re-generating it
+            dataset.remove(
+                &np_info.signature_iri,
+                get_ns("npx").get("hasSignature")?,
+                np_info.signature.as_str(),
+                Some(&np_info.pubinfo),
+            )?;
+            // Normalize nanopub nquads to a string
+            let norm_quads = normalize_dataset(&dataset, &np_info.ns, &norm_ns)
+                .expect("Failed to normalise RDF before adding signature");
+            println!("NORMED QUADS CHECK\n{}", norm_quads);
 
-        // Regenerate and check the signature hash
-        pubkey
-            .verify(
-                Pkcs1v15Sign::new::<Sha256>(),
-                &Sha256::digest(norm_quads.as_bytes()),
-                &engine::general_purpose::STANDARD
-                    .decode(np_info.signature.as_bytes())
-                    .unwrap(),
-            )
-            .expect("Failed to verify the Nanopub signature hash");
+            // Load public key
+            let pubkey_bytes = engine::general_purpose::STANDARD
+                .decode(&np_info.public_key)
+                .expect("Error decoding public key");
+            let pubkey = RsaPublicKey::from_public_key_der(&pubkey_bytes)
+                .expect("Failed to parse RSA public key");
 
-        println!("\n✅ The Nanopub {}{}{} is valid", BOLD, np_info.uri, END);
+            // Regenerate and check the signature hash
+            pubkey
+                .verify(
+                    Pkcs1v15Sign::new::<Sha256>(),
+                    &Sha256::digest(norm_quads.as_bytes()),
+                    &engine::general_purpose::STANDARD
+                        .decode(np_info.signature.as_bytes())
+                        .unwrap(),
+                )
+                .expect("Failed to verify the Nanopub signature hash");
+            msg = format!("{} with signature", msg);
+        } else {
+            msg = format!("{} without signature", msg);
+        }
+
+        println!("\n✅ Nanopub {}{}{} is valid: {}", BOLD, np_info.uri, END, msg);
         // TODO: check if the np has been published
         Ok(Self {
             uri: np_info.uri.to_string(),
