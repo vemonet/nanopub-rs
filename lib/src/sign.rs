@@ -1,6 +1,5 @@
 use crate::utils::NpError;
 
-use base64;
 use base64::{alphabet, engine, Engine as _};
 use regex::Regex;
 use rsa::{sha2::Digest, sha2::Sha256};
@@ -79,7 +78,6 @@ pub fn replace_bnodes(
             let new_ending = matche.replacen('_', "__", 1);
             graph_iri.truncate(graph_iri.len() - matche.len()); // Remove the original ending
             graph_iri.push_str(&new_ending);
-            println!("MATCH GRAPH UNDERSCORE URI: {} {}", graph_iri, matche);
             Some(Iri::new_unchecked(graph_iri))
         } else {
             Some(Iri::new_unchecked(
@@ -143,7 +141,7 @@ pub fn replace_ns_in_quads(
     new_uri: &str,
 ) -> Result<LightDataset, NpError> {
     let old_ns = old_ns.strip_suffix('.').unwrap_or(old_ns);
-    println!("IN REPLACE: {} {}", old_ns, new_ns);
+    // println!("IN REPLACE: {} {}", old_ns, new_ns);
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
         let quad = quad.unwrap();
@@ -210,10 +208,10 @@ struct NormQuad {
     lang: String,
 }
 
-/// Fix normed URIs with fragment that starts with / to use # in the normed
+/// Fix normed URIs last fragments. Make sure it starts with #
 pub fn fix_normed_uri(uri: &str) -> String {
     if let Some(last_slash_index) = uri.rfind(' ') {
-        // println!("INNNN {}", &uri[last_slash_index + 1..]);
+        // println!("IN fix_normed_uri {}", &uri[last_slash_index + 1..]);
         if uri[last_slash_index + 1..].starts_with('#') || uri[last_slash_index + 1..].is_empty() {
             uri.to_string()
         } else if uri[last_slash_index + 1..].starts_with('/')
@@ -352,7 +350,6 @@ pub fn normalize_dataset(
             })
         })
     });
-    // println!(quads_vec);
 
     // Format the ordered list in the normalized string that will be encrypted
     let mut normed_quads = String::new();

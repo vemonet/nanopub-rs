@@ -428,14 +428,15 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             np_iri
         };
 
-    // Make sure namespace ends with the right char (#/.), stralso strip _ if it is at the end
+    // NOTE: Namespace needs to be generated after we removed last char of IRI
+    // Add a . if not ending with /.# we a;sp strip _ if it is at the end
     let np_ns_str = &head_iri[..np_iri.len() + 1];
     let np_ns =
         if !np_ns_str.ends_with('#') && !np_ns_str.ends_with('/') && !np_ns_str.ends_with('.') {
-            Namespace::new_unchecked(format!("{}.", &np_ns_str.strip_suffix('_').unwrap()))
-        // } else if !np_ns_str.ends_with('#') {
-        //     // Np ns always ends with #
-        //     Namespace::new_unchecked(format!("{}#", &np_ns_str))
+            Namespace::new_unchecked(format!(
+                "{}.",
+                &np_ns_str.strip_suffix('_').unwrap_or(np_ns_str)
+            ))
         } else {
             Namespace::new_unchecked(np_ns_str.to_string())
         };
@@ -456,13 +457,6 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         // The third group captures everything after 'RA', if present.
         trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
     }
-
-    // Get np namespace from the np URL (add # if not ending with / or #)
-    // let mut namespace: String = np_iri.to_string();
-    // if !namespace.ends_with('#') && !namespace.ends_with('/') && !namespace.ends_with('.') {
-    //     namespace.push_str(&separator_char.clone().unwrap());
-    // }
-    // let np_ns = Namespace::new(namespace).unwrap();
 
     // Extract signature
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo.unwrap());
