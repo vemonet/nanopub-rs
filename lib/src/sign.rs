@@ -34,6 +34,7 @@ pub fn make_trusty(
         "RA{}",
         base64_engine.encode(Sha256::digest(norm_quads.as_bytes()))
     );
+    println!("TRUUUUUSTY {trusty_hash}");
     Ok(trusty_hash)
 }
 
@@ -228,6 +229,7 @@ pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
     } else {
         uri.to_string()
     }
+    // TODO: of separator we do differently
 }
 
 /// Normalize the quads contained in the nanopub dataset to a string used for signing and generating trusty
@@ -250,7 +252,7 @@ pub fn normalize_dataset(
     //   becomes http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RAyBeXMqokAQZ5psoETKtkOeYzHnoIoXTgNFKRdLM8yzs#__head
     //   last char after trusty becomes # and before .
 
-    // println!("IN normalize_dataset {} {}", norm_ns, base_uri);
+    println!("IN normalize_dataset {} {}", norm_ns, separator);
 
     // Convert dataset to a list of NormQuad struct
     for quad in dataset.quads() {

@@ -397,7 +397,7 @@ impl fmt::Display for Nanopub {
 }
 
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
-fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
+pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut np_url: Option<String> = None;
     let mut head: Option<String> = None;
     let mut assertion: Option<String> = None;
@@ -464,29 +464,27 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             np_iri
         };
 
-    // NOTE: Namespace needs to be generated after we removed last char of IRI
-    // Add a . if not ending with /.# we a;sp strip _ if it is at the end
+    // Getting potential ns from head graph (removing the last frag from head)
     let np_ns_str = &head_iri[..np_iri.len() + 1];
-    let np_ns =
-        if !np_ns_str.ends_with('#') && !np_ns_str.ends_with('/') && !np_ns_str.ends_with('.') {
-            Namespace::new_unchecked(format!(
-                "{}.",
-                &np_ns_str.strip_suffix('_').unwrap_or(np_ns_str)
-            ))
-        } else {
-            Namespace::new_unchecked(np_ns_str.to_string())
-        };
-    println!("np_ns!!! {}", *np_ns);
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
     let mut base_uri: Option<String> = None;
     let mut separator_before_trusty: String = '.'.to_string();
-    let mut separator_after_trusty: String = '#'.to_string();
-    let mut trusty_hash: Option<String> = None;
-    let re_trusty = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$").unwrap();
+    let mut separator_after_trusty: String = "".to_string();
+    let mut trusty_hash: String = "".to_string();
+
+    // Get just the Trusty hash from the URI
+    let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$").unwrap();
+    if let Some(caps) = re_trusty.captures(&np_iri.as_ref()) {
+        // The first group captures everything up to a '/' or '#', non-greedy.
+        trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
+    }
+
+    // Get the base URI and separators from the namespace
+    let re_trusty_ns = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$").unwrap();
     // let re = Regex::new(r"^(.*?)(RA.*)?$").unwrap();
-    if let Some(caps) = re_trusty.captures(&np_ns) {
+    if let Some(caps) = re_trusty_ns.captures(np_ns_str) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
         // The second group captures '/' or '#' if present, defaults to .
@@ -495,12 +493,32 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             .map_or(separator_before_trusty, |m| m.as_str().to_string())
             .to_string();
         // The last group captures everything after 'RA', if present.
-        trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
+        // trusty_hash = caps.get(3).map_or("", |m| m.as_str()).to_string();
         separator_after_trusty = caps
             .get(4)
             .map_or(separator_after_trusty, |m| m.as_str().to_string())
             .to_string();
     }
+    if trusty_hash.is_empty() && separator_after_trusty.is_empty() {
+        separator_after_trusty = "#".to_string()
+    };
+
+    // TODO: handle diff if trusty or not (if not we use default, if trusty we only extract)
+    let np_ns =
+        if !np_ns_str.ends_with('#') && !np_ns_str.ends_with('/') && !np_ns_str.ends_with('.') {
+            if !trusty_hash.is_empty() {
+                // TODO: Change the after trusty part?
+                Namespace::new_unchecked(np_ns_str.to_string())
+            } else {
+                Namespace::new_unchecked(format!(
+                    "{}.",
+                    &np_ns_str.strip_suffix('_').unwrap_or(np_ns_str)
+                ))
+            }
+        } else {
+            Namespace::new_unchecked(np_ns_str.to_string())
+        };
+    println!("np_ns!!! {}", *np_ns);
 
     // Extract signature and its subject URI
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo.unwrap());
@@ -550,7 +568,7 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         base_uri: base_uri.unwrap(),
         separator_before_trusty,
         separator_after_trusty,
-        trusty_hash: trusty_hash.unwrap(),
+        trusty_hash,
         signature: signature.unwrap_or("".to_string()),
         signature_iri,
         public_key: pubkey.unwrap_or("".to_string()),

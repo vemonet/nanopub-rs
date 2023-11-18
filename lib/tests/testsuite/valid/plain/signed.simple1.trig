@@ -1,5 +1,5 @@
-@prefix this: <http://example.org/nanopub-validator-example/RALbDbWVnLmLqpNgOsI_AaYfLbEnlOfZy3CoRRLs9XqVk> .
-@prefix sub: <http://example.org/nanopub-validator-example/RALbDbWVnLmLqpNgOsI_AaYfLbEnlOfZy3CoRRLs9XqVk#> .
+@prefix this: <http://example.org/nanopub-validator-example/RAwReho4X7NTzl-u14lDexEFMyEs_U6uxm-A4_GwykP-w> .
+@prefix sub: <http://example.org/nanopub-validator-example/RAwReho4X7NTzl-u14lDexEFMyEs_U6uxm-A4_GwykP-w#> .
 @prefix np: <http://www.nanopub.org/nschema#> .
 @prefix ex: <http://example.org/> .
 @prefix pav: <http://purl.org/pav/> .
@@ -25,10 +25,10 @@ sub:provenance {
 
 sub:pubinfo {
   sub:sig npx:hasAlgorithm "RSA";
-    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "9Z7zk22V1SgJ+jSw4WAkK3yJ7xuoEkIPJWSLEzx0b6OgHiqiioS0DMziQYCjQA8gBWu0zlJr64tj8Ip38fKynxriznwgVtcjBSKtjnLfZEZPZrtasLKxmtrobYbnyNPBi0Geq8oQpeg9Qg5MldhI7HoiEFTaOkmZJEt0TjrOUVc=";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB";
+    npx:hasSignature "c41bsPcz1E5jcQK/uDQIilMR5FIMd8HgNOeNYMz4vmP50kU/UwO6rnBp4QHYgiLhywId4zAzsewVCdsmj7+RdCgoUMeY+W+oUTXhEHA+nUu4rV7tgZ9JN9LYlpE9uOIdySQSpg9sXg9iyAhKYVGwSPxjWjFqKju7ejZ9/oINJBo=";
     npx:hasSignatureTarget this: .
-
+  
   this: a npx:ExampleNanopub;
     dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime;
     pav:createdBy <http://orcid.org/0000-0002-1267-0234> .
