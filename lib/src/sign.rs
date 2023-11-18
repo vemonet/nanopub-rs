@@ -17,8 +17,9 @@ pub fn make_trusty(
     dataset: &LightDataset,
     base_ns: &str,
     norm_ns: &str,
+    separator: &str,
 ) -> Result<String, NpError> {
-    let norm_quads = normalize_dataset(dataset, base_ns, norm_ns)
+    let norm_quads = normalize_dataset(dataset, base_ns, norm_ns, separator)
         .expect("Failed to normalise RDF after adding signature");
     println!("NORMED QUADS MAKE TRUSTY\n{}", norm_quads);
 
@@ -196,7 +197,7 @@ enum Field {
     Predicate,
     Object,
     Datatype,
-    // Lang,
+    Lang,
 }
 
 struct NormQuad {
@@ -209,36 +210,32 @@ struct NormQuad {
 }
 
 /// Fix normed URIs last fragments. Make sure it starts with #
-pub fn fix_normed_uri(uri: &str) -> String {
+pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
     if let Some(last_slash_index) = uri.rfind(' ') {
-        // println!("IN fix_normed_uri {}", &uri[last_slash_index + 1..]);
-        if uri[last_slash_index + 1..].starts_with('#') || uri[last_slash_index + 1..].is_empty() {
+        let last_frag = &uri[last_slash_index + 1..];
+        // println!("IN fix_normed_uri {}", last_frag);
+        if last_frag.starts_with(separator) || last_frag.is_empty() {
             uri.to_string()
-        } else if uri[last_slash_index + 1..].starts_with('/')
-            || uri[last_slash_index + 1..].starts_with('.')
-        {
+        } else if last_frag.starts_with('/') || last_frag.starts_with('.') {
             format!(
-                "{} #{}",
+                "{} {separator}{}",
                 &uri[..last_slash_index],
                 &uri[last_slash_index + 2..]
             )
         } else {
-            format!(
-                "{} #{}",
-                &uri[..last_slash_index],
-                &uri[last_slash_index + 1..]
-            )
+            format!("{} {separator}{}", &uri[..last_slash_index], last_frag)
         }
     } else {
         uri.to_string()
     }
 }
 
-/// Returns all the quads contained in the nanopub.
+/// Normalize the quads contained in the nanopub dataset to a string used for signing and generating trusty
 pub fn normalize_dataset(
     dataset: &LightDataset,
     base_ns: &str,
     norm_ns: &str,
+    separator: &str,
 ) -> Result<String, Box<dyn Error>> {
     let mut quads_vec: Vec<NormQuad> = vec![];
     let norm_base = format!("{} ", norm_ns.strip_suffix('#').unwrap_or(norm_ns));
@@ -246,6 +243,13 @@ pub fn normalize_dataset(
         Some(_) => &base_ns[..base_ns.len() - 1],
         None => base_ns,
     };
+    // TODO: get last char of namespace before and after the trusty. Default to . before trusty and # after
+    let last_char = base_ns.chars().last().unwrap_or('#');
+    // Already signed: http://www.nextprot.org/nanopubs#NX_Q9Y6K8_ESTEvidence_TS-2083.RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k.
+    // http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
+    //   becomes http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RAyBeXMqokAQZ5psoETKtkOeYzHnoIoXTgNFKRdLM8yzs#__head
+    //   last char after trusty becomes # and before .
+
     // println!("IN normalize_dataset {} {}", norm_ns, base_uri);
 
     // Convert dataset to a list of NormQuad struct
@@ -254,7 +258,7 @@ pub fn normalize_dataset(
 
         // Extract components of the quad and convert them to strings. Replace the base URI if present
         let graph = if quad.g().unwrap().iri().unwrap().to_string() == base_ns {
-            fix_normed_uri(&norm_base)
+            fix_normed_uri(&norm_base, separator)
         } else {
             fix_normed_uri(
                 &quad
@@ -264,13 +268,14 @@ pub fn normalize_dataset(
                     .unwrap()
                     .to_string()
                     .replace(base_uri, &norm_base),
+                separator,
             )
         };
 
         let subject = if quad.s().is_blank_node() {
-            fix_normed_uri(&quad.s().bnode_id().unwrap())
+            fix_normed_uri(&quad.s().bnode_id().unwrap(), separator)
         } else if quad.s().iri().unwrap().to_string() == base_ns {
-            fix_normed_uri(&norm_base)
+            fix_normed_uri(&norm_base, separator)
         } else {
             fix_normed_uri(
                 &quad
@@ -279,6 +284,7 @@ pub fn normalize_dataset(
                     .unwrap()
                     .to_string()
                     .replace(base_uri, &norm_base),
+                separator,
             )
         };
 
@@ -294,7 +300,7 @@ pub fn normalize_dataset(
 
         let object = if quad.o().is_iri() {
             if quad.o().iri().unwrap().to_string() == base_ns {
-                fix_normed_uri(&norm_base)
+                fix_normed_uri(&norm_base, separator)
             } else {
                 fix_normed_uri(
                     &quad
@@ -303,6 +309,7 @@ pub fn normalize_dataset(
                         .unwrap()
                         .to_string()
                         .replace(base_uri, &norm_base),
+                    separator,
                 )
             }
         } else if quad.o().is_blank_node() {
@@ -342,16 +349,19 @@ pub fn normalize_dataset(
 
     // Order the list of nquads
     use Field::*;
-    let orders = [Graph, Subject, Predicate, Object, Datatype];
+    let orders = [Graph, Subject, Predicate, Lang, Datatype, Object];
     quads_vec.sort_by(|a, b| {
         orders.iter().fold(Ordering::Equal, |acc, &field| {
             acc.then_with(|| match field {
                 Graph => a.graph.cmp(&b.graph),
                 Subject => a.subject.cmp(&b.subject),
                 Predicate => a.predicate.cmp(&b.predicate),
-                Object => a.object.cmp(&b.object),
-                Datatype => a.datatype.cmp(&b.datatype),
                 Lang => a.lang.cmp(&b.lang),
+                Datatype => a.datatype.cmp(&b.datatype),
+                Object => a.object.cmp(&b.object),
+                // Object => compare_object(&a.object, &b.object),
+                // Right now string comes first because starts with ^, but we need the URIs thats starts with "http" to be first
+                // Datatype => a.datatype.cmp(&b.datatype),
             })
         })
     });
@@ -375,3 +385,29 @@ pub fn normalize_dataset(
     }
     Ok(normed_quads)
 }
+
+// Compare objects to have ^ and @ ordered after other strings
+// fn compare_object(a: &str, b: &str) -> Ordering {
+//     println!("ABABAB {} {}", a, b);
+//     let starts_special_a = a.starts_with('^') || a.starts_with('@');
+//     let starts_special_b = b.starts_with('^') || b.starts_with('@');
+//     match (starts_special_a, starts_special_b) {
+//         (true, true) | (false, false) => std::cmp::Ord::cmp(&a, &b),
+//         (true, false) => Ordering::Greater,
+//         (false, true) => Ordering::Less,
+//     }
+// }
+
+// Compare datatypes to have ^ and @ ordered after other strings
+// fn compare_datatype(a: &str, b: &str) -> Ordering {
+//     println!("ABABAB compare_datatype {} {}", a, b);
+//     let starts_special_a = a.starts_with('^') || a.starts_with('@');
+//     let starts_special_b = b.starts_with('^') || b.starts_with('@');
+//     match (starts_special_a, starts_special_b) {
+//         (true, true) | (false, false) => std::cmp::Ord::cmp(&a, &b),
+//         (true, false) => Ordering::Greater,
+//         (false, true) => Ordering::Less,
+//     }
+// }
+// left: "RAPMJ82Auq8RcsMQg4OPyTF7LDp532oUGX2n0CNAKgpIA"
+// right: "RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k"

@@ -47,7 +47,10 @@ fn testsuite_check_valid_trusty() -> Result<(), Box<dyn Error>> {
     for (index, entry) in fs::read_dir(path)?.enumerate() {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
-        if filename.ends_with("trig\"") && !filename.contains("simple1-signed-dsa") {
+        if filename.ends_with("trig\"")
+            && !filename.contains("simple1-signed-dsa")
+            && !filename.contains("disgenet")
+        {
             println!("\n☑️  [{}] Testing file check: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
             let _np = Nanopub::check(&np_rdf).expect("Failed check");

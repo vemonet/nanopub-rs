@@ -32,7 +32,8 @@ pub struct NpInfo {
     pub prov: Iri<String>,
     pub pubinfo: Iri<String>,
     pub base_uri: String,
-    pub separator_char: String,
+    pub separator_before_trusty: String,
+    pub separator_after_trusty: String,
     pub trusty_hash: String,
     pub signature: String,
     pub signature_iri: Iri<String>,
@@ -92,17 +93,23 @@ impl Nanopub {
         let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
 
         let norm_ns = if !np_info.trusty_hash.is_empty() {
-            format!("{}{}", np_info.base_uri, np_info.separator_char)
+            format!("{}{}", np_info.base_uri, np_info.separator_before_trusty)
         } else {
             NP_PREF_NS.to_string()
         };
 
         // Check Trusty hash
-        let expected_hash = make_trusty(&dataset, &np_info.ns, &norm_ns).unwrap();
+        let expected_hash = make_trusty(
+            &dataset,
+            &np_info.ns,
+            &norm_ns,
+            &np_info.separator_after_trusty,
+        )
+        .unwrap();
         assert_eq!(expected_hash, np_info.trusty_hash);
         let mut msg: String = "1 trusty".to_string();
 
-        // TODO: also handle when no signature is present? Only check trusty
+        // If signature not present we only check trusty
 
         if !np_info.signature.is_empty() {
             // Remove the signature from the graph before re-generating it
@@ -113,8 +120,13 @@ impl Nanopub {
                 Some(&np_info.pubinfo),
             )?;
             // Normalize nanopub nquads to a string
-            let norm_quads = normalize_dataset(&dataset, &np_info.ns, &norm_ns)
-                .expect("Failed to normalise RDF before adding signature");
+            let norm_quads = normalize_dataset(
+                &dataset,
+                &np_info.ns,
+                &norm_ns,
+                &np_info.separator_after_trusty,
+            )
+            .expect("Failed to normalise RDF before adding signature");
             println!("NORMED QUADS CHECK\n{}", norm_quads);
 
             // Load public key
@@ -139,7 +151,10 @@ impl Nanopub {
             msg = format!("{} without signature", msg);
         }
 
-        println!("\n✅ Nanopub {}{}{} is valid: {}", BOLD, np_info.uri, END, msg);
+        println!(
+            "\n✅ Nanopub {}{}{} is valid: {}",
+            BOLD, np_info.uri, END, msg
+        );
         // TODO: check if the np has been published
         Ok(Self {
             uri: np_info.uri.to_string(),
@@ -285,8 +300,13 @@ impl Nanopub {
 
         // Normalize nanopub nquads to a string
         // let norm_ns = NP_PREF_NS;
-        let norm_quads = normalize_dataset(&dataset, np_info.ns.as_str(), norm_ns)
-            .expect("Failed to normalise RDF before adding signature");
+        let norm_quads = normalize_dataset(
+            &dataset,
+            np_info.ns.as_str(),
+            norm_ns,
+            &np_info.separator_after_trusty,
+        )
+        .expect("Failed to normalise RDF before adding signature");
         println!("NORMED QUADS\n{}", norm_quads);
 
         // Generate signature using the private key and normalized RDF
@@ -306,7 +326,13 @@ impl Nanopub {
         )?;
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
-        let trusty_hash = make_trusty(&dataset, np_info.ns.as_str(), norm_ns).unwrap();
+        let trusty_hash = make_trusty(
+            &dataset,
+            &np_info.ns,
+            norm_ns,
+            &np_info.separator_after_trusty,
+        )
+        .unwrap();
         let trusty_uri = format!(
             "{}{}",
             norm_ns.strip_suffix('#').unwrap_or(norm_ns),
@@ -455,21 +481,28 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
     let mut base_uri: Option<String> = None;
-    let mut separator_char: Option<String> = None;
+    let mut separator_before_trusty: String = '.'.to_string();
+    let mut separator_after_trusty: String = '#'.to_string();
     let mut trusty_hash: Option<String> = None;
-    let re = Regex::new(r"^(.*?)(/|#|\.)?(RA.*)?$").unwrap();
+    let re_trusty = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$").unwrap();
     // let re = Regex::new(r"^(.*?)(RA.*)?$").unwrap();
-    if let Some(caps) = re.captures(&np_iri) {
+    if let Some(caps) = re_trusty.captures(&np_ns) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
-        // The second group captures '/' or '#' if present.
-        separator_char = Some(caps.get(2).map_or(".", |m| m.as_str()).to_string());
-        // The third group captures everything after 'RA', if present.
+        // The second group captures '/' or '#' if present, defaults to .
+        separator_before_trusty = caps
+            .get(2)
+            .map_or(separator_before_trusty, |m| m.as_str().to_string())
+            .to_string();
+        // The last group captures everything after 'RA', if present.
         trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
+        separator_after_trusty = caps
+            .get(4)
+            .map_or(separator_after_trusty, |m| m.as_str().to_string())
+            .to_string();
     }
 
-    // TODO: get signature URI first, not always sig, default to sig if not present
-    // Extract signature
+    // Extract signature and its subject URI
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo.unwrap());
     let mut signature: Option<String> = None;
     let mut signature_iri: Iri<String> = Iri::new_unchecked(np_ns.get("sig").unwrap().to_string());
@@ -515,7 +548,8 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         prov: Iri::new_unchecked(prov.unwrap()),
         pubinfo: pubinfo_iri,
         base_uri: base_uri.unwrap(),
-        separator_char: separator_char.unwrap(),
+        separator_before_trusty,
+        separator_after_trusty,
         trusty_hash: trusty_hash.unwrap(),
         signature: signature.unwrap_or("".to_string()),
         signature_iri,
