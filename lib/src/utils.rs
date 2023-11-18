@@ -1,19 +1,5 @@
-use std::error::Error;
-use std::fmt;
-
 use sophia::api::{ns::Namespace, prefix::Prefix};
 use sophia::iri::Iri;
-
-#[derive(Debug)]
-pub struct NpError(pub String);
-
-impl Error for NpError {}
-
-impl fmt::Display for NpError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 pub fn get_ns(ns: &str) -> Namespace<String> {
     match ns {

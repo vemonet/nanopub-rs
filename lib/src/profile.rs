@@ -8,6 +8,7 @@ use std::{error::Error, fmt};
 
 use crate::constants::DEFAULT_NP_PROFILE;
 use crate::constants::{BOLD, END};
+use crate::error::NpError;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NpProfile {
@@ -24,7 +25,7 @@ impl NpProfile {
         name: &str,
         private_key: &str,
         introduction_nanopub_uri: Option<&str>,
-    ) -> Result<Self, Box<dyn Error>> {
+    ) -> Result<Self, NpError> {
         let (_priv_key, pubkey) = get_keys(private_key);
         Ok(Self {
             orcid_id: orcid_id.to_string(),
@@ -36,7 +37,7 @@ impl NpProfile {
     }
 
     /// Extract profile from YAML file
-    pub fn from_file(filepath: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_file(filepath: &str) -> Result<Self, NpError> {
         let filepath = if filepath.is_empty() {
             DEFAULT_NP_PROFILE
         } else {
@@ -45,8 +46,7 @@ impl NpProfile {
         let mut file = fs::File::open(filepath)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
-        let mut profile: NpProfile =
-            serde_yaml::from_str(&contents).expect("Error parsing profile.yml");
+        let mut profile: NpProfile = serde_yaml::from_str(&contents)?;
         // Read private and public keys from file
         profile.private_key = normalize_key(&fs::read_to_string(&profile.private_key)?)?;
         profile.public_key = normalize_key(&fs::read_to_string(&profile.public_key)?)?;
@@ -88,14 +88,12 @@ pub fn get_keys(private_key: &str) -> (RsaPrivateKey, RsaPublicKey) {
 
 /// Get a public key string for a `RsaPublicKey`
 pub fn get_pubkey_str(public_key: &RsaPublicKey) -> String {
-    normalize_key(
-        &RsaPublicKey::to_public_key_pem(&public_key, rsa::pkcs8::LineEnding::LF).unwrap(),
-    )
-    .unwrap()
+    normalize_key(&RsaPublicKey::to_public_key_pem(public_key, rsa::pkcs8::LineEnding::LF).unwrap())
+        .unwrap()
 }
 
 /// Normalize private/public keys (no prefix, no suffix, no newline)
-pub fn normalize_key(key: &str) -> Result<String, Box<dyn Error>> {
+pub fn normalize_key(key: &str) -> Result<String, NpError> {
     let mut normed_key = key.trim();
     let rm_prefix = "-----BEGIN PUBLIC KEY-----";
     if normed_key.starts_with(rm_prefix) {
@@ -109,12 +107,10 @@ pub fn normalize_key(key: &str) -> Result<String, Box<dyn Error>> {
 }
 
 pub fn get_default_profile_path() -> String {
-    // "/home/vemonet/.nanopub/profile.yml"
     format!(
         "{}/.nanopub/profile.yml",
         env::var("HOME")
             .or_else(|_| env::var("USERPROFILE"))
-            .unwrap_or("".to_string())
+            .unwrap_or("~".to_string())
     )
 }
-// pub const DEFAULT_NP_PROFILES: &str = &format!("{}/.nanopub/profile.yml", env::var("HOME").or_else(|_| env::var("USERPROFILE")).unwrap_or("".to_string()));

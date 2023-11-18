@@ -1,11 +1,10 @@
 use clap::{arg, Command};
 use nanopub::{profile::get_default_profile_path, Nanopub, NpProfile};
-use std::{fs, path::Path};
+use std::{error::Error, fs, path::Path};
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
 // cargo run -- sign tests/resources/nanopub_test_blank.trig -k tests/resources/id_rsa
-fn main() {
-    // let default_profile = get_default_profile_path();
+fn main() -> Result<(), Box<dyn Error>> {
     let cmd = Command::new("nanopub")
         .bin_name("np")
         // .version("1.0")
@@ -49,7 +48,6 @@ fn main() {
 
     let matches = cmd.get_matches();
 
-    // TODO: get ORCID from ~/.nanopub/profile.yml
     match matches.subcommand() {
         Some(("sign", sub)) => {
             let orcid = "http://orcid.org/0000-0000-0000-0000";
@@ -58,14 +56,14 @@ fn main() {
             let profile_file = sub.get_one::<String>("profile").unwrap();
 
             // Read RDF from file and get profile
-            let np_rdf = fs::read_to_string(np_file).unwrap();
+            let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
-                let private_key = fs::read_to_string(key_file).unwrap();
-                NpProfile::new(orcid, "", &private_key, None).unwrap()
+                let private_key = fs::read_to_string(key_file)?;
+                NpProfile::new(orcid, "", &private_key, None)?
             } else if !profile_file.is_empty() {
-                NpProfile::from_file(profile_file).unwrap()
+                NpProfile::from_file(profile_file)?
             } else {
-                NpProfile::from_file(&get_default_profile_path()).unwrap()
+                NpProfile::from_file(&get_default_profile_path())?
             };
             println!("✍️  Signing {}", np_file);
             let np = Nanopub::sign(&np_rdf, &profile).unwrap();
@@ -90,29 +88,29 @@ fn main() {
             let profile_file = sub.get_one::<String>("profile").unwrap();
 
             // Read RDF from file and get profile
-            let np_rdf = fs::read_to_string(np_file).unwrap();
-
+            let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
-                let private_key = fs::read_to_string(key_file).unwrap();
-                NpProfile::new(orcid, "", &private_key, None).unwrap()
+                let private_key = fs::read_to_string(key_file)?;
+                NpProfile::new(orcid, "", &private_key, None)?
             } else if !profile_file.is_empty() {
-                NpProfile::from_file(profile_file).unwrap()
+                NpProfile::from_file(profile_file)?
             } else {
-                NpProfile::from_file(&get_default_profile_path()).unwrap()
+                NpProfile::from_file(&get_default_profile_path())?
             };
             println!("📬️ Publishing {}", np_file);
-            let _ = Nanopub::publish(&np_rdf, &profile, None);
+            let _ = Nanopub::publish(&np_rdf, &profile, None)?;
             // println!("{}", np);
         }
         Some(("check", sub)) => {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             // Read RDF file
-            let np_rdf = fs::read_to_string(np_file).unwrap();
+            let np_rdf = fs::read_to_string(np_file)?;
             println!("🔎 Checking {}", np_file);
-            Nanopub::check(&np_rdf).unwrap();
+            Nanopub::check(&np_rdf)?;
             // println!("{}", np);
         }
         // TODO: verify
         _ => {}
     }
+    Ok(())
 }

@@ -1,8 +1,9 @@
 use crate::constants::{BOLD, END, NP_PREF_NS, TEMP_NP_URI, TEST_SERVER};
+use crate::error::NpError;
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::publish_np;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{get_ns, get_prefixes, NpError};
+use crate::utils::{get_ns, get_prefixes};
 
 use base64;
 use base64::{engine, Engine as _};
@@ -19,6 +20,7 @@ use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
+use std::collections::HashSet;
 use std::error::Error;
 use std::fmt::format;
 use std::{fmt, str};
@@ -87,12 +89,11 @@ impl Nanopub {
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
     /// let np = Nanopub::check(&np_rdf).unwrap();
     /// ```
-    ///
-    pub fn check(rdf: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn check(rdf: &str) -> Result<Self, NpError> {
         let mut dataset: LightDataset = trig::parse_str(rdf)
             .collect_quads()
             .expect("Failed to parse RDF");
-        let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
+        let np_info = extract_np_info(&dataset)?;
 
         let norm_ns = if !np_info.trusty_hash.is_empty() {
             format!("{}{}", np_info.base_uri, np_info.separator_before_trusty)
@@ -106,13 +107,11 @@ impl Nanopub {
             &np_info.ns,
             &norm_ns,
             &np_info.separator_after_trusty,
-        )
-        .unwrap();
+        )?;
         assert_eq!(expected_hash, np_info.trusty_hash);
         let mut msg: String = "1 trusty".to_string();
 
         // If signature not present we only check trusty
-
         if !np_info.signature.is_empty() {
             // Remove the signature from the graph before re-generating it
             dataset.remove(
@@ -127,27 +126,19 @@ impl Nanopub {
                 &np_info.ns,
                 &norm_ns,
                 &np_info.separator_after_trusty,
-            )
-            .expect("Failed to normalise RDF before adding signature");
+            )?;
             println!("NORMED QUADS CHECK\n{}", norm_quads);
 
             // Load public key
-            let pubkey_bytes = engine::general_purpose::STANDARD
-                .decode(&np_info.public_key)
-                .expect("Error decoding public key");
-            let pubkey = RsaPublicKey::from_public_key_der(&pubkey_bytes)
-                .expect("Failed to parse RSA public key");
+            let pubkey_bytes = engine::general_purpose::STANDARD.decode(&np_info.public_key)?;
+            let pubkey = RsaPublicKey::from_public_key_der(&pubkey_bytes)?;
 
             // Regenerate and check the signature hash
-            pubkey
-                .verify(
-                    Pkcs1v15Sign::new::<Sha256>(),
-                    &Sha256::digest(norm_quads.as_bytes()),
-                    &engine::general_purpose::STANDARD
-                        .decode(np_info.signature.as_bytes())
-                        .unwrap(),
-                )
-                .expect("Failed to verify the Nanopub signature hash");
+            pubkey.verify(
+                Pkcs1v15Sign::new::<Sha256>(),
+                &Sha256::digest(norm_quads.as_bytes()),
+                &engine::general_purpose::STANDARD.decode(np_info.signature.as_bytes())?,
+            )?;
             msg = format!("{} with signature", msg);
         } else {
             msg = format!("{} without signature", msg);
@@ -195,18 +186,16 @@ impl Nanopub {
         rdf: &str,
         profile: &NpProfile,
         server_url: Option<&str>,
-    ) -> Result<Self, Box<dyn Error>> {
+    ) -> Result<Self, NpError> {
         // If the nanopub is already signed we verify it, then publish it
-        let dataset: LightDataset = trig::parse_str(rdf)
-            .collect_quads()
-            .expect("Failed to parse RDF");
-        let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
+        let dataset: LightDataset = trig::parse_str(rdf).collect_quads().unwrap();
+        let np_info = extract_np_info(&dataset)?;
 
         let mut np = if np_info.signature.is_empty() {
             println!("Nanopub not signed, signing it before publishing");
-            Nanopub::sign(rdf, profile).unwrap()
+            Nanopub::sign(rdf, profile)?
         } else {
-            Nanopub::check(rdf).unwrap()
+            Nanopub::check(rdf)?
         };
 
         let server_url = if let Some(server_url) = server_url {
@@ -250,7 +239,7 @@ impl Nanopub {
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
     /// let np = Nanopub::sign(&np_rdf, &profile).unwrap();
     /// ```
-    pub fn sign(rdf: &str, profile: &NpProfile) -> Result<Self, Box<dyn Error>> {
+    pub fn sign(rdf: &str, profile: &NpProfile) -> Result<Self, NpError> {
         openssl_probe::init_ssl_cert_env_vars();
 
         let (priv_key, pubkey) = get_keys(&profile.private_key);
@@ -262,14 +251,11 @@ impl Nanopub {
             .expect("Failed to parse RDF");
 
         // Extract graph URLs from the nanopub (fails if np not valid)
-        let np_info = extract_np_info(&dataset)
-            .expect("Could not extract infos from the Nanopublication. It is probably not valid.");
+        let np_info = extract_np_info(&dataset)?;
 
-        dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri).unwrap();
+        dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri)?;
 
-        let np_info = extract_np_info(&dataset).expect(
-            "Could not extract infos from the Nanopublication after replacing blank nodes.",
-        );
+        let np_info = extract_np_info(&dataset)?;
         println!("PUBINFO 2 {}", np_info);
 
         // Add triples about the signature in the pubinfo
@@ -307,17 +293,14 @@ impl Nanopub {
             np_info.ns.as_str(),
             norm_ns,
             &np_info.separator_after_trusty,
-        )
-        .expect("Failed to normalise RDF before adding signature");
+        )?;
         println!("NORMED QUADS\n{}", norm_quads);
 
         // Generate signature using the private key and normalized RDF
-        let signature_vec = priv_key
-            .sign(
-                Pkcs1v15Sign::new::<Sha256>(),
-                &Sha256::digest(norm_quads.as_bytes()),
-            )
-            .expect("Failed to sign nanopub");
+        let signature_vec = priv_key.sign(
+            Pkcs1v15Sign::new::<Sha256>(),
+            &Sha256::digest(norm_quads.as_bytes()),
+        )?;
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
         // Add the signature to the pubinfo graph
         dataset.insert(
@@ -333,16 +316,11 @@ impl Nanopub {
             &np_info.ns,
             norm_ns,
             &np_info.separator_after_trusty,
-        )
-        .unwrap();
-        let trusty_uri = format!(
-            "{}{}",
-            norm_ns.strip_suffix('#').unwrap_or(norm_ns),
-            trusty_hash
-        );
-        let trusty_ns = format!("{}{}", trusty_uri, "#");
-        dataset = replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)
-            .unwrap();
+        )?;
+        let trusty_uri = format!("{norm_ns}{trusty_hash}");
+        let trusty_ns = format!("{trusty_uri}#");
+        dataset =
+            replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)?;
 
         // Prepare the trig serializer
         let prefixes = get_prefixes(&trusty_uri, &trusty_ns);
@@ -351,10 +329,7 @@ impl Nanopub {
             .with_prefix_map(&prefixes[..]);
         let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
 
-        let rdf_str = trig_stringifier
-            .serialize_dataset(&dataset)
-            .expect("Unable to serialize dataset to trig")
-            .to_string();
+        let rdf_str = trig_stringifier.serialize_dataset(&dataset)?.to_string();
 
         // Return the signed Nanopub object
         Ok(Self {
@@ -400,59 +375,74 @@ impl fmt::Display for Nanopub {
 
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
 pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
-    let mut np_url: Option<String> = None;
-    let mut head: Option<String> = None;
-    let mut assertion: Option<String> = None;
-    let mut prov: Option<String> = None;
-    let mut pubinfo: Option<String> = None;
+    let mut np_url: String = "".to_string();
+    let mut head: String = "".to_string();
+    let mut assertion: String = "".to_string();
+    let mut prov: String = "".to_string();
+    let mut pubinfo: String = "".to_string();
 
     // Extract nanopub URL and head graph
     for q in dataset.quads_matching(
         Any,
         [&rdf::type_],
-        [get_ns("np").get("Nanopublication").unwrap()],
+        [get_ns("np").get("Nanopublication")?],
         Any,
     ) {
-        if np_url.is_some() {
+        if !np_url.is_empty() {
+            // return Err(Box::new(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string())));
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
-            np_url = Some(q.unwrap().s().iri().unwrap().to_string());
-            head = Some(q.unwrap().g().unwrap().iri().unwrap().to_string());
+            np_url = q?.s().iri().unwrap().to_string();
+            // np_url = match q {
+            //     Ok(val) => val.s().iri()?.to_string(),
+            //     Err(e) => return Err(NpError::from(e))
+            // };
+            // head = match q {
+            //     Ok(val) => val.g()?.iri()?.to_string(),
+            //     Err(e) => return Err(NpError::from(e))
+            // };
+            head = q?.g().unwrap().iri().unwrap().to_string();
         }
     }
-    if np_url.is_none() {
+    // TODO: .ok_or(NpError("Appropriate error message".to_string()))?
+    if np_url.is_empty() {
         return Err(NpError(
             "The provided RDF does not contain a Nanopublication.".to_string(),
         ));
     }
 
-    let np_iri: Iri<String> = Iri::new_unchecked(np_url.unwrap());
-    let head_iri: Iri<String> = Iri::new_unchecked(head.unwrap());
+    let np_iri: Iri<String> = Iri::new_unchecked(np_url);
+    let head_iri: Iri<String> = Iri::new_unchecked(head);
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_matching(
         [&np_iri],
-        [get_ns("np").get("hasAssertion").unwrap()],
+        [get_ns("np").get("hasAssertion")?],
         Any,
         [Some(&head_iri)],
     ) {
-        assertion = Some(q.unwrap().o().iri().unwrap().to_string());
+        // assertion = q?.o().iri().unwrap().to_string();
+        assertion = q?
+            .o()
+            .iri()
+            .ok_or(NpError("IRI failed".to_string()))?
+            .to_string();
     }
     for q in dataset.quads_matching(
         [&np_iri],
-        [get_ns("np").get("hasProvenance").unwrap()],
+        [get_ns("np").get("hasProvenance")?],
         Any,
         [Some(&head_iri)],
     ) {
-        prov = Some(q.unwrap().o().iri().unwrap().to_string());
+        prov = q?.o().iri().unwrap().to_string();
     }
     for q in dataset.quads_matching(
         [&np_iri],
-        [get_ns("np").get("hasPublicationInfo").unwrap()],
+        [get_ns("np").get("hasPublicationInfo")?],
         Any,
         [Some(&head_iri)],
     ) {
-        pubinfo = Some(q.unwrap().o().iri().unwrap().to_string());
+        pubinfo = q?.o().iri().unwrap().to_string();
     }
 
     // Remove last char if it is # or / to get the URI
@@ -471,24 +461,24 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
-    let mut base_uri: Option<String> = None;
+    let mut base_uri: String = "".to_string();
     let mut separator_before_trusty: String = '.'.to_string();
     let mut separator_after_trusty: String = "".to_string();
     let mut trusty_hash: String = "".to_string();
 
     // Get just the Trusty hash from the URI
-    let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$").unwrap();
+    let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
     if let Some(caps) = re_trusty.captures(&np_iri.as_ref()) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
     }
 
     // Get the base URI and separators from the namespace
-    let re_trusty_ns = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$").unwrap();
-    // let re = Regex::new(r"^(.*?)(RA.*)?$").unwrap();
+    let re_trusty_ns = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$")?;
+    // let re = Regex::new(r"^(.*?)(RA.*)?$")?;
     if let Some(caps) = re_trusty_ns.captures(np_ns_str) {
         // The first group captures everything up to a '/' or '#', non-greedy.
-        base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
+        base_uri = caps.get(1).map_or("", |m| m.as_str()).to_string();
         // The second group captures '/' or '#' if present, defaults to .
         separator_before_trusty = caps
             .get(2)
@@ -523,55 +513,139 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     println!("np_ns!!! {}", *np_ns);
 
     // Extract signature and its subject URI
-    let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo.unwrap());
-    let mut signature: Option<String> = None;
-    let mut signature_iri: Iri<String> = Iri::new_unchecked(np_ns.get("sig").unwrap().to_string());
+    let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
+    let mut signature: String = "".to_string();
+    let mut signature_iri: Iri<String> = Iri::new_unchecked(np_ns.get("sig")?.to_string());
     for q in dataset.quads_matching(
         Any,
-        [get_ns("npx").get("hasSignature").unwrap()],
+        [get_ns("npx").get("hasSignature")?],
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        signature = Some(q.unwrap().o().lexical_form().unwrap().to_string());
-        signature_iri = Iri::new_unchecked(q.unwrap().s().iri().unwrap().to_string());
+        signature = q?.o().lexical_form().unwrap().to_string();
+        signature_iri = Iri::new_unchecked(q?.s().iri().unwrap().to_string());
     }
 
     // Extract public key
     let mut pubkey: Option<String> = None;
     for q in dataset.quads_matching(
         [&signature_iri],
-        [get_ns("npx").get("hasPublicKey").unwrap()],
+        [get_ns("npx").get("hasPublicKey")?],
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        pubkey = Some(q.unwrap().o().lexical_form().unwrap().to_string());
+        pubkey = Some(q?.o().lexical_form().unwrap().to_string());
     }
 
     // Extract algo
     let mut algo: Option<String> = None;
     for q in dataset.quads_matching(
         [&signature_iri],
-        [get_ns("npx").get("hasAlgorithm").unwrap()],
+        [get_ns("npx").get("hasAlgorithm")?],
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        algo = Some(q.unwrap().o().lexical_form().unwrap().to_string());
+        algo = Some(q?.o().lexical_form().unwrap().to_string());
     }
 
-    println!("SIIIIG {}", signature_iri);
+    // Check minimal required triples in assertion, prov, pubinfo graphs
+    let assertion_iri = Iri::new_unchecked(assertion);
+    let prov_iri = Iri::new_unchecked(prov);
+    if head_iri.is_empty() {
+        return Err(NpError("Invalid Nanopub: no Head graph found.".to_string()));
+    }
+    if assertion_iri.is_empty() {
+        return Err(NpError(
+            "Invalid Nanopub: no Assertion graph found.".to_string(),
+        ));
+    }
+    if prov_iri.is_empty() {
+        return Err(NpError(
+            "Invalid Nanopub: no Provenance graph found.".to_string(),
+        ));
+    }
+    if pubinfo_iri.is_empty() {
+        return Err(NpError(
+            "Invalid Nanopub: no PubInfo graph found.".to_string(),
+        ));
+    }
+    if dataset
+        .quads_matching(Any, Any, Any, [Some(assertion_iri.clone())])
+        .next()
+        .is_none()
+    {
+        return Err(NpError(
+            "Invalid Nanopub: no triples in the assertion graph.".to_string(),
+        ));
+    }
+    if dataset
+        .quads_matching(Any, Any, Any, [Some(prov_iri.clone())])
+        .next()
+        .is_none()
+    {
+        return Err(NpError(
+            "Invalid Nanopub: no triples in the provenance graph.".to_string(),
+        ));
+    }
+    if dataset
+        .quads_matching(Any, Any, Any, [Some(pubinfo_iri.clone())])
+        .next()
+        .is_none()
+    {
+        return Err(NpError(
+            "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
+        ));
+    }
+    if dataset
+        .quads_matching([assertion_iri.clone()], Any, Any, [Some(prov_iri.clone())])
+        .next()
+        .is_none()
+    {
+        return Err(NpError("Invalid Nanopub: no triples with the assertion graph as subject in the provenance graph.".to_string()));
+    }
+    if dataset
+        .quads_matching(
+            [
+                np_iri.clone(),
+                Iri::new_unchecked(np_ns.get("")?.to_string()),
+            ],
+            Any,
+            Any,
+            [Some(pubinfo_iri.clone())],
+        )
+        .next()
+        .is_none()
+    {
+        return Err(NpError(
+            "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
+                .to_string(),
+        ));
+    }
+    let mut graph_names = HashSet::new();
+    for g in dataset.graph_names() {
+        println!("GRAPH NAMES! {}", g?.iri().unwrap());
+        if let Some(graph_name) = g?.iri() {
+            graph_names.insert(graph_name.to_string());
+        }
+    }
+    if graph_names.len() != 4 {
+        return Err(NpError(
+            format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
+        ));
+    }
 
     Ok(NpInfo {
         uri: np_iri,
         ns: np_ns,
         head: head_iri,
-        assertion: Iri::new_unchecked(assertion.unwrap()),
-        prov: Iri::new_unchecked(prov.unwrap()),
+        assertion: assertion_iri,
+        prov: prov_iri,
         pubinfo: pubinfo_iri,
-        base_uri: base_uri.unwrap(),
+        base_uri,
         separator_before_trusty,
         separator_after_trusty,
         trusty_hash,
-        signature: signature.unwrap_or("".to_string()),
+        signature,
         signature_iri,
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),

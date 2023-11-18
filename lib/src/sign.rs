@@ -1,4 +1,4 @@
-use crate::utils::NpError;
+use crate::error::NpError;
 
 use base64::{alphabet, engine, Engine as _};
 use regex::Regex;
@@ -9,7 +9,6 @@ use sophia::api::term::Term;
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use std::collections::HashMap;
-use std::error::Error;
 use std::{cmp::Ordering, str};
 
 /// Generate TrustyURI using base64 encoding
@@ -19,15 +18,13 @@ pub fn make_trusty(
     norm_ns: &str,
     separator: &str,
 ) -> Result<String, NpError> {
-    let norm_quads = normalize_dataset(dataset, base_ns, norm_ns, separator)
-        .expect("Failed to normalise RDF after adding signature");
+    let norm_quads = normalize_dataset(dataset, base_ns, norm_ns, separator)?;
     println!("NORMED QUADS MAKE TRUSTY\n{}", norm_quads);
 
     let base64_engine = engine::GeneralPurpose::new(
         &alphabet::Alphabet::new(
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",
-        )
-        .unwrap(),
+        )?,
         engine::GeneralPurposeConfig::new().with_encode_padding(false),
     );
     let trusty_hash = format!(
@@ -47,10 +44,10 @@ pub fn replace_bnodes(
     let mut new_dataset = LightDataset::new();
     let mut bnode_map: HashMap<String, usize> = HashMap::new();
     let mut bnode_counter = 1;
-    let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[a-zA-Z0-9^_]+)$", base_uri)).unwrap();
+    let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[a-zA-Z0-9^_]+)$", base_uri))?;
 
     for quad in dataset.quads() {
-        let quad = quad.unwrap();
+        let quad = quad?;
 
         // Replace bnode in subjects, and add 1 underscore for URI using already underscore
         let subject = if quad.s().is_blank_node() {
@@ -112,23 +109,17 @@ pub fn replace_bnodes(
                 let new_ending = matche.replacen('_', "__", 1);
                 object_iri.truncate(object_iri.len() - matche.len()); // Remove the original ending
                 object_iri.push_str(&new_ending);
-                new_dataset
-                    .insert(
-                        &Iri::new_unchecked(subject),
-                        quad.p(),
-                        &Iri::new_unchecked(object_iri),
-                        graph,
-                    )
-                    .unwrap();
+                new_dataset.insert(
+                    &Iri::new_unchecked(subject),
+                    quad.p(),
+                    &Iri::new_unchecked(object_iri),
+                    graph,
+                )?;
             } else {
-                new_dataset
-                    .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)
-                    .unwrap();
+                new_dataset.insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
             }
         } else {
-            new_dataset
-                .insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)
-                .unwrap();
+            new_dataset.insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
         };
     }
     Ok(new_dataset)
@@ -146,7 +137,7 @@ pub fn replace_ns_in_quads(
     // println!("IN REPLACE: {} {}", old_ns, new_ns);
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
-        let quad = quad.unwrap();
+        let quad = quad?;
         let s = quad.s().iri().unwrap().to_string();
         // Replace URI in subjects
         let subject = if s == old_ns || s == old_uri {
@@ -173,19 +164,17 @@ pub fn replace_ns_in_quads(
                     quad.p(),
                     &Iri::new_unchecked(new_uri.to_string()),
                     graph,
-                )
-                .unwrap();
+                )?;
             } else {
                 new.insert(
                     &subject,
                     quad.p(),
                     &Iri::new_unchecked(o.replace(old_ns, new_ns)),
                     graph,
-                )
-                .unwrap();
+                )?;
             }
         } else {
-            new.insert(&subject, quad.p(), quad.o(), graph).unwrap();
+            new.insert(&subject, quad.p(), quad.o(), graph)?;
         };
     }
     Ok(new)
@@ -238,26 +227,21 @@ pub fn normalize_dataset(
     base_ns: &str,
     norm_ns: &str,
     separator: &str,
-) -> Result<String, Box<dyn Error>> {
+) -> Result<String, NpError> {
     let mut quads_vec: Vec<NormQuad> = vec![];
     let norm_base = format!("{} ", norm_ns.strip_suffix('#').unwrap_or(norm_ns));
     let base_uri = match base_ns.chars().last() {
         Some(_) => &base_ns[..base_ns.len() - 1],
         None => base_ns,
     };
-    // TODO: get last char of namespace before and after the trusty. Default to . before trusty and # after
-    let last_char = base_ns.chars().last().unwrap_or('#');
     // Already signed: http://www.nextprot.org/nanopubs#NX_Q9Y6K8_ESTEvidence_TS-2083.RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k.
     // http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
     //   becomes http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RAyBeXMqokAQZ5psoETKtkOeYzHnoIoXTgNFKRdLM8yzs#__head
     //   last char after trusty becomes # and before .
 
-    println!("IN normalize_dataset {} {}", norm_ns, separator);
-
     // Convert dataset to a list of NormQuad struct
     for quad in dataset.quads() {
-        let quad = quad.unwrap();
-
+        let quad = quad?;
         // Extract components of the quad and convert them to strings. Replace the base URI if present
         let graph = if quad.g().unwrap().iri().unwrap().to_string() == base_ns {
             fix_normed_uri(&norm_base, separator)

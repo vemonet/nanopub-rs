@@ -7,6 +7,8 @@
 // #![ no_implicit_prelude ]
 // https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html
 
+mod constants;
+mod error;
 /// A module to work with nanopublications
 ///
 /// ## Usage
@@ -23,7 +25,6 @@
 ///     &profile,
 /// );
 /// ```
-mod constants;
 pub mod nanopub;
 pub mod profile;
 mod publish;
