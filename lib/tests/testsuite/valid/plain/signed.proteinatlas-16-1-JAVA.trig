@@ -18,11 +18,11 @@
 sub:__head {
   sub:__assertion a np:Assertion;
     rdfs:comment "IHC shows Not_detected protein expression of ENSG00000000003 in lung(macrophages) with a Approved evidence/reliability" .
-  
+
   sub:__provenance a np:Provenance .
-  
+
   sub:__publicationInfo a np:PublicationInfo .
-  
+
   this: a np:Nanopublication;
     np:hasAssertion sub:__assertion;
     np:hasProvenance sub:__provenance;
@@ -32,13 +32,13 @@ sub:__head {
 sub:__assertion {
   hpa:ENSG00000000003 nif:nlx_qual_1010003 "Not_detected";
     bfo:BFO_0000066 hpa:TS-0030 .
-  
+
   hpa:TS-0030 a tissue:TS-0030 .
 }
 
 sub:__provenance {
   sub:__assertion a :IHCEvidence .
-  
+
   this: prv:usedData hpa:ENSG00000000003, hpas:HPA004109;
     wi:evidence "Approved";
     prov:wasDerivedFrom :IHCAssay;
@@ -50,7 +50,7 @@ sub:__publicationInfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
     npx:hasSignature "XU9+aFGZ8PZbvc0yljHDiGGfTC0qtyC7j4wT/xLIOn56kahbeIc2t1cgCT1Dpvrv12V3j4nsTy92Vfb5W0c5XCObYoHJZDdWaymez6+hZ8RqSGdmBkMYTFY8sBo3l5ZvZtuXbsS3ZoX6yQm0omySO/RcTcxsx76RE1SHkA9o+m0=";
     npx:hasSignatureTarget this: .
-  
+
   this: dcterms:contributor <http://orcid.org/0000-0001-6818-334X>, <http://orcid.org/0000-0002-8777-5612>,
       <http://orcid.org/0000-0003-3014-5502>, <http://www.researcherid.com/rid/E-7370-2012>,
       <http://www.researcherid.com/rid/J-7843-2013>;

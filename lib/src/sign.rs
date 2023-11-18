@@ -21,7 +21,7 @@ pub fn make_trusty(
 ) -> Result<String, NpError> {
     let norm_quads = normalize_dataset(dataset, base_ns, norm_ns)
         .expect("Failed to normalise RDF after adding signature");
-    // println!("NORMED QUADS AFTER SIGNING\n{}", norm_quads);
+    println!("NORMED QUADS MAKE TRUSTY\n{}", norm_quads);
 
     let base64_engine = engine::GeneralPurpose::new(
         &alphabet::Alphabet::new(
@@ -46,14 +46,12 @@ pub fn replace_bnodes(
     let mut new_dataset = LightDataset::new();
     let mut bnode_map: HashMap<String, usize> = HashMap::new();
     let mut bnode_counter = 1;
-    let re_underscore_uri = Regex::new(&format!(r"{}(_+\d+)$", base_ns)).unwrap();
-    // let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[a-zA-Z0-9^_]+)$", base_uri)).unwrap();
-    // let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[0-9^_]+)$", base_uri)).unwrap();
+    let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[a-zA-Z0-9^_]+)$", base_uri)).unwrap();
 
     for quad in dataset.quads() {
         let quad = quad.unwrap();
 
-        // Replace bnode in subjects
+        // Replace bnode in subjects, and add 1 underscore for URI using already underscore
         let subject = if quad.s().is_blank_node() {
             let bnode_id = quad.s().bnode_id().unwrap().to_string();
             bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
@@ -64,12 +62,11 @@ pub fn replace_bnodes(
             format!("{}_{}", base_ns, bnode_map[&bnode_id])
         } else if let Some(caps) = re_underscore_uri.captures(&quad.s().iri().unwrap().as_ref()) {
             let mut subject_iri = quad.s().iri().unwrap().to_string();
-            println!("MATCH SUBJECT UNDERSCORE URI: {}", subject_iri);
-            let new_ending = caps.get(1).unwrap().as_str().replacen('_', "__", 1);
-            subject_iri.truncate(subject_iri.len() - caps.get(1).unwrap().as_str().len()); // Remove the original ending
+            let matche = caps.get(1).unwrap().as_str();
+            let new_ending = matche.replacen('_', "__", 1);
+            subject_iri.truncate(subject_iri.len() - matche.len()); // Remove the original ending
             subject_iri.push_str(&new_ending);
             subject_iri
-            // concat!(base_ns.to_owned(), new_ending.to_owned())
         } else {
             quad.s().iri().unwrap().to_string()
         };
@@ -78,9 +75,11 @@ pub fn replace_bnodes(
             re_underscore_uri.captures(&quad.g().unwrap().iri().unwrap().as_ref())
         {
             let mut graph_iri = quad.g().unwrap().iri().unwrap().to_string();
-            let new_ending = caps.get(1).unwrap().as_str().replacen('_', "__", 1);
-            graph_iri.truncate(graph_iri.len() - caps.get(1).unwrap().as_str().len()); // Remove the original ending
+            let matche = caps.get(1).unwrap().as_str();
+            let new_ending = matche.replacen('_', "__", 1);
+            graph_iri.truncate(graph_iri.len() - matche.len()); // Remove the original ending
             graph_iri.push_str(&new_ending);
+            println!("MATCH GRAPH UNDERSCORE URI: {} {}", graph_iri, matche);
             Some(Iri::new_unchecked(graph_iri))
         } else {
             Some(Iri::new_unchecked(
@@ -106,22 +105,13 @@ pub fn replace_bnodes(
                 )
                 .unwrap();
         } else if quad.o().is_iri() {
-            // Handle URI ending with #_1 to double _
-            println!(
-                "NOOORM {} {}",
-                &quad.o().iri().unwrap().as_ref(),
-                re_underscore_uri
-            );
+            // Handle URI ending with #_ to double _
             if let Some(caps) = re_underscore_uri.captures(&quad.o().iri().unwrap().as_ref()) {
-                // captures
-                // base_uri = Some(caps.get(1).map_or("", |m| m.as_str()).to_string());
-                // matches.
-                let mut object_iri = quad.s().iri().unwrap().to_string();
-                println!("MATCH OBJECT UNDERSCORE URI: {}", object_iri);
-                let new_ending = caps.get(1).unwrap().as_str().replacen('_', "__", 1);
-                object_iri.truncate(object_iri.len() - caps.get(1).unwrap().as_str().len()); // Remove the original ending
+                let mut object_iri = quad.o().iri().unwrap().to_string();
+                let matche = caps.get(1).unwrap().as_str();
+                let new_ending = matche.replacen('_', "__", 1);
+                object_iri.truncate(object_iri.len() - matche.len()); // Remove the original ending
                 object_iri.push_str(&new_ending);
-                println!("OBJECT CHANGED {} {}", object_iri, new_ending);
                 new_dataset
                     .insert(
                         &Iri::new_unchecked(subject),
@@ -152,6 +142,8 @@ pub fn replace_ns_in_quads(
     new_ns: &str,
     new_uri: &str,
 ) -> Result<LightDataset, NpError> {
+    let old_ns = old_ns.strip_suffix('.').unwrap_or(old_ns);
+    println!("IN REPLACE: {} {}", old_ns, new_ns);
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
         let quad = quad.unwrap();
@@ -218,6 +210,32 @@ struct NormQuad {
     lang: String,
 }
 
+/// Fix normed URIs with fragment that starts with / to use # in the normed
+pub fn fix_normed_uri(uri: &str) -> String {
+    if let Some(last_slash_index) = uri.rfind(' ') {
+        // println!("INNNN {}", &uri[last_slash_index + 1..]);
+        if uri[last_slash_index + 1..].starts_with('#') || uri[last_slash_index + 1..].is_empty() {
+            uri.to_string()
+        } else if uri[last_slash_index + 1..].starts_with('/')
+            || uri[last_slash_index + 1..].starts_with('.')
+        {
+            format!(
+                "{} #{}",
+                &uri[..last_slash_index],
+                &uri[last_slash_index + 2..]
+            )
+        } else {
+            format!(
+                "{} #{}",
+                &uri[..last_slash_index],
+                &uri[last_slash_index + 1..]
+            )
+        }
+    } else {
+        uri.to_string()
+    }
+}
+
 /// Returns all the quads contained in the nanopub.
 pub fn normalize_dataset(
     dataset: &LightDataset,
@@ -225,12 +243,12 @@ pub fn normalize_dataset(
     norm_ns: &str,
 ) -> Result<String, Box<dyn Error>> {
     let mut quads_vec: Vec<NormQuad> = vec![];
-    let norm_base = format!("{} ", norm_ns);
+    let norm_base = format!("{} ", norm_ns.strip_suffix('#').unwrap_or(norm_ns));
     let base_uri = match base_ns.chars().last() {
         Some(_) => &base_ns[..base_ns.len() - 1],
         None => base_ns,
     };
-    println!("IN normalize_dataset {} {}", norm_ns, base_uri);
+    // println!("IN normalize_dataset {} {}", norm_ns, base_uri);
 
     // Convert dataset to a list of NormQuad struct
     for quad in dataset.quads() {
@@ -238,37 +256,33 @@ pub fn normalize_dataset(
 
         // Extract components of the quad and convert them to strings. Replace the base URI if present
         let graph = if quad.g().unwrap().iri().unwrap().to_string() == base_ns {
-            norm_base.to_string()
+            fix_normed_uri(&norm_base)
         } else {
-            quad.g()
-                .unwrap()
-                .iri()
-                .unwrap()
-                .to_string()
-                .replace(base_uri, &norm_base)
+            fix_normed_uri(
+                &quad
+                    .g()
+                    .unwrap()
+                    .iri()
+                    .unwrap()
+                    .to_string()
+                    .replace(base_uri, &norm_base),
+            )
         };
 
         let subject = if quad.s().is_blank_node() {
-            quad.s().bnode_id().unwrap().to_string()
+            fix_normed_uri(&quad.s().bnode_id().unwrap())
         } else if quad.s().iri().unwrap().to_string() == base_ns {
-            norm_base.to_string()
+            fix_normed_uri(&norm_base)
         } else {
-            quad.s()
-                .iri()
-                .unwrap()
-                .to_string()
-                .replace(base_uri, &norm_base)
+            fix_normed_uri(
+                &quad
+                    .s()
+                    .iri()
+                    .unwrap()
+                    .to_string()
+                    .replace(base_uri, &norm_base),
+            )
         };
-        // Fix normed URIs with fragment that starts with / to use # in the normed
-        // let subject = if let Some(last_slash_index) = subject.rfind(' ') {
-        //     if subject[last_slash_index..].contains('#') {
-        //         subject.to_string()
-        //     } else {
-        //         format!("{}#{}", &subject[..last_slash_index], &subject[last_slash_index + 1..])
-        //     }
-        // } else {
-        //     subject.to_string()
-        // };
 
         let predicate = if quad.p().iri().unwrap().to_string() == base_ns {
             norm_base.to_string()
@@ -282,15 +296,19 @@ pub fn normalize_dataset(
 
         let object = if quad.o().is_iri() {
             if quad.o().iri().unwrap().to_string() == base_ns {
-                norm_base.to_string()
+                fix_normed_uri(&norm_base)
             } else {
-                quad.o()
-                    .iri()
-                    .unwrap()
-                    .to_string()
-                    .replace(base_uri, &norm_base)
+                fix_normed_uri(
+                    &quad
+                        .o()
+                        .iri()
+                        .unwrap()
+                        .to_string()
+                        .replace(base_uri, &norm_base),
+                )
             }
         } else if quad.o().is_blank_node() {
+            // TODO: remove? This should actually never happen since we replace all bnodes first
             quad.o().bnode_id().unwrap().to_string()
         } else {
             quad.o().lexical_form().unwrap().to_string()

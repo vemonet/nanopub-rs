@@ -17,6 +17,9 @@ pub fn publish_np(url: &str, np: &str) -> bool {
         // .header(header::ACCEPT, "application/json")
         .send()
         .unwrap();
+    // if res.status() != 201 {
+    //     println!("{}", res.text().unwrap());
+    // };
     res.status() == 201
 }
 

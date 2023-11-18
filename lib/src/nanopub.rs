@@ -44,6 +44,7 @@ impl fmt::Display for NpInfo {
         writeln!(f, "{}Namespace:{} {}", BOLD, END, *self.ns)?;
         writeln!(f, "{}Base URI:{} {}", BOLD, END, self.base_uri)?;
         writeln!(f, "{}Trusty Hash:{} {}", BOLD, END, self.trusty_hash)?;
+        writeln!(f, "{}Head Graph:{} {}", BOLD, END, self.head)?;
         writeln!(f, "{}Assertion Graph:{} {}", BOLD, END, self.assertion)?;
         Ok(())
     }
@@ -88,7 +89,6 @@ impl Nanopub {
             .expect("Failed to parse RDF");
         let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
 
-        println!("CHAR {}", np_info.separator_char);
         let norm_ns = if !np_info.trusty_hash.is_empty() {
             format!("{}{}", np_info.base_uri, np_info.separator_char)
         } else {
@@ -110,8 +110,6 @@ impl Nanopub {
         let norm_quads = normalize_dataset(&dataset, &np_info.ns, &norm_ns)
             .expect("Failed to normalise RDF before adding signature");
         println!("NORMED QUADS CHECK\n{}", norm_quads);
-
-        println!("PUBKEY {}", np_info.public_key);
 
         // Load public key
         let pubkey_bytes = engine::general_purpose::STANDARD
@@ -201,10 +199,7 @@ impl Nanopub {
                 BOLD, np.uri, END
             );
         } else {
-            println!(
-                "\n❌ Issue publishing the Nanopublication {}{}{}",
-                BOLD, np.uri, END
-            );
+            println!("\n❌ Issue publishing the Nanopublication \n{}", np);
         }
         np.set_published(published);
         Ok(np)
@@ -240,10 +235,15 @@ impl Nanopub {
             .expect("Failed to parse RDF");
 
         // Extract graph URLs from the nanopub (fails if np not valid)
-        let np_info = extract_np_info(&dataset).expect("The provided Nanopublication is not valid");
-        // println!("{}", np_info);
+        let np_info = extract_np_info(&dataset)
+            .expect("Could not extract infos from the Nanopublication. It is probably not valid.");
 
         dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri).unwrap();
+
+        let np_info = extract_np_info(&dataset).expect(
+            "Could not extract infos from the Nanopublication after replacing blank nodes.",
+        );
+        println!("PUBINFO 2 {}", np_info);
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
@@ -261,19 +261,9 @@ impl Nanopub {
         dataset.insert(
             np_info.ns.get("sig")?,
             get_ns("npx").get("hasSignatureTarget")?,
-            Iri::new_unchecked(TEMP_NP_URI),
+            np_info.ns.get("")?,
             Some(&np_info.pubinfo),
         )?;
-
-        // TODO: fix handling of base_uri in normalize
-        // http://purl.org/nanopub/temp/ANYTHING# becomes auto https://w3id.org/np/
-        // Otherwise we reuse the existing base URI:
-        // http://example.org/nanopub-validator-example/pubinfo
-        //   becomes "http://example.org/nanopub-validator-example/ #pubinfo"
-        // http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
-        //   has URI http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030
-        //   becomes "http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030. #__head"
-        //   with trusty: http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RA17kILxyG46VelvFd0N8LH6yYlxEfwumczTYMu3X5QA0
 
         let norm_ns = if np_info.ns.starts_with("http://purl.org/nanopub/temp/") {
             NP_PREF_NS
@@ -281,7 +271,7 @@ impl Nanopub {
             &np_info.ns
         };
         // If np URI don't end with # or / or . we add a . at the end
-        println!("norm_nsnorm_nsnorm_ns {}", norm_ns);
+        println!("norm_ns used for signing {}", norm_ns);
 
         // Normalize nanopub nquads to a string
         // let norm_ns = NP_PREF_NS;
@@ -307,7 +297,11 @@ impl Nanopub {
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
         let trusty_hash = make_trusty(&dataset, np_info.ns.as_str(), norm_ns).unwrap();
-        let trusty_uri = format!("{}{}", norm_ns, trusty_hash);
+        let trusty_uri = format!(
+            "{}{}",
+            norm_ns.strip_suffix('#').unwrap_or(norm_ns),
+            trusty_hash
+        );
         let trusty_ns = format!("{}{}", trusty_uri, "#");
         dataset = replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)
             .unwrap();
@@ -434,15 +428,18 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             np_iri
         };
 
-    // Make sure namespace ends with the right char
+    // Make sure namespace ends with the right char (#/.), stralso strip _ if it is at the end
     let np_ns_str = &head_iri[..np_iri.len() + 1];
-    println!("np_ns_str!!! {}", np_ns_str);
     let np_ns =
         if !np_ns_str.ends_with('#') && !np_ns_str.ends_with('/') && !np_ns_str.ends_with('.') {
-            Namespace::new_unchecked(format!("{}.", np_ns_str))
+            Namespace::new_unchecked(format!("{}.", &np_ns_str.strip_suffix('_').unwrap()))
+        // } else if !np_ns_str.ends_with('#') {
+        //     // Np ns always ends with #
+        //     Namespace::new_unchecked(format!("{}#", &np_ns_str))
         } else {
             Namespace::new_unchecked(np_ns_str.to_string())
         };
+    println!("np_ns!!! {}", *np_ns);
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
@@ -478,7 +475,6 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     ) {
         signature = Some(q.unwrap().o().lexical_form().unwrap().to_string());
     }
-    // println!("SIG! {}", np_ns.get("sig").unwrap());
 
     // Extract public key
     let mut pubkey: Option<String> = None;
