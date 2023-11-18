@@ -1,0 +1,5 @@
+orcid_id: https://orcid.org/0000-0000-0000-0000
+name: Test Person
+public_key: tests/resources/id_rsa.pub
+private_key: tests/resources/id_rsa
+introduction_nanopub_uri:

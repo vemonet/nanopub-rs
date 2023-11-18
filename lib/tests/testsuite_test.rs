@@ -1,15 +1,8 @@
 use nanopub::{Nanopub, NpProfile};
 use std::{error::Error, fs, path::Path};
 
-const ORCID: &str = "http://orcid.org/0000-0000-0000-0000";
 fn get_profile() -> NpProfile {
-    NpProfile::new(
-        ORCID,
-        "",
-        &fs::read_to_string("./tests/resources/id_rsa").unwrap(),
-        None,
-    )
-    .unwrap()
+    NpProfile::from_file("tests/resources/profile.yml").unwrap()
 }
 
 #[test]
@@ -71,10 +64,8 @@ fn testsuite_check_invalid_signed() -> Result<(), Box<dyn Error>> {
         if filename.ends_with("trig\"") && !filename.contains("simple1-signed-dsa") {
             println!("\n☑️  [{}] Testing file check: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
-            let result = std::panic::catch_unwind(|| {
-                Nanopub::check(&np_rdf).expect("Failed check");
-            });
-            assert!(result.is_err(), "The np check did not failed");
+            let np = Nanopub::check(&np_rdf);
+            assert!(np.is_err(), "The np check should have failed");
         }
     }
     Ok(())
@@ -90,17 +81,12 @@ fn testsuite_check_invalid_trusty() -> Result<(), Box<dyn Error>> {
         if filename.ends_with("trig\"") && !filename.contains("simple1-signed-dsa") {
             println!("\n☑️  [{}] Testing file check: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
-            let result = std::panic::catch_unwind(|| {
-                Nanopub::check(&np_rdf).expect("Failed check");
-            });
-            assert!(result.is_err(), "The np check did not failed");
+            let np = Nanopub::check(&np_rdf);
+            assert!(np.is_err(), "The np check should have failed");
         }
     }
     Ok(())
 }
-
-// TODO: define a proper error handling system (use NpError everywhere instead of panics?)
-// Improve np_info_extract to fail when criteria not met (e.g. empty assertion graph)
 
 #[test]
 fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
@@ -110,11 +96,45 @@ fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if filename.ends_with("trig\"") && !filename.contains("simple1-signed-dsa") {
-            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            println!("\n☑️  [{}] Testing file publish: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::publish(&np_rdf, &get_profile(), None);
-            assert!(np.is_err(), "The np check did not failed");
+            assert!(np.is_err(), "The np check should have failed");
         }
     }
+    Ok(())
+}
+
+#[test]
+fn publish_transform_signed_simple1() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/testsuite/transform/signed/rsa-key1/simple1.in.trig")?;
+    let np = Nanopub::publish(&np_rdf, &get_profile(), None)?;
+    assert!(np.published);
+    assert_eq!(
+        np.trusty_hash,
+        "RALbDbWVnLmLqpNgOsI_AaYfLbEnlOfZy3CoRRLs9XqVk"
+    );
+    assert_eq!(np.signature_hash, "9Z7zk22V1SgJ+jSw4WAkK3yJ7xuoEkIPJWSLEzx0b6OgHiqiioS0DMziQYCjQA8gBWu0zlJr64tj8Ip38fKynxriznwgVtcjBSKtjnLfZEZPZrtasLKxmtrobYbnyNPBi0Geq8oQpeg9Qg5MldhI7HoiEFTaOkmZJEt0TjrOUVc=");
+    Ok(())
+}
+
+// NOTE: this lib does not support adding a trusty URI to a nanopub without signing it
+// so we just check if publishing the given examples signed works
+#[test]
+fn publish_transform_trusty_aida() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/testsuite/transform/trusty/aida1.in.trig")?;
+    let np = Nanopub::publish(&np_rdf, &get_profile(), None)?;
+    // println!("{}", np);
+    assert!(np.published);
+    // assert_eq!(np.trusty_hash, "RAPpJU5UOB4pavfWyk7FE3WQiam5yBpmIlviAQWtBSC4M");
+    Ok(())
+}
+
+#[test]
+fn publish_transform_trusty_simple1() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/testsuite/transform/trusty/simple1.in.trig")?;
+    let np = Nanopub::publish(&np_rdf, &get_profile(), None)?;
+    assert!(np.published);
+    // assert_eq!(np.trusty_hash, "RAtAU6U_xKTH016Eoiu11SswQkBu1elB_3_BoDJWH3arA");
     Ok(())
 }

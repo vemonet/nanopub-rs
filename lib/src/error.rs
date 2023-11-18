@@ -2,10 +2,8 @@ use std::error::Error;
 use std::fmt;
 
 use sophia::api::source::StreamError;
-use sophia::api::{ns::Namespace, prefix::Prefix};
-use sophia::inmem::dataset::GenericLightDataset;
-use sophia::inmem::index::{SimpleTermIndex, TermIndexFullError};
-use sophia::iri::{InvalidIri, Iri};
+use sophia::inmem::index::TermIndexFullError;
+use sophia::iri::InvalidIri;
 
 #[derive(Debug)]
 pub struct NpError(pub String);
@@ -37,6 +35,11 @@ impl From<StreamError<TermIndexFullError, std::io::Error>> for NpError {
         NpError(format!("RDF Trig serialization error: {err}"))
     }
 }
+impl From<regex::Error> for NpError {
+    fn from(err: regex::Error) -> Self {
+        NpError(format!("Regex error: {err}"))
+    }
+}
 impl From<std::io::Error> for NpError {
     fn from(err: std::io::Error) -> Self {
         NpError(format!("File IO error: {err}"))
@@ -45,11 +48,6 @@ impl From<std::io::Error> for NpError {
 impl From<base64::DecodeError> for NpError {
     fn from(err: base64::DecodeError) -> Self {
         NpError(format!("Base64 decode error: {err}"))
-    }
-}
-impl From<regex::Error> for NpError {
-    fn from(err: regex::Error) -> Self {
-        NpError(format!("Regex error: {err}"))
     }
 }
 impl From<base64::alphabet::ParseAlphabetError> for NpError {
@@ -62,14 +60,19 @@ impl From<rsa::Error> for NpError {
         NpError(format!("RSA signing error: {err}"))
     }
 }
+impl From<rsa::pkcs8::spki::Error> for NpError {
+    fn from(err: rsa::pkcs8::spki::Error) -> Self {
+        NpError(format!("Invalid RSA public key error: {err}"))
+    }
+}
 impl From<serde_yaml::Error> for NpError {
     fn from(err: serde_yaml::Error) -> Self {
         NpError(format!("Parse profile YAML error: {err}"))
     }
 }
-impl From<rsa::pkcs8::spki::Error> for NpError {
-    fn from(err: rsa::pkcs8::spki::Error) -> Self {
-        NpError(format!("Invalid RSA public key error: {err}"))
+impl From<reqwest::Error> for NpError {
+    fn from(err: reqwest::Error) -> Self {
+        NpError(format!("Error sendind the HTTP request: {err}"))
     }
 }
 // impl From<rio_turtle::error::TurtleError> for NpError {

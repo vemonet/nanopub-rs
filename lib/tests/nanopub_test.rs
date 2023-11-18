@@ -12,8 +12,7 @@ fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
 
     let profile = NpProfile::new(orcid, "", &get_test_key(), None)?;
     let np = Nanopub::publish(&np_rdf, &profile, None)?;
-
-    println!("{}", np);
+    // println!("{}", np);
     assert!(np.published);
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
@@ -31,7 +30,7 @@ fn sign_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
 
     let profile = NpProfile::new(orcid, "", &get_test_key(), None)?;
     let np = Nanopub::sign(&np_rdf, &profile)?;
-    println!("{}", np);
+    // println!("{}", np);
     assert!(!np.published);
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(

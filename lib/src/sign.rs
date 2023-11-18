@@ -19,7 +19,7 @@ pub fn make_trusty(
     separator: &str,
 ) -> Result<String, NpError> {
     let norm_quads = normalize_dataset(dataset, base_ns, norm_ns, separator)?;
-    println!("NORMED QUADS MAKE TRUSTY\n{}", norm_quads);
+    // println!("NORMED QUADS MAKE TRUSTY\n{}", norm_quads);
 
     let base64_engine = engine::GeneralPurpose::new(
         &alphabet::Alphabet::new(
@@ -31,7 +31,6 @@ pub fn make_trusty(
         "RA{}",
         base64_engine.encode(Sha256::digest(norm_quads.as_bytes()))
     );
-    println!("TRUUUUUSTY {trusty_hash}");
     Ok(trusty_hash)
 }
 
@@ -134,7 +133,6 @@ pub fn replace_ns_in_quads(
     new_uri: &str,
 ) -> Result<LightDataset, NpError> {
     let old_ns = old_ns.strip_suffix('.').unwrap_or(old_ns);
-    // println!("IN REPLACE: {} {}", old_ns, new_ns);
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
         let quad = quad?;
@@ -203,7 +201,6 @@ struct NormQuad {
 pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
     if let Some(last_slash_index) = uri.rfind(' ') {
         let last_frag = &uri[last_slash_index + 1..];
-        // println!("IN fix_normed_uri {}", last_frag);
         if last_frag.starts_with(separator) || last_frag.is_empty() {
             uri.to_string()
         } else if last_frag.starts_with('/') || last_frag.starts_with('.') {
@@ -218,7 +215,6 @@ pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
     } else {
         uri.to_string()
     }
-    // TODO: of separator we do differently
 }
 
 /// Normalize the quads contained in the nanopub dataset to a string used for signing and generating trusty
@@ -234,8 +230,8 @@ pub fn normalize_dataset(
         Some(_) => &base_ns[..base_ns.len() - 1],
         None => base_ns,
     };
-    // Already signed: http://www.nextprot.org/nanopubs#NX_Q9Y6K8_ESTEvidence_TS-2083.RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k.
-    // http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
+    // Example already signed: http://www.nextprot.org/nanopubs#NX_Q9Y6K8_ESTEvidence_TS-2083.RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k.
+    // Not signed yet: http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
     //   becomes http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RAyBeXMqokAQZ5psoETKtkOeYzHnoIoXTgNFKRdLM8yzs#__head
     //   last char after trusty becomes # and before .
 
@@ -345,9 +341,6 @@ pub fn normalize_dataset(
                 Lang => a.lang.cmp(&b.lang),
                 Datatype => a.datatype.cmp(&b.datatype),
                 Object => a.object.cmp(&b.object),
-                // Object => compare_object(&a.object, &b.object),
-                // Right now string comes first because starts with ^, but we need the URIs thats starts with "http" to be first
-                // Datatype => a.datatype.cmp(&b.datatype),
             })
         })
     });
@@ -371,29 +364,3 @@ pub fn normalize_dataset(
     }
     Ok(normed_quads)
 }
-
-// Compare objects to have ^ and @ ordered after other strings
-// fn compare_object(a: &str, b: &str) -> Ordering {
-//     println!("ABABAB {} {}", a, b);
-//     let starts_special_a = a.starts_with('^') || a.starts_with('@');
-//     let starts_special_b = b.starts_with('^') || b.starts_with('@');
-//     match (starts_special_a, starts_special_b) {
-//         (true, true) | (false, false) => std::cmp::Ord::cmp(&a, &b),
-//         (true, false) => Ordering::Greater,
-//         (false, true) => Ordering::Less,
-//     }
-// }
-
-// Compare datatypes to have ^ and @ ordered after other strings
-// fn compare_datatype(a: &str, b: &str) -> Ordering {
-//     println!("ABABAB compare_datatype {} {}", a, b);
-//     let starts_special_a = a.starts_with('^') || a.starts_with('@');
-//     let starts_special_b = b.starts_with('^') || b.starts_with('@');
-//     match (starts_special_a, starts_special_b) {
-//         (true, true) | (false, false) => std::cmp::Ord::cmp(&a, &b),
-//         (true, false) => Ordering::Greater,
-//         (false, true) => Ordering::Less,
-//     }
-// }
-// left: "RAPMJ82Auq8RcsMQg4OPyTF7LDp532oUGX2n0CNAKgpIA"
-// right: "RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k"

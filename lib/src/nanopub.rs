@@ -1,4 +1,4 @@
-use crate::constants::{BOLD, END, NP_PREF_NS, TEMP_NP_URI, TEST_SERVER};
+use crate::constants::{BOLD, END, NP_PREF_NS, TEST_SERVER};
 use crate::error::NpError;
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::publish_np;
@@ -21,8 +21,6 @@ use sophia::iri::Iri;
 use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::collections::HashSet;
-use std::error::Error;
-use std::fmt::format;
 use std::{fmt, str};
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
@@ -101,17 +99,24 @@ impl Nanopub {
             NP_PREF_NS.to_string()
         };
 
-        // Check Trusty hash
-        let expected_hash = make_trusty(
-            &dataset,
-            &np_info.ns,
-            &norm_ns,
-            &np_info.separator_after_trusty,
-        )?;
-        assert_eq!(expected_hash, np_info.trusty_hash);
-        let mut msg: String = "1 trusty".to_string();
+        let mut msg: String = "".to_string();
+        if np_info.trusty_hash.is_empty() {
+            msg = format!("{}1 valid (not trusty)", msg);
+        } else {
+            // Check Trusty hash if found
+            let expected_hash = make_trusty(
+                &dataset,
+                &np_info.ns,
+                &norm_ns,
+                &np_info.separator_after_trusty,
+            )?;
+            if expected_hash != np_info.trusty_hash {
+                return Err(NpError(format!("Invalid Nanopub: the hash of the nanopublication is different than the expected hash \n{}\n{}", np_info.trusty_hash, expected_hash).to_string()));
+            }
+            msg = format!("{}1 trusty", msg);
+        }
 
-        // If signature not present we only check trusty
+        // Check signature if found
         if !np_info.signature.is_empty() {
             // Remove the signature from the graph before re-generating it
             dataset.remove(
@@ -127,7 +132,7 @@ impl Nanopub {
                 &norm_ns,
                 &np_info.separator_after_trusty,
             )?;
-            println!("NORMED QUADS CHECK\n{}", norm_quads);
+            // println!("NORMED QUADS CHECK\n{}", norm_quads);
 
             // Load public key
             let pubkey_bytes = engine::general_purpose::STANDARD.decode(&np_info.public_key)?;
@@ -208,7 +213,7 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
-        let published = publish_np(&server_url, &np.get_rdf());
+        let published = publish_np(&server_url, &np.get_rdf())?;
         if published {
             println!(
                 "\n🎉 Nanopublication published at {}{}{}",
@@ -216,6 +221,8 @@ impl Nanopub {
             );
         } else {
             println!("\n❌ Issue publishing the Nanopublication \n{}", np);
+            // TODO: when publish fails, should we return a Nanopub struct with published=false, or throw an error?
+            // return Err(NpError(format!("Issue publishing the Nanopublication \n{}", np)))
         }
         np.set_published(published);
         Ok(np)
@@ -256,7 +263,6 @@ impl Nanopub {
         dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri)?;
 
         let np_info = extract_np_info(&dataset)?;
-        println!("PUBINFO 2 {}", np_info);
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
@@ -283,18 +289,15 @@ impl Nanopub {
         } else {
             &np_info.ns
         };
-        // If np URI don't end with # or / or . we add a . at the end
-        println!("norm_ns used for signing {}", norm_ns);
 
         // Normalize nanopub nquads to a string
-        // let norm_ns = NP_PREF_NS;
         let norm_quads = normalize_dataset(
             &dataset,
             np_info.ns.as_str(),
             norm_ns,
             &np_info.separator_after_trusty,
         )?;
-        println!("NORMED QUADS\n{}", norm_quads);
+        // println!("NORMED QUADS sign before add signature\n{}", norm_quads);
 
         // Generate signature using the private key and normalized RDF
         let signature_vec = priv_key.sign(
@@ -389,22 +392,21 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
     ) {
         if !np_url.is_empty() {
-            // return Err(Box::new(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string())));
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
-            np_url = q?.s().iri().unwrap().to_string();
-            // np_url = match q {
-            //     Ok(val) => val.s().iri()?.to_string(),
-            //     Err(e) => return Err(NpError::from(e))
-            // };
-            // head = match q {
-            //     Ok(val) => val.g()?.iri()?.to_string(),
-            //     Err(e) => return Err(NpError::from(e))
-            // };
-            head = q?.g().unwrap().iri().unwrap().to_string();
+            np_url = q?
+                .s()
+                .iri()
+                .ok_or(NpError("IRI failed".to_string()))?
+                .to_string();
+            head = q?
+                .g()
+                .ok_or(NpError("IRI failed".to_string()))?
+                .iri()
+                .ok_or(NpError("IRI failed".to_string()))?
+                .to_string();
         }
     }
-    // TODO: .ok_or(NpError("Appropriate error message".to_string()))?
     if np_url.is_empty() {
         return Err(NpError(
             "The provided RDF does not contain a Nanopublication.".to_string(),
@@ -434,7 +436,11 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        prov = q?.o().iri().unwrap().to_string();
+        prov = q?
+            .o()
+            .iri()
+            .ok_or(NpError("IRI failed".to_string()))?
+            .to_string();
     }
     for q in dataset.quads_matching(
         [&np_iri],
@@ -442,7 +448,11 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        pubinfo = q?.o().iri().unwrap().to_string();
+        pubinfo = q?
+            .o()
+            .iri()
+            .ok_or(NpError("IRI failed".to_string()))?
+            .to_string();
     }
 
     // Remove last char if it is # or / to get the URI
@@ -510,7 +520,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         } else {
             Namespace::new_unchecked(np_ns_str.to_string())
         };
-    println!("np_ns!!! {}", *np_ns);
 
     // Extract signature and its subject URI
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
@@ -522,8 +531,17 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        signature = q?.o().lexical_form().unwrap().to_string();
-        signature_iri = Iri::new_unchecked(q?.s().iri().unwrap().to_string());
+        signature = q?
+            .o()
+            .lexical_form()
+            .ok_or(NpError("IRI failed".to_string()))?
+            .to_string();
+        signature_iri = Iri::new_unchecked(
+            q?.s()
+                .iri()
+                .ok_or(NpError("IRI failed".to_string()))?
+                .to_string(),
+        );
     }
 
     // Extract public key
@@ -534,7 +552,12 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        pubkey = Some(q?.o().lexical_form().unwrap().to_string());
+        pubkey = Some(
+            q?.o()
+                .lexical_form()
+                .ok_or(NpError("IRI failed".to_string()))?
+                .to_string(),
+        );
     }
 
     // Extract algo
@@ -545,7 +568,12 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        algo = Some(q?.o().lexical_form().unwrap().to_string());
+        algo = Some(
+            q?.o()
+                .lexical_form()
+                .ok_or(NpError("IRI failed".to_string()))?
+                .to_string(),
+        );
     }
 
     // Check minimal required triples in assertion, prov, pubinfo graphs
@@ -623,7 +651,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     }
     let mut graph_names = HashSet::new();
     for g in dataset.graph_names() {
-        println!("GRAPH NAMES! {}", g?.iri().unwrap());
         if let Some(graph_name) = g?.iri() {
             graph_names.insert(graph_name.to_string());
         }

@@ -8,7 +8,7 @@
 // https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html
 
 mod constants;
-mod error;
+pub mod error;
 /// A module to work with nanopublications
 ///
 /// ## Usage
