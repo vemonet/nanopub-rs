@@ -68,7 +68,9 @@ pub struct Nanopub {
 }
 
 impl Nanopub {
-    /// Check a given Nanopub RDF is valid (check trusty hash and signature)
+    /// Check a given Nanopub RDF is valid (check trusty hash and signature).
+    ///
+    /// A failed check will throw an error (panic)
     ///
     /// # Arguments
     ///
