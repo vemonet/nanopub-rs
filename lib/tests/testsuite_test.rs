@@ -2,18 +2,20 @@ use nanopub::{Nanopub, NpProfile};
 use std::{error::Error, fs, path::Path};
 
 const ORCID: &str = "http://orcid.org/0000-0000-0000-0000";
+fn get_test_key() -> String {
+    fs::read_to_string("./tests/resources/id_rsa").unwrap()
+}
 
 #[test]
-fn publish_testsuite_valid_plain() -> Result<(), Box<dyn Error>> {
-    let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
+fn testsuite_publish_valid_plain() -> Result<(), Box<dyn Error>> {
     let path = Path::new("tests/testsuite/valid/plain");
     // Iterate over files
     for entry in fs::read_dir(path)? {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if filename.ends_with("trig\"") {
-            println!("\n☑️  Testing file: {}", filename);
-            let profile = NpProfile::new(ORCID, "", &private_key, None)?;
+            println!("\n☑️  Testing file publish: {}", filename);
+            let profile = NpProfile::new(ORCID, "", &get_test_key(), None)?;
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::publish(&np_rdf, &profile, None)?;
             assert!(np.published);
@@ -23,14 +25,21 @@ fn publish_testsuite_valid_plain() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn check_valid_signed() {
-    let np_rdf =
-        fs::read_to_string("./tests/testsuite/valid/signed/Darwin-Core-schema-resource.trig")
-            .unwrap();
-    Nanopub::check(&np_rdf).expect("Failed check");
-    // let np_rdf = fs::read_to_string("./tests/testsuite/valid/signed/python-step-1.trig").unwrap();
-    // Nanopub::check(&np_rdf).expect("Failed check");
+fn testsuite_check_valid_signed() -> Result<(), Box<dyn Error>> {
+    let path = Path::new("tests/testsuite/valid/signed");
+    // Iterate over files
+    for (index, entry) in fs::read_dir(path)?.enumerate() {
+        let file = entry?;
+        let filename = format!("{:?}", file.file_name());
+        if filename.ends_with("trig\"") && !filename.contains("simple1-signed-dsa") {
+            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            let np_rdf = fs::read_to_string(file.path())?;
+            let _np = Nanopub::check(&np_rdf).expect("Failed check");
+        }
+    }
+    Ok(())
 }
+
 // TODO: check tests/testsuite/valid/signed
 // check tests/testsuite/valid/trusty
 

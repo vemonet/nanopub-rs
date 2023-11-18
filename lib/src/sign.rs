@@ -306,10 +306,16 @@ pub fn normalize_dataset(
                 )
             }
         } else if quad.o().is_blank_node() {
-            // TODO: remove? This should actually never happen since we replace all bnodes first
+            // TODO: remove?  Or throw error. This should actually never happen since we replace all bnodes first
             quad.o().bnode_id().unwrap().to_string()
         } else {
-            quad.o().lexical_form().unwrap().to_string()
+            // Double the \\ to bypass rust escaping
+            quad.o()
+                .lexical_form()
+                .unwrap()
+                .to_string()
+                .replace('\\', "\\\\")
+                .replace('\n', "\\n")
         };
 
         // Extract datatype and language if available
@@ -323,7 +329,6 @@ pub fn normalize_dataset(
         } else {
             "".to_string()
         };
-
         // Create a NormQuad struct and push it to the vector
         quads_vec.push(NormQuad {
             graph,

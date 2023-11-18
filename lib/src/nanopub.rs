@@ -34,6 +34,7 @@ pub struct NpInfo {
     pub separator_char: String,
     pub trusty_hash: String,
     pub signature: String,
+    pub signature_iri: Iri<String>,
     pub algo: String,
     pub public_key: String,
 }
@@ -101,7 +102,7 @@ impl Nanopub {
 
         // Remove the signature from the graph before re-generating it
         dataset.remove(
-            np_info.ns.get("sig")?,
+            &np_info.signature_iri,
             get_ns("npx").get("hasSignature")?,
             np_info.signature.as_str(),
             Some(&np_info.pubinfo),
@@ -458,22 +459,25 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         trusty_hash = Some(caps.get(3).map_or("", |m| m.as_str()).to_string());
     }
 
+    // TODO: get signature URI first, not always sig, default to sig if not present
     // Extract signature
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo.unwrap());
     let mut signature: Option<String> = None;
+    let mut signature_iri: Iri<String> = Iri::new_unchecked(np_ns.get("sig").unwrap().to_string());
     for q in dataset.quads_matching(
-        [np_ns.get("sig").unwrap()],
+        Any,
         [get_ns("npx").get("hasSignature").unwrap()],
         Any,
         [Some(&pubinfo_iri)],
     ) {
         signature = Some(q.unwrap().o().lexical_form().unwrap().to_string());
+        signature_iri = Iri::new_unchecked(q.unwrap().s().iri().unwrap().to_string());
     }
 
     // Extract public key
     let mut pubkey: Option<String> = None;
     for q in dataset.quads_matching(
-        [np_ns.get("sig").unwrap()],
+        [&signature_iri],
         [get_ns("npx").get("hasPublicKey").unwrap()],
         Any,
         [Some(&pubinfo_iri)],
@@ -484,13 +488,15 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Extract algo
     let mut algo: Option<String> = None;
     for q in dataset.quads_matching(
-        [np_ns.get("sig").unwrap()],
+        [&signature_iri],
         [get_ns("npx").get("hasAlgorithm").unwrap()],
         Any,
         [Some(&pubinfo_iri)],
     ) {
         algo = Some(q.unwrap().o().lexical_form().unwrap().to_string());
     }
+
+    println!("SIIIIG {}", signature_iri);
 
     Ok(NpInfo {
         uri: np_iri,
@@ -503,6 +509,7 @@ fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         separator_char: separator_char.unwrap(),
         trusty_hash: trusty_hash.unwrap(),
         signature: signature.unwrap_or("".to_string()),
+        signature_iri,
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),
     })

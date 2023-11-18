@@ -1,14 +1,16 @@
 use nanopub::{Nanopub, NpProfile};
 use std::fs;
 
+fn get_test_key() -> String {
+    fs::read_to_string("./tests/resources/id_rsa").unwrap()
+}
+
 #[test]
 fn publish_nanopub_simple_rsa() {
     let orcid = "http://orcid.org/0000-0002-1267-0234";
-    let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
-    // let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig").unwrap();
 
-    let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
+    let profile = NpProfile::new(orcid, "", &get_test_key(), None).unwrap();
     let np = Nanopub::publish(&np_rdf, &profile, None).unwrap();
 
     println!("{}", np);
@@ -24,10 +26,9 @@ fn publish_nanopub_simple_rsa() {
 #[test]
 fn sign_nanopub_test_blank() {
     let orcid = "http://orcid.org/0000-0000-0000-0000";
-    let private_key = fs::read_to_string("./tests/resources/id_rsa").unwrap();
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig").unwrap();
 
-    let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
+    let profile = NpProfile::new(orcid, "", &get_test_key(), None).unwrap();
     let np = Nanopub::sign(&np_rdf, &profile).unwrap();
     println!("{}", np);
     assert!(!np.published);
