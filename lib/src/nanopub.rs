@@ -207,7 +207,7 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
-        let published = publish_np(&server_url, &np.get_rdf())?;
+        let published = publish_np(&server_url, &np.get_rdf()).unwrap_or(false);
         if published {
             println!(
                 "\n🎉 Nanopublication published at {}{}{}",

@@ -1,4 +1,5 @@
-use crate::error::NpError;
+// use crate::error::NpError;
+use std::error::Error;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 #[cfg(target_arch = "wasm32")]
@@ -7,7 +8,7 @@ use wasm_bindgen_futures::{spawn_local, wasm_bindgen};
 // Blocking API not available on wasm, we need to use async with wasm_bindgen_futures
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn publish_np(url: &str, np: &str) -> Result<bool, NpError> {
+pub fn publish_np(url: &str, np: &str) -> Result<bool, Box<dyn Error>> {
     let url = url.to_string();
     let np = np.to_string();
     let client = reqwest::blocking::Client::new();
@@ -25,7 +26,7 @@ pub fn publish_np(url: &str, np: &str) -> Result<bool, NpError> {
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-pub fn publish_np(url: &str, np: &str) -> Result<bool, NpError> {
+pub fn publish_np(url: &str, np: &str) -> Result<bool, Box<dyn Error>> {
     let url = url.to_string();
     let np = np.to_string();
     let mut published: bool = false;
