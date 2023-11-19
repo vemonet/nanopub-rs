@@ -35,7 +35,7 @@ jobs:
           submodules: true
       - run: |
           rustup update
-          cargo install tarpaulin
+          cargo install cargo-tarpaulin
       - run: cargo build --all-features
       - run: cargo test
         env:

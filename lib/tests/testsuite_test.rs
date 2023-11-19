@@ -106,7 +106,7 @@ fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn publish_transform_signed_simple1() -> Result<(), Box<dyn Error>> {
+fn testsuite_publish_transform_signed_simple1() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/testsuite/transform/signed/rsa-key1/simple1.in.trig")?;
     let np = Nanopub::publish(&np_rdf, &get_profile(), None)?;
     assert!(np.published);
@@ -121,7 +121,7 @@ fn publish_transform_signed_simple1() -> Result<(), Box<dyn Error>> {
 // NOTE: this lib does not support adding a trusty URI to a nanopub without signing it
 // so we just check if publishing the given examples signed works
 #[test]
-fn publish_transform_trusty_aida() -> Result<(), Box<dyn Error>> {
+fn testsuite_publish_transform_trusty_aida() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/testsuite/transform/trusty/aida1.in.trig")?;
     let np = Nanopub::publish(&np_rdf, &get_profile(), None)?;
     // println!("{}", np);
@@ -131,7 +131,7 @@ fn publish_transform_trusty_aida() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn publish_transform_trusty_simple1() -> Result<(), Box<dyn Error>> {
+fn testsuite_publish_transform_trusty_simple1() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/testsuite/transform/trusty/simple1.in.trig")?;
     let np = Nanopub::publish(&np_rdf, &get_profile(), None)?;
     assert!(np.published);

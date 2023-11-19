@@ -20,7 +20,7 @@ Install development dependencies:
 ```bash
 rustup update
 rustup component add rustfmt clippy
-cargo install tarpaulin mdbook mdbook-admonish
+cargo install cargo-tarpaulin mdbook mdbook-admonish
 ```
 
 ### 📥️ Clone the repository
