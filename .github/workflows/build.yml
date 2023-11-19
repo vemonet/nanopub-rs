@@ -19,7 +19,7 @@ jobs:
     name: Build binaries for Linux
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup update && rustup target add aarch64-unknown-linux-gnu
@@ -31,26 +31,26 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - run: cargo build --release
-        working-directory: ./lib
+        working-directory: ./cli
 
       - run: cargo build --release --target aarch64-unknown-linux-gnu
-        working-directory: ./lib
+        working-directory: ./cli
         env:
           BINDGEN_EXTRA_CLANG_ARGS: --sysroot /usr/aarch64-linux-gnu
 
       - uses: actions/upload-artifact@v3
         with:
           name: nanopub_x86_64_linux_gnu
-          path: target/release/nanopub
+          path: target/release/nanopub-cli
       - uses: actions/upload-artifact@v3
         with:
           name: nanopub_aarch64_linux_gnu
-          path: target/aarch64-unknown-linux-gnu/release/nanopub
+          path: target/aarch64-unknown-linux-gnu/release/nanopub-cli
 
       - if: github.event_name == 'release'
         run: |
-          mv target/release/nanopub nanopub_x86_64_linux_gnu
-          mv target/aarch64-unknown-linux-gnu/release/nanopub nanopub_aarch64_linux_gnu
+          mv target/release/nanopub-cli nanopub_x86_64_linux_gnu
+          mv target/aarch64-unknown-linux-gnu/release/nanopub-cli nanopub_aarch64_linux_gnu
 
       - uses: softprops/action-gh-release@v1
         if: github.event_name == 'release'
@@ -65,7 +65,7 @@ jobs:
     name: Build binaries for MacOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup update && rustup target add aarch64-apple-darwin
@@ -77,15 +77,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - run: cargo build --release
-        working-directory: ./lib
+        working-directory: ./cli
 
       - run: cargo build --release --target aarch64-apple-darwin
-        working-directory: ./lib
+        working-directory: ./cli
 
       - uses: actions/upload-artifact@v3
         with:
           name: nanopub_x86_64_apple
-          path: target/release/nanopub
+          path: target/release/nanopub-cli
       - uses: actions/upload-artifact@v3
         with:
           name: nanopub_aarch64_apple
@@ -93,8 +93,8 @@ jobs:
 
       - if: github.event_name == 'release'
         run: |
-          mv target/release/nanopub nanopub_x86_64_apple
-          mv target/aarch64-apple-darwin/release/nanopub nanopub_aarch64_apple
+          mv target/release/nanopub-cli nanopub_x86_64_apple
+          mv target/aarch64-apple-darwin/release/nanopub-cli nanopub_aarch64_apple
 
       - uses: softprops/action-gh-release@v1
         if: github.event_name == 'release'
@@ -108,24 +108,23 @@ jobs:
     name: Build binaries for Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup update
       - uses: Swatinem/rust-cache@v2
 
       - run: cargo build --release
-        working-directory: ./lib
-
+        working-directory: ./cli
 
       - uses: actions/upload-artifact@v3
         with:
           name: nanopub_x86_64_windows_msvc
-          path: target/release/nanopub.exe
+          path: target/release/nanopub-cli.exe
 
       - if: github.event_name == 'release'
         run: |
-          mv target/release/nanopub.exe nanopub_x86_64_windows_msvc.exe
+          mv target/release/nanopub-cli.exe nanopub_x86_64_windows_msvc.exe
 
       - uses: softprops/action-gh-release@v1
         if: github.event_name == 'release'
@@ -142,7 +141,7 @@ jobs:
         architecture: [ "x86_64", "aarch64" ]
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: docker/setup-qemu-action@v2
@@ -174,7 +173,7 @@ jobs:
           # - "aarch64" # Takes too long (1h30)
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: docker/setup-qemu-action@v2
@@ -205,7 +204,7 @@ jobs:
       SDKROOT: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk'
       MACOSX_DEPLOYMENT_TARGET: '10.14'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup update && rustup target add aarch64-apple-darwin
@@ -239,7 +238,7 @@ jobs:
     name: Build wheel for Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup update
@@ -271,7 +270,7 @@ jobs:
     name: Build npm package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodule: true
       - run: rustup update
@@ -308,7 +307,7 @@ jobs:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: rustup update

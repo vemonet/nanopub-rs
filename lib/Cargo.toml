@@ -1,17 +1,17 @@
 [package]
 name = "nanopub"
 version = "0.0.0"
-authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
-license = "MIT"
-readme = "README.md"
-repository = "https://github.com/vemonet/nanopub-rs/tree/main/lib"
-homepage = "https://github.com/vemonet/nanopub-rs"
 description = """
 A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
 """
-keywords = ["RDF", "nanopublications"]
-# categories = ["database-implementations"]
-edition = "2021"
+repository = "https://github.com/vemonet/nanopub-rs/tree/main/lib"
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+homepage.workspace = true
+categories.workspace = true
 # rust-version = "1.60"
 
 [package.metadata.docs.rs]
@@ -23,7 +23,6 @@ rsa = { version = "0.9.3", default-features = false, features = ["pem", "sha2"] 
 openssl-probe = "0.1.5"
 sophia = { git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld", "xml"] }
 regex = "1.10.2"
-clap = { version = "4.4.8", features = ["derive"] }
 reqwest = { version = "0.11", features = ["blocking", "rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9.27"

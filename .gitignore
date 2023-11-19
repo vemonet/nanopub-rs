@@ -1,6 +1,7 @@
 .venv
 target/
 pkg
+tarpaulin-report.html
 
 # JS
 node_modules/

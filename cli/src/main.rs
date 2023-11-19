@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cmd = Command::new("nanopub")
         .bin_name("np")
         // .version("1.0")
-        // .author("Vincent Emonet. <vincent.emonet@gmail.com>")
+        // .author("Vincent Emonet <vincent.emonet@gmail.com>")
         .about("Sign, publish, and check Nanopublications.")
         .subcommand_required(true)
         .arg_required_else_help(true)
@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
 
-            // Read RDF from file and get profile
+            // Read RDF from file, and get profile from YAML file or key
             let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file)?;
@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
 
-            // Read RDF from file and get profile
+            // Read RDF from file, and get profile from YAML file or key
             let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file)?;

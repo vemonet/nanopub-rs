@@ -20,6 +20,7 @@ Install development dependencies:
 ```bash
 rustup update
 rustup component add rustfmt clippy
+cargo install tarpaulin mdbook mdbook-admonish
 ```
 
 ### 📥️ Clone the repository
@@ -65,10 +66,16 @@ cargo test lib
 
 > Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
 
+Test the `nanopub` create with code coverage:
+
+```bash
+cargo tarpaulin -p nanopub
+```
+
 Test signing a nanopublication with the CLI:
 
 ```bash
-cd lib
+cd cli
 cargo run -- sign tests/resources/nanopub_test_blank.trig
 ```
 

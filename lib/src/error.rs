@@ -6,10 +6,21 @@ use sophia::inmem::index::TermIndexFullError;
 use sophia::iri::InvalidIri;
 
 #[derive(Debug)]
+pub struct TermError();
+
+impl Error for TermError {}
+
+impl fmt::Display for TermError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Error retrieving the Sophia RDF Term: graph, IRI, bnode, or literal"
+        )
+    }
+}
+
+#[derive(Debug)]
 pub struct NpError(pub String);
-// pub struct NpError {
-//     message: String,
-// }
 
 impl Error for NpError {}
 
@@ -19,7 +30,13 @@ impl fmt::Display for NpError {
     }
 }
 
-// Add handling for sophia InvalidIri and base64 decode
+// Add handling for errors from external dependencies
+// to be able to use ? more to handle errors
+impl From<TermError> for NpError {
+    fn from(err: TermError) -> Self {
+        NpError(format!("Invalid Quad error: {err}"))
+    }
+}
 impl From<InvalidIri> for NpError {
     fn from(err: InvalidIri) -> Self {
         NpError(format!("Invalid IRI error: {err}"))
@@ -80,27 +97,8 @@ impl From<reqwest::Error> for NpError {
 //         NpError(format!("Parse RDF Turtle error: {}", err))
 //     }
 // }
-// impl From<rsa::pkcs8::spki::Error> for NpError {
-//     fn from(err: rsa::pkcs8::spki::Error) -> Self {
-//         NpError(format!("Parse RSA encryption key error: {}", err))
-//     }
-// }
-
-// impl From<rsa::pkcs8::Error> for NpError {
-//     fn from(err: rsa::pkcs8::Error) -> Self {
-//         NpError(format!("Invalid RSA encryption key error: {}", err))
-//     }
-// }
-
 // impl From<GenericLightDataset<SimpleTermIndex<u32>>> for NpError {
 //     fn from(err: GenericLightDataset<SimpleTermIndex<u32>>) -> Self {
 //         NpError(format!("RDF term error:"))
-//     }
-// }
-// sophia::sophia_inmem::index::TermIndexFullError
-
-// impl From<InvalidIri> for NpError {
-//     fn from(err: InvalidIri) -> Self {
-//         NpError::new(&format!("Invalid IRI error: {}", err))
 //     }
 // }

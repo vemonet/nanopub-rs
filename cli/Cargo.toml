@@ -1,0 +1,15 @@
+[package]
+name = "nanopub-cli"
+version = "0.0.0"
+repository = "https://github.com/vemonet/nanopub-rs/tree/main/cli"
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+homepage.workspace = true
+categories.workspace = true
+
+[dependencies]
+nanopub = { path = "../lib" }
+clap = { version = "4.4.8", features = ["derive"] }

@@ -1,4 +1,4 @@
-use nanopub::{Nanopub, NpProfile};
+use nanopub::{get_np_server, Nanopub, NpProfile};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -45,6 +45,15 @@ fn sign_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
 fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/signed.nanopub_test_blank.trig")?;
     Nanopub::check(&np_rdf)?;
+    Ok(())
+}
+
+#[test]
+fn test_get_np_server() -> Result<(), Box<dyn Error>> {
+    let np_server = get_np_server(true);
+    println!("{}", np_server);
+    let np_server = get_np_server(false);
+    assert_eq!(np_server, "http://server.nanopubs.lod.labs.vu.nl/");
     Ok(())
 }
 

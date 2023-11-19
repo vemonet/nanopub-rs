@@ -1,5 +1,5 @@
 use crate::constants::{BOLD, END, NP_PREF_NS, TEST_SERVER};
-use crate::error::NpError;
+use crate::error::{NpError, TermError};
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::publish_np;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
@@ -394,16 +394,12 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
-            np_url = q?
-                .s()
-                .iri()
-                .ok_or(NpError("IRI failed".to_string()))?
-                .to_string();
+            np_url = q?.s().iri().ok_or(TermError())?.to_string();
             head = q?
                 .g()
-                .ok_or(NpError("IRI failed".to_string()))?
+                .ok_or(TermError())?
                 .iri()
-                .ok_or(NpError("IRI failed".to_string()))?
+                .ok_or(TermError())?
                 .to_string();
         }
     }
@@ -423,12 +419,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        // assertion = q?.o().iri().unwrap().to_string();
-        assertion = q?
-            .o()
-            .iri()
-            .ok_or(NpError("IRI failed".to_string()))?
-            .to_string();
+        assertion = q?.o().iri().ok_or(TermError())?.to_string();
     }
     for q in dataset.quads_matching(
         [&np_iri],
@@ -436,11 +427,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        prov = q?
-            .o()
-            .iri()
-            .ok_or(NpError("IRI failed".to_string()))?
-            .to_string();
+        prov = q?.o().iri().ok_or(TermError())?.to_string();
     }
     for q in dataset.quads_matching(
         [&np_iri],
@@ -448,11 +435,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        pubinfo = q?
-            .o()
-            .iri()
-            .ok_or(NpError("IRI failed".to_string()))?
-            .to_string();
+        pubinfo = q?.o().iri().ok_or(TermError())?.to_string();
     }
 
     // Remove last char if it is # or / to get the URI
@@ -531,17 +514,8 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        signature = q?
-            .o()
-            .lexical_form()
-            .ok_or(NpError("IRI failed".to_string()))?
-            .to_string();
-        signature_iri = Iri::new_unchecked(
-            q?.s()
-                .iri()
-                .ok_or(NpError("IRI failed".to_string()))?
-                .to_string(),
-        );
+        signature = q?.o().lexical_form().ok_or(TermError())?.to_string();
+        signature_iri = Iri::new_unchecked(q?.s().iri().ok_or(TermError())?.to_string());
     }
 
     // Extract public key
@@ -552,12 +526,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        pubkey = Some(
-            q?.o()
-                .lexical_form()
-                .ok_or(NpError("IRI failed".to_string()))?
-                .to_string(),
-        );
+        pubkey = Some(q?.o().lexical_form().ok_or(TermError())?.to_string());
     }
 
     // Extract algo
@@ -568,12 +537,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        algo = Some(
-            q?.o()
-                .lexical_form()
-                .ok_or(NpError("IRI failed".to_string()))?
-                .to_string(),
-        );
+        algo = Some(q?.o().lexical_form().ok_or(TermError())?.to_string());
     }
 
     // Check minimal required triples in assertion, prov, pubinfo graphs

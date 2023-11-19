@@ -1,12 +1,16 @@
 [package]
 name = "nanopub-js"
 version = "0.0.0"
-authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
 description = "JavaScript bindings for the Nanopub rust toolkit"
-license = "MIT"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/js"
-homepage = "https://github.com/vemonet/nanopub-rs"
-edition = "2018"
+authors.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+keywords.workspace = true
+homepage.workspace = true
+categories.workspace = true
+# edition = "2018"
 
 [lib]
 crate-type = ["cdylib"]

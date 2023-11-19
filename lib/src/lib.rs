@@ -29,7 +29,8 @@ pub mod nanopub;
 pub mod profile;
 mod publish;
 mod sign;
-mod utils;
+pub mod utils;
 
 pub use nanopub::Nanopub;
 pub use profile::NpProfile;
+pub use utils::get_np_server;

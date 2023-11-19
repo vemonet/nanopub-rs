@@ -6,7 +6,7 @@ rm -rf target/doc
 
 mdbook build
 
-cargo doc --workspace --no-deps --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc
+cargo doc --workspace --no-deps --exclude nanopub-cli --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc
 
 echo "Docs generated in the target/doc folder"
 

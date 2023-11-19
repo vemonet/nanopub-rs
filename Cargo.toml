@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "lib",
+    "cli",
     "python",
     "js",
 ]
@@ -11,12 +12,13 @@ members = [
 authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
 edition = "2021"
 repository = "https://github.com/vemonet/nanopub-rs"
+homepage = "https://vemonet.github.io/nanopub-rs"
 readme = "./README.md"
-license = "MIT"
+license-file = "LICENSE.txt"
 keywords = ["nanopublications", "rdf", "linked-data", "semantic-web"]
+categories = ["science", "encoding", "database-interface", "cryptography"]
 
 # [workspace.dependencies]
-
 
 [profile.release]
 lto = true
