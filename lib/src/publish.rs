@@ -51,5 +51,5 @@ pub fn publish_np(url: &str, np: &str) -> bool {
             Err(e) => println!(e),
         }
     });
-    Ok(published)
+    published
 }

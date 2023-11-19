@@ -1,4 +1,4 @@
-use nanopub::{get_np_server, Nanopub, NpProfile};
+use nanopub::{get_np_server, Nanopub, NpProfile, profile::get_default_profile_path};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -32,7 +32,11 @@ fn sign_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
         &get_test_key(),
         None,
     )?;
+    println!("{}", profile); // required for coverage
+
+    assert!(get_default_profile_path().ends_with(".nanopub/profile.yml"));
     let np = Nanopub::sign(&np_rdf, &profile)?;
+    println!("{}", np.info); // required for coverage
     assert!(!np.published);
     Ok(())
 }
