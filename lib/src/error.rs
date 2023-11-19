@@ -77,6 +77,11 @@ impl From<rsa::Error> for NpError {
         NpError(format!("RSA signing error: {err}"))
     }
 }
+impl From<rsa::pkcs8::Error> for NpError {
+    fn from(err: rsa::pkcs8::Error) -> Self {
+        NpError(format!("Invalid RSA public key error: {err}"))
+    }
+}
 impl From<rsa::pkcs8::spki::Error> for NpError {
     fn from(err: rsa::pkcs8::spki::Error) -> Self {
         NpError(format!("Invalid RSA public key error: {err}"))

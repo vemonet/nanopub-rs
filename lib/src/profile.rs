@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::io::Read;
 use std::{env, fs};
-use std::{error::Error, fmt};
+use std::fmt;
 
 use crate::constants::DEFAULT_NP_PROFILE;
 use crate::constants::{BOLD, END};
@@ -26,7 +26,7 @@ impl NpProfile {
         private_key: &str,
         introduction_nanopub_uri: Option<&str>,
     ) -> Result<Self, NpError> {
-        let (_priv_key, pubkey) = get_keys(private_key);
+        let (_priv_key, pubkey) = get_keys(private_key)?;
         Ok(Self {
             orcid_id: orcid_id.to_string(),
             name: name.to_string(),
@@ -77,15 +77,13 @@ impl fmt::Display for NpProfile {
 }
 
 /// Get `RsaPrivateKey` and `RsaPublicKey` given a private key string
-pub fn get_keys(private_key: &str) -> (RsaPrivateKey, RsaPublicKey) {
+pub fn get_keys(private_key: &str) -> Result<(RsaPrivateKey, RsaPublicKey), NpError> {
     let priv_key_bytes = engine::general_purpose::STANDARD
-        .decode(private_key)
-        .expect("Error decoding private key");
+        .decode(private_key)?;
     let priv_key =
-        RsaPrivateKey::from_pkcs8_der(&priv_key_bytes).expect("Failed to parse RSA private key");
-
+        RsaPrivateKey::from_pkcs8_der(&priv_key_bytes)?;
     let public_key = RsaPublicKey::from(&priv_key);
-    (priv_key, public_key)
+    Ok((priv_key, public_key))
 }
 
 /// Get a public key string for a `RsaPublicKey`

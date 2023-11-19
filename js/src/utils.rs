@@ -1,5 +1,5 @@
-use js_sys::Error;
-use wasm_bindgen::JsValue;
+// use js_sys::Error;
+// use wasm_bindgen::JsValue;
 
 #[macro_export]
 macro_rules! format_err {
@@ -11,6 +11,6 @@ macro_rules! format_err {
     };
 }
 
-pub fn to_err(e: impl ToString) -> JsValue {
-    JsValue::from(Error::new(&e.to_string()))
-}
+// pub fn to_err(e: impl ToString) -> JsValue {
+//     JsValue::from(Error::new(&e.to_string()))
+// }

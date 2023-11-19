@@ -1,5 +1,3 @@
-// use crate::error::NpError;
-use std::error::Error;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 #[cfg(target_arch = "wasm32")]

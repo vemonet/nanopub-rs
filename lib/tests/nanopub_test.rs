@@ -8,7 +8,6 @@ fn get_test_key() -> String {
 #[test]
 fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
-
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
     let np = Nanopub::publish(&np_rdf, &profile, None)?;
     // println!("{}", np);
@@ -40,6 +39,23 @@ fn sign_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
     assert!(!np.published);
     Ok(())
 }
+
+#[test]
+fn publish_fail() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
+    let profile = NpProfile::new("", "", &get_test_key(), None)?;
+    let np = Nanopub::publish(&np_rdf, &profile, Some("failing"))?;
+    assert!(!np.published);
+    Ok(())
+}
+
+#[test]
+fn profile_fail() -> Result<(), Box<dyn Error>> {
+    let profile = NpProfile::new("", "", "failing", None);
+    assert!(profile.is_err());
+    Ok(())
+}
+
 
 #[test]
 fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {

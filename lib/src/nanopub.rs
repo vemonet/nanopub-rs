@@ -7,12 +7,11 @@ use crate::utils::{get_ns, parse_rdf, serialize_rdf};
 
 use base64;
 use base64::{engine, Engine as _};
-use chrono::Utc;
 use regex::Regex;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::{rdf, xsd, Namespace};
+use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
@@ -244,7 +243,7 @@ impl Nanopub {
     pub fn sign(rdf: &str, profile: &NpProfile) -> Result<Self, NpError> {
         openssl_probe::init_ssl_cert_env_vars();
 
-        let (priv_key, pubkey) = get_keys(&profile.private_key);
+        let (priv_key, pubkey) = get_keys(&profile.private_key)?;
         let pubkey_str = get_pubkey_str(&pubkey);
 
         // Parse the provided RDF
