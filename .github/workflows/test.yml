@@ -10,7 +10,7 @@ on:
 
 jobs:
   fmt:
-    name: fmt
+    name: ✂️ fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
       - run: cargo fmt -- --check
 
   clippy:
-    name: clippy
+    name: 📎 clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,6 +28,7 @@ jobs:
       - run: cargo clippy --all --all-targets --all-features
 
   test:
+    name: 🧪 Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -42,7 +43,7 @@ jobs:
           RUST_BACKTRACE: 1
 
   cov:
-    name: Coverage
+    name: ☂️ Coverage
     runs-on: ubuntu-latest
     container:
       image: xd009642/tarpaulin:develop-nightly
@@ -59,14 +60,50 @@ jobs:
           fail_ci_if_error: true
           # token: ${{secrets.CODECOV_TOKEN}} # not required for public repos
 
+  docs:
+    name: 📖 Update docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # Allow one concurrent deployment
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: rustup update
+
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v1
+        with:
+          mdbook-version: 'latest'
+
+      - run: bash ./scripts/docs-build.sh
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: './target/doc'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+
 
   compare:
-    name: Compare speed with java and python implementations
+    name: ⏱️ Compare speed with java and python implementations
     runs-on: ubuntu-latest
     env:
       HYPERFINE_VERSION: '1.12.0'
       STABLE_PYTHON_VERSION: '3.12'
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ env.STABLE_PYTHON_VERSION }}
@@ -89,16 +126,15 @@ jobs:
         pip install --upgrade nanopub
         wget -O nanopub.jar https://github.com/Nanopublication/nanopub-java/releases/latest/download/nanopub-1.47-jar-with-dependencies.jar
 
-    - name: Install ourself
-      run: cargo install --path cli
-      # Build would go to target/release/nanopub
+    - name: Build ourself
+      run: cargo build --release
 
     - name: Benchmark
       run: |
         hyperfine -m 100 --warmup 10 --export-markdown benchmark.md \
           'java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa' \
           'np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa' \
-          'nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+          'target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
 
     - name: Upload benchmark markdown
       uses: actions/upload-artifact@v3

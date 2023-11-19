@@ -16,7 +16,7 @@ concurrency:
 jobs:
 
   binary_linux:
-    name: Build binaries for Linux
+    name: 🐧 Build binaries for Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
 
 
   binary_mac:
-    name: Build binaries for MacOS
+    name: 🍎 Build binaries for MacOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +105,7 @@ jobs:
 
 
   binary_windows:
-    name: Build binaries for Windows
+    name: 🪟 Build binaries for Windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -134,7 +134,7 @@ jobs:
 
 
   wheel_linux:
-    name: Build wheel for Linux
+    name: 🐍🐧 Build wheel for Linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -164,7 +164,7 @@ jobs:
 
 
   wheel_linux_musl:
-    name: Build wheel for MUSL Linux
+    name: 🐍🐧 Build wheel for MUSL Linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -197,7 +197,7 @@ jobs:
 
 
   wheel_mac:
-    name: Build wheel for MacOS
+    name: 🐍🍎 Build wheel for MacOS
     runs-on: macos-latest
     env:
       DEVELOPER_DIR: '/Applications/Xcode.app/Contents/Developer'
@@ -235,7 +235,7 @@ jobs:
 
 
   wheel_windows:
-    name: Build wheel for Windows
+    name: 🐍🪟 Build wheel for Windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -267,7 +267,7 @@ jobs:
 
 
   npm_tarball:
-    name: Build npm package
+    name: 🦊 Build npm package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -304,6 +304,7 @@ jobs:
 
 
   publish_crates:
+    name: 📦️ Publish crates to crates.io
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:

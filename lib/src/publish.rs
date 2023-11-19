@@ -45,7 +45,7 @@ pub fn publish_np(url: &str, np: &str) -> bool {
                 if r.status() == 201 {
                     published = true;
                 } else {
-                    println!("{}", r);
+                    println!("{}", r.text());
                 }
             }
             Err(e) => println!(e),

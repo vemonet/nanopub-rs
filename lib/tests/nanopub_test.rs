@@ -1,4 +1,4 @@
-use nanopub::{get_np_server, Nanopub, NpProfile, profile::get_default_profile_path};
+use nanopub::{get_np_server, profile::get_default_profile_path, Nanopub, NpProfile};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
