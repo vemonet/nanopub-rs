@@ -20,4 +20,4 @@ On all platforms:
 
 ## 📖 Documentation
 
-Checkout the [documentation website](https://vemonet.github.io/nanopub-rs) for more details.
+Checkout the **[documentation website](https://vemonet.github.io/nanopub-rs)** for more details on how to install and use it.

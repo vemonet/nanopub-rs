@@ -56,7 +56,6 @@ fn profile_fail() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-
 #[test]
 fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/signed.nanopub_test_blank.trig")?;

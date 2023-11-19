@@ -2,9 +2,9 @@ use base64::{engine, Engine as _};
 use rsa::{pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, RsaPrivateKey, RsaPublicKey};
 use serde::{Deserialize, Serialize};
 use serde_yaml;
+use std::fmt;
 use std::io::Read;
 use std::{env, fs};
-use std::fmt;
 
 use crate::constants::DEFAULT_NP_PROFILE;
 use crate::constants::{BOLD, END};
@@ -78,10 +78,8 @@ impl fmt::Display for NpProfile {
 
 /// Get `RsaPrivateKey` and `RsaPublicKey` given a private key string
 pub fn get_keys(private_key: &str) -> Result<(RsaPrivateKey, RsaPublicKey), NpError> {
-    let priv_key_bytes = engine::general_purpose::STANDARD
-        .decode(private_key)?;
-    let priv_key =
-        RsaPrivateKey::from_pkcs8_der(&priv_key_bytes)?;
+    let priv_key_bytes = engine::general_purpose::STANDARD.decode(private_key)?;
+    let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes)?;
     let public_key = RsaPublicKey::from(&priv_key);
     Ok((priv_key, public_key))
 }
