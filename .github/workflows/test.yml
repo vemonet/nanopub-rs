@@ -9,29 +9,21 @@ on:
   pull_request:
 
 jobs:
-  fmt:
-    name: ✂️ fmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: rustup update
-      - run: rustup component add rustfmt
-      - run: cargo fmt -- --check
-
   clippy:
-    name: 📎 clippy
+    name: 📎 fmt and clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: rustup update
-      - run: rustup component add clippy
+      - run: rustup component add clippy rustfmt
+      - run: cargo fmt -- --check
       - run: cargo clippy --all --all-targets --all-features
 
   test:
     name: 🧪 Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: |
@@ -75,7 +67,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: rustup update
 
       - name: Setup mdBook
