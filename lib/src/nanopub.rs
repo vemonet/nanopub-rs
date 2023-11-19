@@ -1,4 +1,4 @@
-use crate::constants::{BOLD, END, NP_PREF_NS, TEST_SERVER};
+use crate::constants::{BOLD, END, NP_PREF_NS, NP_TEMP_URI, TEST_SERVER};
 use crate::error::{NpError, TermError};
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::publish_np;
@@ -7,11 +7,12 @@ use crate::utils::{get_ns, parse_rdf, serialize_rdf};
 
 use base64;
 use base64::{engine, Engine as _};
+use chrono::Utc;
 use regex::Regex;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::{rdf, Namespace};
+use sophia::api::ns::{rdf, xsd, Namespace};
 use sophia::api::quad::Quad;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
@@ -207,7 +208,7 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
-        let published = publish_np(&server_url, &np.get_rdf()).unwrap_or(false);
+        let published = publish_np(&server_url, &np.get_rdf());
         if published {
             println!(
                 "\n🎉 Nanopublication published at {}{}{}",
@@ -276,7 +277,58 @@ impl Nanopub {
             Some(&np_info.pubinfo),
         )?;
 
-        let norm_ns = if np_info.ns.starts_with("http://purl.org/nanopub/temp/") {
+        // TODO: if not already set, automatically add the current date to pubinfo created
+        // np_uri dct:created "2023-11-17T14:13:52.560Z"^^xsd:dateTime ;
+        // if dataset
+        //     .quads_matching(
+        //         [
+        //             &np_info.uri,
+        //             &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
+        //         ],
+        //         [get_ns("dct").get("created")?],
+        //         Any,
+        //         [Some(&np_info.pubinfo)],
+        //     )
+        //     .next()
+        //     .is_none()
+        // {
+        //     let now = Utc::now();
+        //     let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
+        //     // TODO: error when trying to convert to datetime
+        //     //  let lit_date = "2019" * xsd::dateTime;
+        //     dataset.insert(
+        //         &np_info.uri,
+        //         get_ns("dct").get("created")?,
+        //         &*datetime_str,
+        //         Some(&np_info.pubinfo),
+        //     )?;
+        // }
+
+        // If ORCID provided, add to pubinfo graph
+        if !profile.orcid_id.is_empty()
+            && dataset
+                .quads_matching(
+                    [
+                        &np_info.uri,
+                        &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
+                    ],
+                    [get_ns("dct").get("creator")?],
+                    // TODO: also skip if pav:createdBy is present?
+                    Any,
+                    [Some(&np_info.pubinfo)],
+                )
+                .next()
+                .is_none()
+        {
+            dataset.insert(
+                &np_info.uri,
+                get_ns("dct").get("creator")?,
+                Iri::new_unchecked(profile.orcid_id.clone()),
+                Some(&np_info.pubinfo),
+            )?;
+        }
+
+        let norm_ns = if np_info.ns.starts_with(NP_TEMP_URI) {
             NP_PREF_NS
         } else {
             &np_info.ns

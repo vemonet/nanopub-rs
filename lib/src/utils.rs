@@ -68,12 +68,14 @@ pub fn get_ns(ns: &str) -> Namespace<String> {
     match ns {
         "npx" => Namespace::new("http://purl.org/nanopub/x/".to_string()).unwrap(),
         "np" => Namespace::new("http://www.nanopub.org/nschema#".to_string()).unwrap(),
+        "dct" => Namespace::new("http://purl.org/dc/terms/".to_string()).unwrap(),
+        "xsd" => Namespace::new("http://www.w3.org/2001/XMLSchema#".to_string()).unwrap(),
         _ => panic!("Unknown namespace"), // or return an error
     }
 }
 
 /// Get the prefixes of a Nanopub
-pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>); 13] {
+pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>); 14] {
     [
         (
             Prefix::new_unchecked("this".to_string()),
@@ -114,6 +116,10 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
         (
             Prefix::new_unchecked("prov".to_string()),
             Iri::new_unchecked("http://www.w3.org/ns/prov#".to_string()),
+        ),
+        (
+            Prefix::new_unchecked("pav".to_string()),
+            Iri::new_unchecked("http://purl.org/pav/".to_string()),
         ),
         (
             Prefix::new_unchecked("dcterms".to_string()),

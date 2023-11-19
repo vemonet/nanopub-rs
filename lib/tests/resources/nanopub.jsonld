@@ -1,0 +1,58 @@
+{
+    "@context": {
+        "@base": "http://purl.org/nanopub/temp/mynanopub#",
+        "np" : "http://www.nanopub.org/nschema#",
+        "npx": "http://purl.org/nanopub/x/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "foaf": "http://xmlns.com/foaf/0.1/",
+        "dc": "http://purl.org/dc/terms/",
+        "prov": "http://www.w3.org/ns/prov#",
+        "pav": "http://purl.org/pav/",
+        "orcid": "https://orcid.org/",
+        "schema": "https://schema.org/",
+        "ex": "http://example.org/",
+        "hasAssertion": {"@id": "np:hasAssertion"},
+        "hasProvenance": {"@id": "np:hasProvenance"},
+        "hasPublicationInfo": {"@id": "np:hasPublicationInfo"},
+        "Nanopublication": {"@id": "np:Nanopublication"}
+    },
+    "@id": "#Head",
+    "@graph" : {
+        "@id" : "#",
+        "@type": "Nanopublication",
+        "hasAssertion" : {
+            "@id" : "#assertion",
+            "@graph" : [
+                {
+                    "@id": "ex:mosquito",
+                    "ex:transmits": {"@id": "ex:malaria"}
+                }
+            ]
+        },
+        "hasProvenance" : {
+            "@id" : "#provenance",
+            "@graph" : [
+                {
+                    "@id": "#assertion",
+                    "prov:hadPrimarySource": {"@id": "http://dx.doi.org/10.3233/ISU-2010-0613"}
+                }
+            ]
+        },
+        "hasPublicationInfo" : {
+            "@id" : "#pubinfo",
+            "@graph" : [
+                {
+                    "@id": "#",
+                    "@type": "npx:ExampleNanopub",
+                    "pav:createdBy": {"@id": "http://orcid.org/0000-0002-1267-0234"},
+                    "dc:created": {
+                        "@value": "2014-07-24T18:05:11+01:00",
+                        "@type": "xsd:dateTime"
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -1,4 +1,4 @@
-orcid_id: https://orcid.org/0000-0000-0000-0000
+orcid_id: ""
 name: Test Person
 public_key: tests/resources/id_rsa.pub
 private_key: tests/resources/id_rsa

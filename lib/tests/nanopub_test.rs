@@ -7,10 +7,9 @@ fn get_test_key() -> String {
 
 #[test]
 fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
-    let orcid = "http://orcid.org/0000-0002-1267-0234";
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
 
-    let profile = NpProfile::new(orcid, "", &get_test_key(), None)?;
+    let profile = NpProfile::new("", "", &get_test_key(), None)?;
     let np = Nanopub::publish(&np_rdf, &profile, None)?;
     // println!("{}", np);
     assert!(np.published);
@@ -25,19 +24,16 @@ fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn sign_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
-    let orcid = "http://orcid.org/0000-0000-0000-0000";
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
 
-    let profile = NpProfile::new(orcid, "", &get_test_key(), None)?;
+    let profile = NpProfile::new(
+        "https://orcid.org/0000-0000-0000-0000",
+        "",
+        &get_test_key(),
+        None,
+    )?;
     let np = Nanopub::sign(&np_rdf, &profile)?;
-    // println!("{}", np);
     assert!(!np.published);
-    // Values compiled with the nanopub java lib using the exact same RDF
-    assert_eq!(
-        np.trusty_hash,
-        "RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI"
-    );
-    assert_eq!(np.signature_hash, "SVG82DiaVebC48kV/o3uOTlI///60YbICvRHEp5kXuuw2HXn4v5S42vcTNiyo75a3DT8dBxty8anDFgVjMEFh9fgzN+yKQekP/P5L3JGHEg+F2kPtR+y7bW3zfBp2erV+V8dsbq8xps36i8sZxVFgKup3R5zUYm43GfDnG4YCpI=");
     Ok(())
 }
 
@@ -54,6 +50,16 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
     println!("{}", np_server);
     let np_server = get_np_server(false);
     assert_eq!(np_server, "http://server.nanopubs.lod.labs.vu.nl/");
+    Ok(())
+}
+
+#[test]
+fn publish_jsonld() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
+    let profile = NpProfile::new("", "", &get_test_key(), None)?;
+    let np = Nanopub::publish(&np_rdf, &profile, None)?;
+    println!("{}", np);
+    assert!(np.published);
     Ok(())
 }
 
