@@ -34,8 +34,8 @@ chmod +x "${BINARY_NAME}"
 if [ -w "${DEST_DIR}" ]; then
     mv "${BINARY_NAME}" "${DEST_DIR}"
 else
-    echo "Admin permissions required to install to ${DEST_DIR}"
+    echo "🔓️ Admin permissions required to install to ${DEST_DIR}"
     sudo mv "${BINARY_NAME}" "${DEST_DIR}"
 fi
 
-echo "Installation completed. ${BINARY_NAME} installed to ${DEST_DIR}"
+echo "\n✨ Installation completed. \e[1m${BINARY_NAME}\e[0m installed to ${DEST_DIR}"
