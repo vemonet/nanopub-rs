@@ -3,7 +3,7 @@ use crate::error::{NpError, TermError};
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::publish_np;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{get_ns, get_prefixes, parse_rdf};
+use crate::utils::{get_ns, parse_rdf, serialize_rdf};
 
 use base64;
 use base64::{engine, Engine as _};
@@ -13,14 +13,9 @@ use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
-use sophia::api::serializer::{QuadSerializer, Stringifier};
-use sophia::api::source::QuadSource;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
-use sophia::turtle::parser::{nq, trig};
-// use sophia::xml::parser::parse_str;
-use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::collections::HashSet;
 use std::{fmt, str};
 
@@ -323,13 +318,7 @@ impl Nanopub {
             replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)?;
 
         // Prepare the trig serializer
-        let prefixes = get_prefixes(&trusty_uri, &trusty_ns);
-        let trig_config = TrigConfig::new()
-            .with_pretty(true)
-            .with_prefix_map(&prefixes[..]);
-        let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
-
-        let rdf_str = trig_stringifier.serialize_dataset(&dataset)?.to_string();
+        let rdf_str = serialize_rdf(&dataset, &trusty_uri, &trusty_ns)?;
 
         // Return the signed Nanopub object
         Ok(Self {

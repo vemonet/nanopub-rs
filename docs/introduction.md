@@ -15,3 +15,9 @@ On all platforms:
 - 🍎 MacOS
 - 🪟 Windows
 - 🦊 Web browsers
+
+The library automatically handles most RDF serializations supporting graphs for the nanopub:
+
+- TriG
+- Nquads
+- JSON-LD

@@ -1,6 +1,6 @@
 # ⌨️ Use from the CLI
 
-You can easily publish Nanopubs from your terminal using the binary for your platform.
+Publish Nanopubs from your terminal using the binary for your platform.
 
 ## 📥️ Install
 

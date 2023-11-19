@@ -1,4 +1,4 @@
-# 🦀 Use with Rust
+# 🦀 Use from Rust
 
 You can use the Rust crate to easily sign, publish, or check a Nanopub:
 

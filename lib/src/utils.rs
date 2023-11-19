@@ -1,13 +1,51 @@
-use sophia::api::source::{QuadSource as _, TripleSource as _};
+use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
+use sophia::api::source::QuadSource as _;
 use sophia::api::{ns::Namespace, prefix::Prefix};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
+use sophia::jsonld;
 use sophia::turtle::parser::{nq, trig};
-use sophia::{jsonld, xml};
+use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
+
+/// Parse RDF from various format to a `LightDataset` (trig, nquads, JSON-LD)
+pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
+    Ok(
+        if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
+            jsonld::parse_str(rdf)
+                .collect_quads()
+                .expect("Failed to parse JSON-LD RDF")
+        } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
+            nq::parse_str(rdf)
+                .collect_quads()
+                .expect("Failed to parse Nquads RDF")
+        } else {
+            trig::parse_str(rdf)
+                .collect_quads()
+                .expect("Failed to parse Trig RDF")
+        },
+    )
+    // NOTE: XML does not support graph apart from the uncommon trix format
+    // } else if rdf.starts_with("<?xml") {
+    //     let graph = xml::parser::parse_str(rdf)
+    //         .collect_triples()
+    //         .expect("Failed to parse XML RDF");
+    // Ok(dataset)
+}
+
+/// Serialize RDF dataset to Trig
+pub fn serialize_rdf(dataset: &LightDataset, uri: &str, ns: &str) -> Result<String, NpError> {
+    let prefixes = get_prefixes(uri, ns);
+    let trig_config = TrigConfig::new()
+        .with_pretty(true)
+        .with_prefix_map(&prefixes[..]);
+    let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
+
+    Ok(trig_stringifier.serialize_dataset(&dataset)?.to_string())
+}
 
 /// Return a Nanopub server, the main one or one picked randomly from the list of available servers
 pub fn get_np_server(random: bool) -> &'static str {
@@ -23,27 +61,6 @@ pub fn get_np_server(random: bool) -> &'static str {
     // Use the milliseconds to generate an index
     let index = (millis as usize) % LIST_SERVERS.len();
     LIST_SERVERS[index]
-}
-
-pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
-    let dataset = if rdf.starts_with("{") || rdf.starts_with("[") {
-        jsonld::parse_str(rdf)
-            .collect_quads()
-            .expect("Failed to parse JSON-LD RDF")
-    // } else if rdf.starts_with("<?xml") {
-    //     xml::parser::parse_str(rdf)
-    //         .collect_quads()
-    //         .expect("Failed to parse XML RDF")
-    } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
-        nq::parse_str(rdf)
-            .collect_quads()
-            .expect("Failed to parse Nquads RDF")
-    } else {
-        trig::parse_str(rdf)
-            .collect_quads()
-            .expect("Failed to parse Trig RDF")
-    };
-    Ok(dataset)
 }
 
 /// Get a namespace commonly used in nanopub manipulation
