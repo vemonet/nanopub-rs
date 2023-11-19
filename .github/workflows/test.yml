@@ -1,5 +1,5 @@
 
-name: 🧪 Tests
+name: Tests
 
 on:
   workflow_dispatch:
@@ -68,7 +68,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: rustup update
+      - run: rustup update && cargo install mdbook-admonish
 
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v1

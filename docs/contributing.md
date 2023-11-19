@@ -11,7 +11,7 @@ The usual process to make a contribution is to:
 
 ## 🧑‍💻 Development workflow
 
-[![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/vemonet/nanopub-rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/vemonet/nanopub-rs) [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml)
+[![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/vemonet/nanopub-rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/vemonet/nanopub-rs)
 
 [Rust](https://www.rust-lang.org/tools/install), python, and NodeJS are required for development.
 
@@ -147,3 +147,15 @@ cargo install cargo-release
 - Signature triple is added
 - Trusty URI code is calculated on normalized representation that includes signature
 - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
+
+## ⏱️ Speed comparison
+
+Speed taken when signing a nanopub using different languages implementations (in this order: [java](https://github.com/Nanopublication/nanopub-java), [python](https://github.com/fair-workflows/nanopub), rust):
+
+| Command | Mean [ms] | Min [ms] | Max [ms] | Relative |
+|:---|---:|---:|---:|---:|
+| `java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 319.5 ± 11.2 | 296.0 | 337.5 | 60.74 ± 2.49 |
+| `np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 446.6 ± 3.2 | 441.2 | 457.6 | 84.93 ± 1.93 |
+| `target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 5.3 ± 0.1 | 5.1 | 6.3 | 1.00 |
+
+> Tested in GitHub actions on Ubuntu.
