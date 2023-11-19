@@ -67,7 +67,9 @@ impl fmt::Display for NpProfile {
                 "{}Introduction URI:{} {}",
                 BOLD,
                 END,
-                self.introduction_nanopub_uri.clone().unwrap()
+                self.introduction_nanopub_uri
+                    .clone()
+                    .unwrap_or("".to_string())
             )?;
         }
         Ok(())

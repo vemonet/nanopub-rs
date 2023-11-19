@@ -3,7 +3,7 @@ use crate::error::{NpError, TermError};
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::publish_np;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{get_ns, get_prefixes};
+use crate::utils::{get_ns, get_prefixes, parse_rdf};
 
 use base64;
 use base64::{engine, Engine as _};
@@ -18,7 +18,8 @@ use sophia::api::source::QuadSource;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
-use sophia::turtle::parser::trig;
+use sophia::turtle::parser::{nq, trig};
+// use sophia::xml::parser::parse_str;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use std::collections::HashSet;
 use std::{fmt, str};
@@ -88,9 +89,7 @@ impl Nanopub {
     /// let np = Nanopub::check(&np_rdf).unwrap();
     /// ```
     pub fn check(rdf: &str) -> Result<Self, NpError> {
-        let mut dataset: LightDataset = trig::parse_str(rdf)
-            .collect_quads()
-            .expect("Failed to parse RDF");
+        let mut dataset: LightDataset = parse_rdf(rdf)?;
         let np_info = extract_np_info(&dataset)?;
 
         let norm_ns = if !np_info.trusty_hash.is_empty() {
@@ -193,7 +192,7 @@ impl Nanopub {
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
         // If the nanopub is already signed we verify it, then publish it
-        let dataset: LightDataset = trig::parse_str(rdf).collect_quads().unwrap();
+        let dataset: LightDataset = parse_rdf(rdf)?;
         let np_info = extract_np_info(&dataset)?;
 
         let mut np = if np_info.signature.is_empty() {
@@ -253,9 +252,7 @@ impl Nanopub {
         let pubkey_str = get_pubkey_str(&pubkey);
 
         // Parse the provided RDF
-        let mut dataset: LightDataset = trig::parse_str(rdf)
-            .collect_quads()
-            .expect("Failed to parse RDF");
+        let mut dataset: LightDataset = parse_rdf(rdf)?;
 
         // Extract graph URLs from the nanopub (fails if np not valid)
         let np_info = extract_np_info(&dataset)?;
