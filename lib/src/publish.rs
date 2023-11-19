@@ -13,14 +13,17 @@ pub fn publish_np(url: &str, np: &str) -> bool {
     let np = np.to_string();
     let client = reqwest::blocking::Client::new();
     let res = client
-        .post(url)
+        .post(&url)
         .body(np)
         .header(reqwest::header::CONTENT_TYPE, "application/trig")
         // .header(header::ACCEPT, "application/json")
         .send();
     match res {
         Ok(r) => r.status() == 201,
-        Err(_e) => false,
+        Err(e) => {
+            println!("Error publishing the Nanopub to server {url}: {}", e);
+            false
+        }
     }
     // res.status() == 201
 }
@@ -34,7 +37,7 @@ pub fn publish_np(url: &str, np: &str) -> bool {
     spawn_local(async move {
         let client = reqwest::Client::new();
         let res = client
-            .post(url)
+            .post(&url)
             .body(np)
             .header(reqwest::header::CONTENT_TYPE, "application/trig")
             // .header(header::ACCEPT, "application/json")
