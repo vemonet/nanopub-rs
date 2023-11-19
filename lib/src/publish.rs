@@ -48,7 +48,7 @@ pub fn publish_np(url: &str, np: &str) -> bool {
                     println!("Error publishing the Nanopub to server {url}, getting status {}", r.status());
                 }
             }
-            Err(e) => println!(e),
+            Err(e) => println!("Error publishing the Nanopub to server {url}: {}", e),
         }
     });
     published
