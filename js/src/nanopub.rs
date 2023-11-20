@@ -8,6 +8,7 @@ pub struct NanopubJs {
 
 // Optional arguments: https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
 // Maybe try https://rustwasm.github.io/wasm-bindgen/reference/arbitrary-data-with-serde.html
+#[allow(unused_variables, clippy::inherent_to_string)]
 #[wasm_bindgen(js_class = Nanopub)]
 impl NanopubJs {
     // #[wasm_bindgen(constructor)]

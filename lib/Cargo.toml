@@ -12,7 +12,7 @@ license-file.workspace = true
 keywords.workspace = true
 homepage.workspace = true
 categories.workspace = true
-# rust-version = "1.60"
+# rust-version = "1.74"
 
 [package.metadata.docs.rs]
 all-features = true
