@@ -1,3 +1,5 @@
+#![doc = include_str!("../../README.md")]
+#![doc = include_str!("../../docs/use_rust.md")]
 // # extern crate sophia;
 // #![warn(missing_docs)]
 // #![doc(html_favicon_url = "https://raw.github.com/MaastrichtU-IDS/knowledge-collaboratory/main/frontend/app/assets/icon.png")]
@@ -10,13 +12,12 @@
 
 mod constants;
 pub mod error;
+pub mod nanopub;
+pub mod profile;
+mod publish;
+mod sign;
+pub mod utils;
 /// A module to sign, publish, or check [Nanopublications](https://nanopub.net).
-///
-/// [![crates.io](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
-/// [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
-/// [![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
-///
-/// 📖 Checkout the [documentation website](https://vemonet.github.io/nanopub-rs) for more informations
 ///
 /// ## Usage
 ///
@@ -32,12 +33,6 @@ pub mod error;
 /// let checked_np = Nanopub::check(&signed_np.rdf).unwrap();
 /// println!("{}", published_np)
 /// ```
-pub mod nanopub;
-pub mod profile;
-mod publish;
-mod sign;
-pub mod utils;
-
 pub use nanopub::Nanopub;
 pub use profile::NpProfile;
 pub use utils::get_np_server;

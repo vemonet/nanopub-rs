@@ -20,5 +20,5 @@ println!("{}", published_np)
 ```
 
 ```admonish info title="API reference"
-Checkout the **[API documentation](/doc/nanopub)** for more details on how to use the different components and functions of the rust crate.
+Checkout the **[API documentation](https://docs.rs/nanopub)** for more details on how to use the different components and functions of the rust crate.
 ```
