@@ -16,5 +16,5 @@ name = "nanopub_sign"
 crate-type = ["cdylib"]
 
 [dependencies]
-nanopub = { path = "../lib" }
+nanopub = { version = "0.0.0", path = "../lib" }
 pyo3 = { version = "0.20", features = ["extension-module"] }
