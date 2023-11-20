@@ -1,6 +1,6 @@
 [package]
 name = "nanopub"
-version = "0.0.1"
+version = "0.0.2"
 description = """
 A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
 """
@@ -28,7 +28,7 @@ reqwest = { version = "0.11", features = ["blocking", "rustls-tls"], default-fea
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
 chrono = "0.4"
-# log = { version = "0.4.20", features = ["std"] }
+# log = { version = "0.0.2", features = ["std"] }
 
 [dev-dependencies]
 mdbook = "0.4.35"

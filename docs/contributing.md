@@ -128,13 +128,14 @@ cargo install cargo-release cargo-outdated
 2. Bump the version in the `Cargo.toml` file in folders `lib/`, `python`, `js`
 
    ```bash
-   # patch, minor, major
-   cargo release patch --no-tag --no-publish
+   ./scripts/bump.sh 0.0.2
    ```
 
 3. Commit, push, and create a new release on GitHub
 
 4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
+
+> TODO: try `cargo release patch --no-tag --no-publish`
 
 ## ☑️ To do
 

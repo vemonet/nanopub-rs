@@ -297,12 +297,12 @@ jobs:
           path: ./js/pkg
 
       - run: npm run release
-        working-directory: ./js/pkg
+        working-directory: ./js
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: github.event_name == 'release'
 
-
+# nanopub-sign/
   publish_crates:
     name: 📦️ Publish crates to crates.io
     if: github.event_name == 'release'
