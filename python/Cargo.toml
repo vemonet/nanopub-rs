@@ -1,6 +1,6 @@
 [package]
 name = "nanopub-sign"
-version = "0.0.4"
+version = "0.0.5"
 description = "Python bindings for the Nanopub rust toolkit"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/python"
 authors.workspace = true
@@ -16,5 +16,5 @@ name = "nanopub_sign"
 crate-type = ["cdylib"]
 
 [dependencies]
-nanopub = { version = "0.0.4", path = "../lib" }
+nanopub = { version = "0.0.5", path = "../lib" }
 pyo3 = { version = "0.20", features = ["extension-module"] }

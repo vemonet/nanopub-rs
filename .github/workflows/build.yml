@@ -283,6 +283,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
+          registry-url: 'https://registry.npmjs.org'
           cache: npm
           cache-dependency-path: "./js/package.json"
 
@@ -300,7 +301,6 @@ jobs:
         working-directory: ./js
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: github.event_name == 'release'
 
   publish_crates:
