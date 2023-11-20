@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-
 # Script to install dependencies for development and enable pre-commit hooks
 
 python3 -m venv .venv

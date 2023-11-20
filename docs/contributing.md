@@ -18,9 +18,17 @@ The usual process to make a contribution is to:
 Install development dependencies:
 
 ```bash
+# Activate python virtual env
+python3 -m venv .venv
+source .venv/bin/activate
+# Install python dependencies
+pip install maturin pre-commit
+# Install pre-commit hooks
+pre-commit install
+# Install rust dev tools
 rustup update
 rustup component add rustfmt clippy
-cargo install cargo-tarpaulin mdbook mdbook-admonish
+cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish
 ```
 
 ### 📥️ Clone the repository
@@ -32,7 +40,7 @@ cd nanopub-rs
 git checkout -b add-my-contribution
 ```
 
-### ✅ Run tests
+###  🧪 Run tests
 
 Run tests for all packages:
 
@@ -49,13 +57,7 @@ cargo test -- --nocapture
 Run a specific test:
 
 ```bash
-cargo test sign_nanopub_test_blank -- --nocapture
-```
-
-Run all tests:
-
-```bash
-cargo test --verbose --all --all-features
+cargo test sign_nanopub_blank -- --nocapture
 ```
 
 Test a specific package:
@@ -76,7 +78,7 @@ Test signing a nanopublication with the CLI:
 
 ```bash
 cd cli
-cargo run -- sign tests/resources/nanopub_test_blank.trig
+cargo run -- sign ../lib/tests/resources/nanopub_test_blank.trig
 ```
 
 ### ✨ Format
@@ -113,7 +115,7 @@ Publishing artifacts will be done by the `build.yml` workflow, make sure you hav
 Install dependency:
 
 ```bash
-cargo install cargo-release
+cargo install cargo-release cargo-outdated
 ```
 
 1. Make sure dependencies have been updated:
@@ -136,13 +138,15 @@ cargo install cargo-release
 
 ## ☑️ To do
 
-- [ ] Add Nanopub test suite
-- [ ] Add brew packaging (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))
+- [ ] Integrate to the python `nanopub` library to perform signing?
+- [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
+- [ ] Add Java bindings? https://docs.rs/jni/latest/jni
+- [ ] Add brew packaging (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))?
 
 ## ✒️ Nanopub signing process
 
-- preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `https://w3id.org/np/ `, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
-- preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
+- Preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `https://w3id.org/np/ `, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
+- Preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
 - Signature is calculated on this normalized representation (cf. most of the process in the [trusty-uri python lib](https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15), see also [SignatureUtils](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/extra/security/SignatureUtils.java#L196) and [trusty-uri](https://github.com/trustyuri/trustyuri-java/blob/08b61fbb13d20a5cbefde617bd9a9e9b0b03d780/src/main/java/net/trustyuri/rdf/RdfHasher.java#L86))
 - Signature triple is added
 - Trusty URI code is calculated on normalized representation that includes signature

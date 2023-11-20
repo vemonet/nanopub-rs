@@ -18,12 +18,10 @@ Start in dev:
 maturin develop
 ```
 
-Try the python lib by running `python try.py`:
+Try the python lib:
 
-```python
-from nanopub_sign import Nanopub
-np = Nanopub(rdf="tiii")
-print(np.get_rdf())
+```bash
+python try.py
 ```
 
 ## Build

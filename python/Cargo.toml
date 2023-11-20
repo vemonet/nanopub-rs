@@ -10,7 +10,6 @@ license-file.workspace = true
 keywords.workspace = true
 homepage.workspace = true
 categories.workspace = true
-# edition = "2018"
 
 [lib]
 name = "nanopub_sign"
@@ -18,7 +17,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 nanopub = { path = "../lib" }
-
-[dependencies.pyo3]
-version = "0.17.1"
-features = ["extension-module"]
+pyo3 = { version = "0.20", features = ["extension-module"] }

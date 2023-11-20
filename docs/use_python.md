@@ -16,7 +16,7 @@ pip install nanopub-sign
 
 ## 🚀 Use
 
-Create a `.py` file with:
+Create a `sign.py` file with:
 
 ```python
 from nanopub_sign import Nanopub
@@ -72,4 +72,10 @@ np = Nanopub(
 )
 
 print(np.get_rdf())
+```
+
+Run it:
+
+```bash
+python sign.py
 ```

@@ -22,7 +22,7 @@ fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
-fn sign_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
+fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
 
     let profile = NpProfile::new(

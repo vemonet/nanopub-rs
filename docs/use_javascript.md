@@ -16,7 +16,7 @@ npm install @nanopub/sign
 
 ## 🚀 Use
 
-Create an `index.html` file with:
+Create an `index.html` file, and open it in a browser:
 
 ```html
 <!DOCTYPE html>

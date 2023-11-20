@@ -15,24 +15,24 @@ Rename the binary to `np` and put it in your path.
 You can do it easily on Linux, MacOS, and Windows WSL, by using our install script:
 
 ```bash
-curl -sSL https://raw.github.com/vemonet/nanopub-rs/main/install_binary.sh | bash
+curl -sSL https://raw.github.com/vemonet/nanopub-rs/main/scripts/install-binary.sh | bash
 ```
 
 ## ✍️ Sign
 
-Signing a Nanopub, by default it will try to use the profile available at `~/.nanopub/profile.yml`
+Sign a Nanopub, by default it will try to use the profile available at `~/.nanopub/profile.yml`
 
 ```bash
 np sign nanopub.trig
 ```
 
-Signing a Nanopub, using a specific private key file:
+Sign a Nanopub, using a specific private key file:
 
 ```bash
 np sign nanopub.trig -k ~/.nanopub/id_rsa
 ```
 
-Signing a Nanopub, using a `profile.yml` file:
+Sign a Nanopub, using a `profile.yml` file:
 
 ```bash
 np sign nanopub.trig -p ~/.nanopub/profile.yml
