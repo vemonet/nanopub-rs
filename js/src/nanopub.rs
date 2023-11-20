@@ -5,20 +5,28 @@ use wasm_bindgen::prelude::*;
 pub struct NanopubJs {
     np: Nanopub,
 }
-// pub struct NanopubJs(Nanopub);
 
 // Optional arguments: https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
 // Maybe try https://rustwasm.github.io/wasm-bindgen/reference/arbitrary-data-with-serde.html
 #[wasm_bindgen(js_class = Nanopub)]
 impl NanopubJs {
+    // #[wasm_bindgen(constructor)]
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn check(rdf: &str) -> Result<NanopubJs, JsValue> {
         console_error_panic_hook::set_once();
-        let np = Nanopub::check(rdf).expect_throw("Error publishing the Nanopub");
-        Ok(Self { np })
+        Ok(Self {
+            np: Nanopub::check(rdf).expect_throw("Error checking the Nanopub"),
+        })
     }
 
-    // #[wasm_bindgen(constructor)]
+    #[wasm_bindgen(static_method_of = NanopubJs)]
+    pub fn sign(rdf: &str, profile: NpProfileJs) -> Result<NanopubJs, JsValue> {
+        console_error_panic_hook::set_once();
+        Ok(Self {
+            np: Nanopub::sign(rdf, &profile.profile).expect_throw("Error signing the Nanopub"),
+        })
+    }
+
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn publish(
         rdf: &str,
@@ -26,10 +34,10 @@ impl NanopubJs {
         server_url: &str,
     ) -> Result<NanopubJs, JsValue> {
         console_error_panic_hook::set_once();
-        let np = Nanopub::publish(rdf, &profile.profile, Some(server_url))
-            .expect_throw("Error publishing the Nanopub");
-        // Nanopub::sign(rdf, &profile).expect_throw("Error signing the Nanopub")
-        Ok(Self { np })
+        Ok(Self {
+            np: Nanopub::publish(rdf, &profile.profile, Some(server_url))
+                .expect_throw("Error publishing the Nanopub"),
+        })
     }
 
     // #[wasm_bindgen]
@@ -41,16 +49,13 @@ impl NanopubJs {
     pub fn to_string(&self) -> String {
         self.np.to_string()
     }
-
-    // pub fn update(&self, update: &str) -> Result<(), JsValue> {
-    //     self.store.update(update).map_err(to_err)
-    // }
 }
 
 #[wasm_bindgen(js_name = NpProfile)]
 pub struct NpProfileJs {
     profile: NpProfile,
 }
+// pub struct NpProfileJs(NpProfile);
 
 #[wasm_bindgen(js_class = NpProfile)]
 impl NpProfileJs {
