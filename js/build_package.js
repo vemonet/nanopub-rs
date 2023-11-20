@@ -24,7 +24,7 @@ pkg.bugs = {
 pkg.collaborators = undefined;
 pkg.repository = {
     type: "git",
-    url: "https://github.com/vemonet/nanopub-rs.git",
+    url: "git+https://github.com/vemonet/nanopub-rs.git",
     directory: "js",
 };
 fs.writeFileSync("./pkg/package.json", JSON.stringify(pkg, null, 2));

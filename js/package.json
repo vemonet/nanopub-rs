@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/vemonet/nanopub-rs/tree/main/js"
+    "url": "git+https://github.com/vemonet/nanopub-rs.git"
   },
   "files": [
     "*.{js,wasm,d.ts}"
@@ -24,7 +24,7 @@
     "test": "wasm-pack build --debug --target nodejs && mocha",
     "build": "rm -rf pkg && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web && rm -r pkg-node",
     "start": "http-server ./",
-    "release": "npm run build && npm publish ./pkg",
+    "release": "npm run build && npm publish ./pkg --access public",
     "pack": "npm run build && npm pack ./pkg"
   },
   "standard": {
