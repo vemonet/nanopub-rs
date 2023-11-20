@@ -44,8 +44,8 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
 fn publish_fail() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, Some("failing"))?;
-    assert!(!np.published);
+    let np = Nanopub::publish(&np_rdf, &profile, Some("failing"));
+    assert!(np.is_err());
     Ok(())
 }
 

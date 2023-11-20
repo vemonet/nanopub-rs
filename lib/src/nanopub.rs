@@ -221,7 +221,8 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
-        let published = publish_np(&server_url, &np.get_rdf());
+        // let published = publish_np(&server_url, &np.get_rdf());
+        let published = futures::executor::block_on(publish_np(&server_url, &np.get_rdf()))?;
         if published {
             println!(
                 "\n🎉 Nanopublication published at {}{}{}",

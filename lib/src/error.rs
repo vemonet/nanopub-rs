@@ -57,6 +57,11 @@ impl From<regex::Error> for NpError {
         NpError(format!("Regex error: {err}"))
     }
 }
+impl From<String> for NpError {
+    fn from(err: String) -> Self {
+        NpError(format!("Error: {err}"))
+    }
+}
 impl From<std::io::Error> for NpError {
     fn from(err: std::io::Error) -> Self {
         NpError(format!("File IO error: {err}"))
