@@ -1,6 +1,7 @@
 // use js_sys::Error;
 // use wasm_bindgen::JsValue;
 
+// Improve error messages
 #[macro_export]
 macro_rules! format_err {
     ($msg:literal $(,)?) => {

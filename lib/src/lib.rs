@@ -10,7 +10,7 @@
 // https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html
 // Can't publish because outside of pkg: #![doc = include_str!("../../docs/introduction.md")]
 
-mod constants;
+pub mod constants;
 pub mod error;
 pub mod nanopub;
 pub mod profile;

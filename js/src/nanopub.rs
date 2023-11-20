@@ -1,4 +1,4 @@
-use nanopub::{Nanopub, NpProfile};
+use nanopub::{constants::TEST_SERVER, Nanopub, NpProfile};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(js_name = Nanopub)]
@@ -14,7 +14,6 @@ impl NanopubJs {
     // #[wasm_bindgen(constructor)]
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn check(rdf: &str) -> Result<NanopubJs, JsValue> {
-        console_error_panic_hook::set_once();
         Ok(Self {
             np: Nanopub::check(rdf).expect_throw("Error checking the Nanopub"),
         })
@@ -22,7 +21,6 @@ impl NanopubJs {
 
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn sign(rdf: &str, profile: NpProfileJs) -> Result<NanopubJs, JsValue> {
-        console_error_panic_hook::set_once();
         Ok(Self {
             np: Nanopub::sign(rdf, &profile.profile).expect_throw("Error signing the Nanopub"),
         })
@@ -34,7 +32,11 @@ impl NanopubJs {
         profile: NpProfileJs,
         server_url: &str,
     ) -> Result<NanopubJs, JsValue> {
-        console_error_panic_hook::set_once();
+        let server_url = if server_url.is_empty() {
+            TEST_SERVER
+        } else {
+            server_url
+        };
         Ok(Self {
             np: Nanopub::publish(rdf, &profile.profile, Some(server_url))
                 .expect_throw("Error publishing the Nanopub"),
@@ -44,6 +46,10 @@ impl NanopubJs {
     // #[wasm_bindgen]
     pub fn get_rdf(&self) -> Result<String, JsValue> {
         Ok(self.np.get_rdf())
+    }
+
+    pub fn published(&self) -> Result<bool, JsValue> {
+        Ok(self.np.published)
     }
 
     #[wasm_bindgen(js_name = toString)]

@@ -1,5 +1,5 @@
-PREFIX this: <https://w3id.org/np/RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI>
-PREFIX sub: <https://w3id.org/np/RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI#>
+PREFIX this: <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8>
+PREFIX sub: <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -8,12 +8,13 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX biolink: <https://w3id.org/biolink/vocab/>
 PREFIX np: <http://www.nanopub.org/nschema#>
 PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX pav: <http://purl.org/pav/>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX orcid: <https://orcid.org/>
 PREFIX npx: <http://purl.org/nanopub/x/>
 
 GRAPH sub:Head {
-  <https://w3id.org/np/RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI> a np:Nanopublication;
+  <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8> a np:Nanopublication;
     np:hasAssertion sub:assertion;
     np:hasProvenance sub:provenance;
     np:hasPublicationInfo sub:pubInfo.
@@ -55,12 +56,13 @@ GRAPH sub:provenance {
 }
 
 GRAPH sub:pubInfo {
-  <https://w3id.org/np/RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI>
+  <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8>
+    dcterms:creator <http://orcid.org/0000-0000-0000-0000>;
     prov:wasAttributedTo orcid:0000-0000-0000-0000.
 
   sub:sig
     npx:hasAlgorithm "RSA";
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "SVG82DiaVebC48kV/o3uOTlI///60YbICvRHEp5kXuuw2HXn4v5S42vcTNiyo75a3DT8dBxty8anDFgVjMEFh9fgzN+yKQekP/P5L3JGHEg+F2kPtR+y7bW3zfBp2erV+V8dsbq8xps36i8sZxVFgKup3R5zUYm43GfDnG4YCpI=";
-    npx:hasSignatureTarget <https://w3id.org/np/RAoBtLQgkD--9if2Wl_ziui5lZ_-oBrsKyA_4lrMxmFwI>.
+    npx:hasSignature "ScQKA0Auc3s1H6tfI+MCtfH9GkVtvbsTkGbp8FLWUjc1pPrA8HVwja/s5Utd3ZgTFSBggKxD1C0zZUZXkU/F/CnlIlDH9Pvl0adi4jv3FdQmLlwoJ/eoG3ESBRqRN6Ed9RGsLT26E3XFjQp7b93WBnJahljsG7fmB8guwhdOhco=";
+    npx:hasSignatureTarget <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8>.
 }

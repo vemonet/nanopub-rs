@@ -7,7 +7,6 @@ use std::io::Read;
 use std::{env, fs};
 
 use crate::constants::DEFAULT_NP_PROFILE;
-use crate::constants::{BOLD, END};
 use crate::error::NpError;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -56,17 +55,15 @@ impl NpProfile {
 
 impl fmt::Display for NpProfile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "\n{}Nanopub Profile:{}", BOLD, END)?;
-        writeln!(f, "{}ORCID:{} {}", BOLD, END, self.orcid_id)?;
-        writeln!(f, "{}Name:{} {}", BOLD, END, self.name)?;
-        writeln!(f, "{}Public key:{} {}", BOLD, END, self.public_key)?;
-        writeln!(f, "{}Private key:{} {}", BOLD, END, self.private_key)?;
+        writeln!(f, "\nNanopub Profile:")?;
+        writeln!(f, "ORCID:{}", self.orcid_id)?;
+        writeln!(f, "Name:{}", self.name)?;
+        writeln!(f, "Public key: {}", self.public_key)?;
+        writeln!(f, "Private key: {}", self.private_key)?;
         if self.introduction_nanopub_uri.is_some() {
             writeln!(
                 f,
-                "{}Introduction URI:{} {}",
-                BOLD,
-                END,
+                "Introduction URI: {}",
                 self.introduction_nanopub_uri
                     .clone()
                     .unwrap_or("".to_string())

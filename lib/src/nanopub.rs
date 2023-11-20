@@ -40,12 +40,12 @@ pub struct NpInfo {
 
 impl fmt::Display for NpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "\n{}Nanopub URL:{} {}", BOLD, END, self.uri)?;
-        writeln!(f, "{}Namespace:{} {}", BOLD, END, *self.ns)?;
-        writeln!(f, "{}Base URI:{} {}", BOLD, END, self.base_uri)?;
-        writeln!(f, "{}Trusty Hash:{} {}", BOLD, END, self.trusty_hash)?;
-        writeln!(f, "{}Head Graph:{} {}", BOLD, END, self.head)?;
-        writeln!(f, "{}Assertion Graph:{} {}", BOLD, END, self.assertion)?;
+        writeln!(f, "\nNanopub URI: {}", self.uri)?;
+        writeln!(f, "Namespace: {}", *self.ns)?;
+        writeln!(f, "Base URI: {}", self.base_uri)?;
+        writeln!(f, "Trusty Hash: {}", self.trusty_hash)?;
+        writeln!(f, "Head Graph: {}", self.head)?;
+        writeln!(f, "Assertion Graph: {}", self.assertion)?;
         Ok(())
     }
 }
@@ -63,6 +63,18 @@ pub struct Nanopub {
     pub published: bool,
     pub info: NpInfo,
     // dataset: LightDataset,
+}
+
+impl fmt::Display for Nanopub {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "\n{}", self.rdf)?;
+        writeln!(f, "URI: {}", self.uri)?;
+        writeln!(f, "Trusty hash: {}", self.trusty_hash)?;
+        writeln!(f, "Signature hash: {}", self.signature_hash)?;
+        writeln!(f, "Public key: {}", self.public_key)?;
+        writeln!(f, "Published: {}", self.published)?;
+        Ok(())
+    }
 }
 
 impl Nanopub {
@@ -396,22 +408,6 @@ impl Nanopub {
     /// Sets if the nanopub has been published to the network
     pub fn set_published(&mut self, value: bool) {
         self.published = value;
-    }
-}
-
-impl fmt::Display for Nanopub {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(
-            f,
-            "\n{}Nanopublication: {}{} \n{}",
-            BOLD, self.uri, END, self.rdf
-        )?;
-        writeln!(f, "{}ORCID:{} {}", BOLD, END, self.orcid)?;
-        writeln!(f, "{}Public key:{} {}", BOLD, END, self.public_key)?;
-        writeln!(f, "{}Trusty hash:{} {}", BOLD, END, self.trusty_hash)?;
-        writeln!(f, "{}Signature hash:{} {}", BOLD, END, self.signature_hash)?;
-        writeln!(f, "{}Published:{} {}", BOLD, END, self.published)?;
-        Ok(())
     }
 }
 
