@@ -59,6 +59,7 @@ jobs:
             nanopub_x86_64_linux_gnu
             nanopub_aarch64_linux_gnu
           # nanopub_${{ github.event.release.tag_name }}_x86_64_linux_gnu
+          # tag_name: ${{ github.event.release.tag_name }}
 
 
   binary_mac:
