@@ -22,7 +22,7 @@ npm run build
 
 ## Try it
 
-Code in the `index.html` file
+Check the code in the `index.html` file
 
 ```bash
 npm run start

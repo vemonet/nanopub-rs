@@ -5,33 +5,30 @@ use wasm_bindgen::prelude::*;
 pub struct NanopubJs {
     np: Nanopub,
 }
+// pub struct NanopubJs(Nanopub);
 
+// Optional arguments: https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
 // Maybe try https://rustwasm.github.io/wasm-bindgen/reference/arbitrary-data-with-serde.html
 #[wasm_bindgen(js_class = Nanopub)]
 impl NanopubJs {
-    // pub fn new(rdf: Option<&str>) -> Result<JsNanopub, JsValue> {
+    #[wasm_bindgen(static_method_of = NanopubJs)]
+    pub fn check(rdf: &str) -> Result<NanopubJs, JsValue> {
+        console_error_panic_hook::set_once();
+        let np = Nanopub::check(rdf).expect_throw("Error publishing the Nanopub");
+        Ok(Self { np })
+    }
 
-    #[wasm_bindgen(constructor)]
-    pub fn new(
+    // #[wasm_bindgen(constructor)]
+    #[wasm_bindgen(static_method_of = NanopubJs)]
+    pub fn publish(
         rdf: &str,
-        private_key: &str,
-        orcid: &str,
+        profile: NpProfileJs,
         server_url: &str,
-        publish: bool,
     ) -> Result<NanopubJs, JsValue> {
         console_error_panic_hook::set_once();
-        let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
-        let np = if publish {
-            Nanopub::publish(
-                // &rdf.unwrap_or("default in py").to_string(),
-                rdf,
-                &profile,
-                Some(server_url),
-            )
-            .expect_throw("Error publishing the Nanopub")
-        } else {
-            Nanopub::sign(rdf, &profile).expect_throw("Error signing the Nanopub")
-        };
+        let np = Nanopub::publish(rdf, &profile.profile, Some(server_url))
+            .expect_throw("Error publishing the Nanopub");
+        // Nanopub::sign(rdf, &profile).expect_throw("Error signing the Nanopub")
         Ok(Self { np })
     }
 
@@ -50,14 +47,28 @@ impl NanopubJs {
     // }
 }
 
-// let store = Self {
-//     store: Store::new().map_err(to_err)?,
-// };
-// Ok(Self {
-//     np: if let Some(rdf) = rdf {
-//         Nanopub::new(rdf.unwrap_or("default in js"))
-//     } else {
-//         Nanopub::new()
-//     }
-//     .map_err(map_storage_error)?,
-// })
+#[wasm_bindgen(js_name = NpProfile)]
+pub struct NpProfileJs {
+    profile: NpProfile,
+}
+
+#[wasm_bindgen(js_class = NpProfile)]
+impl NpProfileJs {
+    #[wasm_bindgen(constructor)]
+    pub fn new(
+        orcid_id: &str,
+        name: &str,
+        private_key: &str,
+        introduction_nanopub_uri: &str,
+    ) -> Result<NpProfileJs, JsValue> {
+        console_error_panic_hook::set_once();
+        let profile =
+            NpProfile::new(orcid_id, name, private_key, Some(introduction_nanopub_uri)).unwrap();
+        Ok(Self { profile })
+    }
+
+    #[wasm_bindgen(js_name = toString)]
+    pub fn to_string(&self) -> String {
+        self.profile.to_string()
+    }
+}
