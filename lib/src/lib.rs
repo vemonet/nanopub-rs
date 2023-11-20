@@ -10,7 +10,9 @@
 
 mod constants;
 pub mod error;
-/// A module to work with nanopublications
+/// A module to sign, publish, or check [Nanopublications](https://nanopub.net).
+///
+/// 📖 Checkout the [documentation website](https://vemonet.github.io/nanopub-rs) for more informations
 ///
 /// ## Usage
 ///
