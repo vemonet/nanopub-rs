@@ -2,7 +2,7 @@
 authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
 language = "en"
 multilingual = false
-src = "./docs"
+src = "./lib/docs"
 title = "✍️ Nanopub cross-platform toolkit ⚔️"
 description = "A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)"
 
@@ -12,7 +12,7 @@ create-missing = false
 
 [output.html]
 git-repository-url = "https://github.com/vemonet/nanopub-rs"
-additional-css = ["./docs/mdbook-admonish.css"]
+additional-css = ["./lib/docs/mdbook-admonish.css"]
 
 [preprocessor]
 

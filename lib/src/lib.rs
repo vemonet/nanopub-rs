@@ -1,5 +1,5 @@
-#![doc = include_str!("../../README.md")]
-#![doc = include_str!("../../docs/use_rust.md")]
+#![doc = include_str!("../docs/introduction.md")]
+#![doc = include_str!("../docs/use_rust.md")]
 // # extern crate sophia;
 // #![warn(missing_docs)]
 // #![doc(html_favicon_url = "https://raw.github.com/MaastrichtU-IDS/knowledge-collaboratory/main/frontend/app/assets/icon.png")]

@@ -317,4 +317,3 @@ jobs:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
       - run: cargo publish
         working-directory: ./lib
-        continue-on-error: true
