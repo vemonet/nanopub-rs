@@ -7,7 +7,7 @@ BINARY_NAME="np"
 # Destination directory
 DEST_DIR="/usr/local/bin"
 
-BASE_BINARY_URL="http://github.com/vemonet/nanopub-rs/releases/latest/download/nanopub_x86_64_"
+BASE_BINARY_URL="http://github.com/vemonet/nanopub-rs/releases/latest/download/nanopub_x86_64"
 # Detect the platform (Linux or macOS)
 case "$(uname)" in
     "Linux")
@@ -24,18 +24,20 @@ case "$(uname)" in
         ;;
 esac
 
+echo "Downloading binary from $BINARY_URL"
+
 # Download the binary
-curl -o "${BINARY_NAME}" "${BINARY_URL}"
+curl -sSL -o "$BINARY_NAME" "$BINARY_URL"
 
 # Make binary executable
-chmod +x "${BINARY_NAME}"
+chmod +x "$BINARY_NAME"
 
 # Move the binary to the destination directory
-if [ -w "${DEST_DIR}" ]; then
-    mv "${BINARY_NAME}" "${DEST_DIR}"
+if [ -w "$DEST_DIR" ]; then
+    mv "$BINARY_NAME" "$DEST_DIR"
 else
-    echo "🔓️ Admin permissions required to install to ${DEST_DIR}"
-    sudo mv "${BINARY_NAME}" "${DEST_DIR}"
+    echo "🔓️ Admin permissions required to install to $DEST_DIR"
+    sudo mv "$BINARY_NAME" "$DEST_DIR"
 fi
 
-echo "\n✨ Installation completed. \e[1m${BINARY_NAME}\e[0m installed to ${DEST_DIR}"
+echo "✨ Installation completed. $BINARY_NAME installed to $DEST_DIR"

@@ -12,7 +12,7 @@ It is packaged to be used easily through various popular interfaces:
 
 - ⌨️ Binary with a CLI for use in the terminal
 - 🦀 Crate `nanopub` for Rust
-- 🐍 Pip package `nanopub_sign` for Python
+- 🐍 Pip package `nanopub-sign` for Python
 - 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser, or with NodeJS
 
 On all platforms:
