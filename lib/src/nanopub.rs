@@ -20,6 +20,7 @@ use std::collections::HashSet;
 use std::{fmt, str};
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
+#[derive(Clone)]
 pub struct NpInfo {
     pub uri: Iri<String>,
     pub ns: Namespace<String>,
@@ -50,6 +51,7 @@ impl fmt::Display for NpInfo {
 }
 
 /// A nanopublication object
+#[derive(Clone)]
 pub struct Nanopub {
     pub uri: String,
     pub ns: String,

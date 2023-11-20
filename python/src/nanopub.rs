@@ -2,68 +2,67 @@ use nanopub::{Nanopub, NpProfile};
 use pyo3::prelude::*;
 
 #[pyclass(name = "Nanopub", module = "nanopub_sign")]
-#[pyo3(text_signature = "(rdf, private_key, orcid, server_url=None, publish=False)")]
-// #[derive(Clone)]
+#[derive(Clone)]
 pub struct NanopubPy {
     np: Nanopub,
 }
 
 #[pymethods]
 impl NanopubPy {
-    #[new]
-    fn new(
+    // #[new]
+    #[staticmethod]
+    #[pyo3(text_signature = "(rdf)")]
+    fn check(rdf: &str) -> PyResult<Self> {
+        let np = Nanopub::check(rdf).unwrap();
+        Ok(Self { np })
+    }
+
+    #[staticmethod]
+    #[pyo3(text_signature = "(rdf, private_key, orcid, server_url=None)")]
+    fn publish(
         rdf: &str,
-        private_key: &str,
-        orcid: &str,
-        server_url: &str,
-        publish: bool,
-        py: Python<'_>,
+        profile: &NpProfilePy,
+        // private_key: &str,
+        // orcid: &str,
+        server_url: Option<&str>,
+        // py: Python<'_>,
     ) -> PyResult<Self> {
-        py.allow_threads(|| {
-            let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
-            let np = if publish {
-                Nanopub::publish(
-                    // &rdf.unwrap_or("default in py").to_string(),
-                    rdf,
-                    &profile,
-                    Some(server_url),
-                )
-                .unwrap()
-            } else {
-                Nanopub::sign(rdf, &profile).unwrap()
-            };
-            Ok(Self { np })
+        // py.allow_threads(|| { // Put code in this block to enable true parallel https://pyo3.rs/v0.20.0/parallelism
+        // let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
 
-            // Ok( Self {
-            //     rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
-            //     dataset: dataset,
-            //     public_key: public_key.to_string(),
-            //     private_key: private_key.to_string(),
-            //     orcid: orcid.to_string(),
-            //     server_url: if let Some(server_url) = server_url {
-            //         server_url.to_string()
-            //     } else{
-            //         TEST_SERVER.to_string()
-            //     },
-            //     publish: if let Some(publish) = publish {
-            //         publish.clone()
-            //     } else {
-            //         false
-            //     }
-            // })
+        let np = Nanopub::publish(rdf, &profile.profile, server_url).unwrap();
+        // Nanopub::sign(rdf, &profile).unwrap()
+        Ok(Self { np })
 
-            // Ok(Self {
-            //     np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
-            // })
-            // Ok(Self {
-            //     np: if let Some(rdf) = rdf {
-            //         Nanopub::new(rdf.unwrap_or("default in py"))
-            //     } else {
-            //         Nanopub::new()
-            //     }
-            //     .map_err(map_storage_error)?,
-            // })
-        })
+        // Ok( Self {
+        //     rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
+        //     dataset: dataset,
+        //     public_key: public_key.to_string(),
+        //     private_key: private_key.to_string(),
+        //     orcid: orcid.to_string(),
+        //     server_url: if let Some(server_url) = server_url {
+        //         server_url.to_string()
+        //     } else{
+        //         TEST_SERVER.to_string()
+        //     },
+        //     publish: if let Some(publish) = publish {
+        //         publish.clone()
+        //     } else {
+        //         false
+        //     }
+        // })
+
+        // Ok(Self {
+        //     np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
+        // })
+        // Ok(Self {
+        //     np: if let Some(rdf) = rdf {
+        //         Nanopub::new(rdf.unwrap_or("default in py"))
+        //     } else {
+        //         Nanopub::new()
+        //     }
+        //     .map_err(map_storage_error)?,
+        // })
     }
 
     // #[new]
@@ -84,8 +83,9 @@ impl NanopubPy {
     // }
 
     #[pyo3(text_signature = "($self)")]
-    fn get_rdf(&self, py: Python<'_>) -> PyResult<String> {
-        py.allow_threads(|| Ok(self.np.get_rdf()))
+    fn get_rdf(&self, _py: Python<'_>) -> PyResult<String> {
+        // py.allow_threads(|| Ok(self.np.get_rdf()))
+        Ok(self.np.get_rdf())
     }
 
     // /// >>> store.update('DELETE WHERE { <http://example.com> ?p ?o }')
@@ -98,6 +98,28 @@ impl NanopubPy {
     //         self.np.update(update).map_err(map_evaluation_error)
     //     })
     // }
+}
+
+#[pyclass(name = "NpProfile", module = "nanopub_sign")]
+#[derive(Clone)]
+pub struct NpProfilePy {
+    profile: NpProfile,
+}
+
+#[pymethods]
+impl NpProfilePy {
+    #[new]
+    #[pyo3(text_signature = "(orcid_id, name, private_key, introduction_nanopub_uri)")]
+    fn new(
+        orcid_id: &str,
+        name: &str,
+        private_key: &str,
+        introduction_nanopub_uri: Option<&str>,
+    ) -> PyResult<Self> {
+        let profile =
+            NpProfile::new(orcid_id, name, private_key, introduction_nanopub_uri).unwrap();
+        Ok(Self { profile })
+    }
 }
 
 // /// Formats the sum of two numbers as string.

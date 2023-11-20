@@ -15,12 +15,13 @@ use pyo3::prelude::*;
 
 /// Nanopub Python bindings
 #[pymodule]
-fn nanopub_sign(_py: Python<'_>, module: &PyModule) -> PyResult<()> {
-    module.add("__package__", "nanopub-sign")?;
-    module.add("__version__", env!("CARGO_PKG_VERSION"))?;
-    module.add("__author__", env!("CARGO_PKG_AUTHORS").replace(':', "\n"))?;
+fn nanopub_sign(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add("__package__", "nanopub-sign")?;
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
+    m.add("__author__", env!("CARGO_PKG_AUTHORS").replace(':', "\n"))?;
 
-    module.add_class::<NanopubPy>()
+    m.add_class::<NpProfilePy>()?;
+    m.add_class::<NanopubPy>()
 
     // io::add_to_module(module)
 }

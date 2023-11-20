@@ -10,7 +10,7 @@ use crate::constants::DEFAULT_NP_PROFILE;
 use crate::constants::{BOLD, END};
 use crate::error::NpError;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NpProfile {
     pub orcid_id: String,
     pub name: String,
