@@ -1,5 +1,7 @@
 # 🟨 Use from JavaScript
 
+[![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
+
 You can easily publish Nanopubs from JavaScript, or TypeScript.
 
 ```admonish warning title="Early stage"

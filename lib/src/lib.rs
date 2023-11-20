@@ -12,6 +12,10 @@ mod constants;
 pub mod error;
 /// A module to sign, publish, or check [Nanopublications](https://nanopub.net).
 ///
+/// [![crates.io](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
+/// [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
+/// [![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
+///
 /// 📖 Checkout the [documentation website](https://vemonet.github.io/nanopub-rs) for more informations
 ///
 /// ## Usage

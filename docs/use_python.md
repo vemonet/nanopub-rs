@@ -1,5 +1,7 @@
 # 🐍 Use from Python
 
+[![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
+
 You can easily publish Nanopubs from Python.
 
 ```admonish warning title="Early stage"

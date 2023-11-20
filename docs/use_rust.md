@@ -1,5 +1,7 @@
 # 🦀 Use from Rust
 
+[![crates.io](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
+
 You can use the Rust crate to easily sign, publish, or check a Nanopub:
 
 ```rust

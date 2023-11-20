@@ -1,9 +1,9 @@
 # ✍️ Nanopub cross-platform toolkit ⚔️
 
-[![Latest Version](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
+[![crates.io](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
 [![Released API docs](https://docs.rs/nanopub/badge.svg)](https://docs.rs/nanopub)
 [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
-[![npm](https://img.shields.io/npm/v/nanopub/sign)](https://www.npmjs.com/package/nanopub/sign)
+[![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
 
 [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml)
 [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml)
