@@ -19,6 +19,6 @@ let checked_np = Nanopub::check(&signed_np.rdf).unwrap();
 println!("{}", published_np)
 ```
 
-```admonish info title="API reference"
+## 📖 API reference
+
 Checkout the **[API documentation](https://docs.rs/nanopub)** for more details on how to use the different components and functions of the rust crate.
-```

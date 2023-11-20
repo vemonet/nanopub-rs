@@ -18,6 +18,7 @@ pkg.main = "node.js";
 pkg.browser = "web.js";
 pkg.files = ["*.{js,wasm,d.ts}"];
 pkg.homepage = "https://github.com/vemonet/nanopub-rs/tree/main/js";
+pkg.license = "MIT";
 pkg.bugs = {
     url: "https://github.com/vemonet/nanopub-rs/issues",
 };
