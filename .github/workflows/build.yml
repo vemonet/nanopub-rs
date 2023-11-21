@@ -295,7 +295,7 @@ jobs:
       - name: Upload tarball
         uses: actions/upload-artifact@v3
         with:
-          name: nanopub_rs_npm
+          name: nanopub_sign_npm
           path: ./js/pkg
 
       - run: npm run release
