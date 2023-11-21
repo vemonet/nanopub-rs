@@ -1,6 +1,6 @@
 [package]
 name = "nanopub"
-version = "0.0.7"
+version = "0.0.9"
 description = """
 A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
 """

@@ -83,10 +83,9 @@ pub fn get_np_server(random: bool) -> &'static str {
         return LIST_SERVERS[0];
     }
     // Generate a random number
-    let mut buf = [0u8; 4]; // Buffer to store 4 bytes (u32)
+    let mut buf = [0u8; 4];
     getrandom(&mut buf).expect("Failed to generate random number");
-    let num = u32::from_ne_bytes(buf); // Convert bytes to u32
-                                       // Use the random number to generate an index
+    let num = u32::from_ne_bytes(buf);
     let index = num as usize % LIST_SERVERS.len();
     LIST_SERVERS[index]
 }
