@@ -86,6 +86,8 @@ pub fn get_ns(ns: &str) -> Namespace<String> {
         "npx" => Namespace::new("http://purl.org/nanopub/x/".to_string()).unwrap(),
         "np" => Namespace::new("http://www.nanopub.org/nschema#".to_string()).unwrap(),
         "dct" => Namespace::new("http://purl.org/dc/terms/".to_string()).unwrap(),
+        "prov" => Namespace::new("http://www.w3.org/ns/prov#".to_string()).unwrap(),
+        "pav" => Namespace::new("http://purl.org/pav/".to_string()).unwrap(),
         _ => panic!("Unknown namespace"), // or return an error
     }
 }

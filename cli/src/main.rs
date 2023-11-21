@@ -1,7 +1,6 @@
 use clap::{arg, Command};
-use nanopub::{profile::get_default_profile_path, Nanopub, NpProfile};
+use nanopub::{get_np_server, profile::get_default_profile_path, Nanopub, NpProfile};
 use std::{error::Error, fs, path::Path};
-// use tokio;
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
 // cargo run -- sign tests/resources/nanopub_test_blank.trig -k tests/resources/id_rsa
@@ -39,6 +38,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .arg(
                     arg!(-p --profile <PROFILE> "The path to a profile.yml file. Default: ~/.nanopub/profile.yml")
                         .default_value("")
+                )
+                .arg(
+                    arg!(-t --test "To publish to the test server instead of a production server.")
                 )
                 .arg_required_else_help(true),
         ).subcommand(
@@ -88,6 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
+            let test_server = sub.get_flag("test");
 
             // Read RDF from file, and get profile from YAML file or key
             let np_rdf = fs::read_to_string(np_file)?;
@@ -99,8 +102,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             } else {
                 NpProfile::from_file(&get_default_profile_path())?
             };
-            println!("📬️ Publishing {}", np_file);
-            let _ = Nanopub::publish(&np_rdf, &profile, None).await;
+            if test_server {
+                println!("🧪 Publishing {np_file} to test server");
+                let _ = Nanopub::publish(&np_rdf, &profile, None).await;
+            } else {
+                let server = get_np_server(true);
+                println!("📬️ Publishing {np_file} to {server}");
+                let _ = Nanopub::publish(&np_rdf, &profile, Some(server)).await;
+            }
         }
         Some(("check", sub)) => {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");

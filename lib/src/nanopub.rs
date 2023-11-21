@@ -326,7 +326,7 @@ impl Nanopub {
         //     )?;
         // }
 
-        // If ORCID provided, add to pubinfo graph
+        // If ORCID provided and not already provided, add to pubinfo graph
         if !profile.orcid_id.is_empty()
             && dataset
                 .quads_matching(
@@ -334,8 +334,11 @@ impl Nanopub {
                         &np_info.uri,
                         &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
                     ],
-                    [get_ns("dct").get("creator")?],
-                    // TODO: also skip if pav:createdBy is present?
+                    [
+                        get_ns("dct").get("creator")?,
+                        get_ns("prov").get("wasAttributedTo")?,
+                        get_ns("pav").get("createdBy")?,
+                    ],
                     Any,
                     [Some(&np_info.pubinfo)],
                 )
