@@ -22,6 +22,10 @@ macro_rules! format_err {
     };
 }
 
+pub fn to_err(e: impl ToString) -> JsValue {
+    JsValue::from(Error::new(&e.to_string()))
+}
+
 // #[wasm_bindgen]
 // extern "C" {
 //     // Use `js_namespace` here to bind `console.log(..)` instead of just `log(..)`
@@ -37,7 +41,3 @@ macro_rules! format_err {
 // macro_rules! console_log {
 //     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()));
 // }
-
-pub fn to_err(e: impl ToString) -> JsValue {
-    JsValue::from(Error::new(&e.to_string()))
-}

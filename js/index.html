@@ -53,14 +53,15 @@
           const checked = Nanopub.check(rdfStr);
           console.log("CHECKED", checked.toString());
 
-          console.log("Random np server:", get_np_server(true));
+          console.log("Random np server:", get_np_server());
 
           const profile = new NpProfile(orcid, "Your Name", private_key, "");
+          console.log("Profile", profile)
           Nanopub.publish(rdfStr, profile, "")
             .then(np => {
                 // Handle successful publication
                 console.log("PUBLISHED!", np.toString())
-                console.log("PUBLISHED!", np)
+                console.log("PUBLISHED!", np.toJs(), np)
                 rdfText.innerText = np.get_rdf();
             })
             .catch(error => {

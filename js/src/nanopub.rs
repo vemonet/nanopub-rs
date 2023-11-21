@@ -3,7 +3,6 @@ use nanopub::{constants::TEST_SERVER, get_np_server as get_server, Nanopub, NpPr
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
-// use js_sys::{Promise, JsValue};
 
 #[wasm_bindgen(js_name = Nanopub)]
 #[derive(Serialize)]
@@ -16,7 +15,6 @@ pub struct NanopubJs {
 #[allow(unused_variables, clippy::inherent_to_string)]
 #[wasm_bindgen(js_class = Nanopub)]
 impl NanopubJs {
-    // #[wasm_bindgen(constructor)]
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn check(rdf: &str) -> Result<NanopubJs, JsValue> {
         Nanopub::check(rdf)
@@ -64,14 +62,14 @@ impl NanopubJs {
     pub fn to_string(&self) -> String {
         self.np.to_string()
     }
+
+    #[wasm_bindgen(js_name = toJs)]
+    pub fn to_js(&self) -> Result<JsValue, JsValue> {
+        serde_wasm_bindgen::to_value(&self.np).map_err(|e| e.into())
+    }
 }
 
-// impl Into<JsValue> for NanopubJs {
-//     fn into(self) -> JsValue {
-//         JsValue::from_serde(&self).unwrap()
-//     }
-// }
-
+/// Nanopub profile in JavaScript
 #[wasm_bindgen(js_name = NpProfile)]
 #[derive(Serialize)]
 pub struct NpProfileJs {
@@ -79,6 +77,7 @@ pub struct NpProfileJs {
 }
 // pub struct NpProfileJs(NpProfile);
 
+#[allow(clippy::inherent_to_string)]
 #[wasm_bindgen(js_class = NpProfile)]
 impl NpProfileJs {
     #[wasm_bindgen(constructor)]
@@ -92,10 +91,16 @@ impl NpProfileJs {
             .map(|profile: NpProfile| Self { profile })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
+    // TODO: create from profile.yml file
 
     #[wasm_bindgen(js_name = toString)]
     pub fn to_string(&self) -> String {
         self.profile.to_string()
+    }
+
+    #[wasm_bindgen(js_name = toJs)]
+    pub fn to_js(&self) -> Result<JsValue, JsValue> {
+        serde_wasm_bindgen::to_value(&self.profile).map_err(|e| e.into())
     }
 }
 
@@ -104,3 +109,10 @@ impl NpProfileJs {
 pub fn get_np_server(random: Option<bool>) -> String {
     get_server(random.unwrap_or(true)).to_string()
 }
+
+// impl Into<JsValue> for NanopubJs {
+//     fn into(self) -> JsValue {
+//         // JsValue::from_serde(&self).unwrap()
+//         self.to_js()
+//     }
+// }

@@ -4,7 +4,7 @@ Publish Nanopubs from your terminal using the binary for your platform.
 
 ## 📥️ Install
 
-Download the binary adapted to your platform:
+Download the binary adapted to your platform from the repository [Releases page](https://github.com/vemonet/nanopub-rs/releases):
 
 - 🐧 Linux
 - 🍎 MacOS
