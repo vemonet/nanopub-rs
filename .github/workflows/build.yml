@@ -90,7 +90,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: nanopub_aarch64_apple
-          path: target/aarch64-apple-darwin/release/nanopub
+          path: target/aarch64-apple-darwin/release/nanopub-cli
 
       - if: github.event_name == 'release'
         run: |
