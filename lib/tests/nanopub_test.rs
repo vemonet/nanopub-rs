@@ -5,11 +5,11 @@ fn get_test_key() -> String {
     fs::read_to_string("./tests/resources/id_rsa").unwrap()
 }
 
-#[test]
-fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
+#[tokio::test]
+async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, None)?;
+    let np = Nanopub::publish(&np_rdf, &profile, None).await?;
     // println!("{}", np);
     assert!(np.published);
     // Values compiled with the nanopub java lib using the exact same RDF
@@ -40,11 +40,11 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[test]
-fn publish_fail() -> Result<(), Box<dyn Error>> {
+#[tokio::test]
+async fn publish_fail() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, Some("failing"));
+    let np = Nanopub::publish(&np_rdf, &profile, Some("failing")).await;
     assert!(np.is_err());
     Ok(())
 }
@@ -72,11 +72,11 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-#[test]
-fn publish_jsonld() -> Result<(), Box<dyn Error>> {
+#[tokio::test]
+async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, None)?;
+    let np = Nanopub::publish(&np_rdf, &profile, None).await?;
     println!("{}", np);
     assert!(np.published);
     Ok(())

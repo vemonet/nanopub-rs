@@ -34,13 +34,7 @@ futures = "0.3"
 [dev-dependencies]
 mdbook = "0.4.35"
 wasm-pack = "0.12.1"
+tokio = "1.34"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 futures = "0.3"
-
-# [target.'cfg(target_arch = "wasm32")'.dependencies]
-# wasm-bindgen-futures = "0.4.38"
-
-# [[bench]]
-# name = "store"
-# harness = false

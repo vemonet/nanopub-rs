@@ -1,4 +1,4 @@
-from nanopub_sign import Nanopub, NpProfile
+from nanopub_sign import Nanopub, NpProfile, get_np_server
 
 rdf_str = """@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -48,3 +48,5 @@ np = Nanopub.publish(
     profile=profile,
     server_url=None,
 )
+
+print(f"Random server: {get_np_server()}")

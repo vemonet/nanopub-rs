@@ -1,5 +1,8 @@
-use nanopub::{constants::TEST_SERVER, Nanopub, NpProfile};
+use js_sys::Promise;
+use nanopub::{constants::TEST_SERVER, get_np_server as get_server, Nanopub, NpProfile};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::future_to_promise;
+// use js_sys::{Promise, JsValue};
 
 #[wasm_bindgen(js_name = Nanopub)]
 pub struct NanopubJs {
@@ -27,23 +30,26 @@ impl NanopubJs {
     }
 
     #[wasm_bindgen(static_method_of = NanopubJs)]
-    pub fn publish(
-        rdf: &str,
-        profile: NpProfileJs,
-        server_url: &str,
-    ) -> Result<NanopubJs, JsValue> {
+    pub fn publish(rdf: &str, profile: NpProfileJs, server_url: &str) -> Promise {
+        let rdf = rdf.to_string();
+        let profile = profile.profile.clone();
         let server_url = if server_url.is_empty() {
             TEST_SERVER
         } else {
             server_url
-        };
-        Ok(Self {
-            np: Nanopub::publish(rdf, &profile.profile, Some(server_url))
-                .expect_throw("Error publishing the Nanopub"),
+        }
+        .to_string();
+        // console_log!("{}", server_url);
+        future_to_promise(async move {
+            match Nanopub::publish(&rdf, &profile, Some(&server_url)).await {
+                Ok(np) => Ok(JsValue::from(NanopubJs { np })),
+                Err(e) => Err(JsValue::from_str(&format!(
+                    "Error publishing the Nanopub: {e}"
+                ))),
+            }
         })
     }
 
-    // #[wasm_bindgen]
     pub fn get_rdf(&self) -> Result<String, JsValue> {
         Ok(self.np.get_rdf())
     }
@@ -73,7 +79,6 @@ impl NpProfileJs {
         private_key: &str,
         introduction_nanopub_uri: &str,
     ) -> Result<NpProfileJs, JsValue> {
-        console_error_panic_hook::set_once();
         let profile =
             NpProfile::new(orcid_id, name, private_key, Some(introduction_nanopub_uri)).unwrap();
         Ok(Self { profile })
@@ -83,4 +88,10 @@ impl NpProfileJs {
     pub fn to_string(&self) -> String {
         self.profile.to_string()
     }
+}
+
+/// Return a random server
+#[wasm_bindgen]
+pub fn get_np_server(random: Option<bool>) -> String {
+    get_server(random.unwrap_or(true)).to_string()
 }

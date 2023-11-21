@@ -73,6 +73,18 @@ np = Nanopub.publish(
 )
 ```
 
+Test server is used if the `server_url` is none, to publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the main nanopub server, defaults to true.
+
+```python
+from nanopub_sign import Nanopub, NpProfile, get_np_server
+
+np = Nanopub.publish(
+    rdf=rdf_str,
+    profile=profile,
+    server_url=get_np_server(),
+)
+```
+
 Run it:
 
 ```bash

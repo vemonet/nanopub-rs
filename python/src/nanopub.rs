@@ -1,5 +1,7 @@
-use nanopub::{Nanopub, NpProfile};
-use pyo3::prelude::*;
+use nanopub::{get_np_server as get_server, Nanopub, NpProfile};
+use pyo3::{exceptions::PyException, prelude::*};
+// use pyo3_asyncio::generic::future_into_py;
+use tokio::runtime::Runtime;
 
 #[pyclass(name = "Nanopub", module = "nanopub_sign")]
 #[derive(Clone)]
@@ -18,68 +20,87 @@ impl NanopubPy {
     }
 
     #[staticmethod]
-    #[pyo3(text_signature = "(rdf, private_key, orcid, server_url=None)")]
-    fn publish(
-        rdf: &str,
-        profile: &NpProfilePy,
-        // private_key: &str,
-        // orcid: &str,
-        server_url: Option<&str>,
-        // py: Python<'_>,
-    ) -> PyResult<Self> {
-        // py.allow_threads(|| { // Put code in this block to enable true parallel https://pyo3.rs/v0.20.0/parallelism
-        // let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
-
-        let np = Nanopub::publish(rdf, &profile.profile, server_url).unwrap();
-        // Nanopub::sign(rdf, &profile).unwrap()
+    #[pyo3(text_signature = "(rdf, profile)")]
+    fn sign(rdf: &str, profile: &NpProfilePy) -> PyResult<Self> {
+        let np = Nanopub::sign(rdf, &profile.profile).unwrap();
         Ok(Self { np })
-
-        // Ok( Self {
-        //     rdf: nq_stringifier.serialize_dataset(&mut dataset)?.to_string(),
-        //     dataset: dataset,
-        //     public_key: public_key.to_string(),
-        //     private_key: private_key.to_string(),
-        //     orcid: orcid.to_string(),
-        //     server_url: if let Some(server_url) = server_url {
-        //         server_url.to_string()
-        //     } else{
-        //         TEST_SERVER.to_string()
-        //     },
-        //     publish: if let Some(publish) = publish {
-        //         publish.clone()
-        //     } else {
-        //         false
-        //     }
-        // })
-
-        // Ok(Self {
-        //     np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
-        // })
-        // Ok(Self {
-        //     np: if let Some(rdf) = rdf {
-        //         Nanopub::new(rdf.unwrap_or("default in py"))
-        //     } else {
-        //         Nanopub::new()
-        //     }
-        //     .map_err(map_storage_error)?,
-        // })
     }
 
-    // #[new]
-    // fn new(rdf: Option<&str>, py: Python<'_>) -> PyResult<Self> {
-    //     py.allow_threads(|| {
-    //         Ok(Self {
-    //             np: Nanopub::new(&rdf.unwrap_or("default in py").to_string()),
-    //         })
-    //         // Ok(Self {
-    //         //     np: if let Some(rdf) = rdf {
-    //         //         Nanopub::new(rdf.unwrap_or("default in py"))
-    //         //     } else {
-    //         //         Nanopub::new()
-    //         //     }
-    //         //     .map_err(map_storage_error)?,
-    //         // })
-    //     })
+    #[staticmethod]
+    #[pyo3(text_signature = "(rdf, profile, server_url)")]
+    fn publish(rdf: &str, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
+        let rdf = rdf.to_string();
+        let profile = profile.profile.clone();
+        let server_url = server_url.map(str::to_string);
+        // Use a tokio runtime to wait on the async operation
+        let rt = Runtime::new().map_err(|e| {
+            PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
+        })?;
+        let result = rt.block_on(async move {
+            Nanopub::publish(&rdf, &profile, server_url.as_deref())
+                .await
+                .map_err(|e| PyErr::new::<PyException, _>(format!("Error publishing: {e}")))
+        });
+        result.map(|np| Self { np })
+    }
+
+    // ASYNC WITH TOKIO
+    // #[staticmethod]
+    // #[pyo3(text_signature = "(rdf, profile, server_url)")]
+    // fn apublish(py: Python<'_>, rdf: &str, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<PyObject> {
+    //     let rdf = rdf.to_string();
+    //     let profile = profile.profile.clone();
+    //     let server_url = server_url.map(str::to_string);
+
+    //     let future = async move {
+    //         let np = Nanopub::publish(&rdf, &profile, server_url.as_deref()).await.unwrap();
+    //         Ok(NanopubPy { np })
+    //     };
+    //     Ok(future_into_py(py, future)?.into())
+    // }
+
+    // SYNC WITH FUTURES
+    // #[staticmethod]
+    // #[pyo3(text_signature = "(rdf, private_key, server_url=None)")]
+    // fn publish(
+    //     rdf: &str,
+    //     profile: &NpProfilePy,
+    //     server_url: Option<&str>,
+    //     // py: Python<'_>,
+    // ) -> PyResult<Self> {
+    //     // py.allow_threads(|| { // Put code in this block to enable true parallel https://pyo3.rs/v0.20.0/parallelism
+    //     // let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
+    //     let rdf = rdf.to_string();
+    //     let profile = profile.profile.clone();
+    //     let server_url = server_url.map(str::to_string);
+
+    //     let future = async move {
+    //         Self {
+    //             np: Nanopub::publish(&rdf, &profile, server_url.as_deref()).await.unwrap()
+    //                 // .map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("Error: {}", e)))
+    //         }
+    //     };
+    //     Ok(block_on(future))
+    // }
+
+    // ASYNC WITH FUTURES
+    // #[staticmethod]
+    // #[pyo3(text_signature = "(rdf, profile, server_url)")]
+    // fn apublish(py: Python<'_>, rdf: &str, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<PyObject> {
+    //     let rdf = rdf.to_string();
+    //     let profile = profile.profile.clone();
+    //     let server_url = server_url.map(str::to_string);
+
+    //     let future = async move {
+    //         let np = Nanopub::publish(&rdf, &profile, server_url.as_deref()).await.unwrap();
+    //         Ok(NanopubPy { np })
+    //     };
+
+    //     // Use FutureExt to convert the future into a Python-compatible future
+    //     let py_future = future.boxed().into_py(py);
+
+    //     // Return the Python future object
+    //     Ok(py_future)
     // }
 
     #[pyo3(text_signature = "($self)")]
@@ -122,16 +143,9 @@ impl NpProfilePy {
     }
 }
 
-// /// Formats the sum of two numbers as string.
-// #[pyfunction]
-// fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-//     Ok((a + b).to_string())
-// }
-
-// /// A Python module implemented in Rust.
-// #[pymodule]
-// fn string_sum(py: Python<'_>, m: &PyModule) -> PyResult<()> {
-//     m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
-
-//     Ok(())
-// }
+/// Return a random server
+#[pyfunction]
+#[pyo3(text_signature = "(random)")]
+pub fn get_np_server(random: Option<bool>) -> PyResult<String> {
+    Ok(get_server(random.unwrap_or(true)).to_string())
+}

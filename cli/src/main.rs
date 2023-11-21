@@ -1,10 +1,12 @@
 use clap::{arg, Command};
 use nanopub::{profile::get_default_profile_path, Nanopub, NpProfile};
 use std::{error::Error, fs, path::Path};
+// use tokio;
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
 // cargo run -- sign tests/resources/nanopub_test_blank.trig -k tests/resources/id_rsa
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
     let cmd = Command::new("nanopub")
         .bin_name("np")
         // .version("1.0")
@@ -98,7 +100,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 NpProfile::from_file(&get_default_profile_path())?
             };
             println!("📬️ Publishing {}", np_file);
-            let _ = Nanopub::publish(&np_rdf, &profile, None)?;
+            let _ = Nanopub::publish(&np_rdf, &profile, None).await;
             // println!("{}", np);
         }
         Some(("check", sub)) => {

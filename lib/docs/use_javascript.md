@@ -63,16 +63,25 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
       // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
       init().then(() => {
           const checked = Nanopub.check(rdfStr);
+          console.log("CHECKED", checked.toString());
+
           const profile = new NpProfile(orcid, "Your Name", private_key, "");
 
           const np = Nanopub.publish(rdfStr, profile, "");
           rdfText.innerText = np.get_rdf();
           console.log("PUBLISHED", np.toString());
-          console.log("CHECKED", checked.toString());
       });
     </script>
   </body>
 </html>
+```
+
+The test server is used if the last argument of `Nanopub.publish` is an empty string, to easily publish to a production server use `get_np_server()`:
+
+```typescript
+import init, { Nanopub, NpProfile, get_np_server } from "https://unpkg.com/@nanopub/sign";
+
+const np = Nanopub.publish(rdfStr, profile, get_np_server());
 ```
 
 ## ⚛️ Use from any JavaScript framework
@@ -98,7 +107,7 @@ For example, to use it in a nextjs react app:
     ```typescript
     'use client'
     import { useEffect, useState } from 'react';
-    import init, { Nanopub, NpProfile } from "@nanopub/sign";
+    import init, { Nanopub, NpProfile, get_np_server } from "@nanopub/sign";
 
     export default function Home() {
       const [rdfOutput, setRdfOutput] = useState('');
@@ -135,6 +144,7 @@ For example, to use it in a nextjs react app:
         // Initialize the wasm library and use it
         init().then(() => {
           const profile = new NpProfile(orcid, "User Name", privateKey, "");
+
           const np = Nanopub.publish(rdfStr, profile, "");
           setRdfOutput(np.get_rdf());
           console.log("PUBLISHED", np.toString());

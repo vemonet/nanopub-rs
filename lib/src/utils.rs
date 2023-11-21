@@ -12,28 +12,56 @@ use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
 
 /// Parse RDF from various format to a `LightDataset` (trig, nquads, JSON-LD)
+#[cfg(not(target_arch = "wasm32"))]
 pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
-    Ok(
-        if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
-            jsonld::parse_str(rdf)
-                .collect_quads()
-                .expect("Failed to parse JSON-LD RDF")
-        } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
-            nq::parse_str(rdf)
-                .collect_quads()
-                .expect("Failed to parse Nquads RDF")
-        } else {
-            trig::parse_str(rdf)
-                .collect_quads()
-                .expect("Failed to parse Trig RDF")
-        },
-    )
+    let rdf = rdf.to_string();
+    // The JSON-LD parser uses futures::block_on which creates conflict when running in tokio runtime
+    // So we need to spawn a separate thread
+    let handle = std::thread::spawn(move || {
+        futures::executor::block_on(async {
+            return if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
+                jsonld::parse_str(&rdf)
+                    .collect_quads()
+                    .expect("Failed to parse JSON-LD RDF")
+            } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
+                nq::parse_str(&rdf)
+                    .collect_quads()
+                    .expect("Failed to parse Nquads RDF")
+            } else {
+                trig::parse_str(&rdf)
+                    .collect_quads()
+                    .expect("Failed to parse Trig RDF")
+            };
+        })
+    });
+    // Retrieve the result from the isolated operation
+    let dataset = handle.join().expect("Error parsing RDF");
+    Ok(dataset)
     // NOTE: XML does not support graph apart from the uncommon trix format
     // } else if rdf.starts_with("<?xml") {
     //     let graph = xml::parser::parse_str(rdf)
     //         .collect_triples()
     //         .expect("Failed to parse XML RDF");
-    // Ok(dataset)
+}
+
+/// Parse RDF, in wasm we don't need to do the futures trick because we don't use tokio async runtime
+#[cfg(target_arch = "wasm32")]
+pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
+    let rdf = rdf.to_string();
+    let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
+        jsonld::parse_str(&rdf)
+            .collect_quads()
+            .expect("Failed to parse JSON-LD RDF")
+    } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
+        nq::parse_str(&rdf)
+            .collect_quads()
+            .expect("Failed to parse Nquads RDF")
+    } else {
+        trig::parse_str(&rdf)
+            .collect_quads()
+            .expect("Failed to parse Trig RDF")
+    };
+    Ok(dataset)
 }
 
 /// Serialize RDF dataset to Trig
