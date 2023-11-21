@@ -10,6 +10,7 @@ use base64::{engine, Engine as _};
 use regex::Regex;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
+use serde::Serialize;
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
@@ -51,7 +52,7 @@ impl fmt::Display for NpInfo {
 }
 
 /// A nanopublication object
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct Nanopub {
     pub uri: String,
     pub ns: String,
@@ -61,7 +62,7 @@ pub struct Nanopub {
     pub public_key: String,
     pub orcid: String,
     pub published: bool,
-    pub info: NpInfo,
+    // pub info: NpInfo,
     // dataset: LightDataset,
 }
 
@@ -171,7 +172,7 @@ impl Nanopub {
             public_key: np_info.public_key.to_string(),
             orcid: np_info.public_key.to_string(),
             published: false,
-            info: np_info,
+            // info: np_info,
             // dataset: dataset,
         })
     }
@@ -265,7 +266,7 @@ impl Nanopub {
         openssl_probe::init_ssl_cert_env_vars();
 
         let (priv_key, pubkey) = get_keys(&profile.private_key)?;
-        let pubkey_str = get_pubkey_str(&pubkey);
+        let pubkey_str = get_pubkey_str(&pubkey)?;
 
         // Parse the provided RDF
         let mut dataset: LightDataset = parse_rdf(rdf)?;
@@ -298,6 +299,7 @@ impl Nanopub {
         )?;
 
         // TODO: if not already set, automatically add the current date to pubinfo created
+        // But there is an error when trying to cast the string to xsd::dateTime
         // np_uri dct:created "2023-11-17T14:13:52.560Z"^^xsd:dateTime ;
         // if dataset
         //     .quads_matching(
@@ -402,7 +404,7 @@ impl Nanopub {
             public_key: pubkey_str,
             orcid: profile.orcid_id.to_string(),
             published: false,
-            info: np_info,
+            // info: np_info,
             // dataset: dataset,
         })
     }

@@ -1,4 +1,7 @@
-use nanopub::{get_np_server, profile::get_default_profile_path, Nanopub, NpProfile};
+use nanopub::{
+    get_np_server, nanopub::extract_np_info, profile::get_default_profile_path, utils::parse_rdf,
+    Nanopub, NpProfile,
+};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -35,7 +38,6 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
 
     assert!(get_default_profile_path().ends_with(".nanopub/profile.yml"));
     let np = Nanopub::sign(&np_rdf, &profile)?;
-    println!("{}", np.info); // required for coverage
     assert!(!np.published);
     Ok(())
 }
@@ -79,6 +81,15 @@ async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np = Nanopub::publish(&np_rdf, &profile, None).await?;
     println!("{}", np);
     assert!(np.published);
+    Ok(())
+}
+
+#[test]
+fn test_np_info() -> Result<(), Box<dyn Error>> {
+    let rdf_str = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
+    let dataset = parse_rdf(&rdf_str)?;
+    let np_info = extract_np_info(&dataset)?;
+    println!("{}", np_info); // Required for coverage
     Ok(())
 }
 

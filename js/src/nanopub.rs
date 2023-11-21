@@ -1,10 +1,12 @@
 use js_sys::Promise;
 use nanopub::{constants::TEST_SERVER, get_np_server as get_server, Nanopub, NpProfile};
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
 // use js_sys::{Promise, JsValue};
 
 #[wasm_bindgen(js_name = Nanopub)]
+#[derive(Serialize)]
 pub struct NanopubJs {
     np: Nanopub,
 }
@@ -17,16 +19,16 @@ impl NanopubJs {
     // #[wasm_bindgen(constructor)]
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn check(rdf: &str) -> Result<NanopubJs, JsValue> {
-        Ok(Self {
-            np: Nanopub::check(rdf).expect_throw("Error checking the Nanopub"),
-        })
+        Nanopub::check(rdf)
+            .map(|np| Self { np })
+            .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn sign(rdf: &str, profile: NpProfileJs) -> Result<NanopubJs, JsValue> {
-        Ok(Self {
-            np: Nanopub::sign(rdf, &profile.profile).expect_throw("Error signing the Nanopub"),
-        })
+        Nanopub::sign(rdf, &profile.profile)
+            .map(|np| Self { np })
+            .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     #[wasm_bindgen(static_method_of = NanopubJs)]
@@ -64,7 +66,14 @@ impl NanopubJs {
     }
 }
 
+// impl Into<JsValue> for NanopubJs {
+//     fn into(self) -> JsValue {
+//         JsValue::from_serde(&self).unwrap()
+//     }
+// }
+
 #[wasm_bindgen(js_name = NpProfile)]
+#[derive(Serialize)]
 pub struct NpProfileJs {
     profile: NpProfile,
 }
@@ -79,9 +88,9 @@ impl NpProfileJs {
         private_key: &str,
         introduction_nanopub_uri: &str,
     ) -> Result<NpProfileJs, JsValue> {
-        let profile =
-            NpProfile::new(orcid_id, name, private_key, Some(introduction_nanopub_uri)).unwrap();
-        Ok(Self { profile })
+        NpProfile::new(orcid_id, name, private_key, Some(introduction_nanopub_uri))
+            .map(|profile: NpProfile| Self { profile })
+            .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     #[wasm_bindgen(js_name = toString)]

@@ -1,3 +1,5 @@
+// use rand::{thread_rng, Rng as _};
+use getrandom::getrandom;
 use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
 use sophia::api::source::QuadSource as _;
 use sophia::api::{ns::Namespace, prefix::Prefix};
@@ -6,7 +8,7 @@ use sophia::iri::Iri;
 use sophia::jsonld;
 use sophia::turtle::parser::{nq, trig};
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
-use std::time::{SystemTime, UNIX_EPOCH};
+// use rand::prelude::*;
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
@@ -80,14 +82,12 @@ pub fn get_np_server(random: bool) -> &'static str {
     if !random {
         return LIST_SERVERS[0];
     }
-    // Use time to generate a pseudo-random number, to avoid installing the rand crate
-    let start = SystemTime::now();
-    let since_the_epoch = start
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards");
-    let millis = since_the_epoch.as_millis();
-    // Use the milliseconds to generate an index
-    let index = (millis as usize) % LIST_SERVERS.len();
+    // Generate a random number
+    let mut buf = [0u8; 4]; // Buffer to store 4 bytes (u32)
+    getrandom(&mut buf).expect("Failed to generate random number");
+    let num = u32::from_ne_bytes(buf); // Convert bytes to u32
+                                       // Use the random number to generate an index
+    let index = num as usize % LIST_SERVERS.len();
     LIST_SERVERS[index]
 }
 

@@ -15,15 +15,17 @@ impl NanopubPy {
     #[staticmethod]
     #[pyo3(text_signature = "(rdf)")]
     fn check(rdf: &str) -> PyResult<Self> {
-        let np = Nanopub::check(rdf).unwrap();
-        Ok(Self { np })
+        Nanopub::check(rdf)
+            .map(|np| Self { np })
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
     }
 
     #[staticmethod]
     #[pyo3(text_signature = "(rdf, profile)")]
     fn sign(rdf: &str, profile: &NpProfilePy) -> PyResult<Self> {
-        let np = Nanopub::sign(rdf, &profile.profile).unwrap();
-        Ok(Self { np })
+        Nanopub::sign(rdf, &profile.profile)
+            .map(|np| Self { np })
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Signing: {e}")))
     }
 
     #[staticmethod]
@@ -39,7 +41,7 @@ impl NanopubPy {
         let result = rt.block_on(async move {
             Nanopub::publish(&rdf, &profile, server_url.as_deref())
                 .await
-                .map_err(|e| PyErr::new::<PyException, _>(format!("Error publishing: {e}")))
+                .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))
         });
         result.map(|np| Self { np })
     }
@@ -108,17 +110,6 @@ impl NanopubPy {
         // py.allow_threads(|| Ok(self.np.get_rdf()))
         Ok(self.np.get_rdf())
     }
-
-    // /// >>> store.update('DELETE WHERE { <http://example.com> ?p ?o }')
-    // #[pyo3(text_signature = "($self, update, *, base_iri)")]
-    // #[args(update, "*", base_iri = "None")]
-    // fn update(&self, update: &str, base_iri: Option<&str>, py: Python<'_>) -> PyResult<()> {
-    //     py.allow_threads(|| {
-    //         let update =
-    //             Update::parse(update, base_iri).map_err(|e| map_evaluation_error(e.into()))?;
-    //         self.np.update(update).map_err(map_evaluation_error)
-    //     })
-    // }
 }
 
 #[pyclass(name = "NpProfile", module = "nanopub_sign")]
@@ -137,9 +128,9 @@ impl NpProfilePy {
         private_key: &str,
         introduction_nanopub_uri: Option<&str>,
     ) -> PyResult<Self> {
-        let profile =
-            NpProfile::new(orcid_id, name, private_key, introduction_nanopub_uri).unwrap();
-        Ok(Self { profile })
+        NpProfile::new(orcid_id, name, private_key, introduction_nanopub_uri)
+            .map(|profile| Self { profile })
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting profile: {e}")))
     }
 }
 

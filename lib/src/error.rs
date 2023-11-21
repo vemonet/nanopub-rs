@@ -52,6 +52,11 @@ impl From<StreamError<TermIndexFullError, std::io::Error>> for NpError {
         NpError(format!("RDF Trig serialization error: {err}"))
     }
 }
+impl From<StreamError<sophia::jsonld::JsonLdError, TermIndexFullError>> for NpError {
+    fn from(err: StreamError<sophia::jsonld::JsonLdError, TermIndexFullError>) -> Self {
+        NpError(format!("JSON-LD parse error: {err}"))
+    }
+}
 impl From<regex::Error> for NpError {
     fn from(err: regex::Error) -> Self {
         NpError(format!("Regex error: {err}"))

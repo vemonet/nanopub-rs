@@ -68,7 +68,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 NpProfile::from_file(&get_default_profile_path())?
             };
             println!("✍️  Signing {}", np_file);
-            let np = Nanopub::sign(&np_rdf, &profile).unwrap();
+            let np = Nanopub::sign(&np_rdf, &profile)?;
             println!("{}", np);
 
             // Prefix the nanopub filename with "signed."
@@ -101,7 +101,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             };
             println!("📬️ Publishing {}", np_file);
             let _ = Nanopub::publish(&np_rdf, &profile, None).await;
-            // println!("{}", np);
         }
         Some(("check", sub)) => {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
@@ -111,7 +110,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Nanopub::check(&np_rdf)?;
             // println!("{}", np);
         }
-        // TODO: verify
         _ => {}
     }
     Ok(())

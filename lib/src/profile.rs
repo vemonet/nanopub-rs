@@ -29,7 +29,7 @@ impl NpProfile {
         Ok(Self {
             orcid_id: orcid_id.to_string(),
             name: name.to_string(),
-            public_key: get_pubkey_str(&pubkey),
+            public_key: get_pubkey_str(&pubkey)?,
             private_key: private_key.to_string(),
             introduction_nanopub_uri: Some(introduction_nanopub_uri.unwrap_or("").to_string()),
         })
@@ -82,9 +82,11 @@ pub fn get_keys(private_key: &str) -> Result<(RsaPrivateKey, RsaPublicKey), NpEr
 }
 
 /// Get a public key string for a `RsaPublicKey`
-pub fn get_pubkey_str(public_key: &RsaPublicKey) -> String {
-    normalize_key(&RsaPublicKey::to_public_key_pem(public_key, rsa::pkcs8::LineEnding::LF).unwrap())
-        .unwrap()
+pub fn get_pubkey_str(public_key: &RsaPublicKey) -> Result<String, NpError> {
+    normalize_key(&RsaPublicKey::to_public_key_pem(
+        public_key,
+        rsa::pkcs8::LineEnding::LF,
+    )?)
 }
 
 /// Normalize private/public keys (no prefix, no suffix, no newline)
@@ -101,6 +103,7 @@ pub fn normalize_key(key: &str) -> Result<String, NpError> {
     Ok(normed_key.trim().replace('\n', ""))
 }
 
+/// Try to get default profile path from users home folder
 pub fn get_default_profile_path() -> String {
     format!(
         "{}/.nanopub/profile.yml",

@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Testing Nanopub JS</title>
+    <link rel="icon" href="https://github.com/Nanopublication/nanopub-website/blob/main/static/img/icon.png?raw=true" type="image/x-icon">
   </head>
   <body>
     <pre><code id="rdf-text"></code></pre>
@@ -52,13 +53,14 @@
           const checked = Nanopub.check(rdfStr);
           console.log("CHECKED", checked.toString());
 
-          console.log("Random np server:", get_np_server());
+          console.log("Random np server:", get_np_server(true));
 
           const profile = new NpProfile(orcid, "Your Name", private_key, "");
           Nanopub.publish(rdfStr, profile, "")
             .then(np => {
                 // Handle successful publication
                 console.log("PUBLISHED!", np.toString())
+                console.log("PUBLISHED!", np)
                 rdfText.innerText = np.get_rdf();
             })
             .catch(error => {
