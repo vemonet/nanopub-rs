@@ -1,5 +1,7 @@
 use clap::{arg, Command};
-use nanopub::{get_np_server, profile::get_default_profile_path, Nanopub, NpProfile};
+use nanopub::{
+    error::NpError, get_np_server, profile::get_default_profile_path, Nanopub, NpProfile,
+};
 use std::{error::Error, fs, path::Path};
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
@@ -8,8 +10,7 @@ use std::{error::Error, fs, path::Path};
 async fn main() -> Result<(), Box<dyn Error>> {
     let cmd = Command::new("nanopub")
         .bin_name("np")
-        // .version("1.0")
-        // .author("Vincent Emonet <vincent.emonet@gmail.com>")
+        .version(env!("CARGO_PKG_VERSION"))
         .about("Sign, publish, and check Nanopublications.")
         .subcommand_required(true)
         .arg_required_else_help(true)
@@ -18,7 +19,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .about("Sign a Nanopub")
                 .arg(arg!(<NANOPUB_FILE> "The file to sign"))
                 .arg(
-                    arg!(-k --key <PRIVATE_KEY> "The private key used to sign. Found in ~/.nanopub by default")
+                    arg!(-k --key <PRIVATE_KEY> "The path to a private key used to sign. Found in ~/.nanopub by default")
                         .default_value("")
                 )
                 .arg(
@@ -29,10 +30,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .subcommand(
             Command::new("publish")
-                .about("Sign and publish a Nanopub")
+                .about("Sign, publish, or check a Nanopublication (https://nanopub.net)")
                 .arg(arg!(<NANOPUB_FILE> "The file to publish"))
                 .arg(
-                    arg!(-k --key <PRIVATE_KEY> "The private key used to sign.")
+                    arg!(-k --key <PRIVATE_KEY> "The path to a private key used to sign.")
                         .default_value("")
                 )
                 .arg(
@@ -40,7 +41,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .default_value("")
                 )
                 .arg(
-                    arg!(-t --test "To publish to the test server instead of a production server.")
+                    arg!(-t --test "To publish to the test server instead of the Nanopublication network.")
                 )
                 .arg_required_else_help(true),
         ).subcommand(
@@ -76,12 +77,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Prefix the nanopub filename with "signed."
             let path = Path::new(np_file);
             let parent = path.parent().unwrap_or_else(|| Path::new(""));
-            let file_name = path.file_name().unwrap().to_str().unwrap();
+            let file_name = path
+                .file_name()
+                .ok_or_else(|| NpError("Error getting filename".to_string()))?
+                .to_str()
+                .ok_or_else(|| NpError("Error getting filename".to_string()))?;
             let new_file_name = format!("signed.{}", file_name);
             let signed_path = parent.join(new_file_name);
             println!(
                 "📁 Signed Nanopub stored to {}",
-                signed_path.to_str().unwrap()
+                signed_path
+                    .to_str()
+                    .ok_or_else(|| NpError("Error getting signed path".to_string()))?
             );
             let _ = fs::write(signed_path, np.get_rdf());
         }

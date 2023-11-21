@@ -48,7 +48,7 @@ np publish signed.nanopub.trig
 
 You can use the same `-p` and `-k` options that are available for the `np sign` command
 
-## ✅ Check
+## 🔎 Check
 
 Check if a signed nanopub is valid. It will check the Trusty hash, and signature based on the public key:
 

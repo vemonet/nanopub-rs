@@ -35,16 +35,12 @@ pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
 pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
     let rdf = rdf.to_string();
     let handle = std::thread::spawn(move || {
-        futures::executor::block_on(async {
-            jsonld::parse_str(&rdf).collect_quads()
-            // .unwrap()
-            // .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}")))
-        })
+        futures::executor::block_on(async { jsonld::parse_str(&rdf).collect_quads() })
     });
     let dataset = handle
         .join()
         .map_err(|_| NpError("Error parsing JSON-LD".to_string()))?
-        .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}",)))?;
+        .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}")))?;
     Ok(dataset)
 }
 
@@ -63,7 +59,6 @@ pub fn serialize_rdf(dataset: &LightDataset, uri: &str, ns: &str) -> Result<Stri
         .with_pretty(true)
         .with_prefix_map(&prefixes[..]);
     let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
-
     Ok(trig_stringifier.serialize_dataset(&dataset)?.to_string())
 }
 

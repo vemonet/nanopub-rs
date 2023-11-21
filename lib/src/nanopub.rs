@@ -81,7 +81,7 @@ impl fmt::Display for Nanopub {
 impl Nanopub {
     /// Check a given Nanopub RDF is valid (check trusty hash and signature).
     ///
-    /// A failed check will throw an error (panic)
+    /// A failed check will throw an error
     ///
     /// # Arguments
     ///
@@ -394,7 +394,6 @@ impl Nanopub {
         dataset =
             replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)?;
 
-        // Prepare the trig serializer
         let rdf_str = serialize_rdf(&dataset, &trusty_uri, &trusty_ns)?;
 
         // Return the signed Nanopub object

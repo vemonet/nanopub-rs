@@ -1,4 +1,4 @@
-use js_sys::Promise;
+use js_sys::{Promise, JSON};
 use nanopub::{constants::TEST_SERVER, get_np_server as get_server, Nanopub, NpProfile};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
@@ -23,8 +23,17 @@ impl NanopubJs {
     }
 
     #[wasm_bindgen(static_method_of = NanopubJs)]
-    pub fn sign(rdf: &str, profile: NpProfileJs) -> Result<NanopubJs, JsValue> {
-        Nanopub::sign(rdf, &profile.profile)
+    pub fn sign(rdf: JsValue, profile: NpProfileJs) -> Result<NanopubJs, JsValue> {
+        let rdf_str = if rdf.is_string() {
+            rdf.as_string()
+                .ok_or_else(|| JsValue::from_str("RDF input must be a string"))?
+        } else {
+            JSON::stringify(&rdf)
+                .map_err(|e| JsValue::from_str("Failed to stringify JSON-LD object"))?
+                .as_string()
+                .ok_or_else(|| JsValue::from_str("Failed to convert JSON-LD object to string"))?
+        };
+        Nanopub::sign(&rdf_str, &profile.profile)
             .map(|np| Self { np })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
