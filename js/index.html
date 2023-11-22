@@ -2,12 +2,18 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
-    <title>Testing Nanopub JS</title>
+    <title>Nanopublication signing demo</title>
     <link rel="icon" href="https://github.com/Nanopublication/nanopub-website/blob/main/static/img/icon.png?raw=true" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   </head>
-  <body>
-    <div>
-      <textarea id="rdf-input" rows="30" cols="100">
+  <body class="bg-gray-800 text-white">
+    <div class="flex flex-col h-screen m-4">
+      <div class="flex justify-center mb-2">
+        <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
+      </div>
+      <textarea class="p-2 rounded-sm text-xs text-black" id="rdf-input" rows="29">
 @prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dc: <http://purl.org/dc/terms/> .
@@ -38,8 +44,19 @@
     a npx:ExampleNanopub .
 }
       </textarea>
-      <button id="upload-button">Upload private key to sign Nanopub</button>
-      <pre><code id="rdf-text"></code></pre>
+      <p class="flex justify-center text-sm my-4">
+        The first time you will need to upload a
+        <a class="mx-1 text-blue-500 hover:text-blue-700" href="https://raw.githubusercontent.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
+          RSA private key file
+        </a>
+        that will be used to sign the nanopub.
+      </p>
+      <div class="flex justify-center">
+        <button id="upload-btn" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
+          <i class="fas fa-paper-plane"></i> Sign Nanopublication
+        </button>
+      </div>
+      <pre class="m-4 p-2 text-xs rounded-md bg-gray-700"><code id="rdf-text"></code></pre>
     </div>
 
     <script type="module">
@@ -52,7 +69,8 @@
 
       const rdfInput = document.getElementById('rdf-input');
       const rdfText = document.getElementById('rdf-text');
-      const uploadButton = document.getElementById('upload-button');
+      const uploadButton = document.getElementById('upload-btn');
+      let privKey = null;
 
       uploadButton.addEventListener('click', () => {
         const rdfStr = rdfInput.value;
@@ -79,23 +97,32 @@
       });
 
       function handlePrivateKeySelection() {
-        return new Promise((resolve, reject) => {
-          const fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          // fileInput.accept = '.pem'; // Adjust the file type if needed
-          fileInput.onchange = event => {
-            const file = event.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = e => resolve(e.target.result);
-              reader.onerror = e => reject(e);
-              reader.readAsText(file);
-            } else {
-              reject(new Error('No file selected'));
-            }
-          };
-          fileInput.click();
-        });
+        if (privKey) {
+          return new Promise((resolve, reject) => {
+            resolve(privKey)
+          })
+        } else {
+          return new Promise((resolve, reject) => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.onchange = event => {
+              const file = event.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                  // Keep the private key if the user submit a new nanopub
+                  privKey = e.target.result
+                  resolve(e.target.result)
+                };
+                reader.onerror = e => reject(e);
+                reader.readAsText(file);
+              } else {
+                reject(new Error('No file selected'));
+              }
+            };
+            fileInput.click();
+          });
+        }
       }
     </script>
   </body>
