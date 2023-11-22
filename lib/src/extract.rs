@@ -28,6 +28,7 @@ pub struct NpInfo {
     pub signature_iri: Iri<String>,
     pub algo: String,
     pub public_key: String,
+    pub orcid: String,
 }
 
 impl fmt::Display for NpInfo {
@@ -36,6 +37,7 @@ impl fmt::Display for NpInfo {
         writeln!(f, "Namespace: {}", *self.ns)?;
         writeln!(f, "Base URI: {}", self.base_uri)?;
         writeln!(f, "Trusty Hash: {}", self.trusty_hash)?;
+        writeln!(f, "ORCID: {}", self.orcid)?;
         writeln!(f, "Head Graph: {}", self.head)?;
         writeln!(f, "Assertion Graph: {}", self.assertion)?;
         Ok(())
@@ -225,6 +227,21 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         algo = Some(q?.o().lexical_form().ok_or(TermError())?.to_string());
     }
 
+    // Extract ORCID
+    let mut orcid: Option<String> = None;
+    for q in dataset.quads_matching(
+        [&np_iri, &Iri::new_unchecked(np_ns_str.to_string())],
+        [
+            get_ns("dct").get("creator")?,
+            get_ns("prov").get("wasAttributedTo")?,
+            get_ns("pav").get("createdBy")?,
+        ],
+        Any,
+        [Some(&pubinfo_iri)],
+    ) {
+        orcid = Some(q?.o().iri().ok_or(TermError())?.to_string());
+    }
+
     // Check minimal required triples in assertion, prov, pubinfo graphs
     let assertion_iri = Iri::new_unchecked(assertion);
     let prov_iri = Iri::new_unchecked(prov);
@@ -307,5 +324,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         signature_iri,
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),
+        orcid: orcid.unwrap_or("".to_string()),
     })
 }

@@ -68,19 +68,16 @@ impl Nanopub {
         let np_rdf = fetch_np(url).await?;
         let dataset: LightDataset = parse_rdf(&np_rdf)?;
         let np_info = extract_np_info(&dataset)?;
-        // TODO: Nanopub::check()?
+        // TODO: do a Nanopub::check()?
         Ok(Self {
             uri: np_info.uri.to_string(),
             ns: np_info.ns.to_string(),
             rdf: np_rdf,
-            trusty_hash: np_info.trusty_hash.to_string(),
-            signature_hash: np_info.signature.to_string(),
-            public_key: np_info.public_key.to_string(),
-            // TODO: get ORCID in NpInfo
-            orcid: np_info.public_key.to_string(),
+            trusty_hash: np_info.trusty_hash,
+            signature_hash: np_info.signature,
+            public_key: np_info.public_key,
+            orcid: np_info.orcid,
             published: true,
-            // info: np_info,
-            // dataset: dataset,
         })
     }
     /// Check a given Nanopub RDF is valid (check trusty hash and signature).
@@ -166,18 +163,16 @@ impl Nanopub {
             "\n✅ Nanopub {}{}{} is valid: {}",
             BOLD, np_info.uri, END, msg
         );
-        // TODO: check if the np has been published
+        // TODO: check if the np has been published with Nanopub::fetch
         Ok(Self {
             uri: np_info.uri.to_string(),
             ns: np_info.ns.to_string(),
             rdf: rdf.to_string(),
-            trusty_hash: np_info.trusty_hash.to_string(),
-            signature_hash: np_info.signature.to_string(),
-            public_key: np_info.public_key.to_string(),
-            orcid: np_info.public_key.to_string(),
+            trusty_hash: np_info.trusty_hash,
+            signature_hash: np_info.signature,
+            public_key: np_info.public_key,
+            orcid: np_info.orcid,
             published: false,
-            // info: np_info,
-            // dataset: dataset,
         })
     }
 
@@ -399,7 +394,6 @@ impl Nanopub {
             replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)?;
 
         let rdf_str = serialize_rdf(&dataset, &trusty_uri, &trusty_ns)?;
-
         // Return the signed Nanopub object
         Ok(Self {
             uri: trusty_uri,
@@ -410,8 +404,6 @@ impl Nanopub {
             public_key: pubkey_str,
             orcid: profile.orcid_id.to_string(),
             published: false,
-            // info: np_info,
-            // dataset: dataset,
         })
     }
 

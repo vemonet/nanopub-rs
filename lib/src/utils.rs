@@ -6,7 +6,7 @@ use sophia::api::{ns::Namespace, prefix::Prefix};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::jsonld;
-use sophia::turtle::parser::{nq, trig};
+use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 
 use crate::constants::LIST_SERVERS;
