@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Generate code coverage
         run: |
-          cargo tarpaulin -p nanopub --verbose --timeout 120 --out xml
+          cargo tarpaulin -p nanopub --out xml --exclude-files error.rs --verbose --timeout 120
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v2

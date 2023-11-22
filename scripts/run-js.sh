@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-
 set -e
 
 cd js
+
+# Or: npm run build
+# npm run start
 
 # --target x86_64-unknown-linux-gnu
 wasm-pack build --target web

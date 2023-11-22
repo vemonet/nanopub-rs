@@ -20,18 +20,16 @@ pub fn make_trusty(
 ) -> Result<String, NpError> {
     let norm_quads = normalize_dataset(dataset, base_ns, norm_ns, separator)?;
     // println!("NORMED QUADS MAKE TRUSTY\n{}", norm_quads);
-
     let base64_engine = engine::GeneralPurpose::new(
         &alphabet::Alphabet::new(
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_",
         )?,
         engine::GeneralPurposeConfig::new().with_encode_padding(false),
     );
-    let trusty_hash = format!(
+    Ok(format!(
         "RA{}",
         base64_engine.encode(Sha256::digest(norm_quads.as_bytes()))
-    );
-    Ok(trusty_hash)
+    ))
 }
 
 /// Replace bnodes by URI ending with `_1` in the RDF dataset

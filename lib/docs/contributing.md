@@ -71,7 +71,7 @@ cargo test lib
 Test the `nanopub` create with code coverage:
 
 ```bash
-cargo tarpaulin -p nanopub
+cargo tarpaulin -p nanopub --out html
 ```
 
 Test signing a nanopublication with the CLI:

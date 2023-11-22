@@ -42,6 +42,26 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[test]
+fn check_valid_unsigned() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
+    let np = Nanopub::check(&np_rdf);
+    assert!(!np.is_err());
+    Ok(())
+}
+
+#[test]
+fn wrong_rdf_file() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./inexistent");
+    assert!(np_rdf.is_err());
+    let np_rdf = fs::read_to_string("./tests/resources/wrong-rdf.trig")?;
+    let np = Nanopub::check(&np_rdf);
+    assert!(np.is_err());
+    let np = Nanopub::check("{wrong");
+    assert!(np.is_err());
+    Ok(())
+}
+
 #[tokio::test]
 async fn publish_fail() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;

@@ -17,10 +17,10 @@ pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
     let rdf = rdf.to_string();
     let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
         parse_jsonld(&rdf)?
-    } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
-        nq::parse_str(&rdf)
-            .collect_quads()
-            .map_err(|e| NpError(format!("Error parsing Nquads: {e}")))?
+    // } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
+    //     nq::parse_str(&rdf)
+    //         .collect_quads()
+    //         .map_err(|e| NpError(format!("Error parsing Nquads: {e}")))?
     } else {
         trig::parse_str(&rdf)
             .collect_quads()
@@ -39,7 +39,7 @@ pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
     });
     let dataset = handle
         .join()
-        .map_err(|_| NpError("Error parsing JSON-LD".to_string()))?
+        .map_err(|_| NpError("Error retrieving JSON-LD from thread".to_string()))?
         .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}")))?;
     Ok(dataset)
 }

@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-
 set -e
 
-echo "📦️ Make sure to have enabled your virtual environment"
-
+source .venv/bin/activate
 cd python
 
 maturin develop

@@ -45,5 +45,5 @@
 }
 
 :pubInfo {
-    : prov:wasAttributedTo orcid:0000-0000-0000-0000 .
+    : a npx:ExampleNanopub .
 }

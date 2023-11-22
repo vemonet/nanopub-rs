@@ -1,14 +1,15 @@
-use clap::{arg, Command};
+use clap::{arg, value_parser, Command};
+use clap_complete::{generate, Generator, Shell};
 use nanopub::{
     error::NpError, get_np_server, profile::get_default_profile_path, Nanopub, NpProfile,
 };
-use std::{error::Error, fs, path::Path};
+use std::{error::Error, fs, io, path::Path};
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
 // cargo run -- sign tests/resources/nanopub_test_blank.trig -k tests/resources/id_rsa
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let cmd = Command::new("nanopub")
+    let mut cmd = Command::new("nanopub")
         .bin_name("np")
         .version(env!("CARGO_PKG_VERSION"))
         .about("Sign, publish, and check Nanopublications.")
@@ -49,9 +50,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .about("Check if a Nanopub is valid")
                 .arg(arg!(<NANOPUB_FILE> "The file to check"))
                 .arg_required_else_help(true),
+        )
+        .subcommand(
+            Command::new("completions")
+                .about("Generates completion scripts for your shell")
+                .arg(arg!([SHELL] "The shell to generate scripts for")
+                    .value_parser(value_parser!(Shell)))
         );
 
-    let matches = cmd.get_matches();
+    let matches = cmd.clone().get_matches();
 
     match matches.subcommand() {
         Some(("sign", sub)) => {
@@ -126,7 +133,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Nanopub::check(&np_rdf)?;
             // println!("{}", np);
         }
+        Some(("completions", sub)) => {
+            let shell = sub.get_one::<Shell>("SHELL").expect("required");
+            eprintln!("Generating completion file for {shell}...");
+            print_completions(shell.to_owned(), &mut cmd);
+        }
         _ => {}
     }
     Ok(())
+}
+
+fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
+    generate(gen, cmd, cmd.get_name().to_string(), &mut io::stdout());
 }

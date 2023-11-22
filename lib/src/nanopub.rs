@@ -454,6 +454,9 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             "The provided RDF does not contain a Nanopublication.".to_string(),
         ));
     }
+    if head.is_empty() {
+        return Err(NpError("Invalid Nanopub: no Head graph found.".to_string()));
+    }
 
     let np_iri: Iri<String> = Iri::new_unchecked(np_url);
     let head_iri: Iri<String> = Iri::new_unchecked(head);
@@ -482,6 +485,22 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         [Some(&head_iri)],
     ) {
         pubinfo = q?.o().iri().ok_or(TermError())?.to_string();
+    }
+
+    if assertion.is_empty() {
+        return Err(NpError(
+            "Invalid Nanopub: no Assertion graph found.".to_string(),
+        ));
+    }
+    if prov.is_empty() {
+        return Err(NpError(
+            "Invalid Nanopub: no Provenance graph found.".to_string(),
+        ));
+    }
+    if pubinfo.is_empty() {
+        return Err(NpError(
+            "Invalid Nanopub: no PubInfo graph found.".to_string(),
+        ));
     }
 
     // Remove last char if it is # or / to get the URI
@@ -589,24 +608,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Check minimal required triples in assertion, prov, pubinfo graphs
     let assertion_iri = Iri::new_unchecked(assertion);
     let prov_iri = Iri::new_unchecked(prov);
-    if head_iri.is_empty() {
-        return Err(NpError("Invalid Nanopub: no Head graph found.".to_string()));
-    }
-    if assertion_iri.is_empty() {
-        return Err(NpError(
-            "Invalid Nanopub: no Assertion graph found.".to_string(),
-        ));
-    }
-    if prov_iri.is_empty() {
-        return Err(NpError(
-            "Invalid Nanopub: no Provenance graph found.".to_string(),
-        ));
-    }
-    if pubinfo_iri.is_empty() {
-        return Err(NpError(
-            "Invalid Nanopub: no PubInfo graph found.".to_string(),
-        ));
-    }
     if dataset
         .quads_matching(Any, Any, Any, [Some(assertion_iri.clone())])
         .next()

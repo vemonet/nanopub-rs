@@ -27,3 +27,5 @@ The library automatically handles most RDF serializations supporting graphs for 
 - TriG
 - Nquads
 - JSON-LD
+
+> 💡 If you are facing any problem, or have ideas to help improve this project, please [create an issue](https://github.com/vemonet/nanopub-rs/issues) on GitHub.

@@ -55,3 +55,30 @@ Check if a signed nanopub is valid. It will check the Trusty hash, and signature
 ```bash
 np check signed.nanopub.trig
 ```
+
+## ⏭️ Enable completions
+
+You can generate and enable completions for your shell:
+
+- ZSH
+
+    ```bash
+    np completions zsh > ~/.zsh/completion/np
+    source ~/.zsh/completion/np
+    ```
+
+- Bash
+
+    ```bash
+    np completions bash > ~/.bash_completion.d/np
+    source ~/.bash_completion.d/np
+    ```
+
+- Fish
+
+    ```bash
+    np completions bash > ~/.config/fish/completions/np
+    source ~/.config/fish/completions/np
+    ```
+
+> Add the `source` command to your `.zshrc` or `.bashrc` if not already done.
