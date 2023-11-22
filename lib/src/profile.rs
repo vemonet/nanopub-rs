@@ -6,7 +6,6 @@ use std::fmt;
 use std::io::Read;
 use std::{env, fs};
 
-use crate::constants::DEFAULT_NP_PROFILE;
 use crate::error::NpError;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -38,9 +37,15 @@ impl NpProfile {
     /// Extract profile from YAML file
     pub fn from_file(filepath: &str) -> Result<Self, NpError> {
         let filepath = if filepath.is_empty() {
-            DEFAULT_NP_PROFILE
+            // Default to home dir if nothing provided
+            format!(
+                "{}/.nanopub/profile.yml",
+                env::var("HOME")
+                    .or_else(|_| env::var("USERPROFILE"))
+                    .unwrap_or("~".to_string())
+            )
         } else {
-            filepath
+            filepath.to_string()
         };
         let mut file = fs::File::open(filepath)?;
         let mut contents = String::new();
@@ -101,14 +106,4 @@ pub fn normalize_key(key: &str) -> Result<String, NpError> {
         normed_key = &normed_key[..normed_key.len() - rm_suffix.len() - 1].trim();
     }
     Ok(normed_key.trim().replace('\n', ""))
-}
-
-/// Try to get default profile path from users home folder
-pub fn get_default_profile_path() -> String {
-    format!(
-        "{}/.nanopub/profile.yml",
-        env::var("HOME")
-            .or_else(|_| env::var("USERPROFILE"))
-            .unwrap_or("~".to_string())
-    )
 }

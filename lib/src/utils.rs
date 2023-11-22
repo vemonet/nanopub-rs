@@ -17,11 +17,8 @@ pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
     let rdf = rdf.to_string();
     let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
         parse_jsonld(&rdf)?
-    // } else if rdf.lines().all(|line| line.split_whitespace().count() == 4) {
-    //     nq::parse_str(&rdf)
-    //         .collect_quads()
-    //         .map_err(|e| NpError(format!("Error parsing Nquads: {e}")))?
     } else {
+        // The TriG parser handles nquads
         trig::parse_str(&rdf)
             .collect_quads()
             .map_err(|e| NpError(format!("Error parsing TriG: {e}")))?

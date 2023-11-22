@@ -268,15 +268,9 @@ pub fn normalize_dataset(
             .ok_or(TermError())?
             .to_string();
         // Extract components of the quad and convert them to strings. Replace the base URI if present
-        let graph = if graph == base_ns {
-            fix_normed_uri(&norm_base, separator)
-        } else {
-            fix_normed_uri(&graph.replace(base_uri, &norm_base), separator)
-        };
+        let graph = fix_normed_uri(&graph.replace(base_uri, &norm_base), separator);
 
-        let subject = if quad.s().is_blank_node() {
-            fix_normed_uri(&quad.s().bnode_id().ok_or(TermError())?, separator)
-        } else if quad.s().iri().ok_or(TermError())?.to_string() == base_ns {
+        let subject = if quad.s().iri().ok_or(TermError())?.to_string() == base_ns {
             fix_normed_uri(&norm_base, separator)
         } else {
             fix_normed_uri(
@@ -290,15 +284,12 @@ pub fn normalize_dataset(
             )
         };
 
-        let predicate = if quad.p().iri().ok_or(TermError())?.to_string() == base_ns {
-            norm_base.to_string()
-        } else {
-            quad.p()
-                .iri()
-                .ok_or(TermError())?
-                .to_string()
-                .replace(base_uri, &norm_base)
-        };
+        let predicate = quad
+            .p()
+            .iri()
+            .ok_or(TermError())?
+            .to_string()
+            .replace(base_uri, &norm_base);
 
         let object = if quad.o().is_iri() {
             if quad.o().iri().ok_or(TermError())?.to_string() == base_ns {
@@ -314,9 +305,6 @@ pub fn normalize_dataset(
                     separator,
                 )
             }
-        } else if quad.o().is_blank_node() {
-            // TODO: remove?  Or throw error. This should actually never happen since we replace all bnodes first
-            quad.o().bnode_id().ok_or(TermError())?.to_string()
         } else {
             // Double the \\ to bypass rust escaping
             quad.o()

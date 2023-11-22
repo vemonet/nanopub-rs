@@ -1,8 +1,6 @@
 use clap::{arg, value_parser, Command};
 use clap_complete::{generate, Generator, Shell};
-use nanopub::{
-    error::NpError, get_np_server, profile::get_default_profile_path, Nanopub, NpProfile,
-};
+use nanopub::{error::NpError, get_np_server, Nanopub, NpProfile};
 use std::{error::Error, fs, io, path::Path};
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
@@ -72,10 +70,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file)?;
                 NpProfile::new(orcid, "", &private_key, None)?
-            } else if !profile_file.is_empty() {
-                NpProfile::from_file(profile_file)?
             } else {
-                NpProfile::from_file(&get_default_profile_path())?
+                NpProfile::from_file(profile_file)?
             };
             println!("✍️  Signing {}", np_file);
             let np = Nanopub::sign(&np_rdf, &profile)?;
@@ -111,10 +107,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file)?;
                 NpProfile::new(orcid, "", &private_key, None)?
-            } else if !profile_file.is_empty() {
-                NpProfile::from_file(profile_file)?
             } else {
-                NpProfile::from_file(&get_default_profile_path())?
+                NpProfile::from_file(profile_file)?
             };
             if test_server {
                 println!("🧪 Publishing {np_file} to test server");

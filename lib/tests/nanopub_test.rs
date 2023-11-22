@@ -1,7 +1,11 @@
 use nanopub::{
-    get_np_server, nanopub::extract_np_info, profile::get_default_profile_path, utils::parse_rdf,
+    extract::extract_np_info,
+    get_np_server,
+    sign::normalize_dataset,
+    utils::{get_ns, parse_rdf},
     Nanopub, NpProfile,
 };
+use sophia::inmem::dataset::LightDataset;
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -35,8 +39,6 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
         None,
     )?;
     println!("{}", profile); // required for coverage
-
-    assert!(get_default_profile_path().ends_with(".nanopub/profile.yml"));
     let np = Nanopub::sign(&np_rdf, &profile)?;
     assert!(!np.published);
     Ok(())
@@ -113,8 +115,37 @@ fn test_np_info() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// #[test]
-// fn fetch_nanopub() {
-//     let np_url = "http://orcid.org/0000-0000-0000-0000";
-//     let np = fetch(np_url);
-// }
+#[test]
+fn default_profile_file() -> Result<(), Box<dyn Error>> {
+    let profile = NpProfile::from_file("");
+    assert!(profile.is_ok());
+    Ok(())
+}
+
+#[test]
+fn test_normalize() -> Result<(), Box<dyn Error>> {
+    let dataset = LightDataset::new();
+    let _norm = normalize_dataset(&dataset, "", "", "#");
+    Ok(())
+}
+
+#[test]
+fn test_get_ns_empty() -> Result<(), Box<dyn Error>> {
+    let ns = std::panic::catch_unwind(|| {
+        get_ns("not there");
+    });
+    // ns.is_err()
+    match ns {
+        Ok(_) => panic!("No panic occurred"),
+        Err(_) => Ok(()),
+    }
+}
+
+#[tokio::test]
+async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
+    let np_url = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
+    let np = Nanopub::fetch(np_url).await?;
+    assert!(np.published);
+    println!("{}", np);
+    Ok(())
+}
