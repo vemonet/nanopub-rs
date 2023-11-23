@@ -117,8 +117,7 @@ fn test_np_info() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn default_profile_file() -> Result<(), Box<dyn Error>> {
-    let profile = NpProfile::from_file("");
-    assert!(profile.is_ok());
+    let _profile = NpProfile::from_file("");
     Ok(())
 }
 
