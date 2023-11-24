@@ -79,8 +79,7 @@
     </div>
 
     <script type="module">
-      import init, { get_np_server, Nanopub, NpProfile } from "https://unpkg.com/@nanopub/sign";
-      // import init, { Nanopub, NpProfile, get_np_server } from "./pkg/web.js";
+      import init, { getNpServer, Nanopub, NpProfile } from "https://unpkg.com/@nanopub/sign";
 
       const orcid="https://orcid.org/0000-0000-0000-0000";
 
@@ -96,7 +95,8 @@
         // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
         init().then(() => {
           const checked = Nanopub.check(rdfStr);
-          // console.log("CHECKED", checked.toJs());
+          console.log("CHECKED", checked.toJs());
+          console.log("Random Nanopub server:", getNpServer());
           const profile = new NpProfile(orcid, "Your Name", privKey, "");
           Nanopub.publish(rdfStr, profile, "")
             .then(np => {
@@ -115,6 +115,10 @@
         console.log(idToken);
         // document.getElementById("welcome").textContent = "hello " + idToken.given_name + " " + idToken.family_name + " (" + idToken.sub + ")";
         // TODO: generate private/public key pair, publish nanopub link to public key, display private key
+        // const keypair = new KeyPair()
+        // const fullName = idToken.given_name + " " + idToken.family_name
+        // publishNpIntro(keypair.public, idToken.sub, fullName)
+        // document.getElementById("show-privkey").textContent = keypair.private
       }
       function onError() {
         console.error("Error when login.")
