@@ -1,4 +1,7 @@
 use base64::{engine, Engine as _};
+use getrandom::getrandom;
+use rand_core::{impls, CryptoRng, RngCore};
+use rsa::pkcs1::EncodeRsaPrivateKey;
 use rsa::{pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, RsaPrivateKey, RsaPublicKey};
 use serde::{Deserialize, Serialize};
 use serde_yaml;
@@ -86,24 +89,60 @@ pub fn get_keys(private_key: &str) -> Result<(RsaPrivateKey, RsaPublicKey), NpEr
     Ok((priv_key, public_key))
 }
 
-/// Get a public key string for a `RsaPublicKey`
-pub fn get_pubkey_str(public_key: &RsaPublicKey) -> Result<String, NpError> {
-    normalize_key(&RsaPublicKey::to_public_key_pem(
-        public_key,
-        rsa::pkcs8::LineEnding::LF,
-    )?)
-}
-
 /// Normalize private/public keys (no prefix, no suffix, no newline)
 pub fn normalize_key(key: &str) -> Result<String, NpError> {
-    let mut normed_key = key.trim();
-    let rm_prefix = "-----BEGIN PUBLIC KEY-----";
-    if normed_key.starts_with(rm_prefix) {
-        normed_key = &normed_key[rm_prefix.len()..].trim();
+    let mut normed_key = key.trim().to_string();
+    let start_patterns = [
+        "-----BEGIN PUBLIC KEY-----",
+        "-----BEGIN RSA PRIVATE KEY-----",
+    ];
+    for pattern in start_patterns.iter() {
+        if normed_key.starts_with(pattern) {
+            normed_key = normed_key[pattern.len()..].to_string();
+            break;
+        }
     }
-    let rm_suffix = "-----END PUBLIC KEY-----";
-    if normed_key.ends_with(rm_suffix) {
-        normed_key = &normed_key[..normed_key.len() - rm_suffix.len() - 1].trim();
+    let end_patterns = ["-----END PUBLIC KEY-----", "-----END RSA PRIVATE KEY-----"];
+    for pattern in end_patterns.iter() {
+        if normed_key.ends_with(pattern) {
+            normed_key = normed_key[..normed_key.len() - pattern.len()].to_string();
+            break;
+        }
     }
     Ok(normed_key.trim().replace('\n', ""))
 }
+
+/// Get a public key string for a `RsaPublicKey`
+pub fn get_pubkey_str(pubkey: &RsaPublicKey) -> Result<String, NpError> {
+    normalize_key(&pubkey.to_public_key_pem(rsa::pkcs8::LineEnding::LF)?)
+}
+
+/// Generate private/public key pair
+pub fn gen_keys() -> Result<(String, String), NpError> {
+    let mut rng = WasmRng;
+    let bits = 2048;
+    let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+    let pub_key = RsaPublicKey::from(&priv_key);
+    Ok((
+        normalize_key(&priv_key.to_pkcs1_pem(rsa::pkcs8::LineEnding::LF)?)?,
+        get_pubkey_str(&pub_key)?,
+    ))
+}
+
+// Because of wasm we can't use the rand crate
+struct WasmRng;
+impl RngCore for WasmRng {
+    fn next_u32(&mut self) -> u32 {
+        impls::next_u32_via_fill(self)
+    }
+    fn next_u64(&mut self) -> u64 {
+        impls::next_u64_via_fill(self)
+    }
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        getrandom(dest).expect("Error generating random bytes");
+    }
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
+        getrandom(dest).map_err(rand_core::Error::new)
+    }
+}
+impl CryptoRng for WasmRng {}

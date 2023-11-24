@@ -22,7 +22,7 @@
   "scripts": {
     "fmt": "prettier \"**/*.{ts,tsx,js,cjs,json,md,html}\" --ignore-path .gitignore --write",
     "test": "wasm-pack build --debug --target nodejs && mocha",
-    "build": "rm -r pkg pkg-web pkg-node && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web pkg-node",
+    "build": "rm -rf pkg pkg-web pkg-node && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web pkg-node",
     "start": "http-server ./",
     "release": "npm run build && npm publish ./pkg --access public",
     "pack": "npm run build && npm pack ./pkg"

@@ -4,7 +4,7 @@ use crate::extract::extract_np_info;
 use crate::profile::{get_keys, get_pubkey_str, NpProfile};
 use crate::publish::{fetch_np, publish_np};
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{get_ns, parse_rdf, serialize_rdf};
+use crate::utils::{ns, parse_rdf, serialize_rdf};
 
 use base64;
 use base64::{engine, Engine as _};
@@ -12,6 +12,7 @@ use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use serde::Serialize;
 use sophia::api::dataset::{Dataset, MutableDataset};
+use sophia::api::ns::{rdf, Namespace};
 use sophia::api::term::matcher::Any;
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
@@ -131,7 +132,7 @@ impl Nanopub {
             // Remove the signature from the graph before re-generating it
             dataset.remove(
                 &np_info.signature_iri,
-                get_ns("npx").get("hasSignature")?,
+                ns("npx").get("hasSignature")?,
                 np_info.signature.as_str(),
                 Some(&np_info.pubinfo),
             )?;
@@ -280,19 +281,19 @@ impl Nanopub {
         // Add triples about the signature in the pubinfo
         dataset.insert(
             np_info.ns.get("sig")?,
-            get_ns("npx").get("hasPublicKey")?,
+            ns("npx").get("hasPublicKey")?,
             &*pubkey_str,
             Some(&np_info.pubinfo),
         )?;
         dataset.insert(
             np_info.ns.get("sig")?,
-            get_ns("npx").get("hasAlgorithm")?,
+            ns("npx").get("hasAlgorithm")?,
             "RSA",
             Some(&np_info.pubinfo),
         )?;
         dataset.insert(
             np_info.ns.get("sig")?,
-            get_ns("npx").get("hasSignatureTarget")?,
+            ns("npx").get("hasSignatureTarget")?,
             np_info.ns.get("")?,
             Some(&np_info.pubinfo),
         )?;
@@ -334,9 +335,9 @@ impl Nanopub {
                         &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
                     ],
                     [
-                        get_ns("dct").get("creator")?,
-                        get_ns("prov").get("wasAttributedTo")?,
-                        get_ns("pav").get("createdBy")?,
+                        ns("dct").get("creator")?,
+                        ns("prov").get("wasAttributedTo")?,
+                        ns("pav").get("createdBy")?,
                     ],
                     Any,
                     [Some(&np_info.pubinfo)],
@@ -346,7 +347,7 @@ impl Nanopub {
         {
             dataset.insert(
                 &np_info.uri,
-                get_ns("dct").get("creator")?,
+                ns("dct").get("creator")?,
                 Iri::new_unchecked(profile.orcid_id.clone()),
                 Some(&np_info.pubinfo),
             )?;
@@ -376,7 +377,7 @@ impl Nanopub {
         // Add the signature to the pubinfo graph
         dataset.insert(
             np_info.ns.get("sig")?,
-            get_ns("npx").get("hasSignature")?,
+            ns("npx").get("hasSignature")?,
             &*signature_hash,
             Some(&np_info.pubinfo),
         )?;
@@ -416,4 +417,80 @@ impl Nanopub {
     pub fn set_published(&mut self, value: bool) {
         self.published = value;
     }
+}
+
+/// Bootstrap a base nanopub dataset that can be edited later
+pub fn create_base_dataset() -> Result<LightDataset, NpError> {
+    let mut dataset = LightDataset::new();
+    let np_iri = Iri::new_unchecked(NP_TEMP_URI);
+    let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
+    let head_graph = np_ns.get("Head")?;
+    // Add Head graph triples
+    dataset.insert(
+        np_iri,
+        ns("np").get("hasAssertion")?,
+        np_ns.get("assertion")?,
+        Some(head_graph),
+    )?;
+    dataset.insert(
+        np_iri,
+        ns("np").get("hasProvenance")?,
+        np_ns.get("provenance")?,
+        Some(head_graph),
+    )?;
+    dataset.insert(
+        np_iri,
+        ns("np").get("hasPublicationInfo")?,
+        np_ns.get("pubinfo")?,
+        Some(&head_graph),
+    )?;
+    dataset.insert(
+        np_iri,
+        rdf::type_,
+        ns("np").get("Nanopublication")?,
+        Some(&head_graph),
+    )?;
+    Ok(dataset)
+}
+
+/// Create a Nanopub introduction given a pubkey, an ORCID and a name
+pub fn create_np_intro(orcid: &str, public_key: &str, name: &str) -> Result<LightDataset, NpError> {
+    let mut ds = create_base_dataset()?;
+    let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
+    let assertion_graph = np_ns.get("assertion")?;
+    let prov_graph = np_ns.get("provenance")?;
+
+    // Assertion graph triples, add key declaration
+    ds.insert(
+        np_ns.get("keyDeclaration")?,
+        ns("npx").get("declaredBy")?,
+        Iri::new_unchecked(orcid),
+        Some(&assertion_graph),
+    )?;
+    ds.insert(
+        np_ns.get("keyDeclaration")?,
+        ns("npx").get("hasAlgorithm")?,
+        "RSA",
+        Some(&assertion_graph),
+    )?;
+    ds.insert(
+        np_ns.get("keyDeclaration")?,
+        ns("npx").get("hasPublicKey")?,
+        public_key,
+        Some(&assertion_graph),
+    )?;
+    ds.insert(
+        Iri::new_unchecked(orcid),
+        ns("foaf").get("name")?,
+        name,
+        Some(&assertion_graph),
+    )?;
+    // Provenance graph triples
+    ds.insert(
+        assertion_graph,
+        ns("prov").get("wasAttributedTo")?,
+        assertion_graph,
+        Some(&prov_graph),
+    )?;
+    Ok(ds)
 }

@@ -51,6 +51,7 @@ pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
 
 /// Serialize RDF dataset to Trig
 pub fn serialize_rdf(dataset: &LightDataset, uri: &str, ns: &str) -> Result<String, NpError> {
+    // TODO: make uri and ns Option<>. If not provided we extract with extract_np_info
     let prefixes = get_prefixes(uri, ns);
     let trig_config = TrigConfig::new()
         .with_pretty(true)
@@ -73,13 +74,14 @@ pub fn get_np_server(random: bool) -> &'static str {
 }
 
 /// Get a namespace commonly used in nanopub manipulation
-pub fn get_ns(ns: &str) -> Namespace<String> {
+pub fn ns(ns: &str) -> Namespace<String> {
     match ns {
         "npx" => Namespace::new("http://purl.org/nanopub/x/".to_string()).unwrap(),
         "np" => Namespace::new("http://www.nanopub.org/nschema#".to_string()).unwrap(),
         "dct" => Namespace::new("http://purl.org/dc/terms/".to_string()).unwrap(),
         "prov" => Namespace::new("http://www.w3.org/ns/prov#".to_string()).unwrap(),
         "pav" => Namespace::new("http://purl.org/pav/".to_string()).unwrap(),
+        "foaf" => Namespace::new("http://xmlns.com/foaf/0.1/".to_string()).unwrap(),
         _ => panic!("Unknown namespace"), // or return an error
     }
 }
@@ -121,7 +123,7 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
         ),
         (
             Prefix::new_unchecked("np".to_string()),
-            Iri::new_unchecked(get_ns("np").to_string()),
+            Iri::new_unchecked(ns("np").to_string()),
         ),
         (
             Prefix::new_unchecked("prov".to_string()),
@@ -141,7 +143,7 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
         ),
         (
             Prefix::new_unchecked("npx".to_string()),
-            Iri::new_unchecked(get_ns("npx").to_string()),
+            Iri::new_unchecked(ns("npx").to_string()),
         ),
     ]
 }

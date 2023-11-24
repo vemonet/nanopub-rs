@@ -29,8 +29,9 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
 chrono = "0.4"
 futures = "0.3"
-# rand = { version = "0.8.5", features = ["getrandom"], default-features = false }
+# rand = { version = "0.8", features = ["std_rng"], default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
+rand_core = { version = "0.6", features = ["std"] }
 # log = { version = "0.0.2", features = ["std"] }
 
 [dev-dependencies]

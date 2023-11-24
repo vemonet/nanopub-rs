@@ -1,5 +1,8 @@
 use js_sys::{Promise, JSON};
-use nanopub::{constants::TEST_SERVER, get_np_server as get_server, Nanopub, NpProfile};
+use nanopub::{
+    constants::TEST_SERVER, get_np_server as get_server, nanopub::create_np_intro,
+    profile::gen_keys, utils::serialize_rdf, Nanopub, NpProfile,
+};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
@@ -113,10 +116,49 @@ impl NpProfileJs {
     }
 }
 
+/// Create a Nanopub introduction given a pubkey, an ORCID and a name
+// #[wasm_bindgen(js_name = createNpIntro)]
+// pub fn create_intro(orcid: &str, public_key: &str, name: &str) -> Result<String, JsValue> {
+//     // create_np_intro(orcid, public_key, name)
+//     //     .map(|ds| serialize_rdf(ds, None, None)?)
+//     //     .map_err(|e| JsValue::from_str(&e.to_string()))
+
+//     // TODO: make it directly a "publish_intro function?"
+//     let ds = create_np_intro(orcid, public_key, name)
+//         .map_err(|e| JsValue::from_str(&e.to_string()))
+//         // .expect("Error creating the intro")
+//         ;
+
+//     serialize_rdf(&ds, None, None).map_err(|e| JsValue::from_str(&e.to_string()))
+// }
+
 /// Return a random server
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = getNpServer)]
 pub fn get_np_server(random: Option<bool>) -> String {
     get_server(random.unwrap_or(true)).to_string()
+}
+
+#[wasm_bindgen(js_name = KeyPair)]
+#[derive(Serialize)]
+pub struct KeyPair {
+    public: String,
+    private: String,
+}
+
+/// Generate a private/public RSA key pair
+#[wasm_bindgen(js_class = KeyPair)]
+impl KeyPair {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Result<KeyPair, JsValue> {
+        gen_keys()
+            .map(|(private, public)| Self { private, public })
+            .map_err(|e| JsValue::from_str(&e.to_string()))
+    }
+
+    #[wasm_bindgen(js_name = toJs)]
+    pub fn to_js(&self) -> Result<JsValue, JsValue> {
+        serde_wasm_bindgen::to_value(&self).map_err(|e| e.into())
+    }
 }
 
 // impl Into<JsValue> for NanopubJs {

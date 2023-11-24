@@ -1,8 +1,10 @@
 use nanopub::{
     extract::extract_np_info,
     get_np_server,
+    nanopub::create_np_intro,
+    profile::gen_keys,
     sign::normalize_dataset,
-    utils::{get_ns, parse_rdf},
+    utils::{ns, parse_rdf, serialize_rdf},
     Nanopub, NpProfile,
 };
 use sophia::inmem::dataset::LightDataset;
@@ -131,7 +133,7 @@ fn test_normalize() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_get_ns_empty() -> Result<(), Box<dyn Error>> {
     let ns = std::panic::catch_unwind(|| {
-        get_ns("not there");
+        ns("not there");
     });
     // ns.is_err()
     match ns {
@@ -146,5 +148,23 @@ async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
     let np = Nanopub::fetch(np_url).await?;
     assert!(np.published);
     println!("{}", np);
+    Ok(())
+}
+
+#[test]
+fn test_gen_keys() -> Result<(), Box<dyn Error>> {
+    let (privkey, _pubkey) = gen_keys()?;
+    assert!(privkey.len() > 10);
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
+    let pubkey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
+    let intro_ds = create_np_intro("https://orcid.org/0000-0000-0000-0000", pubkey, "Test Name");
+    // let profile = NpProfile::new("", "", &get_test_key(), None)?;
+    // let np = Nanopub::publish(&serialize_rdf(intro_ds, uri, ns), &profile, None).await?;
+    // println!("{}", np);
+    // assert!(np.published);
     Ok(())
 }
