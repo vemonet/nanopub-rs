@@ -11,7 +11,19 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         .header(reqwest::header::CONTENT_TYPE, "application/trig")
         .send()
         .await?;
-    Ok(res.status() == 201)
+    // println!("DEBUG: publish resp: {:#?}", res);
+    // Ok(res.status() == 201)
+    match res.status() {
+        reqwest::StatusCode::CREATED => Ok(true),
+        _ => {
+            // Get the error message from the response body
+            let error_msg = res
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error while publishing the nanopub".to_string());
+            Err(NpError(error_msg))
+        }
+    }
 }
 
 /// Fetch nanopub from its URI

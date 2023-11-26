@@ -8,14 +8,17 @@ use crate::utils::{ns, parse_rdf, serialize_rdf};
 
 use base64;
 use base64::{engine, Engine as _};
+use chrono::Utc;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use serde::Serialize;
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::{rdf, Namespace};
+use sophia::api::ns::{rdf, xsd, Namespace};
 use sophia::api::term::matcher::Any;
+use sophia::api::term::{SimpleTerm, Term};
+// use sophia::api::;
 use sophia::inmem::dataset::LightDataset;
-use sophia::iri::Iri;
+use sophia::iri::{AsIriRef, Iri};
 use std::{fmt, str};
 
 /// Trait to provide the nanopub RDF as string or sophia dataset
@@ -124,12 +127,6 @@ impl Nanopub {
         let mut dataset = rdf.get_dataset()?;
         let np_info = extract_np_info(&dataset, true)?;
 
-        let norm_ns = if !np_info.trusty_hash.is_empty() {
-            format!("{}{}", np_info.base_uri, np_info.separator_before_trusty)
-        } else {
-            NP_PREF_NS.to_string()
-        };
-
         let mut msg: String = "".to_string();
         if np_info.trusty_hash.is_empty() {
             msg = format!("{}1 valid (not trusty)", msg);
@@ -138,7 +135,7 @@ impl Nanopub {
             let expected_hash = make_trusty(
                 &dataset,
                 &np_info.ns,
-                &norm_ns,
+                &np_info.normalized_ns,
                 &np_info.separator_after_trusty,
             )?;
             if expected_hash != np_info.trusty_hash {
@@ -160,7 +157,7 @@ impl Nanopub {
             let norm_quads = normalize_dataset(
                 &dataset,
                 &np_info.ns,
-                &norm_ns,
+                &np_info.normalized_ns,
                 &np_info.separator_after_trusty,
             )?;
             // println!("NORMED QUADS CHECK\n{}", norm_quads);
@@ -253,30 +250,33 @@ impl Nanopub {
         // TODO: if not already set, automatically add the current date to pubinfo created
         // But there is an error when trying to cast the string to xsd::dateTime
         // np_uri dct:created "2023-11-17T14:13:52.560Z"^^xsd:dateTime ;
-        // if dataset
-        //     .quads_matching(
-        //         [
-        //             &np_info.uri,
-        //             &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
-        //         ],
-        //         [get_ns("dct").get("created")?],
-        //         Any,
-        //         [Some(&np_info.pubinfo)],
-        //     )
-        //     .next()
-        //     .is_none()
-        // {
-        //     let now = Utc::now();
-        //     let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
-        //     // TODO: error when trying to convert to datetime
-        //     //  let lit_date = "2019" * xsd::dateTime;
-        //     dataset.insert(
-        //         &np_info.uri,
-        //         get_ns("dct").get("created")?,
-        //         &*datetime_str,
-        //         Some(&np_info.pubinfo),
-        //     )?;
-        // }
+        if dataset
+            .quads_matching(
+                [
+                    &np_info.uri,
+                    &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
+                ],
+                [ns("dct").get("created")?],
+                Any,
+                [Some(&np_info.pubinfo)],
+            )
+            .next()
+            .is_none()
+        {
+            let now = Utc::now();
+            let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
+            // TODO: error when trying to convert to datetime
+            // let lit_date = "2019" * xsd::dateTime;
+            // let lit_date = datetime_str.as_str() * xsd::dateTime;
+            let lit_date = SimpleTerm::LiteralDatatype(datetime_str.into(), xsd::dateTime.iriref());
+            dataset.insert(
+                np_info.ns.as_iri_ref(),
+                ns("dct").get("created")?,
+                lit_date,
+                // &*datetime_str * xsd::dateTime.iriref(),
+                Some(&np_info.pubinfo),
+            )?;
+        }
 
         // If ORCID provided and not already provided, add to pubinfo graph
         if !profile.orcid_id.is_empty()
@@ -298,24 +298,18 @@ impl Nanopub {
                 .is_none()
         {
             dataset.insert(
-                &np_info.uri,
+                np_info.ns.as_iri_ref(),
                 ns("dct").get("creator")?,
                 Iri::new_unchecked(profile.orcid_id.clone()),
                 Some(&np_info.pubinfo),
             )?;
         }
 
-        let norm_ns = if np_info.ns.starts_with(NP_TEMP_URI) {
-            NP_PREF_NS
-        } else {
-            &np_info.ns
-        };
-
         // Normalize nanopub nquads to a string
         let norm_quads = normalize_dataset(
             &dataset,
             np_info.ns.as_str(),
-            norm_ns,
+            &np_info.normalized_ns,
             &np_info.separator_after_trusty,
         )?;
         // println!("NORMED QUADS sign before add signature\n{}", norm_quads);
@@ -338,10 +332,10 @@ impl Nanopub {
         let trusty_hash = make_trusty(
             &dataset,
             &np_info.ns,
-            norm_ns,
+            &np_info.normalized_ns,
             &np_info.separator_after_trusty,
         )?;
-        let trusty_uri = format!("{norm_ns}{trusty_hash}");
+        let trusty_uri = format!("{}{trusty_hash}", np_info.normalized_ns);
         let trusty_ns = format!("{trusty_uri}#");
         dataset =
             replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)?;
@@ -421,7 +415,10 @@ impl Nanopub {
         } else {
             println!("\n❌ Issue publishing the Nanopublication \n{}", np);
             // TODO: when publish fails, should we return a Nanopub struct with published=false, or throw an error?
-            // return Err(NpError(format!("Issue publishing the Nanopublication \n{}", np)))
+            return Err(NpError(format!(
+                "Issue publishing the Nanopublication \n{}",
+                np
+            )));
         }
         np.set_published(published);
         Ok(np)

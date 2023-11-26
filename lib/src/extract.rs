@@ -1,3 +1,4 @@
+use crate::constants::{NP_PREF_NS, NP_TEMP_URI};
 use crate::error::{NpError, TermError};
 use crate::utils::ns;
 
@@ -16,6 +17,7 @@ use std::fmt;
 pub struct NpInfo {
     pub uri: Iri<String>,
     pub ns: Namespace<String>,
+    pub normalized_ns: String,
     pub head: Iri<String>,
     pub assertion: Iri<String>,
     pub prov: Iri<String>,
@@ -125,6 +127,9 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         ));
     }
 
+    // Getting potential ns from head graph (removing the last frag from head)
+    let original_ns = &head_iri[..np_iri.len()];
+
     // Remove last char if it is # or / to get the URI
     let np_iri: Iri<String> =
         if np_iri.ends_with('#') || np_iri.ends_with('/') || np_iri.ends_with('.') {
@@ -135,9 +140,6 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         } else {
             np_iri
         };
-
-    // Getting potential ns from head graph (removing the last frag from head)
-    let np_ns_str = &head_iri[..np_iri.len() + 1];
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
@@ -156,7 +158,7 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
     // Get the base URI and separators from the namespace
     let re_trusty_ns = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$")?;
     // let re = Regex::new(r"^(.*?)(RA.*)?$")?;
-    if let Some(caps) = re_trusty_ns.captures(np_ns_str) {
+    if let Some(caps) = re_trusty_ns.captures(original_ns) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         base_uri = caps.get(1).map_or("", |m| m.as_str()).to_string();
         // The second group captures '/' or '#' if present, defaults to .
@@ -175,21 +177,27 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         separator_after_trusty = "#".to_string()
     };
 
-    // TODO: handle diff if trusty or not (if not we use default, if trusty we only extract)
-    let np_ns =
-        if !np_ns_str.ends_with('#') && !np_ns_str.ends_with('/') && !np_ns_str.ends_with('.') {
-            if !trusty_hash.is_empty() {
-                // TODO: Change the after trusty part?
-                Namespace::new_unchecked(np_ns_str.to_string())
-            } else {
-                Namespace::new_unchecked(format!(
-                    "{}.",
-                    &np_ns_str.strip_suffix('_').unwrap_or(np_ns_str)
-                ))
-            }
-        } else {
-            Namespace::new_unchecked(np_ns_str.to_string())
-        };
+    let np_ns = Namespace::new_unchecked(original_ns.to_string());
+    // println!(
+    //     "DEBUG: Extracted URI and namespace: {} {} {}",
+    //     np_iri,
+    //     np_ns.get("")?,
+    //     trusty_hash
+    // );
+
+    // Generate normalized namespace without trusty
+    let norm_ns = if !trusty_hash.is_empty() {
+        format!("{}{}", base_uri, separator_before_trusty)
+    } else if original_ns.starts_with(NP_TEMP_URI) {
+        NP_PREF_NS.to_string()
+    } else if !original_ns.ends_with('#')
+        && !original_ns.ends_with('/')
+        && !original_ns.ends_with('.')
+    {
+        format!("{}.", &original_ns)
+    } else {
+        original_ns.to_string()
+    };
 
     // Extract signature and its subject URI
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
@@ -230,7 +238,7 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
     // Extract ORCID
     let mut orcid: Option<String> = None;
     for q in dataset.quads_matching(
-        [&np_iri, &Iri::new_unchecked(np_ns_str.to_string())],
+        [&np_iri, &Iri::new_unchecked(original_ns.to_string())],
         [
             ns("dct").get("creator")?,
             ns("prov").get("wasAttributedTo")?,
@@ -314,6 +322,7 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
     let np_info = NpInfo {
         uri: np_iri,
         ns: np_ns,
+        normalized_ns: norm_ns,
         head: head_iri,
         assertion: assertion_iri,
         prov: prov_iri,

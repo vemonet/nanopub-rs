@@ -29,6 +29,17 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[tokio::test]
+async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("tests/testsuite/valid/plain/proteinatlas-16-1.trig")?;
+    // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
+    let profile = NpProfile::new("", "", &get_test_key(), None)?;
+    let np = Nanopub::publish(&np_rdf, &profile, None).await?;
+    assert!(np.published);
+    println!("{}", np);
+    Ok(())
+}
+
 #[test]
 fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;

@@ -155,7 +155,10 @@ pub fn replace_ns_in_quads(
     new_ns: &str,
     new_uri: &str,
 ) -> Result<LightDataset, NpError> {
-    let old_ns = old_ns.strip_suffix('.').unwrap_or(old_ns);
+    // println!(
+    //     "DEBUG: REPLACE_NS_IN_QUADS: Old ns: {} old_uri: {} new ns: {} new_uri: {}",
+    //     old_ns, old_uri, new_ns, new_uri
+    // );
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
         let quad = quad?;
@@ -222,18 +225,25 @@ struct NormQuad {
 
 /// Fix normed URIs last fragments. Make sure it starts with #
 pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
-    if let Some(last_slash_index) = uri.rfind(' ') {
-        let last_frag = &uri[last_slash_index + 1..];
-        if last_frag.starts_with(separator) || last_frag.is_empty() {
+    if let Some(space_index) = uri.rfind(' ') {
+        let last_frag = &uri[space_index + 1..];
+        // println!(
+        //     "DEBUG: last frag: '{}' URI: '{}' SEP: '{}'",
+        //     last_frag, uri, separator
+        // );
+        if uri.ends_with(&format!(" {separator}")) || last_frag.is_empty() {
+            uri.strip_suffix(separator).unwrap_or(uri).to_string()
+        } else if last_frag.starts_with(separator) {
             uri.to_string()
-        } else if last_frag.starts_with('/') || last_frag.starts_with('.') {
-            format!(
-                "{} {separator}{}",
-                &uri[..last_slash_index],
-                &uri[last_slash_index + 2..]
-            )
+        // TODO: remove those checks, there are not useful anymore?
+        // } else if last_frag.starts_with('/') || last_frag.starts_with('.') {
+        //     format!(
+        //         "{} {separator}{}",
+        //         &uri[..space_index],
+        //         &uri[space_index + 2..]
+        //     )
         } else {
-            format!("{} {separator}{}", &uri[..last_slash_index], last_frag)
+            format!("{} {separator}{}", &uri[..space_index], last_frag)
         }
     } else {
         uri.to_string()
@@ -248,15 +258,14 @@ pub fn normalize_dataset(
     separator: &str,
 ) -> Result<String, NpError> {
     let mut quads_vec: Vec<NormQuad> = vec![];
-    let norm_base = format!("{} ", norm_ns.strip_suffix('#').unwrap_or(norm_ns));
-    let base_uri = match base_ns.chars().last() {
-        Some(_) => &base_ns[..base_ns.len() - 1],
-        None => base_ns,
-    };
+    let norm_uri = format!("{} ", norm_ns);
+    // println!("DEBUG: NORMALIZE {} {} {}", base_ns, norm_ns, separator);
     // Example already signed: http://www.nextprot.org/nanopubs#NX_Q9Y6K8_ESTEvidence_TS-2083.RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k.
     // Not signed yet: http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head
     //   becomes http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030.RAyBeXMqokAQZ5psoETKtkOeYzHnoIoXTgNFKRdLM8yzs#__head
     //   last char after trusty becomes # and before .
+    // Default tmp URI: http://purl.org/nanopub/temp/
+    //   becomes: https://w3id.org/np/RAyBeXMqokAQZ5psoETKtkOeYzHnoIoXTgNFKRdLM8yzs#Head
 
     // Convert dataset to a list of NormQuad struct
     for quad in dataset.quads() {
@@ -268,10 +277,10 @@ pub fn normalize_dataset(
             .ok_or(TermError())?
             .to_string();
         // Extract components of the quad and convert them to strings. Replace the base URI if present
-        let graph = fix_normed_uri(&graph.replace(base_uri, &norm_base), separator);
+        let graph = fix_normed_uri(&graph.replace(base_ns, &norm_uri), separator);
 
         let subject = if quad.s().iri().ok_or(TermError())?.to_string() == base_ns {
-            fix_normed_uri(&norm_base, separator)
+            norm_uri.to_string()
         } else {
             fix_normed_uri(
                 &quad
@@ -279,7 +288,7 @@ pub fn normalize_dataset(
                     .iri()
                     .ok_or(TermError())?
                     .to_string()
-                    .replace(base_uri, &norm_base),
+                    .replace(base_ns, &norm_uri),
                 separator,
             )
         };
@@ -289,11 +298,11 @@ pub fn normalize_dataset(
             .iri()
             .ok_or(TermError())?
             .to_string()
-            .replace(base_uri, &norm_base);
+            .replace(base_ns, &norm_uri);
 
         let object = if quad.o().is_iri() {
             if quad.o().iri().ok_or(TermError())?.to_string() == base_ns {
-                fix_normed_uri(&norm_base, separator)
+                norm_uri.to_string()
             } else {
                 fix_normed_uri(
                     &quad
@@ -301,7 +310,7 @@ pub fn normalize_dataset(
                         .iri()
                         .ok_or(TermError())?
                         .to_string()
-                        .replace(base_uri, &norm_base),
+                        .replace(base_ns, &norm_uri),
                     separator,
                 )
             }

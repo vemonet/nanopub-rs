@@ -1,68 +1,59 @@
-PREFIX this: <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8>
-PREFIX sub: <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX schema: <http://schema.org/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX biolink: <https://w3id.org/biolink/vocab/>
-PREFIX np: <http://www.nanopub.org/nschema#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX pav: <http://purl.org/pav/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX orcid: <https://orcid.org/>
-PREFIX npx: <http://purl.org/nanopub/x/>
+@prefix this: <https://w3id.org/np/RANUwFgJ2onO89byLuR_U_4ADqWGityl4cdoU6S7Hyv28> .
+@prefix sub: <https://w3id.org/np/RANUwFgJ2onO89byLuR_U_4ADqWGityl4cdoU6S7Hyv28#> .
+@prefix drugbank: <http://identifiers.org/drugbank/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
 
-GRAPH sub:Head {
-  <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8> a np:Nanopublication;
+sub:Head {
+  this: a np:Nanopublication;
     np:hasAssertion sub:assertion;
     np:hasProvenance sub:provenance;
-    np:hasPublicationInfo sub:pubInfo.
+    np:hasPublicationInfo sub:pubInfo .
 }
 
-GRAPH sub:assertion {
-  <http://identifiers.org/drugbank/DB10771> a biolink:Drug.
+sub:assertion {
+  drugbank:DB10771 a biolink:Drug .
 
-  <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease.
+  <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
 
-  sub:_1 a biolink:Context.
+  sub:_1 a biolink:Context .
 
-  sub:_2 a biolink:Target.
+  sub:_2 a biolink:Target .
 
-  sub:_3 a biolink:Date.
+  sub:_3 a biolink:Date .
 
-  sub:_4 a biolink:Thing.
+  sub:_4 a biolink:Thing .
 
-  sub:_5 a biolink:Date.
+  sub:_5 a biolink:Date .
 
-  sub:_6 a biolink:Context.
+  sub:_6 a biolink:Context .
 
-  sub:__1 a biolink:Thing.
+  sub:__1 a biolink:Thing .
 
-  sub:___2 a biolink:Thing.
+  sub:___2 a biolink:Thing .
 
   sub:association a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation;
     rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
     rdf:predicate biolink:treats;
-    rdf:subject <http://identifiers.org/drugbank/DB10771>;
+    rdf:subject drugbank:DB10771;
     biolink:context sub:_1;
     biolink:date sub:_3;
-    biolink:target sub:_2.
+    biolink:target sub:_2 .
 }
 
-GRAPH sub:provenance {
-  sub:assertion
-    dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime.
+sub:provenance {
+  sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
 }
 
-GRAPH sub:pubInfo {
-  <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8>
-    dcterms:creator <http://orcid.org/0000-0000-0000-0000>;
-    prov:wasAttributedTo orcid:0000-0000-0000-0000.
-
-  sub:sig
-    npx:hasAlgorithm "RSA";
+sub:pubInfo {
+  sub:sig npx:hasAlgorithm "RSA";
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "ScQKA0Auc3s1H6tfI+MCtfH9GkVtvbsTkGbp8FLWUjc1pPrA8HVwja/s5Utd3ZgTFSBggKxD1C0zZUZXkU/F/CnlIlDH9Pvl0adi4jv3FdQmLlwoJ/eoG3ESBRqRN6Ed9RGsLT26E3XFjQp7b93WBnJahljsG7fmB8guwhdOhco=";
-    npx:hasSignatureTarget <https://w3id.org/np/RAor3eDIXHTmyMPuvXgMwaElNBFR2VkchnA-YM8KDOra8>.
+    npx:hasSignature "1NTjNSJThh0vC7TXz0AkL4ZfSv1q10bLEAqgxegCdZ5nwNyOpJ6lwKky1//x7dPbjtdRszCJ73TyiQigqLy+wfK+PsFpenz8dNcjqbxdsTQPFt2V3JBJPyNLWlsWipku9bQGH2++k/6+yW9/6WmpivYVCb4Erm9xpGoM+jRWetU=";
+    npx:hasSignatureTarget this: .
+
+  this: a npx:ExampleNanopub .
 }
