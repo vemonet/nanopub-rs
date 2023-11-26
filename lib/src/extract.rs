@@ -46,11 +46,6 @@ impl fmt::Display for NpInfo {
     }
 }
 
-// TODO: separate funtion just to extract uri and ns (to pass to serialize_rdf())
-// pub fn extract_np_uri(dataset: &LightDataset) -> Result<(String, String), NpError> {
-//     let mut np_url: String = "".to_string();
-// }
-
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
 pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<NpInfo, NpError> {
     let mut np_url: String = "".to_string();
@@ -129,6 +124,7 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
 
     // Getting potential ns from head graph (removing the last frag from head)
     let original_ns = &head_iri[..np_iri.len()];
+    let np_ns = Namespace::new_unchecked(original_ns.to_string());
 
     // Remove last char if it is # or / to get the URI
     let np_iri: Iri<String> =
@@ -157,7 +153,6 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
 
     // Get the base URI and separators from the namespace
     let re_trusty_ns = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$")?;
-    // let re = Regex::new(r"^(.*?)(RA.*)?$")?;
     if let Some(caps) = re_trusty_ns.captures(original_ns) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         base_uri = caps.get(1).map_or("", |m| m.as_str()).to_string();
@@ -167,7 +162,6 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
             .map_or(separator_before_trusty, |m| m.as_str().to_string())
             .to_string();
         // The last group captures everything after 'RA', if present.
-        // trusty_hash = caps.get(3).map_or("", |m| m.as_str()).to_string();
         separator_after_trusty = caps
             .get(4)
             .map_or(separator_after_trusty, |m| m.as_str().to_string())
@@ -176,14 +170,7 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
     if trusty_hash.is_empty() && separator_after_trusty.is_empty() {
         separator_after_trusty = "#".to_string()
     };
-
-    let np_ns = Namespace::new_unchecked(original_ns.to_string());
-    // println!(
-    //     "DEBUG: Extracted URI and namespace: {} {} {}",
-    //     np_iri,
-    //     np_ns.get("")?,
-    //     trusty_hash
-    // );
+    // println!("DEBUG: Extracted URIs: {} {} {}", np_iri, np_ns.get("")?, trusty_hash);
 
     // Generate normalized namespace without trusty
     let norm_ns = if !trusty_hash.is_empty() {
@@ -319,7 +306,7 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         ));
     }
 
-    let np_info = NpInfo {
+    Ok(NpInfo {
         uri: np_iri,
         ns: np_ns,
         normalized_ns: norm_ns,
@@ -336,86 +323,5 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),
         orcid: orcid.unwrap_or("".to_string()),
-    };
-    // let _ = check_np_info(dataset, &np_info, check_pubinfo);
-    Ok(np_info)
-}
-
-pub fn check_np_info(
-    dataset: &LightDataset,
-    np_info: &NpInfo,
-    check_pubinfo: bool,
-) -> Result<(), NpError> {
-    // Check minimal required triples in assertion, prov, pubinfo graphs
-    if dataset
-        .quads_matching(Any, Any, Any, [Some(np_info.assertion.clone())])
-        .next()
-        .is_none()
-    {
-        return Err(NpError(
-            "Invalid Nanopub: no triples in the assertion graph.".to_string(),
-        ));
-    }
-    if dataset
-        .quads_matching(Any, Any, Any, [Some(np_info.prov.clone())])
-        .next()
-        .is_none()
-    {
-        return Err(NpError(
-            "Invalid Nanopub: no triples in the provenance graph.".to_string(),
-        ));
-    }
-    if dataset
-        .quads_matching(
-            [np_info.assertion.clone()],
-            Any,
-            Any,
-            [Some(np_info.prov.clone())],
-        )
-        .next()
-        .is_none()
-    {
-        return Err(NpError("Invalid Nanopub: no triples with the assertion graph as subject in the provenance graph.".to_string()));
-    }
-    if check_pubinfo {
-        if dataset
-            .quads_matching(Any, Any, Any, [Some(np_info.pubinfo.clone())])
-            .next()
-            .is_none()
-        {
-            return Err(NpError(
-                "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
-            ));
-        }
-        if dataset
-            .quads_matching(
-                [
-                    np_info.uri.clone(),
-                    Iri::new_unchecked(np_info.ns.get("")?.to_string()),
-                ],
-                Any,
-                Any,
-                [Some(np_info.pubinfo.clone())],
-            )
-            .next()
-            .is_none()
-        {
-            return Err(NpError(
-                "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
-                    .to_string(),
-            ));
-        };
-    }
-    let mut graph_names = HashSet::new();
-    for g in dataset.graph_names() {
-        if let Some(graph_name) = g?.iri() {
-            graph_names.insert(graph_name.to_string());
-        }
-    }
-    if graph_names.len() != 4 {
-        return Err(NpError(
-            format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
-        ));
-    }
-    Ok(())
+    })
 }

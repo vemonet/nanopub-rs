@@ -1,7 +1,7 @@
-use crate::constants::{BOLD, END, NP_PREF_NS, NP_TEMP_URI, TEST_SERVER};
+use crate::constants::{BOLD, END, NP_TEMP_URI, TEST_SERVER};
 use crate::error::NpError;
 use crate::extract::extract_np_info;
-use crate::profile::{get_keys, get_pubkey_str, NpProfile};
+use crate::profile::NpProfile;
 use crate::publish::{fetch_np, publish_np};
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
 use crate::utils::{ns, parse_rdf, serialize_rdf};
@@ -15,8 +15,7 @@ use serde::Serialize;
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, xsd, Namespace};
 use sophia::api::term::matcher::Any;
-use sophia::api::term::{SimpleTerm, Term};
-// use sophia::api::;
+use sophia::api::term::SimpleTerm;
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::{AsIriRef, Iri};
 use std::{fmt, str};
@@ -217,9 +216,6 @@ impl Nanopub {
         openssl_probe::init_ssl_cert_env_vars();
         let mut dataset = rdf.get_dataset()?;
 
-        let (priv_key, pubkey) = get_keys(&profile.private_key)?;
-        let pubkey_str = get_pubkey_str(&pubkey)?;
-
         // Extract graph URLs from the nanopub (fails if np not valid)
         let np_info = extract_np_info(&dataset, false)?;
 
@@ -231,7 +227,7 @@ impl Nanopub {
         dataset.insert(
             np_info.ns.get("sig")?,
             ns("npx").get("hasPublicKey")?,
-            &*pubkey_str,
+            &*profile.public_key,
             Some(&np_info.pubinfo),
         )?;
         dataset.insert(
@@ -247,9 +243,7 @@ impl Nanopub {
             Some(&np_info.pubinfo),
         )?;
 
-        // TODO: if not already set, automatically add the current date to pubinfo created
-        // But there is an error when trying to cast the string to xsd::dateTime
-        // np_uri dct:created "2023-11-17T14:13:52.560Z"^^xsd:dateTime ;
+        // If not already set, automatically add the current date to pubinfo created
         if dataset
             .quads_matching(
                 [
@@ -265,15 +259,13 @@ impl Nanopub {
         {
             let now = Utc::now();
             let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
-            // TODO: error when trying to convert to datetime
+            // TODO: there is an error when trying to cast the string to xsd::dateTime
             // let lit_date = "2019" * xsd::dateTime;
-            // let lit_date = datetime_str.as_str() * xsd::dateTime;
-            let lit_date = SimpleTerm::LiteralDatatype(datetime_str.into(), xsd::dateTime.iriref());
             dataset.insert(
                 np_info.ns.as_iri_ref(),
                 ns("dct").get("created")?,
-                lit_date,
-                // &*datetime_str * xsd::dateTime.iriref(),
+                SimpleTerm::LiteralDatatype(datetime_str.into(), xsd::dateTime.iriref()),
+                // datetime_str.as_str() * xsd::dateTime,
                 Some(&np_info.pubinfo),
             )?;
         }
@@ -315,7 +307,7 @@ impl Nanopub {
         // println!("NORMED QUADS sign before add signature\n{}", norm_quads);
 
         // Generate signature using the private key and normalized RDF
-        let signature_vec = priv_key.sign(
+        let signature_vec = profile.get_private_key()?.sign(
             Pkcs1v15Sign::new::<Sha256>(),
             &Sha256::digest(norm_quads.as_bytes()),
         )?;
@@ -348,7 +340,7 @@ impl Nanopub {
             rdf: rdf_str,
             trusty_hash,
             signature_hash,
-            public_key: pubkey_str,
+            public_key: profile.public_key.to_string(),
             orcid: profile.orcid_id.to_string(),
             published: false,
         })

@@ -22,10 +22,15 @@ On all platforms:
 - 🪟 Windows
 - 🦊 Web browsers
 
-The library automatically handles most RDF serializations supporting graphs for the nanopub:
+The library automatically handles most RDF serializations supporting quads for the nanopub:
 
 - TriG
 - Nquads
 - JSON-LD
+
+When signing a nanopub, some metadata in the pubinfo graph are created automatically if they are not already set in the RDF provided:
+
+- Date and time of the Nanopublication creation using `dct:created`.
+- ORCID of the creator using `dct:creator`, if an ORCID was provided in the profile used to sign the Nanopublication (we also check if the ORCID has been set with `prov:wasAttributedTo`, or `pav:createdBy`)
 
 > 💡 If you are facing any problem, or have ideas to help improve this project, please [create an issue](https://github.com/vemonet/nanopub-rs/issues) on GitHub.

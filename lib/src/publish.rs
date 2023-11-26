@@ -11,8 +11,6 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         .header(reqwest::header::CONTENT_TYPE, "application/trig")
         .send()
         .await?;
-    // println!("DEBUG: publish resp: {:#?}", res);
-    // Ok(res.status() == 201)
     match res.status() {
         reqwest::StatusCode::CREATED => Ok(true),
         _ => {

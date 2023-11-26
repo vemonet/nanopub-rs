@@ -155,10 +155,6 @@ pub fn replace_ns_in_quads(
     new_ns: &str,
     new_uri: &str,
 ) -> Result<LightDataset, NpError> {
-    // println!(
-    //     "DEBUG: REPLACE_NS_IN_QUADS: Old ns: {} old_uri: {} new ns: {} new_uri: {}",
-    //     old_ns, old_uri, new_ns, new_uri
-    // );
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
         let quad = quad?;
@@ -227,21 +223,10 @@ struct NormQuad {
 pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
     if let Some(space_index) = uri.rfind(' ') {
         let last_frag = &uri[space_index + 1..];
-        // println!(
-        //     "DEBUG: last frag: '{}' URI: '{}' SEP: '{}'",
-        //     last_frag, uri, separator
-        // );
         if uri.ends_with(&format!(" {separator}")) || last_frag.is_empty() {
             uri.strip_suffix(separator).unwrap_or(uri).to_string()
         } else if last_frag.starts_with(separator) {
             uri.to_string()
-        // TODO: remove those checks, there are not useful anymore?
-        // } else if last_frag.starts_with('/') || last_frag.starts_with('.') {
-        //     format!(
-        //         "{} {separator}{}",
-        //         &uri[..space_index],
-        //         &uri[space_index + 2..]
-        //     )
         } else {
             format!("{} {separator}{}", &uri[..space_index], last_frag)
         }

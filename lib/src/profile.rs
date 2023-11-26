@@ -21,13 +21,16 @@ pub struct NpProfile {
 }
 
 impl NpProfile {
+    /// Create a new Nanopub profile
     pub fn new(
         orcid_id: &str,
         name: &str,
         private_key: &str,
         introduction_nanopub_uri: Option<&str>,
     ) -> Result<Self, NpError> {
-        let (_priv_key, pubkey) = get_keys(private_key)?;
+        let privkey =
+            RsaPrivateKey::from_pkcs8_der(&engine::general_purpose::STANDARD.decode(private_key)?)?;
+        let pubkey = RsaPublicKey::from(&privkey);
         Ok(Self {
             orcid_id: orcid_id.to_string(),
             name: name.to_string(),
@@ -37,7 +40,7 @@ impl NpProfile {
         })
     }
 
-    /// Extract profile from YAML file
+    /// Create a Nanopub profile from a YAML file
     pub fn from_file(filepath: &str) -> Result<Self, NpError> {
         let filepath = if filepath.is_empty() {
             // Default to home dir if nothing provided
@@ -58,6 +61,17 @@ impl NpProfile {
         profile.private_key = normalize_key(&fs::read_to_string(&profile.private_key)?)?;
         profile.public_key = normalize_key(&fs::read_to_string(&profile.public_key)?)?;
         Ok(profile)
+    }
+
+    /// Get the private key as `RsaPrivateKey` struct
+    pub fn get_private_key(&self) -> Result<RsaPrivateKey, NpError> {
+        Ok(RsaPrivateKey::from_pkcs8_der(
+            &engine::general_purpose::STANDARD.decode(&self.private_key)?,
+        )?)
+    }
+    /// Get the public key as `RsaPublicKey` struct
+    pub fn get_public_key(&self) -> Result<RsaPublicKey, NpError> {
+        Ok(RsaPublicKey::from(&self.get_private_key()?))
     }
 }
 
@@ -81,15 +95,7 @@ impl fmt::Display for NpProfile {
     }
 }
 
-/// Get `RsaPrivateKey` and `RsaPublicKey` given a private key string
-pub fn get_keys(private_key: &str) -> Result<(RsaPrivateKey, RsaPublicKey), NpError> {
-    let priv_key_bytes = engine::general_purpose::STANDARD.decode(private_key)?;
-    let priv_key = RsaPrivateKey::from_pkcs8_der(&priv_key_bytes)?;
-    let public_key = RsaPublicKey::from(&priv_key);
-    Ok((priv_key, public_key))
-}
-
-/// Normalize private/public keys (no prefix, no suffix, no newline)
+/// Normalize a private or public key string (remove prefix, suffix, newlines)
 pub fn normalize_key(key: &str) -> Result<String, NpError> {
     let mut normed_key = key.trim().to_string();
     let start_patterns = [
