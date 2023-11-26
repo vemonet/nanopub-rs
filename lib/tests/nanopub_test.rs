@@ -3,7 +3,7 @@ use nanopub::{
     get_np_server,
     profile::gen_keys,
     sign::normalize_dataset,
-    utils::{ns, parse_rdf, serialize_rdf},
+    utils::{ns, parse_rdf},
     Nanopub, NpProfile,
 };
 use sophia::inmem::dataset::LightDataset;

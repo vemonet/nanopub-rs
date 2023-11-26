@@ -12,7 +12,7 @@ create-missing = false
 
 [output.html]
 git-repository-url = "https://github.com/vemonet/nanopub-rs"
-additional-css = ["./lib/docs/mdbook-admonish.css"]
+additional-css = ["./lib/docs/assets/mdbook-admonish.css"]
 
 [preprocessor]
 

@@ -10,6 +10,7 @@ use wasm_bindgen_futures::future_to_promise;
 #[derive(Serialize)]
 pub struct NanopubJs {
     np: Nanopub,
+    // ds: LightDataset
 }
 
 // Optional arguments: https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
