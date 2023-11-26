@@ -1,7 +1,6 @@
 use js_sys::{Promise, JSON};
 use nanopub::{
-    constants::TEST_SERVER, get_np_server as get_server, nanopub::create_np_intro,
-    profile::gen_keys, utils::serialize_rdf, Nanopub, NpProfile,
+    constants::TEST_SERVER, get_np_server as get_server, profile::gen_keys, Nanopub, NpProfile,
 };
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
@@ -57,6 +56,25 @@ impl NanopubJs {
                 Ok(np) => Ok(JsValue::from(NanopubJs { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
                     "Error publishing the Nanopub: {e}"
+                ))),
+            }
+        })
+    }
+
+    #[wasm_bindgen(static_method_of = NanopubJs)]
+    pub fn publish_intro(profile: NpProfileJs, server_url: &str) -> Promise {
+        let profile = profile.profile.clone();
+        let server_url = if server_url.is_empty() {
+            TEST_SERVER
+        } else {
+            server_url
+        }
+        .to_string();
+        future_to_promise(async move {
+            match Nanopub::publish_intro(&profile, Some(&server_url)).await {
+                Ok(np) => Ok(JsValue::from(NanopubJs { np })),
+                Err(e) => Err(JsValue::from_str(&format!(
+                    "Error publishing the Nanopub Introduction: {e}"
                 ))),
             }
         })

@@ -88,6 +88,23 @@ fn testsuite_check_invalid_trusty() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[test]
+fn testsuite_check_invalid_plain() -> Result<(), Box<dyn Error>> {
+    let path = Path::new("tests/testsuite/invalid/plain");
+    // Iterate over files
+    for (index, entry) in fs::read_dir(path)?.enumerate() {
+        let file = entry?;
+        let filename = format!("{:?}", file.file_name());
+        if !filename.ends_with("xml\"") && !filename.contains("valid") {
+            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            let np_rdf = fs::read_to_string(file.path())?;
+            let np = Nanopub::check(&np_rdf);
+            assert!(np.is_err(), "The np check should have failed");
+        }
+    }
+    Ok(())
+}
+
 #[tokio::test]
 async fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
     let path = Path::new("tests/testsuite/invalid/plain");
@@ -95,7 +112,7 @@ async fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
     for (index, entry) in fs::read_dir(path)?.enumerate() {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
-        if !filename.ends_with("xml\"") && !filename.contains("simple1-signed-dsa") {
+        if !filename.ends_with("xml\"") && !filename.contains("info") {
             println!("\n☑️  [{}] Testing file publish: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::publish(&np_rdf, &get_profile(), None).await;

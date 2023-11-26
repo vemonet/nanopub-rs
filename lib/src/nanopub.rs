@@ -18,6 +18,26 @@ use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use std::{fmt, str};
 
+/// Trait to provide the nanopub RDF as string or sophia dataset
+pub trait RdfSource {
+    fn get_dataset(&self) -> Result<LightDataset, NpError>;
+}
+impl RdfSource for LightDataset {
+    fn get_dataset(&self) -> Result<LightDataset, NpError> {
+        Ok(self.to_owned())
+    }
+}
+impl RdfSource for &str {
+    fn get_dataset(&self) -> Result<LightDataset, NpError> {
+        parse_rdf(self)
+    }
+}
+impl RdfSource for &String {
+    fn get_dataset(&self) -> Result<LightDataset, NpError> {
+        parse_rdf(self)
+    }
+}
+
 /// A nanopublication object
 #[derive(Clone, Serialize)]
 pub struct Nanopub {
@@ -68,7 +88,7 @@ impl Nanopub {
     pub async fn fetch(url: &str) -> Result<Self, NpError> {
         let np_rdf = fetch_np(url).await?;
         let dataset: LightDataset = parse_rdf(&np_rdf)?;
-        let np_info = extract_np_info(&dataset)?;
+        let np_info = extract_np_info(&dataset, true)?;
         // TODO: do a Nanopub::check()?
         Ok(Self {
             uri: np_info.uri.to_string(),
@@ -100,9 +120,9 @@ impl Nanopub {
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
     /// let np = Nanopub::check(&np_rdf).unwrap();
     /// ```
-    pub fn check(rdf: &str) -> Result<Self, NpError> {
-        let mut dataset: LightDataset = parse_rdf(rdf)?;
-        let np_info = extract_np_info(&dataset)?;
+    pub fn check<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
+        let mut dataset = rdf.get_dataset()?;
+        let np_info = extract_np_info(&dataset, true)?;
 
         let norm_ns = if !np_info.trusty_hash.is_empty() {
             format!("{}{}", np_info.base_uri, np_info.separator_before_trusty)
@@ -164,84 +184,18 @@ impl Nanopub {
             "\n✅ Nanopub {}{}{} is valid: {}",
             BOLD, np_info.uri, END, msg
         );
+        let rdf = serialize_rdf(&dataset, &np_info.uri.as_ref(), &np_info.ns.as_ref())?;
         // TODO: check if the np has been published with Nanopub::fetch
         Ok(Self {
             uri: np_info.uri.to_string(),
             ns: np_info.ns.to_string(),
-            rdf: rdf.to_string(),
+            rdf,
             trusty_hash: np_info.trusty_hash,
             signature_hash: np_info.signature,
             public_key: np_info.public_key,
             orcid: np_info.orcid,
             published: false,
         })
-    }
-
-    /// Async function to sign and publish RDF to a nanopub server
-    ///
-    /// # Arguments
-    ///
-    /// * `rdf` - A string slice that holds the RDF of the nanopub
-    /// * `profile` - The NpProfile with private key and ORCID
-    /// * `server_url` - The URL of the server to publish to
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::fs;
-    /// use nanopub::{Nanopub, NpProfile};
-    /// use tokio::runtime;
-    ///
-    /// let private_key = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxmak6SOCouJPuEzHNForkqFhgfHE3aAIAx+Y5q6UDEDM9Q0EksheNffJB4iPqsAfiFpY0ARQY92K5r8P4+a78eu9reYrb2WxZb1qPJmvR7XZ6sN1oHD7dd/EyQoJmQsmOKdrqaLRbzR7tZrf52yvKkwNWXcIVhW8uxe7iUgxiojZpW9srKoK/qFRpaUZSKn7Z/zgtDH9FJkYbBsGPDMqp78Kzt+sJb+U2W+wCSSy34jIUxx6QRbzvn6uexc/emFw/1DU5y7zBudhgC7mVk8vX1gUNKyjZBzlOmRcretrANgffqs5fx/TMHN1xtkA/H1u1IKBfKoyk/xThMLAgMBAAECggEAECuG0GZA3HF8OaqFgMG+W+agOvH04h4Pqv4cHjYNxnxpFcNV9nEssTKWSOvCwYy7hrwZBGV3PQzbjFmmrxVFs20+8yCD7KbyKKQZPVC0zf84bj6NTNgvr6DpGtDxINxuGaMjCt7enqhoRyRRuZ0fj2gD3Wqae/Ds8cpDCefkyMg0TvauHSUj244vGq5nt93txUv1Sa+/8tWZ77Dm0s5a3wUYB2IeAMl5WrO2GMvgzwH+zT+4kvNWg5S0Ze4KE+dG3lSIYZjo99h14LcQS9eALC/VBcAJ6pRXaCTT/TULtcLNeOpoc9Fu25f0yTsDt6Ga5ApliYkb7rDhV+OFrw1sYQKBgQDCE9so+dPg7qbp0cV+lbb7rrV43m5s9Klq0riS7u8m71oTwhmvm6gSLfjzqb8GLrmflCK4lKPDSTdwyvd+2SSmOXySw94zr1Pvc7sHdmMRyA7mH3m+zSOOgyCTTKyhDRCNcRIkysoL+DecDhNo4Fumf71tsqDYogfxpAQhn0re8wKBgQDXhMmmT2oXiMnYHhi2k7CJe3HUqkZgmW4W44SWqKHp0V6sjcHm0N0RT5Hz1BFFUd5Y0ZB3JLcah19myD1kKYCj7xz6oVLb8O7LeAZNlb0FsrtD7NU+Hciywo8qESiA7UYDkU6+hsmxaI01DsttMIdG4lSBbEjA7t4IQC5lyr7xiQKBgQCN87YGJ40Y5ZXCSgOZDepz9hqX2KGOIfnUv2HvXsIfiUwqTXs6HbD18xg3KL4myIBOvywSM+4ABYp+foY+Cpcq2btLIeZhiWjsKIrw71+Q/vIe0YDb1PGf6DsoYhmWBpdHzR9HN+hGjvwlsYny2L9Qbfhgxxmsuf7zeFLpQLijjwKBgH7TD28k8IOk5VKec2CNjKd600OYaA3UfCpP/OhDl/RmVtYoHWDcrBrRvkvEEd2/DZ8qw165Zl7gJs3vK+FTYvYVcfIzGPWA1KU7nkntwewmf3i7V8lT8ZTwVRsmObWU60ySJ8qKuwoBQodki2VX12NpMN1wgWe3qUUlr6gLJU4xAoGAet6nD3QKwk6TTmcGVfSWOzvpaDEzGkXjCLaxLKh9GreM/OE+h5aN2gUoFeQapG5rUwI/7Qq0xiLbRXw+OmfAoV2XKv7iI8DjdIh0F06mlEAwQ/B0CpbqkuuxphIbchtdcz/5ra233r3BMNIqBl3VDDVoJlgHPg9msOTRy13lFqc=";
-    /// let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
-    /// let orcid = "https://orcid.org/0000-0000-0000-0000";
-    /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
-    ///
-    /// let np = rt.block_on(async {
-    ///   Nanopub::publish(&np_rdf, &profile, None).await
-    /// }).unwrap();
-    /// ```
-    pub async fn publish(
-        rdf: &str,
-        profile: &NpProfile,
-        server_url: Option<&str>,
-    ) -> Result<Self, NpError> {
-        // If the nanopub is already signed we verify it, then publish it
-        let dataset: LightDataset = parse_rdf(rdf)?;
-        let np_info = extract_np_info(&dataset)?;
-
-        let mut np = if np_info.signature.is_empty() {
-            println!("Nanopub not signed, signing it before publishing");
-            Nanopub::sign(rdf, profile)?
-        } else {
-            Nanopub::check(rdf)?
-        };
-
-        let server_url = if let Some(server_url) = server_url {
-            server_url.to_string()
-        } else {
-            // Use test server if None provided
-            println!(
-                "No server URL provided, using the test server {}",
-                TEST_SERVER
-            );
-            TEST_SERVER.to_string()
-        };
-        let published = publish_np(&server_url, &np.get_rdf()).await?;
-        // let published = futures::executor::block_on(publish_np(&server_url, &np.get_rdf()))?;
-        if published {
-            println!(
-                "\n🎉 Nanopublication published at {}{}{}",
-                BOLD, np.uri, END
-            );
-        } else {
-            println!("\n❌ Issue publishing the Nanopublication \n{}", np);
-            // TODO: when publish fails, should we return a Nanopub struct with published=false, or throw an error?
-            // return Err(NpError(format!("Issue publishing the Nanopublication \n{}", np)))
-        }
-        np.set_published(published);
-        Ok(np)
     }
 
     /// Sign an unsigned nanopub RDF and add trusty URI
@@ -262,21 +216,19 @@ impl Nanopub {
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
     /// let np = Nanopub::sign(&np_rdf, &profile).unwrap();
     /// ```
-    pub fn sign(rdf: &str, profile: &NpProfile) -> Result<Self, NpError> {
+    pub fn sign<T: RdfSource>(rdf: T, profile: &NpProfile) -> Result<Self, NpError> {
         openssl_probe::init_ssl_cert_env_vars();
+        let mut dataset = rdf.get_dataset()?;
 
         let (priv_key, pubkey) = get_keys(&profile.private_key)?;
         let pubkey_str = get_pubkey_str(&pubkey)?;
 
-        // Parse the provided RDF
-        let mut dataset: LightDataset = parse_rdf(rdf)?;
-
         // Extract graph URLs from the nanopub (fails if np not valid)
-        let np_info = extract_np_info(&dataset)?;
+        let np_info = extract_np_info(&dataset, false)?;
 
         dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri)?;
 
-        let np_info = extract_np_info(&dataset)?;
+        let np_info = extract_np_info(&dataset, false)?;
 
         // Add triples about the signature in the pubinfo
         dataset.insert(
@@ -408,6 +360,140 @@ impl Nanopub {
         })
     }
 
+    /// Async function to sign and publish RDF to a nanopub server
+    ///
+    /// # Arguments
+    ///
+    /// * `rdf` - A string slice that holds the RDF of the nanopub
+    /// * `profile` - The NpProfile with private key and ORCID
+    /// * `server_url` - The URL of the server to publish to
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::fs;
+    /// use nanopub::{Nanopub, NpProfile};
+    /// use tokio::runtime;
+    ///
+    /// let private_key = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxmak6SOCouJPuEzHNForkqFhgfHE3aAIAx+Y5q6UDEDM9Q0EksheNffJB4iPqsAfiFpY0ARQY92K5r8P4+a78eu9reYrb2WxZb1qPJmvR7XZ6sN1oHD7dd/EyQoJmQsmOKdrqaLRbzR7tZrf52yvKkwNWXcIVhW8uxe7iUgxiojZpW9srKoK/qFRpaUZSKn7Z/zgtDH9FJkYbBsGPDMqp78Kzt+sJb+U2W+wCSSy34jIUxx6QRbzvn6uexc/emFw/1DU5y7zBudhgC7mVk8vX1gUNKyjZBzlOmRcretrANgffqs5fx/TMHN1xtkA/H1u1IKBfKoyk/xThMLAgMBAAECggEAECuG0GZA3HF8OaqFgMG+W+agOvH04h4Pqv4cHjYNxnxpFcNV9nEssTKWSOvCwYy7hrwZBGV3PQzbjFmmrxVFs20+8yCD7KbyKKQZPVC0zf84bj6NTNgvr6DpGtDxINxuGaMjCt7enqhoRyRRuZ0fj2gD3Wqae/Ds8cpDCefkyMg0TvauHSUj244vGq5nt93txUv1Sa+/8tWZ77Dm0s5a3wUYB2IeAMl5WrO2GMvgzwH+zT+4kvNWg5S0Ze4KE+dG3lSIYZjo99h14LcQS9eALC/VBcAJ6pRXaCTT/TULtcLNeOpoc9Fu25f0yTsDt6Ga5ApliYkb7rDhV+OFrw1sYQKBgQDCE9so+dPg7qbp0cV+lbb7rrV43m5s9Klq0riS7u8m71oTwhmvm6gSLfjzqb8GLrmflCK4lKPDSTdwyvd+2SSmOXySw94zr1Pvc7sHdmMRyA7mH3m+zSOOgyCTTKyhDRCNcRIkysoL+DecDhNo4Fumf71tsqDYogfxpAQhn0re8wKBgQDXhMmmT2oXiMnYHhi2k7CJe3HUqkZgmW4W44SWqKHp0V6sjcHm0N0RT5Hz1BFFUd5Y0ZB3JLcah19myD1kKYCj7xz6oVLb8O7LeAZNlb0FsrtD7NU+Hciywo8qESiA7UYDkU6+hsmxaI01DsttMIdG4lSBbEjA7t4IQC5lyr7xiQKBgQCN87YGJ40Y5ZXCSgOZDepz9hqX2KGOIfnUv2HvXsIfiUwqTXs6HbD18xg3KL4myIBOvywSM+4ABYp+foY+Cpcq2btLIeZhiWjsKIrw71+Q/vIe0YDb1PGf6DsoYhmWBpdHzR9HN+hGjvwlsYny2L9Qbfhgxxmsuf7zeFLpQLijjwKBgH7TD28k8IOk5VKec2CNjKd600OYaA3UfCpP/OhDl/RmVtYoHWDcrBrRvkvEEd2/DZ8qw165Zl7gJs3vK+FTYvYVcfIzGPWA1KU7nkntwewmf3i7V8lT8ZTwVRsmObWU60ySJ8qKuwoBQodki2VX12NpMN1wgWe3qUUlr6gLJU4xAoGAet6nD3QKwk6TTmcGVfSWOzvpaDEzGkXjCLaxLKh9GreM/OE+h5aN2gUoFeQapG5rUwI/7Qq0xiLbRXw+OmfAoV2XKv7iI8DjdIh0F06mlEAwQ/B0CpbqkuuxphIbchtdcz/5ra233r3BMNIqBl3VDDVoJlgHPg9msOTRy13lFqc=";
+    /// let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
+    /// let orcid = "https://orcid.org/0000-0000-0000-0000";
+    /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    ///
+    /// let np = rt.block_on(async {
+    ///   Nanopub::publish(&np_rdf, &profile, None).await
+    /// }).unwrap();
+    /// ```
+    pub async fn publish<T: RdfSource>(
+        rdf: T,
+        profile: &NpProfile,
+        server_url: Option<&str>,
+    ) -> Result<Self, NpError> {
+        openssl_probe::init_ssl_cert_env_vars();
+        let dataset = rdf.get_dataset()?;
+        let np_info = extract_np_info(&dataset, false)?;
+
+        let mut np = if np_info.signature.is_empty() {
+            println!("Nanopub not signed, signing it before publishing");
+            Nanopub::sign(rdf, profile)?
+        } else {
+            // If the nanopub is already signed we verify it, then publish it
+            Nanopub::check(rdf)?
+        };
+
+        let server_url = if let Some(server_url) = server_url {
+            server_url.to_string()
+        } else {
+            // Use test server if None provided
+            println!(
+                "No server URL provided, using the test server {}",
+                TEST_SERVER
+            );
+            TEST_SERVER.to_string()
+        };
+        let published = publish_np(&server_url, &np.get_rdf()).await?;
+        if published {
+            println!(
+                "\n🎉 Nanopublication published at {}{}{}",
+                BOLD, np.uri, END
+            );
+        } else {
+            println!("\n❌ Issue publishing the Nanopublication \n{}", np);
+            // TODO: when publish fails, should we return a Nanopub struct with published=false, or throw an error?
+            // return Err(NpError(format!("Issue publishing the Nanopublication \n{}", np)))
+        }
+        np.set_published(published);
+        Ok(np)
+    }
+
+    /// Async function to sign and publish a Nanopub intro for a Profile
+    ///
+    /// # Arguments
+    ///
+    /// * `profile` - The NpProfile with private key and ORCID
+    /// * `server_url` - The URL of the server to publish to
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::fs;
+    /// use nanopub::{Nanopub, NpProfile};
+    /// use tokio::runtime;
+    ///
+    /// let private_key = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxmak6SOCouJPuEzHNForkqFhgfHE3aAIAx+Y5q6UDEDM9Q0EksheNffJB4iPqsAfiFpY0ARQY92K5r8P4+a78eu9reYrb2WxZb1qPJmvR7XZ6sN1oHD7dd/EyQoJmQsmOKdrqaLRbzR7tZrf52yvKkwNWXcIVhW8uxe7iUgxiojZpW9srKoK/qFRpaUZSKn7Z/zgtDH9FJkYbBsGPDMqp78Kzt+sJb+U2W+wCSSy34jIUxx6QRbzvn6uexc/emFw/1DU5y7zBudhgC7mVk8vX1gUNKyjZBzlOmRcretrANgffqs5fx/TMHN1xtkA/H1u1IKBfKoyk/xThMLAgMBAAECggEAECuG0GZA3HF8OaqFgMG+W+agOvH04h4Pqv4cHjYNxnxpFcNV9nEssTKWSOvCwYy7hrwZBGV3PQzbjFmmrxVFs20+8yCD7KbyKKQZPVC0zf84bj6NTNgvr6DpGtDxINxuGaMjCt7enqhoRyRRuZ0fj2gD3Wqae/Ds8cpDCefkyMg0TvauHSUj244vGq5nt93txUv1Sa+/8tWZ77Dm0s5a3wUYB2IeAMl5WrO2GMvgzwH+zT+4kvNWg5S0Ze4KE+dG3lSIYZjo99h14LcQS9eALC/VBcAJ6pRXaCTT/TULtcLNeOpoc9Fu25f0yTsDt6Ga5ApliYkb7rDhV+OFrw1sYQKBgQDCE9so+dPg7qbp0cV+lbb7rrV43m5s9Klq0riS7u8m71oTwhmvm6gSLfjzqb8GLrmflCK4lKPDSTdwyvd+2SSmOXySw94zr1Pvc7sHdmMRyA7mH3m+zSOOgyCTTKyhDRCNcRIkysoL+DecDhNo4Fumf71tsqDYogfxpAQhn0re8wKBgQDXhMmmT2oXiMnYHhi2k7CJe3HUqkZgmW4W44SWqKHp0V6sjcHm0N0RT5Hz1BFFUd5Y0ZB3JLcah19myD1kKYCj7xz6oVLb8O7LeAZNlb0FsrtD7NU+Hciywo8qESiA7UYDkU6+hsmxaI01DsttMIdG4lSBbEjA7t4IQC5lyr7xiQKBgQCN87YGJ40Y5ZXCSgOZDepz9hqX2KGOIfnUv2HvXsIfiUwqTXs6HbD18xg3KL4myIBOvywSM+4ABYp+foY+Cpcq2btLIeZhiWjsKIrw71+Q/vIe0YDb1PGf6DsoYhmWBpdHzR9HN+hGjvwlsYny2L9Qbfhgxxmsuf7zeFLpQLijjwKBgH7TD28k8IOk5VKec2CNjKd600OYaA3UfCpP/OhDl/RmVtYoHWDcrBrRvkvEEd2/DZ8qw165Zl7gJs3vK+FTYvYVcfIzGPWA1KU7nkntwewmf3i7V8lT8ZTwVRsmObWU60ySJ8qKuwoBQodki2VX12NpMN1wgWe3qUUlr6gLJU4xAoGAet6nD3QKwk6TTmcGVfSWOzvpaDEzGkXjCLaxLKh9GreM/OE+h5aN2gUoFeQapG5rUwI/7Qq0xiLbRXw+OmfAoV2XKv7iI8DjdIh0F06mlEAwQ/B0CpbqkuuxphIbchtdcz/5ra233r3BMNIqBl3VDDVoJlgHPg9msOTRy13lFqc=";
+    /// let orcid = "https://orcid.org/0000-0000-0000-0000";
+    /// let profile = NpProfile::new(orcid, "User Name", &private_key, None).unwrap();
+    /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+    ///
+    /// let np = rt.block_on(async {
+    ///   Nanopub::publish_intro(&profile, None).await
+    /// }).unwrap();
+    /// ```
+    pub async fn publish_intro(
+        profile: &NpProfile,
+        server_url: Option<&str>,
+    ) -> Result<Self, NpError> {
+        let mut ds = create_base_dataset()?;
+        let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
+        let assertion_graph = np_ns.get("assertion")?;
+        let prov_graph = np_ns.get("provenance")?;
+
+        // Assertion graph triples, add key declaration
+        ds.insert(
+            np_ns.get("keyDeclaration")?,
+            ns("npx").get("declaredBy")?,
+            Iri::new_unchecked(profile.orcid_id.as_str()),
+            Some(&assertion_graph),
+        )?;
+        ds.insert(
+            np_ns.get("keyDeclaration")?,
+            ns("npx").get("hasAlgorithm")?,
+            "RSA",
+            Some(&assertion_graph),
+        )?;
+        ds.insert(
+            np_ns.get("keyDeclaration")?,
+            ns("npx").get("hasPublicKey")?,
+            profile.public_key.as_str(),
+            Some(&assertion_graph),
+        )?;
+        ds.insert(
+            Iri::new_unchecked(profile.orcid_id.as_str()),
+            ns("foaf").get("name")?,
+            profile.name.as_str(),
+            Some(&assertion_graph),
+        )?;
+        // Provenance graph triples
+        ds.insert(
+            assertion_graph,
+            ns("prov").get("wasAttributedTo")?,
+            assertion_graph,
+            Some(&prov_graph),
+        )?;
+        Nanopub::publish(ds, profile, server_url).await
+    }
+
     /// Returns the RDF of the nanopub
     pub fn get_rdf(&self) -> String {
         self.rdf.clone()
@@ -451,46 +537,4 @@ pub fn create_base_dataset() -> Result<LightDataset, NpError> {
         Some(&head_graph),
     )?;
     Ok(dataset)
-}
-
-/// Create a Nanopub introduction given a pubkey, an ORCID and a name
-pub fn create_np_intro(orcid: &str, public_key: &str, name: &str) -> Result<LightDataset, NpError> {
-    let mut ds = create_base_dataset()?;
-    let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
-    let assertion_graph = np_ns.get("assertion")?;
-    let prov_graph = np_ns.get("provenance")?;
-
-    // Assertion graph triples, add key declaration
-    ds.insert(
-        np_ns.get("keyDeclaration")?,
-        ns("npx").get("declaredBy")?,
-        Iri::new_unchecked(orcid),
-        Some(&assertion_graph),
-    )?;
-    ds.insert(
-        np_ns.get("keyDeclaration")?,
-        ns("npx").get("hasAlgorithm")?,
-        "RSA",
-        Some(&assertion_graph),
-    )?;
-    ds.insert(
-        np_ns.get("keyDeclaration")?,
-        ns("npx").get("hasPublicKey")?,
-        public_key,
-        Some(&assertion_graph),
-    )?;
-    ds.insert(
-        Iri::new_unchecked(orcid),
-        ns("foaf").get("name")?,
-        name,
-        Some(&assertion_graph),
-    )?;
-    // Provenance graph triples
-    ds.insert(
-        assertion_graph,
-        ns("prov").get("wasAttributedTo")?,
-        assertion_graph,
-        Some(&prov_graph),
-    )?;
-    Ok(ds)
 }

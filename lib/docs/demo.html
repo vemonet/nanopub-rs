@@ -12,12 +12,12 @@
   </head>
 
   <body class="bg-gray-800 text-white">
-    <div class="flex flex-col h-screen m-4">
-      <div class="flex justify-center mb-2">
+    <div class="flex flex-col h-screen p-4 space-y-4">
+      <div class="flex justify-center">
         <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
       </div>
 
-      <form id="nanopub-form" class="flex flex-col items-center">
+      <form id="nanopub-form" class="flex flex-col space-y-4 items-center">
         <textarea class="p-2 rounded-sm text-xs text-black w-full" id="rdf-input" rows="30">
 @prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -50,32 +50,33 @@
 }
         </textarea>
 
-        <p class="flex justify-center text-sm my-4">
+        <p class="text-center text-sm">
           You will need to provide a
-          <a class="mx-1 text-blue-500 hover:text-blue-700" href="https://raw.githubusercontent.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
+          <a class="text-blue-500 hover:text-blue-700" href="https://raw.githubusercontent.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
             RSA private key file
           </a>
           that will be used to sign the Nanopub. Save it in your password manager to reuse it easily 💡
         </p>
 
-        <p class="flex justify-center text-sm">
-          If you don't have a private key yet, you can generate one that will be linked to your ORCID.
-          By clicking the button below: a RSA private/public key pair will be generated,
-          a nanopub will be published linking the public key to your ORCID,
-          the private key will be shown to you, so you can store it
-        </p>
-
-        <div id="orcidWidget" class="m-2 p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600"></div>
+        <div class="text-center bg-slate-600 rounded-md p-2">
+          <p class="text-sm">
+            If you don't have a private key yet, you can generate one that will be linked to your ORCID.
+            By clicking the button below: a RSA private/public key pair will be generated,
+            a nanopub will be published linking the public key to your ORCID,
+            the private key will be shown to you, so you can store it.
+          </p>
+          <div id="orcidWidget" class="inline-flex m-2 p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900 cursor-pointer"></div>
+        </div>
 
         <input type="password" id="private-key" placeholder="Enter Private Key" class="text-black text-center rounded-md"></input>
 
-        <button type="submit" class="mt-2 p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
+        <button type="submit" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
           <i class="fas fa-paper-plane"></i> Sign Nanopublication
         </button>
 
       </form>
 
-      <pre class="m-4 p-2 text-xs rounded-md bg-gray-700"><code id="rdf-output"></code></pre>
+      <pre class="mb-4 p-2 text-xs rounded-md bg-gray-700"><code id="rdf-output"></code></pre>
     </div>
 
     <script type="module">
@@ -94,35 +95,57 @@
         const privKey = document.getElementById('private-key').value
         // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
         init().then(() => {
-          const checked = Nanopub.check(rdfStr);
-          console.log("CHECKED", checked.toJs());
           console.log("Random Nanopub server:", getNpServer());
           const profile = new NpProfile(orcid, "Your Name", privKey, "");
-          Nanopub.publish(rdfStr, profile, "")
-            .then(np => {
-              rdfOutput.innerText = np.get_rdf();
-                console.log("Published Nanopub:", np.toString());
-            })
-            .catch(error => {
-                console.error("Publishing error:", error);
-            });
+          try {
+            const checked = Nanopub.check(rdfStr);
+            console.log("CHECKED", checked.toJs());
+
+            const np = Nanopub.sign(rdfStr, profile)
+            rdfOutput.innerText = np.get_rdf();
+            console.log("Signed Nanopub:", np.toString());
+          } catch (error) {
+              rdfOutput.innerText = error.toString();
+              console.error("Error:", error);
+          }
+
+          // Nanopub.publish(rdfStr, profile, "")
+          //   .then(np => {
+          //     rdfOutput.innerText = np.get_rdf();
+          //     console.log("Published Nanopub:", np.toString());
+          //   })
+          //   .catch(error => {
+          //     rdfOutput.innerText = error;
+          //     console.error("Publishing error:", error);
+          //   });
         });
       })
 
 
       // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
       function onLogin(idToken) {
+        idToken.orcid = idToken.iss + '/' + idToken.sub
+        idToken.fullName = idToken.given_name + " " + idToken.family_name
         console.log(idToken);
-        // document.getElementById("welcome").textContent = "hello " + idToken.given_name + " " + idToken.family_name + " (" + idToken.sub + ")";
-        // TODO: generate private/public key pair, publish nanopub link to public key, display private key
-        // const keypair = new KeyPair()
-        // const fullName = idToken.given_name + " " + idToken.family_name
-        // publishNpIntro(keypair.public, idToken.sub, fullName)
-        // document.getElementById("show-privkey").textContent = keypair.private
+        // Generate private/public key pair
+        const keypair = new KeyPair()
+        const profile = new NpProfile(idToken.orcid, idToken.fullName, keypair.private, "");
+        // Publish nanopub link to public key,
+        // const intro = Nanopub.publish_intro(profile, getNpServer(false))
+        const intro = Nanopub.publish_intro(profile, "")
+          .then(np => {
+            rdfOutput.innerText = np.get_rdf();
+            console.log("Published Introduction Nanopub:", np.toString());
+            // TODO: Display private key
+            // document.getElementById("display-privkey").textContent = keypair.private
+          })
+          .catch(error => {
+            rdfOutput.innerText = error;
+            console.error("Publishing error:", error);
+          });
       }
       function onError() {
         console.error("Error when login.")
-        // document.getElementById("welcome").textContent = "Something has gone wrong :(";
       }
       var config = {
         // "mode": "sandbox",
