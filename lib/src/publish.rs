@@ -15,10 +15,7 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         reqwest::StatusCode::CREATED => Ok(true),
         _ => {
             // Get the error message from the response body
-            let error_msg = res
-                .text()
-                .await
-                .unwrap_or_else(|_| "Unknown error while publishing the nanopub".to_string());
+            let error_msg = res.text().await?;
             Err(NpError(error_msg))
         }
     }

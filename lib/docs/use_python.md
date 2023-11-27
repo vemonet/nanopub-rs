@@ -4,10 +4,6 @@
 
 You can easily publish Nanopubs from Python.
 
-```admonish warning title="Early stage"
-This component is in a really early stage, and the below documentation might not be right.
-```
-
 ## 📥️ Install
 
 Install the `pip` package:

@@ -138,17 +138,17 @@ pub fn gen_keys() -> Result<(String, String), NpError> {
 // Because of wasm we can't use the rand crate
 struct WasmRng;
 impl RngCore for WasmRng {
-    fn next_u32(&mut self) -> u32 {
-        impls::next_u32_via_fill(self)
-    }
-    fn next_u64(&mut self) -> u64 {
-        impls::next_u64_via_fill(self)
-    }
     fn fill_bytes(&mut self, dest: &mut [u8]) {
         getrandom(dest).expect("Error generating random bytes");
     }
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
         getrandom(dest).map_err(rand_core::Error::new)
+    }
+    fn next_u32(&mut self) -> u32 {
+        impls::next_u32_via_fill(self)
+    }
+    fn next_u64(&mut self) -> u64 {
+        impls::next_u64_via_fill(self)
     }
 }
 impl CryptoRng for WasmRng {}

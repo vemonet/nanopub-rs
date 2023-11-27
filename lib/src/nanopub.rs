@@ -52,7 +52,7 @@ pub struct Nanopub {
     pub orcid: String,
     pub published: bool,
     // pub info: NpInfo,
-    // dataset: LightDataset,
+    // pub dataset: LightDataset,
 }
 
 impl fmt::Display for Nanopub {
@@ -68,6 +68,13 @@ impl fmt::Display for Nanopub {
 }
 
 impl Nanopub {
+    // // TODO: change approach to use Nanopub::new(rdf).sign()?
+    // pub fn new<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
+    //     let mut dataset = rdf.get_dataset()?;
+    //     let np_info = extract_np_info(&dataset, false)?;
+    //     // Ok(Self { info: np_info, dataset, published: false })
+    // }
+
     /// Fetch a Nanopub given its URI.
     ///
     /// # Arguments

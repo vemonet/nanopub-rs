@@ -1,7 +1,9 @@
 use nanopub::{
+    constants::TEST_SERVER,
     extract::extract_np_info,
     get_np_server,
     profile::gen_keys,
+    publish::publish_np,
     sign::normalize_dataset,
     utils::{ns, parse_rdf},
     Nanopub, NpProfile,
@@ -50,7 +52,8 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
         &get_test_key(),
         None,
     )?;
-    println!("{}", profile); // required for coverage
+    println!("{}", profile); // cov
+    let _pubkey = profile.get_public_key(); // cov
     let np = Nanopub::sign(&np_rdf, &profile)?;
     assert!(!np.published);
     Ok(())
@@ -60,7 +63,7 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
 fn check_valid_unsigned() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let np = Nanopub::check(&np_rdf);
-    assert!(!np.is_err());
+    assert!(np.is_ok());
     Ok(())
 }
 
@@ -179,5 +182,12 @@ async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
 fn test_gen_keys() -> Result<(), Box<dyn Error>> {
     let (privkey, _pubkey) = gen_keys()?;
     assert!(privkey.len() > 10);
+    Ok(())
+}
+
+#[tokio::test]
+async fn unit_publish_np_fail() -> Result<(), Box<dyn Error>> {
+    let res = publish_np(TEST_SERVER, "wrong").await;
+    assert!(res.is_err());
     Ok(())
 }
