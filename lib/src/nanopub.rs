@@ -1,8 +1,8 @@
 use crate::constants::{BOLD, END, NP_TEMP_URI, TEST_SERVER};
 use crate::error::NpError;
 use crate::extract::extract_np_info;
+use crate::network::{fetch_np, publish_np};
 use crate::profile::NpProfile;
-use crate::publish::{fetch_np, publish_np};
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
 use crate::utils::{ns, parse_rdf, serialize_rdf};
 

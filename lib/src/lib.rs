@@ -14,8 +14,8 @@ pub mod constants;
 pub mod error;
 pub mod extract;
 pub mod nanopub;
+pub mod network;
 pub mod profile;
-pub mod publish;
 pub mod sign;
 pub mod utils;
 /// A module to sign, publish, or check [Nanopublications](https://nanopub.net).

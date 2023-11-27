@@ -9,6 +9,7 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         .post(&server)
         .body(np)
         .header(reqwest::header::CONTENT_TYPE, "application/trig")
+        // .header(reqwest::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         .send()
         .await?;
     match res.status() {
