@@ -4,38 +4,53 @@
 [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
 [![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
 
-This project aims to provide a comprehensive cross-platform toolkit to sign, publish, and check **[Nanopublications](https://nanopub.net)**.
+This project aims to provide a comprehensive cross-platform toolkit to sign, publish, and verify **[Nanopublications](https://nanopub.net)**.
 
-It enables developers to:
+Whether you're a developer looking to integrate nanopub functionalities into your application or a researcher seeking an efficient way to handle nanopublications, `nanopub-rs` offers a suite of tools tailored to meet  your needs.
 
-- Sign and publish nanopubs using a RSA private key, with support for configuration through a `profile.yml` file.
-- Check the validity of signed or unsigned nanopubs.
+## 🔑 Key Features
 
-It is packaged to be used easily through various popular interfaces:
+### ✨ Nanopub management
 
-- ⌨️ Binary with a CLI for use in the terminal
-- 🦀 Crate `nanopub` for Rust
-- 🐍 Pip package `nanopub-sign` for Python
-- 📦️ NPM package `@nanopub/sign` for JavaScript (compiled to WebAssembly) in the browser, or with NodeJS
+- ✍️ **Sign & Publish** nanopubs using a RSA private key. Customize your workflow with a `profile.yml` file.
+- 🔍 **Verify**: ensure the integrity of nanopubs by checking their validity, whether they are signed or unsigned.
+- 📥 **Fetch** nanopubs from the network using their URI.
 
-On all platforms:
+### 📦️ Packaged for multiple interfaces
+
+This library is packaged for easy use across various interfaces and languages:
+
+- ⌨️  **Terminal enthusiasts**: binary with a Command Line Interface (CLI) for straightforward terminal operations.
+- 🦀 **Rust developers**: available as a Rust crate `nanopub`.
+- 🐍 **Python programmers**: available as a Python pip package `nanopub-sign`.
+- 🌐 **Web developers**: available as a NPM package `@nanopub/sign`, compiled to [WebAssembly](https://webassembly.org/), for browser integrations with JavaScript, or NodeJS.
+
+### ⚔️ Cross-platform support
+
+It runs seamlessly on:
 
 - 🐧 Linux
 - 🍎 MacOS
 - 🪟 Windows
 - 🦊 Web browsers
 
-The library automatically handles most RDF serializations supporting quads for the nanopub:
+### 🧩 RDF serialization support
 
-- TriG
-- Nquads
-- JSON-LD
+The library handles most RDF serializations supporting quads, including TriG, Nquads, and JSON-LD.
 
-When signing a nanopub, some metadata are created automatically in the pubinfo graph if they are not already set in the provided RDF:
+### 📝 Automated metadata creation
 
-- Date and time of the nanopub creation is added using `dct:created`
-- ORCID of the creator is added using `dct:creator` if an ORCID was provided in the profile used to sign the nanopub (we also check if the ORCID has been set with `prov:wasAttributedTo` or `pav:createdBy`)
+When you sign a nanopub, if it has not already been defined in the pubinfo graph yet:
 
-Checkout the page most adapted to your use-case to get started.
+- 🕓 **Automatic timestamp**: the `dct:created` attribute is used to add the date and time of creation.
+- 🪪 **Creator identification**: if an ORCID is provided in the profile, it's added using `dct:creator`. The library also checks for ORCID set with `prov:wasAttributedTo` or `pav:createdBy`.
 
-> 💡 If you are facing any problem, or have ideas to help improve this project, please [create an issue](https://github.com/vemonet/nanopub-rs/issues) on GitHub.
+## 👆 Interactive demo
+
+Experience `nanopub-rs` in action! Visit the **[demo page](https://vemonet.github.io/nanopub-rs/demo.html)** to sign Nanopublications, or generate and register a new key pair, directly in your browser using the NPM version of this library.
+
+## 🚀 Getting started
+
+Checkout the page most adapted to your use-case to get started!
+
+> 💡 **Need Help or Have Suggestions?** We welcome your input and feedback! If you encounter any issues or have ideas to enhance this tool, please [create an issue](https://github.com/vemonet/nanopub-rs/issues) on our GitHub repository.

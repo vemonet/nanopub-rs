@@ -10,6 +10,8 @@ pip install maturin pre-commit
 rustup update
 rustup component add rustfmt clippy
 
-cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish
+cargo install wasm-pack cargo-tarpaulin
+
+source scripts/docs-install.sh
 
 pre-commit install

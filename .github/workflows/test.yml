@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Generate code coverage
         run: |
-          cargo tarpaulin -p nanopub --out xml --exclude-files error.rs --verbose --timeout 120
+          cargo tarpaulin -p nanopub --out xml --exclude-files lib/src/error.rs --verbose --timeout 120
 
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v2
@@ -68,12 +68,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: rustup update && cargo install mdbook-admonish
+      - run: bash ./scripts/docs-install.sh
 
-      - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v1
-        with:
-          mdbook-version: 'latest'
+      # - name: Setup mdBook
+      #   uses: peaceiris/actions-mdbook@v1
+      #   with:
+      #     mdbook-version: 'latest'
 
       - run: bash ./scripts/docs-build.sh
 

@@ -1,6 +1,6 @@
 [package]
 name = "nanopub-js"
-version = "0.0.10"
+version = "0.0.11"
 description = "JavaScript bindings for the Nanopub rust toolkit"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/js"
 authors.workspace = true
@@ -15,7 +15,7 @@ categories.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-nanopub = { version = "0.0.10", path = "../lib" }
+nanopub = { version = "0.0.11", path = "../lib" }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 serde-wasm-bindgen = "0.6"

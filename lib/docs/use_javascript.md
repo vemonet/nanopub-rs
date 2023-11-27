@@ -4,6 +4,10 @@
 
 You can easily publish Nanopubs from JavaScript, or TypeScript.
 
+```admonish example title="Demo"
+Visit the **[demo page](https://vemonet.github.io/nanopub-rs/demo.html)** to sign nanopubs, or generate and register a new key pair, directly in your browser using this NPM package. You can checkout the [`demo.html`](https://github.com/vemonet/nanopub-rs/blob/main/lib/docs/demo.html) file as an example to use the package directly from HTML/JS.
+```
+
 ## 📥️ Install
 
 Install the `npm` package (use `yarn` or `pnpm` if you prefer):

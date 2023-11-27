@@ -137,14 +137,33 @@ cargo install cargo-release cargo-outdated
 
 > TODO: try `cargo release patch --no-tag --no-publish`
 
-## ☑️ To do
+## ️🗺️ Architecture details
 
-- [ ] Integrate to the python `nanopub` library to perform signing?
-- [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
-- [ ] Add Java bindings? https://docs.rs/jni/latest/jni
-- [ ] Add brew packaging (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))?
+### 🗃️ Folder structure
 
-## ✒️ Nanopub signing process
+```
+nanopub-rs/
+├── lib/
+│   ├── src/
+│   │   └── 🦀 Source code for the core Rust crate.
+│   ├── tests/
+│   │   └── 🧪 Tests for the core Rust crate.
+│   └── docs/
+│       └── 📖 Markdown and HTML files for the documentation website.
+├── python/
+│   └── 🐍 Python bindings for interacting with the Rust crate.
+├── js/
+│   └── 🌐 JavaScript bindings for integrating into JS environments.
+├── cli/
+│   └── ⌨️ Scripts for the command-line interface.
+├── scripts/
+│   └── 🛠️ Development scripts (build docs, testing).
+└── .github/
+    └── workflows/
+        └── ⚙️ Automated CI/CD workflows.
+```
+
+### ✒️ Nanopub signing process
 
 - Preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `https://w3id.org/np/ `, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
 - Preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
@@ -152,6 +171,13 @@ cargo install cargo-release cargo-outdated
 - Signature triple is added
 - Trusty URI code is calculated on normalized representation that includes signature
 - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
+
+### ☑️ To do
+
+- [ ] Integrate to the python `nanopub` library to perform signing?
+- [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
+- [ ] Add Java bindings? https://docs.rs/jni/latest/jni
+- [ ] Add brew packaging (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))?
 
 ## ⏱️ Speed comparison
 

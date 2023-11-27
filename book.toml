@@ -10,12 +10,18 @@ description = "A cross-platform Rust library to sign Nanopublications, with bind
 build-dir = "./target/doc"
 create-missing = false
 
-[output.html]
-git-repository-url = "https://github.com/vemonet/nanopub-rs"
-additional-css = ["./lib/docs/assets/mdbook-admonish.css"]
-
 [preprocessor]
 
 [preprocessor.admonish]
 command = "mdbook-admonish"
 assets_version = "3.0.1" # do not edit: managed by `mdbook-admonish install`
+
+[preprocessor.pagetoc]
+
+[output.html]
+git-repository-url = "https://github.com/vemonet/nanopub-rs"
+additional-css = [
+    "lib/docs/assets/mdbook-admonish.css",
+    "theme/pagetoc.css",
+]
+additional-js  = ["theme/pagetoc.js"]
