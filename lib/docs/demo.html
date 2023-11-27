@@ -18,20 +18,17 @@
   </head>
 
   <body class="bg-gray-800 text-white">
-    <div class="flex flex-col h-screen p-4 space-y-4">
-      <div class="flex flex-col items-center">
-        <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
-        <p class="text-sm">
-          Using the package
-          <a class="text-blue-500 hover:text-blue-700" href="https://vemonet.github.io/nanopub-rs/use_javascript.html" target="_blank" rel="noopener noreferrer">
-            <b><code>@nanopub/sign</code></b>
-          </a>
-        </p>
-      </div>
+    <div class="flex flex-col h-screen items-center p-4 space-y-4">
+      <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
+      <p class="text-sm">
+        In your browser, using the package
+        <a class="text-blue-500 hover:text-blue-700" href="https://vemonet.github.io/nanopub-rs/use_javascript.html" target="_blank" rel="noopener noreferrer">
+          <b><code>@nanopub/sign</code></b>
+        </a>
+      </p>
 
-      <form id="nanopub-form" class="flex flex-col space-y-4 items-center">
-        <!-- Nanopub RDF input -->
-        <textarea class="p-2 rounded-sm text-xs text-black w-full" id="rdf-input" rows="28">
+      <!-- Nanopub RDF input -->
+      <textarea class="p-2 rounded-sm text-xs text-black w-full" id="rdf-input" rows="28">
 @prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dc: <http://purl.org/dc/terms/> .
@@ -60,56 +57,55 @@
   : a npx:ExampleNanopub .
 }</textarea>
 
-        <!-- Private key input -->
-        <p class="text-center text-sm">
-          You will need to provide a
-          <a class="text-blue-500 hover:text-blue-700" href="https://raw.github.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
-            RSA private key file
-          </a>
-          that will be used to sign the Nanopub. Save it in your password manager to reuse it easily 💡
+      <!-- Private key input -->
+      <p class="text-center text-sm">
+        You will need to provide a
+        <a class="text-blue-500 hover:text-blue-700" href="https://raw.github.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
+          RSA private key file
+        </a>
+        that will be used to sign the Nanopub. Save it in your password manager to reuse it easily 💡
+      </p>
+      <input type="password" id="private-key" placeholder="Enter Private Key" class="text-black text-center rounded-md"></input>
+
+      <!-- Card to login with ORCID, generate and register private keys -->
+      <div class="flex flex-col items-center text-sm bg-slate-600 rounded-md p-3 space-y-2">
+        <p>
+          If you don't have a private key yet, you can generate one that will be linked to your ORCID.
         </p>
-        <input type="password" id="private-key" placeholder="Enter Private Key" class="text-black text-center rounded-md"></input>
-
-        <!-- Card to login with ORCID, generate and register private keys -->
-        <div class="flex flex-col items-center text-sm bg-slate-600 rounded-md p-3 space-y-2">
-          <p>
-            If you don't have a private key yet, you can generate one that will be linked to your ORCID.
-          </p>
-          <div class="flex justify-center space-x-2">
-            <div id="orcidWidget" class="inline-flex p-2 space-x-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900 cursor-pointer">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" width="20" height="20" alt="ORCID" />
-            </div>
-            <button id="publish-intro-btn" class="hidden p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900">
-              <i class="fas fa-key mr-2"></i> Generate key and publish introduction
-            </button>
+        <div class="flex justify-center space-x-2">
+          <div id="orcidWidget" class="inline-flex p-2 space-x-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900 cursor-pointer">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" width="20" height="20" alt="ORCID" />
           </div>
-
-          <!-- Display generated private key -->
-          <div id="privkey-card" class="hidden flex flex-col items-center space-y-2">
-            <p>
-              The Nanopublication Introduction has been published successfully 🎉
-            </p>
-            <p>
-              You can now <b>copy the private key below</b>, store it somewhere (e.g. your password manager),
-              and reuse-it later to sign Nanopublications:
-            </p>
-            <p id="display-privkey" class="break-all rounded-md bg-green-500 p-2"></p>
-          </div>
+          <button id="publish-intro-btn" class="hidden p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900">
+            <i class="fas fa-key mr-2"></i> Generate key and publish introduction
+          </button>
         </div>
 
-        <!-- Submit nanopub btn -->
-        <button type="submit" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
-          <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
-        </button>
-      </form>
+        <!-- Display generated private key -->
+        <div id="privkey-card" class="hidden flex flex-col items-center space-y-2">
+          <p>
+            The Nanopublication Introduction has been published successfully 🎉
+          </p>
+          <p>
+            You can now <b>copy the private key below</b>, store it somewhere (e.g. your password manager),
+            and reuse-it later to sign Nanopublications:
+          </p>
+          <p id="display-privkey" class="break-all rounded-md bg-green-500 p-2"></p>
+        </div>
+      </div>
 
-      <pre>
+      <!-- Submit nanopub btn -->
+      <button id="submit-btn" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
+        <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
+      </button>
+
+      <pre class="w-full">
         <code id="rdf-output" class="language-turtle bg-slate-900 text-xs rounded-md"></code>
       </pre>
     </div>
 
     <script type="module">
-      import init, { getNpServer, Nanopub, NpProfile } from "https://unpkg.com/@nanopub/sign";
+      import init, { getNpServer, Nanopub, NpProfile, KeyPair } from "https://unpkg.com/@nanopub/sign";
       hljs.registerLanguage('turtle', window.hljsDefineTurtle);
 
       let privKey = null;
@@ -120,9 +116,7 @@
       // TODO: get ORCID based on the public key registered in the nanopub network
 
       // Sign nanopub
-      const form = document.getElementById('nanopub-form');
-      form.addEventListener('submit', (event) => {
-        event.preventDefault();
+      document.getElementById('submit-btn').addEventListener('click', (event) => {
         const rdfStr = rdfInput.value
         const privKey = document.getElementById('private-key').value
         // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
