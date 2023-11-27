@@ -19,13 +19,19 @@
 
   <body class="bg-gray-800 text-white">
     <div class="flex flex-col h-screen p-4 space-y-4">
-      <div class="flex justify-center">
+      <div class="flex flex-col items-center">
         <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
+        <p class="text-sm">
+          Using the package
+          <a class="text-blue-500 hover:text-blue-700" href="https://vemonet.github.io/nanopub-rs/use_javascript.html" target="_blank" rel="noopener noreferrer">
+            <b><code>@nanopub/sign</code></b>
+          </a>
+        </p>
       </div>
 
       <form id="nanopub-form" class="flex flex-col space-y-4 items-center">
         <!-- Nanopub RDF input -->
-        <textarea class="p-2 rounded-sm text-xs text-black w-full" id="rdf-input" rows="30">
+        <textarea class="p-2 rounded-sm text-xs text-black w-full" id="rdf-input" rows="28">
 @prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix dc: <http://purl.org/dc/terms/> .
@@ -52,8 +58,7 @@
 
 :pubinfo {
   : a npx:ExampleNanopub .
-}
-        </textarea>
+}</textarea>
 
         <!-- Private key input -->
         <p class="text-center text-sm">
@@ -66,15 +71,10 @@
         <input type="password" id="private-key" placeholder="Enter Private Key" class="text-black text-center rounded-md"></input>
 
         <!-- Card to login with ORCID, generate and register private keys -->
-        <div class="flex flex-col items-center text-sm bg-slate-600 rounded-md p-2 space-y-2">
+        <div class="flex flex-col items-center text-sm bg-slate-600 rounded-md p-3 space-y-2">
           <p>
             If you don't have a private key yet, you can generate one that will be linked to your ORCID.
           </p>
-          <!-- <p>
-            By clicking the button below: a RSA private/public key pair will be generated,
-            a nanopub will be published linking the public key to your ORCID,
-            and the private key will be shown to you (so you can store it).
-          </p> -->
           <div class="flex justify-center space-x-2">
             <div id="orcidWidget" class="inline-flex p-2 space-x-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900 cursor-pointer">
               <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" width="20" height="20" alt="ORCID" />
@@ -202,6 +202,7 @@
         ORCID.init(config);
       });
 
+      // For dev:
       // document.addEventListener("DOMContentLoaded", function(e) {
       //   const testPrivate = "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAPdEfIdHtZYoFh6/DWorzoHpFXMjugqW+CGpe9uk4BfUq54MToi2u7fgdGGtXLg4wsJFBYETdVeS0p1uA7EPe8LhwjHPktf5c6AZbO/lYpKM59e7/Ih4mvOy4iTIe/Dv+1OgasTSK0nXAbKUm/5iJ6LOYa82JQeE/QnT5gUw2e97AgMBAAECgYBbNQnyJINYpeSy5qoeFZaQ2Ncup2kCavmQASJMvJ5ka+/51nRJfY30n3iOZxIiad19J1SGbhUEfoXtyBzYfOubF2i2GJtdF5VyjdSoU6w/gOo2/vnbH+GCHnMclrWshohOADGQU/Y8pYhIvlQqcb6xEOts9m9C9g4uwvPXqjmhoQJBAPkmSFIZwF3i2UvJlHyeXi599L0jkGTUJy/Y4IjieUx5suwvAtG47ejhgIPKK06VtW49oGPHWjWc3cJAmnV+vTMCQQD+EPTvNtLpX9QiDEJD7b8woDwmVrvH/RUosP/cXpMQd7BUVgPlpffAlFJGDlOzwwjZjy+8kc6MYevh1kWqobSZAkEAyCs+nV99ErEHnYEFoB1oU3f0oeSpxKhCF4np03AIvi1kV6bpX+9wjNJnevp5UriqvDgc3S0zx7EQ5Vkb/1vkywJBAMMw59y4tAVT+DhITsi9aTvEfzG9RPt6trzSb2Aw0K/AJJpGkyvl/JfZ2/Oyoh/jYXM0DKrFIni76mtRIajcH1ECQQCJi6aXOaRkRPmf7FYY9cRaJdR1BtZkKZbDg6ZMD1bY97cGiM9STTMeldYcCtQBtyhVCTEObI/V6/0FAvY9Zi7w"
       //   document.getElementById("privkey-card").classList.remove("hidden");
