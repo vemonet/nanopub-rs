@@ -310,8 +310,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
       - run: rustup update
       - run: cargo login $CRATES_IO_TOKEN
         env:
