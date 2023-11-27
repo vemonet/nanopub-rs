@@ -151,22 +151,24 @@
       // Generate key pair and publish Nanopub intro
       const introBtn = document.getElementById('publish-intro-btn')
       introBtn.addEventListener('click', (event) => {
-        const keypair = new KeyPair()
-        const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
-        // Publish nanopub link to public key
-        const intro = Nanopub.publish_intro(profile, getNpServer(false))
-          .then(np => {
-            rdfOutput.textContent = np.get_rdf();
-            console.log("Published Introduction Nanopub:", np.toString());
-            // Display private key
-            document.getElementById("privkey-card").classList.remove("hidden");
-            document.getElementById("display-privkey").textContent = keypair.private
-            hljs.highlightAll();
-          })
-          .catch(error => {
-            rdfOutput.textContent = error;
-            console.error("Publishing error:", error);
-          });
+        init().then(() => {
+          const keypair = new KeyPair()
+          const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
+          // Publish nanopub link to public key
+          const intro = Nanopub.publish_intro(profile, getNpServer(false))
+            .then(np => {
+              rdfOutput.textContent = np.get_rdf();
+              console.log("Published Introduction Nanopub:", np.toString());
+              // Display private key
+              document.getElementById("privkey-card").classList.remove("hidden");
+              document.getElementById("display-privkey").textContent = keypair.private
+              hljs.highlightAll();
+            })
+            .catch(error => {
+              rdfOutput.textContent = error;
+              console.error("Publishing error:", error);
+            });
+        });
       });
 
       // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
