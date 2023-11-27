@@ -9,8 +9,8 @@
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Highlight JS -->
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script src="assets/turtle.js"></script>
     <!-- ORCID login widget -->
     <script src="assets/orcid-widget.js"></script>
@@ -84,6 +84,7 @@
             </button>
           </div>
 
+          <!-- Display generated private key -->
           <div id="privkey-card" class="hidden flex flex-col items-center space-y-2">
             <p>
               The Nanopublication Introduction has been published successfully 🎉
@@ -96,6 +97,7 @@
           </div>
         </div>
 
+        <!-- Submit nanopub btn -->
         <button type="submit" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
           <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
         </button>
@@ -133,11 +135,11 @@
 
             const np = Nanopub.sign(rdfStr, profile)
             rdfOutput.textContent = np.get_rdf();
-            hljs.highlightAll();
             console.log("Signed Nanopub:", np.toString());
+            hljs.highlightAll();
           } catch (error) {
-              rdfOutput.textContent = error.toString();
-              console.error("Error:", error);
+            rdfOutput.textContent = error.toString();
+            console.error("Error:", error);
           }
 
           // Nanopub.publish(rdfStr, profile, "")
@@ -165,6 +167,7 @@
             // Display private key
             document.getElementById("privkey-card").classList.remove("hidden");
             document.getElementById("display-privkey").textContent = keypair.private
+            hljs.highlightAll();
           })
           .catch(error => {
             rdfOutput.textContent = error;
