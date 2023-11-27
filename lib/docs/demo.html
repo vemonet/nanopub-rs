@@ -18,25 +18,25 @@
   </head>
 
   <body class="bg-gray-800 text-white">
+
     <div class="flex flex-col h-screen items-center p-4 space-y-4">
       <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
       <p class="text-sm">
-        In your browser, using the package
+        Done in your browser, using the package
         <a class="text-blue-500 hover:text-blue-700" href="https://vemonet.github.io/nanopub-rs/use_javascript.html" target="_blank" rel="noopener noreferrer">
           <b><code>@nanopub/sign</code></b>
         </a>
       </p>
 
       <!-- Nanopub RDF input -->
-      <textarea class="p-2 rounded-sm text-xs text-black w-full" id="rdf-input" rows="28">
-@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dc: <http://purl.org/dc/terms/> .
-@prefix pav: <http://purl.org/pav/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix np: <http://www.nanopub.org/nschema#> .
-@prefix npx: <http://purl.org/nanopub/x/> .
-@prefix ex: <http://example.org/> .
+      <div id="rdf-input" contenteditable="true" class="language-turtle p-2 whitespace-pre-wrap rounded-sm text-xs bg-white text-black w-full">@prefix : &lt;http://purl.org/nanopub/temp/mynanopub#&gt; .
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+@prefix dc: &lt;http://purl.org/dc/terms/&gt; .
+@prefix pav: &lt;http://purl.org/pav/&gt; .
+@prefix prov: &lt;http://www.w3.org/ns/prov#&gt; .
+@prefix np: &lt;http://www.nanopub.org/nschema#&gt; .
+@prefix npx: &lt;http://purl.org/nanopub/x/&gt; .
+@prefix ex: &lt;http://example.org/&gt; .
 
 :Head {
   : np:hasAssertion :assertion ;
@@ -50,12 +50,12 @@
 }
 
 :provenance {
-  :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
+  :assertion prov:hadPrimarySource &lt;http://dx.doi.org/10.3233/ISU-2010-0613&gt; .
 }
 
 :pubinfo {
   : a npx:ExampleNanopub .
-}</textarea>
+}</div>
 
       <!-- Private key input -->
       <p class="text-center text-sm">
@@ -67,7 +67,7 @@
       </p>
       <input type="password" id="private-key" placeholder="Enter Private Key" class="text-black text-center rounded-md"></input>
 
-      <!-- Card to login with ORCID, generate and register private keys -->
+      <!-- Card with btn to login with ORCID, and btn to generate and register private keys -->
       <div class="flex flex-col items-center text-sm bg-slate-600 rounded-md p-3 space-y-2">
         <p>
           If you don't have a private key yet, you can generate one that will be linked to your ORCID.
@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <!-- Submit nanopub btn -->
+      <!-- Btn to submit the nanopub -->
       <button id="submit-btn" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
         <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
       </button>
@@ -105,19 +105,19 @@
     </div>
 
     <script type="module">
-      import init, { getNpServer, Nanopub, NpProfile, KeyPair } from "https://unpkg.com/@nanopub/sign";
+      import init, { Nanopub, NpProfile, KeyPair, getNpServer } from "https://unpkg.com/@nanopub/sign";
       hljs.registerLanguage('turtle', window.hljsDefineTurtle);
 
-      let privKey = null;
+      // TODO: get ORCID based on the public key registered in the nanopub network
       let orcidToken = null;
       let orcid = "";
+      let privKey = null;
       const rdfInput = document.getElementById('rdf-input');
       const rdfOutput = document.getElementById('rdf-output');
-      // TODO: get ORCID based on the public key registered in the nanopub network
 
       // Sign nanopub
       document.getElementById('submit-btn').addEventListener('click', (event) => {
-        const rdfStr = rdfInput.value
+        const rdfStr = rdfInput.textContent
         const privKey = document.getElementById('private-key').value
         // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
         init().then(() => {
@@ -170,6 +170,8 @@
       });
 
       // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
+      // If you want to redeploy this, you will need to get an ORCID client ID, and add your website URL to the redirect URIs
+      // https://orcid.org/developer-tools
       function onLogin(idToken) {
         idToken.orcid = idToken.iss + '/' + idToken.sub
         idToken.fullName = idToken.given_name + " " + idToken.family_name
