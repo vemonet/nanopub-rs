@@ -1,8 +1,9 @@
 use base64::{engine, Engine as _};
 use getrandom::getrandom;
 use rand_core::{impls, CryptoRng, RngCore};
-use rsa::pkcs1::EncodeRsaPrivateKey;
-use rsa::{pkcs8::DecodePrivateKey, pkcs8::EncodePublicKey, RsaPrivateKey, RsaPublicKey};
+use rsa::{RsaPrivateKey, RsaPublicKey};
+// use rsa::pkcs1::{DecodeRsaPrivateKey, EncodeRsaPrivateKey};
+use rsa::pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey};
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 use std::fmt;
@@ -100,6 +101,7 @@ pub fn normalize_key(key: &str) -> Result<String, NpError> {
     let mut normed_key = key.trim().to_string();
     let start_patterns = [
         "-----BEGIN PUBLIC KEY-----",
+        "-----BEGIN PRIVATE KEY-----",
         "-----BEGIN RSA PRIVATE KEY-----",
     ];
     for pattern in start_patterns.iter() {
@@ -108,7 +110,11 @@ pub fn normalize_key(key: &str) -> Result<String, NpError> {
             break;
         }
     }
-    let end_patterns = ["-----END PUBLIC KEY-----", "-----END RSA PRIVATE KEY-----"];
+    let end_patterns = [
+        "-----END PUBLIC KEY-----",
+        "-----END PRIVATE KEY-----",
+        "-----END RSA PRIVATE KEY-----",
+    ];
     for pattern in end_patterns.iter() {
         if normed_key.ends_with(pattern) {
             normed_key = normed_key[..normed_key.len() - pattern.len()].to_string();
@@ -130,7 +136,7 @@ pub fn gen_keys() -> Result<(String, String), NpError> {
     let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
     let pub_key = RsaPublicKey::from(&priv_key);
     Ok((
-        normalize_key(&priv_key.to_pkcs1_pem(rsa::pkcs8::LineEnding::LF)?)?,
+        normalize_key(&priv_key.to_pkcs8_pem(rsa::pkcs8::LineEnding::LF)?)?,
         get_pubkey_str(&pub_key)?,
     ))
 }

@@ -169,8 +169,9 @@ impl Nanopub {
             // println!("NORMED QUADS CHECK\n{}", norm_quads);
 
             // Load public key
-            let pubkey_bytes = engine::general_purpose::STANDARD.decode(&np_info.public_key)?;
-            let pubkey = RsaPublicKey::from_public_key_der(&pubkey_bytes)?;
+            let pubkey = RsaPublicKey::from_public_key_der(
+                &engine::general_purpose::STANDARD.decode(&np_info.public_key)?,
+            )?;
 
             // Regenerate and check the signature hash
             pubkey.verify(

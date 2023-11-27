@@ -181,6 +181,7 @@ async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_gen_keys() -> Result<(), Box<dyn Error>> {
     let (privkey, _pubkey) = gen_keys()?;
+    println!("{}", privkey);
     assert!(privkey.len() > 10);
     Ok(())
 }
