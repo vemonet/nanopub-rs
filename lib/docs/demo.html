@@ -116,59 +116,59 @@
       const rdfOutput = document.getElementById('rdf-output');
 
       // Sign nanopub
-      document.getElementById('submit-btn').addEventListener('click', (event) => {
+      document.getElementById('submit-btn').addEventListener('click', async (event) => {
+        // WebAssembly binary needs to be initialized
+        await init()
         const rdfStr = rdfInput.textContent
         const privKey = document.getElementById('private-key').value
-        // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
-        init().then(() => {
-          console.log("Random Nanopub server:", getNpServer());
-          const profile = new NpProfile(orcid, "Your Name", privKey, "");
-          try {
-            const checked = Nanopub.check(rdfStr);
-            console.log("CHECKED", checked.toJs());
+        console.log("Random Nanopub server:", getNpServer());
+        const profile = new NpProfile(orcid, "Your Name", privKey, "");
+        try {
+          const checked = Nanopub.check(rdfStr);
+          console.log("CHECKED", checked.toJs());
 
-            const np = Nanopub.sign(rdfStr, profile)
-            rdfOutput.textContent = np.get_rdf();
-            console.log("Signed Nanopub:", np.toString());
-            hljs.highlightAll();
-          } catch (error) {
-            rdfOutput.textContent = error.toString();
-            console.error("Error:", error);
-          }
+          const np = Nanopub.sign(rdfStr, profile)
+          rdfOutput.textContent = np.get_rdf();
+          console.log("Signed Nanopub:", np.toString());
+          hljs.highlightAll();
+        } catch (error) {
+          rdfOutput.textContent = error.toString();
+          console.error("Error:", error);
+        }
 
-          // Nanopub.publish(rdfStr, profile, "")
-          //   .then(np => {
-          //     rdfOutput.textContent = np.get_rdf();
-          //     console.log("Published Nanopub:", np.toString());
-          //   })
-          //   .catch(error => {
-          //     rdfOutput.textContent = error;
-          //     console.error("Publishing error:", error);
-          //   });
-        });
+        // Nanopub.publish(rdfStr, profile, "")
+        //   .then(np => {
+        //     rdfOutput.textContent = np.get_rdf();
+        //     console.log("Published Nanopub:", np.toString());
+        //   })
+        //   .catch(error => {
+        //     rdfOutput.textContent = error;
+        //     console.error("Publishing error:", error);
+        //   });
       });
 
       // Generate key pair and publish Nanopub intro
       const introBtn = document.getElementById('publish-intro-btn')
-      introBtn.addEventListener('click', (event) => {
-        init().then(() => {
-          const keypair = new KeyPair()
-          const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
-          // Publish nanopub link to public key
-          const intro = Nanopub.publish_intro(profile, getNpServer(false))
-            .then(np => {
-              rdfOutput.textContent = np.get_rdf();
-              console.log("Published Introduction Nanopub:", np.toString());
-              // Display private key
-              document.getElementById("privkey-card").classList.remove("hidden");
-              document.getElementById("display-privkey").textContent = keypair.private
-              hljs.highlightAll();
-            })
-            .catch(error => {
-              rdfOutput.textContent = error;
-              console.error("Publishing error:", error);
-            });
-        });
+      introBtn.addEventListener('click', async (event) => {
+        await init()
+        let keypair = new KeyPair()
+        keypair = keypair.toJs()
+        console.log("PUB INTRO", orcidToken, keypair.private)
+        const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
+        // Publish nanopub link to public key
+        const intro = Nanopub.publish_intro(profile, getNpServer(false))
+          .then(np => {
+            rdfOutput.textContent = np.get_rdf();
+            console.log("Published Introduction Nanopub:", np.toString());
+            // Display private key
+            document.getElementById("privkey-card").classList.remove("hidden");
+            document.getElementById("display-privkey").textContent = keypair.private
+            hljs.highlightAll();
+          })
+          .catch(error => {
+            rdfOutput.textContent = error;
+            console.error("Publishing error:", error);
+          });
       });
 
       // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
