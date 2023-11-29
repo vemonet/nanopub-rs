@@ -24,3 +24,5 @@ for file in "${files[@]}"; do
         echo "⚠️ File not found: $file"
     fi
 done
+
+gmsg "🏷️ Bump to $new_version" || true
