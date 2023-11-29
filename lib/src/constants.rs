@@ -1,7 +1,7 @@
 /// List of available Nanopub servers
 /// Checkout the live list at https://monitor.petapico.org
 pub const LIST_SERVERS: [&str; 6] = [
-    "https://server.nanopubs.lod.labs.vu.nl/",
+    "https://server.np.trustyuri.net/",
     "https://server.np.dumontierlab.com/",
     "https://app.tkuhn.eculture.labs.vu.nl/nanopub-server-1",
     "https://app.tkuhn.eculture.labs.vu.nl/nanopub-server-2",
