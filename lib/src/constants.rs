@@ -10,7 +10,8 @@ pub const LIST_SERVERS: [&str; 6] = [
 ];
 
 /// Nanopub test server URL
-pub const TEST_SERVER: &str = "http://test-server.nanopubs.lod.labs.vu.nl/";
+pub const TEST_SERVER: &str = "https://np.test.knowledgepixels.com/";
+// pub const TEST_SERVER: &str = "http://test-server.nanopubs.lod.labs.vu.nl/";
 
 pub const NP_PREF_NS: &str = "https://w3id.org/np/";
 pub const NP_TEMP_URI: &str = "http://purl.org/nanopub/temp/";

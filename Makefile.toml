@@ -1,0 +1,88 @@
+# https://github.com/elastic/elasticsearch-rs/blob/main/Makefile.toml
+# https://github.com/ffizer/ffizer/blob/master/Makefile.toml
+[config]
+default_to_workspace = false
+
+# [env]
+# RUST_BACKTRACE = "full"
+
+[tasks.install]
+script="""
+rustup update
+rustup component add rustfmt clippy
+cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish mdbook-pagetoc
+pipx install "maturin[patchelf]"
+pipx install pre-commit
+pre-commit install
+"""
+
+[tasks.format]
+# install_crate = { crate_name = "rustfmt", rustup_component_name = "rustfmt" }
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt"]
+
+[tasks.lint]
+install_crate = { rustup_component_name = "clippy" }
+command = "cargo"
+args = ["clippy"]
+
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+dependencies = ["format", "lint"]
+
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+dependencies = ["clean"]
+
+[tasks.js]
+command = "npm"
+args = ["run", "build"]
+dependencies = ["format", "install-wasm-pack"]
+cwd = "./js/"
+
+[tasks.py]
+command = "maturin"
+args = ["develop"]
+dependencies = ["format"]
+cwd = "./python/"
+
+
+[tasks.mdbook]
+command = "mdbook"
+args = ["build"]
+dependencies = ["format"]
+
+[tasks.docs]
+command = "cargo doc --workspace --no-deps --exclude nanopub-cli --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc"
+# args = [
+#     "doc", "--workspace", "--target-dir", "target/doc", "--no-deps",
+#     "--exclude", "nanopub-cli", "--exclude", "nanopub-js", "--exclude", "nanopub-sign",
+# ]
+dependencies = ["format", "mdbook"]
+
+
+
+[tasks.install-wasm-pack]
+install_crate = "wasm-pack"
+
+[tasks.install-tarpaulin]
+install_crate = "cargo-tarpaulin"
+
+[tasks.install-mdbook]
+install_crate = "mdbook"
+
+[tasks.install-mdbook-admonish]
+install_crate = "mdbook-admonish"
+
+[tasks.install-mdbook-pagetoc]
+install_crate = "mdbook-pagetoc"
+
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]

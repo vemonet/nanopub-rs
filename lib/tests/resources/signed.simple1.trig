@@ -28,7 +28,7 @@ sub:pubinfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB";
     npx:hasSignature "c41bsPcz1E5jcQK/uDQIilMR5FIMd8HgNOeNYMz4vmP50kU/UwO6rnBp4QHYgiLhywId4zAzsewVCdsmj7+RdCgoUMeY+W+oUTXhEHA+nUu4rV7tgZ9JN9LYlpE9uOIdySQSpg9sXg9iyAhKYVGwSPxjWjFqKju7ejZ9/oINJBo=";
     npx:hasSignatureTarget this: .
-  
+
   this: a npx:ExampleNanopub;
     dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime;
     pav:createdBy <http://orcid.org/0000-0002-1267-0234> .

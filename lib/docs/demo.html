@@ -2,16 +2,14 @@
 <html lang="en-US">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Playground to sign Nanopublications in your browser" />
     <title>Nanopublication signing demo</title>
     <link rel="icon" href="https://github.com/Nanopublication/nanopub-website/blob/main/static/img/icon.png?raw=true" type="image/x-icon">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Highlight JS -->
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark-dimmed.min.css">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="assets/turtle.js"></script>
     <!-- ORCID login widget -->
     <script src="assets/orcid-widget.js"></script>
     <script src="https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js"></script>
@@ -29,33 +27,7 @@
       </p>
 
       <!-- Nanopub RDF input -->
-      <div id="rdf-input" contenteditable="true" class="language-turtle p-2 whitespace-pre-wrap rounded-sm text-xs bg-white text-black w-full">@prefix : &lt;http://purl.org/nanopub/temp/mynanopub#&gt; .
-@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
-@prefix dc: &lt;http://purl.org/dc/terms/&gt; .
-@prefix pav: &lt;http://purl.org/pav/&gt; .
-@prefix prov: &lt;http://www.w3.org/ns/prov#&gt; .
-@prefix np: &lt;http://www.nanopub.org/nschema#&gt; .
-@prefix npx: &lt;http://purl.org/nanopub/x/&gt; .
-@prefix ex: &lt;http://example.org/&gt; .
-
-:Head {
-  : np:hasAssertion :assertion ;
-    np:hasProvenance :provenance ;
-    np:hasPublicationInfo :pubinfo ;
-    a np:Nanopublication .
-}
-
-:assertion {
-  ex:mosquito ex:transmits ex:malaria .
-}
-
-:provenance {
-  :assertion prov:hadPrimarySource &lt;http://dx.doi.org/10.3233/ISU-2010-0613&gt; .
-}
-
-:pubinfo {
-  : a npx:ExampleNanopub .
-}</div>
+      <div id="rdf-input" class="w-full" style="min-height: 34em;"></div>
 
       <!-- Private key input -->
       <p class="text-center text-sm">
@@ -99,77 +71,108 @@
         <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
       </button>
 
-      <pre class="w-full">
-        <code id="rdf-output" class="language-turtle bg-slate-900 text-xs rounded-md"></code>
-      </pre>
+      <div id="rdf-output" class="w-full hidden" style="min-height: 54em;"></div>
     </div>
 
     <script type="module">
       import init, { Nanopub, NpProfile, KeyPair, getNpServer } from "https://unpkg.com/@nanopub/sign";
-      hljs.registerLanguage('turtle', window.hljsDefineTurtle);
+      import monacoLoader from 'https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.4.0/+esm';
 
-      // TODO: get ORCID based on the public key registered in the nanopub network
-      let orcidToken = null;
-      let orcid = "";
-      let privKey = null;
-      const rdfInput = document.getElementById('rdf-input');
-      const rdfOutput = document.getElementById('rdf-output');
+      async function main() {
+        // WebAssembly needs to be initialized
+        await init();
+        const monaco = await monacoLoader.init();
 
-      // Sign nanopub
-      document.getElementById('submit-btn').addEventListener('click', async (event) => {
-        // WebAssembly binary needs to be initialized
-        await init()
-        const rdfStr = rdfInput.textContent
-        const privKey = document.getElementById('private-key').value
-        console.log("Random Nanopub server:", getNpServer());
-        const profile = new NpProfile(orcid, "Your Name", privKey, "");
-        try {
-          const checked = Nanopub.check(rdfStr);
-          console.log("CHECKED", checked.toJs());
+        // TODO: get ORCID based on the public key registered in the nanopub network
+        let orcidToken = null;
+        let orcid = "";
+        let privKey = null;
+        const rdfInput = document.getElementById('rdf-input');
+        const rdfOutput = document.getElementById('rdf-output');
 
-          const np = Nanopub.sign(rdfStr, profile)
-          rdfOutput.textContent = np.get_rdf();
-          console.log("Signed Nanopub:", np.toString());
-          hljs.highlightAll();
-        } catch (error) {
-          rdfOutput.textContent = error.toString();
-          console.error("Error:", error);
-        }
+        // Theme from https://github.com/brijeshb42/monaco-themes/tree/master/themes
+        const theme = await (await fetch('assets/Solarized-dark.json')).json()
+        // Directly try a theme from its URL:
+        // const theme = await (await fetch('https://raw.githubusercontent.com/brijeshb42/monaco-themes/master/themes/Solarized-light.json')).json()
+        monaco.editor.defineTheme('solarized-dark', theme);
 
-        // Nanopub.publish(rdfStr, profile, "")
-        //   .then(np => {
-        //     rdfOutput.textContent = np.get_rdf();
-        //     console.log("Published Nanopub:", np.toString());
-        //   })
-        //   .catch(error => {
-        //     rdfOutput.textContent = error;
-        //     console.error("Publishing error:", error);
-        //   });
-      });
+        // Setup the 2 Monaco editors
+        const editorsConfig = {
+            theme: 'solarized-dark',
+            language: 'sparql',
+            automaticLayout: true,
+            scrollBeyondLastLine: false,
+            lineNumbers: 'on',
+            minimap: {
+                enabled: false
+            },
+            scrollbar: {
+                alwaysConsumeMouseWheel: false
+            },
+        };
+        const ieditor = monaco.editor.create(rdfInput, {
+            ...editorsConfig,
+            value: exampleRdf,
+        });
+        const oeditor = monaco.editor.create(rdfOutput, {
+            ...editorsConfig,
+            readOnly: true,
+        });
 
-      // Generate key pair and publish Nanopub intro
-      const introBtn = document.getElementById('publish-intro-btn')
-      introBtn.addEventListener('click', async (event) => {
-        await init()
-        let keypair = new KeyPair()
-        keypair = keypair.toJs()
-        console.log("PUB INTRO", orcidToken, keypair.private)
-        const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
-        // Publish nanopub link to public key
-        const intro = Nanopub.publish_intro(profile, getNpServer(false))
-          .then(np => {
-            rdfOutput.textContent = np.get_rdf();
-            console.log("Published Introduction Nanopub:", np.toString());
-            // Display private key
-            document.getElementById("privkey-card").classList.remove("hidden");
-            document.getElementById("display-privkey").textContent = keypair.private
-            hljs.highlightAll();
-          })
-          .catch(error => {
-            rdfOutput.textContent = error;
-            console.error("Publishing error:", error);
-          });
-      });
+        // Sign nanopub
+        document.getElementById('submit-btn').addEventListener('click', async (event) => {
+          const rdfStr = ieditor.getValue();
+          const privKey = document.getElementById('private-key').value
+          console.log("Random Nanopub server:", getNpServer());
+          const profile = new NpProfile(orcid, "Your Name", privKey, "");
+          try {
+            const checked = Nanopub.check(rdfStr);
+            console.log("CHECKED", checked.toJs());
+
+            const np = Nanopub.sign(rdfStr, profile)
+            oeditor.setValue(np.get_rdf());
+            // rdfOutput.textContent = np.get_rdf();
+            console.log("Signed Nanopub:", np.toString());
+          } catch (error) {
+            // rdfOutput.textContent = error.toString();
+            oeditor.setValue(error.toString());
+            console.error("Error:", error);
+          }
+          rdfOutput.classList.remove("hidden");
+          // Nanopub.publish(rdfStr, profile, "")
+          //   .then(np => {
+          //     oeditor.setValue(np.get_rdf());
+          //     console.log("Published Nanopub:", np.toString());
+          //   })
+          //   .catch(error => {
+          //     oeditor.setValue(error.toString());
+          //     console.error("Publishing error:", error);
+          //   });
+        });
+
+        // Generate key pair and publish Nanopub intro
+        const introBtn = document.getElementById('publish-intro-btn')
+        introBtn.addEventListener('click', async (event) => {
+          let keypair = new KeyPair()
+          keypair = keypair.toJs()
+          console.log("PUB INTRO", orcidToken, keypair.private)
+          const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
+          // Publish nanopub link to public key
+          const intro = Nanopub.publish_intro(profile, getNpServer(false))
+            .then(np => {
+              oeditor.setValue(np.get_rdf());
+              console.log("Published Introduction Nanopub:", np.toString());
+              // Display private key
+              document.getElementById("privkey-card").classList.remove("hidden");
+              document.getElementById("display-privkey").textContent = keypair.private
+            })
+            .catch(error => {
+              oeditor.setValue(error.toString());
+              console.error("Publishing error:", error);
+            });
+          rdfOutput.classList.remove("hidden");
+        });
+      }
 
       // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
       // If you want to redeploy this, you will need to get an ORCID client ID, and add your website URL to the redirect URIs
@@ -200,6 +203,35 @@
         ORCID.init(config);
       });
 
+      const exampleRdf = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix ex: <http://example.org/> .
+
+:Head {
+  : np:hasAssertion :assertion ;
+    np:hasProvenance :provenance ;
+    np:hasPublicationInfo :pubinfo ;
+    a np:Nanopublication .
+}
+
+:assertion {
+  ex:mosquito ex:transmits ex:malaria .
+}
+
+:provenance {
+  :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
+}
+
+:pubinfo {
+  : a npx:ExampleNanopub .
+}`
+
+      main()
       // For dev:
       // document.addEventListener("DOMContentLoaded", function(e) {
       //   const testPrivate = "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAPdEfIdHtZYoFh6/DWorzoHpFXMjugqW+CGpe9uk4BfUq54MToi2u7fgdGGtXLg4wsJFBYETdVeS0p1uA7EPe8LhwjHPktf5c6AZbO/lYpKM59e7/Ih4mvOy4iTIe/Dv+1OgasTSK0nXAbKUm/5iJ6LOYa82JQeE/QnT5gUw2e97AgMBAAECgYBbNQnyJINYpeSy5qoeFZaQ2Ncup2kCavmQASJMvJ5ka+/51nRJfY30n3iOZxIiad19J1SGbhUEfoXtyBzYfOubF2i2GJtdF5VyjdSoU6w/gOo2/vnbH+GCHnMclrWshohOADGQU/Y8pYhIvlQqcb6xEOts9m9C9g4uwvPXqjmhoQJBAPkmSFIZwF3i2UvJlHyeXi599L0jkGTUJy/Y4IjieUx5suwvAtG47ejhgIPKK06VtW49oGPHWjWc3cJAmnV+vTMCQQD+EPTvNtLpX9QiDEJD7b8woDwmVrvH/RUosP/cXpMQd7BUVgPlpffAlFJGDlOzwwjZjy+8kc6MYevh1kWqobSZAkEAyCs+nV99ErEHnYEFoB1oU3f0oeSpxKhCF4np03AIvi1kV6bpX+9wjNJnevp5UriqvDgc3S0zx7EQ5Vkb/1vkywJBAMMw59y4tAVT+DhITsi9aTvEfzG9RPt6trzSb2Aw0K/AJJpGkyvl/JfZ2/Oyoh/jYXM0DKrFIni76mtRIajcH1ECQQCJi6aXOaRkRPmf7FYY9cRaJdR1BtZkKZbDg6ZMD1bY97cGiM9STTMeldYcCtQBtyhVCTEObI/V6/0FAvY9Zi7w"
