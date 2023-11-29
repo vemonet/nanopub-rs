@@ -15,7 +15,7 @@
     <script src="https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js"></script>
   </head>
 
-  <body class="bg-gray-800 text-white">
+  <body class="bg-slate-700 text-white">
 
     <div class="flex flex-col h-screen items-center p-4 space-y-4">
       <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
@@ -67,7 +67,7 @@
       </div>
 
       <!-- Btn to submit the nanopub -->
-      <button id="submit-btn" class="p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-600">
+      <button id="submit-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
         <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
       </button>
 
@@ -97,6 +97,7 @@
         monaco.editor.defineTheme('solarized-dark', theme);
 
         // Setup the 2 Monaco editors
+        // TODO: auto change language to json when providing JSON-LD
         const editorsConfig = {
             theme: 'solarized-dark',
             language: 'sparql',
@@ -130,24 +131,14 @@
             console.log("CHECKED", checked.toJs());
 
             const np = Nanopub.sign(rdfStr, profile)
+            // const np = await Nanopub.publish(rdfStr, profile, "https://np.test.knowledgepixels.com/")
             oeditor.setValue(np.get_rdf());
-            // rdfOutput.textContent = np.get_rdf();
             console.log("Signed Nanopub:", np.toString());
           } catch (error) {
-            // rdfOutput.textContent = error.toString();
             oeditor.setValue(error.toString());
             console.error("Error:", error);
           }
           rdfOutput.classList.remove("hidden");
-          // Nanopub.publish(rdfStr, profile, "")
-          //   .then(np => {
-          //     oeditor.setValue(np.get_rdf());
-          //     console.log("Published Nanopub:", np.toString());
-          //   })
-          //   .catch(error => {
-          //     oeditor.setValue(error.toString());
-          //     console.error("Publishing error:", error);
-          //   });
         });
 
         // Generate key pair and publish Nanopub intro
