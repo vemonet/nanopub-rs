@@ -164,36 +164,34 @@
             });
           rdfOutput.classList.remove("hidden");
         });
-      }
 
-      // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
-      // If you want to redeploy this, you will need to get an ORCID client ID, and add your website URL to the redirect URIs
-      // https://orcid.org/developer-tools
-      function onLogin(idToken) {
-        idToken.orcid = idToken.iss + '/' + idToken.sub
-        idToken.fullName = idToken.given_name + " " + idToken.family_name
-        orcid = idToken.orcid;
-        orcidToken = idToken
-        introBtn.classList.remove("hidden");
-        console.log("Logged in", idToken);
-      }
-      function onError() {
-        console.error("Error when login.")
-      }
-      var config = {
-        // "mode": "sandbox",
-        // "returnUrl": "http://localhost:3000/demo.html",
-        "mode": "live",
-        "clientId": "APP-TEANCMSUOPYZOGJ3",
-        "returnUrl": "https://vemonet.github.io/nanopub-rs/demo.html",
-        "onSuccess": onLogin,
-        "onFail": onError,
-        "buttonText": "Authenticate with ORCID",
-        "auto": true
-      };
-      document.addEventListener('DOMContentLoaded', function() {
+        // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
+        // If you want to redeploy this, you will need to get an ORCID client ID, and add your website URL to the redirect URIs
+        // https://orcid.org/developer-tools
+        function onLogin(idToken) {
+          idToken.orcid = idToken.iss + '/' + idToken.sub
+          idToken.fullName = idToken.given_name + " " + idToken.family_name
+          orcid = idToken.orcid;
+          orcidToken = idToken
+          introBtn.classList.remove("hidden");
+          console.log("Logged in", idToken);
+        }
+        function onError() {
+          console.error("Error when login.")
+        }
+        var config = {
+          // "mode": "sandbox",
+          // "returnUrl": "http://localhost:3000/demo.html",
+          "mode": "live",
+          "clientId": "APP-TEANCMSUOPYZOGJ3",
+          "returnUrl": "https://vemonet.github.io/nanopub-rs/demo.html",
+          "onSuccess": onLogin,
+          "onFail": onError,
+          "buttonText": "Authenticate with ORCID",
+          "auto": true
+        };
         ORCID.init(config);
-      });
+      }
 
       const exampleRdf = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
