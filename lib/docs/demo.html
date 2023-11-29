@@ -78,15 +78,16 @@
       import init, { Nanopub, NpProfile, KeyPair, getNpServer } from "https://unpkg.com/@nanopub/sign";
       import monacoLoader from 'https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.4.0/+esm';
 
+      // TODO: get ORCID based on the public key registered in the nanopub network
+      let orcidToken = null;
+      let orcid = "";
+      let privKey = null;
+
       async function main() {
         // WebAssembly needs to be initialized
         await init();
         const monaco = await monacoLoader.init();
 
-        // TODO: get ORCID based on the public key registered in the nanopub network
-        let orcidToken = null;
-        let orcid = "";
-        let privKey = null;
         const rdfInput = document.getElementById('rdf-input');
         const rdfOutput = document.getElementById('rdf-output');
 
@@ -130,10 +131,10 @@
             const checked = Nanopub.check(rdfStr);
             console.log("CHECKED", checked.toJs());
 
-            const np = Nanopub.sign(rdfStr, profile)
-            // const np = await Nanopub.publish(rdfStr, profile, "https://np.test.knowledgepixels.com/")
+            // const np = Nanopub.sign(rdfStr, profile)
+            const np = await Nanopub.publish(rdfStr, profile, "https://np.test.knowledgepixels.com/")
             oeditor.setValue(np.get_rdf());
-            console.log("Signed Nanopub:", np.toString());
+            console.log("Published Nanopub:", np.toString());
           } catch (error) {
             oeditor.setValue(error.toString());
             console.error("Error:", error);
