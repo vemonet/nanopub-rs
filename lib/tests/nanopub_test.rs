@@ -107,7 +107,7 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
     let np_server = get_np_server(true);
     println!("{}", np_server);
     let np_server = get_np_server(false);
-    assert_eq!(np_server, "https://server.nanopubs.lod.labs.vu.nl/");
+    assert_eq!(np_server, "https://server.np.trustyuri.net/");
     Ok(())
 }
 
