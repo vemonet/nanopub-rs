@@ -74,7 +74,7 @@
           const rdfStr = rdfInput.value
           // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
           const keypair = new KeyPair()
-          console.log("KEEEYS", keypair.toJs())
+          console.log("KEYS", keypair.toJs())
 
           const checked = Nanopub.check(rdfStr);
           console.log("CHECKED", checked.toJs());
