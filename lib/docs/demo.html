@@ -31,9 +31,9 @@
         </a>
       </p>
 
-      <button id="toggle-mode" class="p-2 text-sm rounded-md bg-slate-600 hover:bg-slate-800 text-slate-400">Switch to JSON-LD</button>
+      <button id="switch-trig-jsonld" class="p-2 text-sm rounded-md bg-slate-600 hover:bg-slate-800 text-slate-400">Switch to JSON-LD</button>
 
-      <!-- Nanopub RDF input -->
+      <!-- Input editor -->
       <div id="rdf-input" class="w-full" style="min-height: 34em"></div>
 
       <!-- Private key input -->
@@ -83,6 +83,7 @@
         </button>
       </div>
 
+      <!-- Output editor -->
       <div id="rdf-output" class="w-full hidden" style="min-height: 54em; flex-grow: 0"></div>
       <br/><br/>
     </div>
@@ -115,7 +116,6 @@
         const exampleJsonld = await (await fetch('assets/nanopub-example.json')).text()
 
         // Setup the 2 Monaco editors
-        // TODO: auto change language to json when providing JSON-LD
         const editorsConfig = {
             theme: 'solarized-dark',
             automaticLayout: true,
@@ -190,7 +190,7 @@
         });
 
         // Toggle JSON-LD / TriG
-        document.getElementById('toggle-mode').addEventListener('click', async (event) => {
+        document.getElementById('switch-trig-jsonld').addEventListener('click', async (event) => {
           const currentLang = ieditor.getModel().getLanguageId();
           let newLang, buttonText;
           if (currentLang === 'json') {
@@ -203,7 +203,7 @@
             ieditor.setValue(exampleJsonld);
           }
           monaco.editor.setModelLanguage(ieditor.getModel(), newLang);
-          document.getElementById('toggle-mode').textContent = buttonText;
+          document.getElementById('switch-trig-jsonld').textContent = buttonText;
         });
 
         // Generate key pair and publish Nanopub intro
