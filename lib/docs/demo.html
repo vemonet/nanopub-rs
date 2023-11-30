@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Playground to sign Nanopublications in your browser" />
-    <title>Nanopublication signing demo</title>
+    <title>Nanopublication signing playground</title>
     <link rel="icon" href="https://github.com/Nanopublication/nanopub-website/blob/main/static/img/icon.png?raw=true" type="image/x-icon">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,22 +17,29 @@
 
   <body class="bg-slate-700 text-white">
 
-    <div class="flex flex-col h-screen items-center p-4 space-y-4">
-      <h1 class="text-xl font-semibold">Nanopublication signing demo</h1>
-      <p class="text-sm">
-        Done in your browser, using the package
-        <a class="text-blue-500 hover:text-blue-700" href="https://vemonet.github.io/nanopub-rs/use_javascript.html" target="_blank" rel="noopener noreferrer">
+    <div class="flex flex-col items-center p-4 space-y-4">
+      <h1 class="text-xl font-semibold">✍️ Nanopublication signing playground 🕹️</h1>
+      <p class="text-sm text-center">
+        Sign
+        <a href="https://nanopub.net" target="_blank" rel="noopener noreferrer">
+          Nanopublications
+        </a>
+        in TriG or JSON-LD format.
+        Everything is running in your browser, using the package
+        <a href="https://vemonet.github.io/nanopub-rs/use_javascript.html" target="_blank" rel="noopener noreferrer">
           <b><code>@nanopub/sign</code></b>
         </a>
       </p>
 
+      <button id="toggle-mode" class="p-2 text-sm rounded-md bg-slate-600 hover:bg-slate-800 text-slate-400">Switch to JSON-LD</button>
+
       <!-- Nanopub RDF input -->
-      <div id="rdf-input" class="w-full" style="min-height: 34em;"></div>
+      <div id="rdf-input" class="w-full" style="min-height: 34em"></div>
 
       <!-- Private key input -->
-      <p class="text-center text-sm">
+      <p class="text-sm text-center">
         You will need to provide a
-        <a class="text-blue-500 hover:text-blue-700" href="https://raw.github.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
+        <a href="https://raw.github.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
           RSA private key file
         </a>
         that will be used to sign the Nanopub. Save it in your password manager to reuse it easily 💡
@@ -42,7 +49,7 @@
       <!-- Card with btn to login with ORCID, and btn to generate and register private keys -->
       <div class="flex flex-col items-center text-sm bg-slate-600 rounded-md p-3 space-y-2">
         <p>
-          If you don't have a private key yet, you can generate one that will be linked to your ORCID.
+          If you don't have a private key yet, you can generate one that will be linked to your ORCID by a Nanopublication published to the network.
         </p>
         <div class="flex justify-center space-x-2">
           <div id="orcidWidget" class="inline-flex p-2 space-x-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900 cursor-pointer">
@@ -67,11 +74,17 @@
       </div>
 
       <!-- Btn to submit the nanopub -->
-      <button id="submit-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
-        <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
-      </button>
+      <div class="flex space-x-4">
+        <button id="sign-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
+          <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
+        </button>
+        <button id="publish-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
+          <i class="fas fa-upload mr-2"></i> Publish Nanopublication
+        </button>
+      </div>
 
-      <div id="rdf-output" class="w-full hidden" style="min-height: 54em;"></div>
+      <div id="rdf-output" class="w-full hidden" style="min-height: 54em; flex-grow: 0"></div>
+      <br/><br/>
     </div>
 
     <script type="module">
@@ -97,14 +110,19 @@
         // const theme = await (await fetch('https://raw.githubusercontent.com/brijeshb42/monaco-themes/master/themes/Solarized-light.json')).json()
         monaco.editor.defineTheme('solarized-dark', theme);
 
+        const npJsonSchema = await (await fetch('assets/nanopub-json-schema.json')).json()
+        const exampleTrig = await (await fetch('assets/nanopub-example.trig')).text()
+        const exampleJsonld = await (await fetch('assets/nanopub-example.json')).text()
+
         // Setup the 2 Monaco editors
         // TODO: auto change language to json when providing JSON-LD
         const editorsConfig = {
             theme: 'solarized-dark',
-            language: 'sparql',
             automaticLayout: true,
             scrollBeyondLastLine: false,
             lineNumbers: 'on',
+            tabSize: 2,
+            insertSpaces: true,
             minimap: {
                 enabled: false
             },
@@ -114,32 +132,78 @@
         };
         const ieditor = monaco.editor.create(rdfInput, {
             ...editorsConfig,
-            value: exampleRdf,
+            language: 'sparql',
+            value: exampleTrig,
         });
         const oeditor = monaco.editor.create(rdfOutput, {
             ...editorsConfig,
+            language: 'sparql',
             readOnly: true,
         });
 
-        // Sign nanopub
-        document.getElementById('submit-btn').addEventListener('click', async (event) => {
+        // Add JSON Schema validation for JSON-LD
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          validate: true,
+          schemas: [
+            {
+              uri: "https://vemonet.github.io/nanopub-rs/assets/nanopub-schema.json",
+              fileMatch: ["*"],
+              schema: npJsonSchema
+            },
+          ]
+        });
+
+        // Sign and publish the content of the input editor
+        async function sign(publish = false) {
+          monaco.editor.setModelMarkers(ieditor.getModel(), 'errors', []);
           const rdfStr = ieditor.getValue();
           const privKey = document.getElementById('private-key').value
-          console.log("Random Nanopub server:", getNpServer());
+          const serverUrl = (publish) ? getNpServer() : "" // Empty is test server
+          if (serverUrl && publish) {
+            console.log(`Publishing to ${serverUrl}`)
+          }
           const profile = new NpProfile(orcid, "Your Name", privKey, "");
           try {
-            const checked = Nanopub.check(rdfStr);
-            console.log("CHECKED", checked.toJs());
-
+            // const checked = Nanopub.check(rdfStr);
+            // console.log("CHECKED", checked.toJs());
             // const np = Nanopub.sign(rdfStr, profile)
-            const np = await Nanopub.publish(rdfStr, profile, "https://np.test.knowledgepixels.com/")
+
+            const np = await Nanopub.publish(rdfStr, profile, serverUrl)
             oeditor.setValue(np.get_rdf());
             console.log("Published Nanopub:", np.toString());
-          } catch (error) {
-            oeditor.setValue(error.toString());
-            console.error("Error:", error);
+          } catch (err) {
+            // oeditor.setValue(error.toString());
+            displayError(err);
+            console.error("Error:", err);
           }
           rdfOutput.classList.remove("hidden");
+        }
+
+        // Sign or publish nanopub
+        document.getElementById('sign-btn').addEventListener('click', async (event) => {
+          event.preventDefault();
+          sign(false)
+        });
+        document.getElementById('publish-btn').addEventListener('click', async (event) => {
+          event.preventDefault();
+          sign(true)
+        });
+
+        // Toggle JSON-LD / TriG
+        document.getElementById('toggle-mode').addEventListener('click', async (event) => {
+          const currentLang = ieditor.getModel().getLanguageId();
+          let newLang, buttonText;
+          if (currentLang === 'json') {
+            newLang = 'sparql';
+            buttonText = 'Switch to JSON-LD';
+            ieditor.setValue(exampleTrig);
+          } else {
+            newLang = 'json';
+            buttonText = 'Switch to TriG';
+            ieditor.setValue(exampleJsonld);
+          }
+          monaco.editor.setModelLanguage(ieditor.getModel(), newLang);
+          document.getElementById('toggle-mode').textContent = buttonText;
         });
 
         // Generate key pair and publish Nanopub intro
@@ -158,12 +222,29 @@
               document.getElementById("privkey-card").classList.remove("hidden");
               document.getElementById("display-privkey").textContent = keypair.private
             })
-            .catch(error => {
-              oeditor.setValue(error.toString());
-              console.error("Publishing error:", error);
+            .catch(err => {
+              oeditor.setValue(err.toString());
+              console.error("Error publishing the Nanopub Introduction:", err);
             });
           rdfOutput.classList.remove("hidden");
         });
+
+        function displayError(err) {
+          oeditor.setValue(err);
+          // Handle error msg with line and position returned by nt/ttl/trig parsers
+          const match = err.match(/(.*?) on line (\d+) at position (\d+)/);
+          const [msg, lineNumber, position] = (match)
+              ? [match[1], parseInt(match[2], 10), parseInt(match[3], 10)]
+              : [err, 1, 1];
+          monaco.editor.setModelMarkers(ieditor.getModel(), 'errors', [{
+              startLineNumber: lineNumber,
+              startColumn: position,
+              endLineNumber: lineNumber,
+              endColumn: position + 3,
+              message: msg,
+              severity: monaco.MarkerSeverity.Error
+          }]);
+        }
 
         // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
         // If you want to redeploy this, you will need to get an ORCID client ID, and add your website URL to the redirect URIs
@@ -193,34 +274,6 @@
         ORCID.init(config);
       }
 
-      const exampleRdf = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dc: <http://purl.org/dc/terms/> .
-@prefix pav: <http://purl.org/pav/> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix np: <http://www.nanopub.org/nschema#> .
-@prefix npx: <http://purl.org/nanopub/x/> .
-@prefix ex: <http://example.org/> .
-
-:Head {
-  : np:hasAssertion :assertion ;
-    np:hasProvenance :provenance ;
-    np:hasPublicationInfo :pubinfo ;
-    a np:Nanopublication .
-}
-
-:assertion {
-  ex:mosquito ex:transmits ex:malaria .
-}
-
-:provenance {
-  :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
-}
-
-:pubinfo {
-  : a npx:ExampleNanopub .
-}`
-
       main()
       // For dev:
       // document.addEventListener("DOMContentLoaded", function(e) {
@@ -231,4 +284,23 @@
       // });
     </script>
   </body>
+
+  <style>
+    a {
+      color: #3b82f6;
+    }
+    a:hover {
+      color: #2563EB;
+    }
+    #orcidWidget a {
+      color: rgb(148, 163, 184);
+    }
+    /* Enable resize of editors */
+    #rdf-input, #rdf-output {
+      flex-shrink: 0;
+      flex-basis: 1;
+      overflow: auto;
+      resize: vertical;
+    }
+  </style>
 </html>
