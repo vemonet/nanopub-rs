@@ -60,22 +60,20 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
 		pav:createdBy <http://orcid.org/0000-0002-1267-0234> ;
 		a npx:ExampleNanopub .
 }`
+      async function main() {
+        // WebAssembly binary needs to be initialized
+        await init();
+        const checked = Nanopub.check(rdfStr);
+        console.log("CHECKED", checked.toString());
 
+        const profile = new NpProfile(orcid, "Your Name", private_key, "");
+
+        const np = await Nanopub.publish(rdfStr, profile, "");
+        rdfText.innerText = np.get_rdf();
+        console.log("PUBLISHED", np.toJs());
+      }
       const orcid="https://orcid.org/0000-0000-0000-0000";
       const rdfText = document.getElementById('rdf-text');
-
-      // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
-      init().then(() => {
-          const checked = Nanopub.check(rdfStr);
-          console.log("CHECKED", checked.toString());
-
-          const profile = new NpProfile(orcid, "Your Name", private_key, "");
-
-          const np = Nanopub.publish(rdfStr, profile, "");
-          rdfText.innerText = np.get_rdf();
-          console.log("PUBLISHED", np.toString());
-          console.log("JS object", np.toJs())
-      });
     </script>
   </body>
 </html>
@@ -147,10 +145,10 @@ For example, to use it in a nextjs react app:
         const orcid = "https://orcid.org/0000-0000-0000-0000";
 
         // Initialize the wasm library and use it
-        init().then(() => {
+        init().then(async () => {
           const profile = new NpProfile(orcid, "User Name", privateKey, "");
 
-          const np = Nanopub.publish(rdfStr, profile, "");
+          const np = await Nanopub.publish(rdfStr, profile, "");
           setRdfOutput(np.get_rdf());
           console.log("PUBLISHED", np.toString());
         });
