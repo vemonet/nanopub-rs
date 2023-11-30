@@ -56,13 +56,14 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
 	:assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
 }
 :pubinfo {
-	: dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
-		pav:createdBy <http://orcid.org/0000-0002-1267-0234> ;
-		a npx:ExampleNanopub .
+	: a npx:ExampleNanopub .
 }`
       async function main() {
         // WebAssembly binary needs to be initialized
         await init();
+        const orcid="https://orcid.org/0000-0000-0000-0000";
+        const rdfText = document.getElementById('rdf-text');
+
         const checked = Nanopub.check(rdfStr);
         console.log("CHECKED", checked.toString());
 
@@ -72,8 +73,7 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
         rdfText.innerText = np.get_rdf();
         console.log("PUBLISHED", np.toJs());
       }
-      const orcid="https://orcid.org/0000-0000-0000-0000";
-      const rdfText = document.getElementById('rdf-text');
+      main()
     </script>
   </body>
 </html>
@@ -138,9 +138,7 @@ For example, to use it in a nextjs react app:
       :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
     }
     :pubinfo {
-      : dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
-        pav:createdBy <http://orcid.org/0000-0002-1267-0234> ;
-        a npx:ExampleNanopub .
+      : a npx:ExampleNanopub .
     }`;
         const orcid = "https://orcid.org/0000-0000-0000-0000";
 
@@ -150,7 +148,7 @@ For example, to use it in a nextjs react app:
 
           const np = await Nanopub.publish(rdfStr, profile, "");
           setRdfOutput(np.get_rdf());
-          console.log("PUBLISHED", np.toString());
+          console.log("PUBLISHED", np.toJs());
         });
       }, []);
 

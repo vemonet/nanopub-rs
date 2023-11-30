@@ -68,7 +68,7 @@ cargo test lib
 
 > Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
 
-Test the `nanopub` create with code coverage:
+Test the `nanopub` crate with code coverage:
 
 ```bash
 cargo tarpaulin -p nanopub --out html
