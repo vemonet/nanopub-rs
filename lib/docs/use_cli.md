@@ -1,6 +1,6 @@
 # ⌨️ Use from the CLI
 
-Publish Nanopubs from your terminal using the binary for your platform.
+Check, sign, and publish Nanopubs from your terminal using the binary for your platform.
 
 ## 📥️ Install
 
@@ -10,7 +10,7 @@ Download the binary adapted to your platform from the repository [Releases page]
 - 🍎 MacOS
 - 🪟 Windows
 
-Rename the binary to `np` and put it in your path.
+Rename the binary to `np` (or anything you prefer), and put it in your path.
 
 You can do it easily on Linux, MacOS, and Windows WSL, by using our install script:
 

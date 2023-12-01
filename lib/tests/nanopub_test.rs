@@ -2,13 +2,14 @@ use nanopub::{
     constants::TEST_SERVER,
     extract::extract_np_info,
     get_np_server,
+    nanopub::create_base_dataset,
     network::publish_np,
     profile::gen_keys,
     sign::normalize_dataset,
     utils::{ns, parse_rdf},
     Nanopub, NpProfile,
 };
-use sophia::inmem::dataset::LightDataset;
+use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset, iri::Iri};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -105,7 +106,7 @@ fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_get_np_server() -> Result<(), Box<dyn Error>> {
-    let np_server = get_np_server(true);
+    let _np_server = get_np_server(true);
     let np_server = get_np_server(false);
     assert_eq!(np_server, "https://server.np.trustyuri.net/");
     Ok(())
@@ -191,5 +192,28 @@ fn test_gen_keys() -> Result<(), Box<dyn Error>> {
 async fn unit_publish_np_fail() -> Result<(), Box<dyn Error>> {
     let res = publish_np(TEST_SERVER, "wrong").await;
     assert!(res.is_err());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_from_scratch() -> Result<(), Box<dyn Error>> {
+    let mut np = Nanopub::new(create_base_dataset()?)?;
+    println!("DEBUG: SCRATCH {}", np.get_rdf()?);
+    let profile = NpProfile::new("", "", &get_test_key(), None)?;
+    np.dataset.insert(
+        Iri::new_unchecked("http://example.org/mosquitoes"),
+        Iri::new_unchecked("http://example.org/transmits"),
+        Iri::new_unchecked("http://example.org/malaria"),
+        Some(&np.info.assertion),
+    )?;
+    np.dataset.insert(
+        &np.info.assertion,
+        Iri::new_unchecked("http://www.w3.org/ns/prov#hadPrimarySource"),
+        Iri::new_unchecked("http://dx.doi.org/10.3233/ISU-2010-0613"),
+        Some(&np.info.prov),
+    )?;
+    let np = np.publish(&profile, None).await?;
+    println!("DEBUG: SCRATCH 2 {}", np.get_rdf()?);
+    // assert!(res.is_err());
     Ok(())
 }

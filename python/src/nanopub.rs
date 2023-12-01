@@ -1,5 +1,7 @@
 use nanopub::{get_np_server as get_server, Nanopub, NpProfile};
 use pyo3::{exceptions::PyException, prelude::*};
+use pythonize::pythonize;
+// use pyo3::types::IntoPyDict;
 // use pyo3_asyncio::generic::future_into_py;
 use tokio::runtime::Runtime;
 
@@ -11,13 +13,13 @@ pub struct NanopubPy {
 
 #[pymethods]
 impl NanopubPy {
-    // #[new]
-    // #[pyo3(text_signature = "(rdf)")]
-    // fn new(rdf: &str) -> PyResult<Self> {
-    //     Nanopub::new(rdf)
-    //         .map(|np| Self { np })
-    //         .map_err(|e| PyErr::new::<PyException, _>(format!("{e}")))?
-    // }
+    #[new]
+    #[pyo3(text_signature = "(rdf)")]
+    fn new(rdf: &str) -> PyResult<Self> {
+        Nanopub::new(rdf)
+            .map(|np| Self { np })
+            .map_err(|e| PyErr::new::<PyException, _>(format!("{e}")))
+    }
 
     #[staticmethod]
     #[pyo3(text_signature = "(rdf)")]
@@ -28,6 +30,15 @@ impl NanopubPy {
             .map(|np| Self { np })
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
     }
+
+    // NOTE: should we make check a class method (instead of static)?
+    // But error with IRI in sophia dataset when cloning
+    // #[pyo3(text_signature = "(rdf)")]
+    // fn check(&mut self) -> PyResult<Self> {
+    //     self.clone().np.check()
+    //         .map(|np| Self { np })
+    //         .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
+    // }
 
     #[staticmethod]
     #[pyo3(text_signature = "(rdf, profile)")]
@@ -57,6 +68,21 @@ impl NanopubPy {
                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))
         });
         result.map(|np| Self { np })
+    }
+
+    #[pyo3(text_signature = "($self)")]
+    fn get_rdf(&self, _py: Python<'_>) -> PyResult<String> {
+        // py.allow_threads(|| Ok(self.np.get_rdf()))
+        self.np
+            .get_rdf()
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting RDF: {e}")))
+    }
+
+    #[pyo3(text_signature = "($self)")]
+    fn info(&self, py: Python<'_>) -> PyResult<PyObject> {
+        pythonize(py, &self.np.info).map_err(|e| {
+            PyErr::new::<PyException, _>(format!("Error converting struct info to dict: {e}"))
+        })
     }
 
     // ASYNC WITH TOKIO
@@ -117,14 +143,6 @@ impl NanopubPy {
     //     // Return the Python future object
     //     Ok(py_future)
     // }
-
-    #[pyo3(text_signature = "($self)")]
-    fn get_rdf(&self, _py: Python<'_>) -> PyResult<String> {
-        // py.allow_threads(|| Ok(self.np.get_rdf()))
-        self.np
-            .get_rdf()
-            .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting RDF: {e}")))
-    }
 }
 
 #[pyclass(name = "NpProfile", module = "nanopub_sign")]

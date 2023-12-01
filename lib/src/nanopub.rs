@@ -22,20 +22,20 @@ use std::{fmt, str};
 
 /// Trait to provide the nanopub RDF as string or sophia dataset
 pub trait RdfSource {
-    fn get_dataset(&self) -> Result<LightDataset, NpError>;
+    fn get_dataset(self) -> Result<LightDataset, NpError>;
 }
 impl RdfSource for LightDataset {
-    fn get_dataset(&self) -> Result<LightDataset, NpError> {
-        Ok(self.to_owned())
+    fn get_dataset(self) -> Result<LightDataset, NpError> {
+        Ok(self)
     }
 }
 impl RdfSource for &str {
-    fn get_dataset(&self) -> Result<LightDataset, NpError> {
+    fn get_dataset(self) -> Result<LightDataset, NpError> {
         parse_rdf(self)
     }
 }
 impl RdfSource for &String {
-    fn get_dataset(&self) -> Result<LightDataset, NpError> {
+    fn get_dataset(self) -> Result<LightDataset, NpError> {
         parse_rdf(self)
     }
 }

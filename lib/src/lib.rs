@@ -18,6 +18,7 @@ pub mod network;
 pub mod profile;
 pub mod sign;
 pub mod utils;
+pub use error::NpError;
 /// A module to sign, publish, or check [Nanopublications](https://nanopub.net).
 ///
 /// ## Usage
@@ -39,6 +40,6 @@ pub mod utils;
 /// });
 /// println!("{}", published_np)
 /// ```
-pub use nanopub::Nanopub;
+pub use nanopub::{create_base_dataset, Nanopub};
 pub use profile::NpProfile;
 pub use utils::get_np_server;

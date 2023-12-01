@@ -9,6 +9,49 @@ The usual process to make a contribution is to:
 5. Add tests if possible to cover the lines you added.
 6. Commit, and send a Pull Request.
 
+## ️🗺️ Architecture details
+
+### 🗃️ Folder structure
+
+```
+nanopub-rs/
+├── lib/
+│   ├── src/
+│   │   └── 🦀 Source code for the core Rust crate.
+│   ├── tests/
+│   │   └── 🧪 Tests for the core Rust crate.
+│   └── docs/
+│       └── 📖 Markdown and HTML files for the documentation website.
+├── python/
+│   └── 🐍 Python bindings for interacting with the Rust crate.
+├── js/
+│   └── 🌐 JavaScript bindings for integrating into JS environments.
+├── cli/
+│   └── ⌨️ Scripts for the command-line interface.
+├── scripts/
+│   └── 🛠️ Development scripts (build docs, testing).
+└── .github/
+    └── workflows/
+        └── ⚙️ Automated CI/CD workflows.
+```
+
+### ✒️ Nanopub signing process
+
+- Preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `https://w3id.org/np/ `, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
+- Preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
+- Signature is calculated on this normalized representation (cf. most of the process in the [trusty-uri python lib](https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15), see also [SignatureUtils](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/extra/security/SignatureUtils.java#L196) and [trusty-uri](https://github.com/trustyuri/trustyuri-java/blob/08b61fbb13d20a5cbefde617bd9a9e9b0b03d780/src/main/java/net/trustyuri/rdf/RdfHasher.java#L86))
+- Signature triple is added
+- Trusty URI code is calculated on normalized representation that includes signature
+- Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
+
+### ☑️ To do
+
+- [ ] Add possibility to build the nanopub from scratch for JS and python
+- [ ] Integrate to the python `nanopub` library to perform signing?
+- [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
+- [ ] Add Java bindings? https://docs.rs/jni/latest/jni
+- [ ] Add brew packaging? (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))
+
 ## 🧑‍💻 Development workflow
 
 [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/vemonet/nanopub-rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/vemonet/nanopub-rs) [![dependency status](https://deps.rs/repo/github/vemonet/nanopub-rs/status.svg)](https://deps.rs/repo/github/vemonet/nanopub-rs)
@@ -66,8 +109,6 @@ If tests panic without telling on which test it failed:
 cargo test -- --test-threads=1
 ```
 
-> Checkout the README in the `python` and `js` folder for the instructions to build and test for each language
-
 Test the `nanopub` crate with code coverage:
 
 ```bash
@@ -80,6 +121,37 @@ Test signing a nanopublication with the CLI:
 cd cli
 cargo run -- sign ../lib/tests/resources/nanopub_test_blank.trig
 ```
+
+### 🐍 Run python
+
+Build the pip package, and run the `python/try.py` script:
+
+```bash
+./scripts/run-python.sh
+```
+
+Or just run the script:
+
+```bash
+source .venv/bin/activate
+python python/try.py
+```
+
+### 🟨 Run JavaScript
+
+Build the npm package:
+
+```bash
+./scripts/run-js.py
+```
+
+Start a web server:
+
+```bash
+python -m http.server 3000 --directory ./js
+```
+
+Open [localhost:3000](http://localhost:3000) in your web browser.
 
 ### ✨ Format
 
@@ -135,49 +207,7 @@ cargo install cargo-release cargo-outdated
 
 4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
 
-> TODO: try `cargo release patch --no-tag --no-publish`
-
-## ️🗺️ Architecture details
-
-### 🗃️ Folder structure
-
-```
-nanopub-rs/
-├── lib/
-│   ├── src/
-│   │   └── 🦀 Source code for the core Rust crate.
-│   ├── tests/
-│   │   └── 🧪 Tests for the core Rust crate.
-│   └── docs/
-│       └── 📖 Markdown and HTML files for the documentation website.
-├── python/
-│   └── 🐍 Python bindings for interacting with the Rust crate.
-├── js/
-│   └── 🌐 JavaScript bindings for integrating into JS environments.
-├── cli/
-│   └── ⌨️ Scripts for the command-line interface.
-├── scripts/
-│   └── 🛠️ Development scripts (build docs, testing).
-└── .github/
-    └── workflows/
-        └── ⚙️ Automated CI/CD workflows.
-```
-
-### ✒️ Nanopub signing process
-
-- Preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `https://w3id.org/np/ `, cf. [code](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
-- Preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
-- Signature is calculated on this normalized representation (cf. most of the process in the [trusty-uri python lib](https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15), see also [SignatureUtils](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/extra/security/SignatureUtils.java#L196) and [trusty-uri](https://github.com/trustyuri/trustyuri-java/blob/08b61fbb13d20a5cbefde617bd9a9e9b0b03d780/src/main/java/net/trustyuri/rdf/RdfHasher.java#L86))
-- Signature triple is added
-- Trusty URI code is calculated on normalized representation that includes signature
-- Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
-
-### ☑️ To do
-
-- [ ] Integrate to the python `nanopub` library to perform signing?
-- [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
-- [ ] Add Java bindings? https://docs.rs/jni/latest/jni
-- [ ] Add brew packaging (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))?
+<!-- Try `cargo release patch --no-tag --no-publish`? -->
 
 ## ⏱️ Speed comparison
 
