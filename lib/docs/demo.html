@@ -164,13 +164,13 @@
           }
           const profile = new NpProfile(orcid, "Your Name", privKey, "");
           try {
-            // const checked = Nanopub.check(rdfStr);
-            // console.log("CHECKED", checked.toJs());
-            // const np = Nanopub.sign(rdfStr, profile)
+            // const checked = new Nanopub(rdfStr).check();
+            // console.log("CHECKED", checked.info());
+            // const np = new Nanopub(rdfStr).sign(profile)
 
-            const np = await Nanopub.publish(rdfStr, profile, serverUrl)
+            const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
             oeditor.setValue(np.get_rdf());
-            console.log("Published Nanopub:", np.toString());
+            console.log("Published Nanopub:", np.info());
           } catch (err) {
             // oeditor.setValue(error.toString());
             displayError(err);
@@ -209,15 +209,14 @@
         // Generate key pair and publish Nanopub intro
         const introBtn = document.getElementById('publish-intro-btn')
         introBtn.addEventListener('click', async (event) => {
-          let keypair = new KeyPair()
-          keypair = keypair.toJs()
-          console.log("PUB INTRO", orcidToken, keypair.private)
+          let keypair = new KeyPair();
+          keypair = keypair.info();
           const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
           // Publish nanopub link to public key
           const intro = Nanopub.publish_intro(profile, getNpServer(false))
             .then(np => {
               oeditor.setValue(np.get_rdf());
-              console.log("Published Introduction Nanopub:", np.toString());
+              console.log("Published Introduction Nanopub:", np.info());
               // Display private key
               document.getElementById("privkey-card").classList.remove("hidden");
               document.getElementById("display-privkey").textContent = keypair.private

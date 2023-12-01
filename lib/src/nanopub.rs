@@ -128,7 +128,7 @@ impl Nanopub {
             // Check Trusty hash if found
             let expected_hash = make_trusty(
                 &self.dataset,
-                &self.info.ns,
+                &self.info.uri,
                 &self.info.normalized_ns,
                 &self.info.separator_after_trusty,
             )?;
@@ -151,7 +151,7 @@ impl Nanopub {
             // Normalize nanopub nquads to a string
             let norm_quads = normalize_dataset(
                 &unsigned_dataset,
-                &self.info.ns,
+                &self.info.uri,
                 &self.info.normalized_ns,
                 &self.info.separator_after_trusty,
             )?;
@@ -204,7 +204,7 @@ impl Nanopub {
         openssl_probe::init_ssl_cert_env_vars();
         self.dataset = replace_bnodes(&self.dataset, &self.info.ns, &self.info.uri)?;
         self.info = extract_np_info(&self.dataset)?;
-        println!("SIGN INFO {}", self.info);
+        // println!("DEBUG: sign info {}", self.info);
 
         // Add triples about the signature in the pubinfo
         self.dataset.insert(

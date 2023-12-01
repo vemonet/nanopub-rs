@@ -63,15 +63,17 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
         await init();
         const orcid="https://orcid.org/0000-0000-0000-0000";
         const rdfText = document.getElementById('rdf-text');
-
-        const checked = Nanopub.check(rdfStr);
-        console.log("CHECKED", checked.toString());
-
+        const serverUrl = "";
         const profile = new NpProfile(orcid, "Your Name", private_key, "");
 
-        const np = await Nanopub.publish(rdfStr, profile, "");
+        const checked = new Nanopub(rdfStr).check();
+        console.log("CHECKED", checked.info());
+        const signed = new Nanopub(rdfStr).sign(profile)
+        console.log("SIGNED", signed.info());
+
+        const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
+        console.log("PUBLISHED", np.info());
         rdfText.innerText = np.get_rdf();
-        console.log("PUBLISHED", np.toJs());
       }
       main()
     </script>
@@ -144,11 +146,12 @@ For example, to use it in a nextjs react app:
 
         // Initialize the wasm library and use it
         init().then(async () => {
+          const serverUrl = "";
           const profile = new NpProfile(orcid, "User Name", privateKey, "");
 
-          const np = await Nanopub.publish(rdfStr, profile, "");
+          const np = await new Nanopub(rdfStr).publish(profile, serverUrl)
+          console.log("PUBLISHED", np.info());
           setRdfOutput(np.get_rdf());
-          console.log("PUBLISHED", np.toJs());
         });
       }, []);
 

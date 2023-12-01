@@ -20,7 +20,7 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
     let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
-    // println!("{}", np);
+    println!("{}", np.get_rdf()?);
     assert!(np.info.published);
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(

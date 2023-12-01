@@ -3,6 +3,7 @@ use crate::error::{NpError, TermError};
 use crate::utils::ns;
 
 use regex::Regex;
+use serde::{Serialize, Serializer};
 use sophia::api::dataset::Dataset;
 use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
@@ -12,9 +13,10 @@ use sophia::iri::Iri;
 use std::fmt;
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct NpInfo {
     pub uri: Iri<String>,
+    #[serde(serialize_with = "serialize_namespace")]
     pub ns: Namespace<String>,
     pub normalized_ns: String,
     pub head: Iri<String>,
@@ -122,8 +124,20 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         ));
     }
 
+    // Get just the Trusty hash from the URI
+    let mut trusty_hash: String = "".to_string();
+    let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
+    if let Some(caps) = re_trusty.captures(&np_iri.as_ref()) {
+        // The first group captures everything up to a '/' or '#', non-greedy.
+        trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
+    }
+
     // Getting potential ns from head graph (removing the last frag from head)
-    let original_ns = &head_iri[..np_iri.len()];
+    let original_ns = if trusty_hash.is_empty() {
+        &head_iri[..np_iri.len()]
+    } else {
+        &head_iri[..np_iri.len() + 1]
+    };
     let np_ns = Namespace::new_unchecked(original_ns.to_string());
 
     // Remove last char if it is # or / to get the URI
@@ -142,14 +156,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut base_uri: String = "".to_string();
     let mut separator_before_trusty: String = '.'.to_string();
     let mut separator_after_trusty: String = "".to_string();
-    let mut trusty_hash: String = "".to_string();
-
-    // Get just the Trusty hash from the URI
-    let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
-    if let Some(caps) = re_trusty.captures(&np_iri.as_ref()) {
-        // The first group captures everything up to a '/' or '#', non-greedy.
-        trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
-    }
 
     // Get the base URI and separators from the namespace
     let re_trusty_ns = Regex::new(r"^(.*?)(/|#|\.)?(RA[a-zA-Z0-9-_]*)?([#/\.])?$")?;
@@ -170,7 +176,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     if trusty_hash.is_empty() && separator_after_trusty.is_empty() {
         separator_after_trusty = "#".to_string()
     };
-    // println!("DEBUG: Extracted URIs: {} {} {}", np_iri, np_ns.get("")?, trusty_hash);
 
     // Generate normalized namespace without trusty
     let norm_ns = if !trusty_hash.is_empty() {
@@ -240,73 +245,6 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let assertion_iri = Iri::new_unchecked(assertion);
     let prov_iri = Iri::new_unchecked(prov);
 
-    // Check minimal required triples in assertion, prov, pubinfo graphs
-    // if dataset
-    //     .quads_matching(Any, Any, Any, [Some(assertion_iri.clone())])
-    //     .next()
-    //     .is_none()
-    // {
-    //     return Err(NpError(
-    //         "Invalid Nanopub: no triples in the assertion graph.".to_string(),
-    //     ));
-    // }
-    // if dataset
-    //     .quads_matching(Any, Any, Any, [Some(prov_iri.clone())])
-    //     .next()
-    //     .is_none()
-    // {
-    //     return Err(NpError(
-    //         "Invalid Nanopub: no triples in the provenance graph.".to_string(),
-    //     ));
-    // }
-    // if dataset
-    //     .quads_matching([assertion_iri.clone()], Any, Any, [Some(prov_iri.clone())])
-    //     .next()
-    //     .is_none()
-    // {
-    //     return Err(NpError("Invalid Nanopub: no triples with the assertion graph as subject in the provenance graph.".to_string()));
-    // }
-    // if check_pubinfo {
-    //     if dataset
-    //         .quads_matching(Any, Any, Any, [Some(pubinfo_iri.clone())])
-    //         .next()
-    //         .is_none()
-    //     {
-    //         return Err(NpError(
-    //             "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
-    //         ));
-    //     }
-    //     if dataset
-    //         .quads_matching(
-    //             [
-    //                 np_iri.clone(),
-    //                 Iri::new_unchecked(np_ns.get("")?.to_string()),
-    //             ],
-    //             Any,
-    //             Any,
-    //             [Some(pubinfo_iri.clone())],
-    //         )
-    //         .next()
-    //         .is_none()
-    //     {
-    //         return Err(NpError(
-    //             "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
-    //                 .to_string(),
-    //         ));
-    //     }
-    // }
-    // let mut graph_names = HashSet::new();
-    // for g in dataset.graph_names() {
-    //     if let Some(graph_name) = g?.iri() {
-    //         graph_names.insert(graph_name.to_string());
-    //     }
-    // }
-    // if graph_names.len() > 4 {
-    //     return Err(NpError(
-    //         format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
-    //     ));
-    // }
-
     Ok(NpInfo {
         uri: np_iri,
         ns: np_ns,
@@ -326,4 +264,12 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         orcid: orcid.unwrap_or("".to_string()),
         published: false,
     })
+}
+
+// Custom serialize function for Namespace
+fn serialize_namespace<S>(ns: &Namespace<String>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(ns.as_str())
 }

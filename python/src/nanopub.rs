@@ -12,6 +12,13 @@ pub struct NanopubPy {
 #[pymethods]
 impl NanopubPy {
     // #[new]
+    // #[pyo3(text_signature = "(rdf)")]
+    // fn new(rdf: &str) -> PyResult<Self> {
+    //     Nanopub::new(rdf)
+    //         .map(|np| Self { np })
+    //         .map_err(|e| PyErr::new::<PyException, _>(format!("{e}")))?
+    // }
+
     #[staticmethod]
     #[pyo3(text_signature = "(rdf)")]
     fn check(rdf: &str) -> PyResult<Self> {

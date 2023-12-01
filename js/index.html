@@ -73,19 +73,27 @@
           event.preventDefault();
           const rdfStr = rdfInput.value
           // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
-          const keypair = new KeyPair()
-          console.log("KEYS", keypair.toJs())
+          // const keypair = new KeyPair()
+          // console.log("KEYS", keypair.info())
 
-          const checked = Nanopub.check(rdfStr);
-          console.log("CHECKED", checked.toJs());
+          // const checked = Nanopub.check(rdfStr);
+          // console.log("CHECKED", checked.info());
 
           const profile = new NpProfile(orcid, "Your Name", privKey, "");
-          const np = await Nanopub.publish(rdfStr, profile, "")
+          // const np = await Nanopub.publish(rdfStr, profile, "")
+          const np = await new Nanopub(rdfStr).publish(profile, "");
+          // console.log(np.get_rdf());
+          // await np.publish(profile, "");
           rdfOutput.innerText = np.get_rdf();
-          console.log("Published Nanopub:", np.toJs());
+          console.log("Published Nanopub:", np.info());
+          // new Nanopub(rdfStr).publish(profile, "")
+          //   .then(np => {
+          //     rdfOutput.innerText = np.get_rdf();
+          //     console.log("Published Nanopub:", np.info());
+          //   })
         })
       }
-
+      main();
     </script>
   </body>
 </html>
