@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 NpProfile::from_file(profile_file)?
             };
             println!("✍️  Signing {}", np_file);
-            let np = Nanopub::sign(&np_rdf, &profile)?;
+            let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
             println!("{}", np);
 
             // Prefix the nanopub filename with "signed."
@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .to_str()
                     .ok_or_else(|| NpError("Error getting signed path".to_string()))?
             );
-            let _ = fs::write(signed_path, np.get_rdf());
+            let _ = fs::write(signed_path, np.get_rdf()?);
         }
         Some(("publish", sub)) => {
             let orcid = "http://orcid.org/0000-0000-0000-0000";
@@ -112,11 +112,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             };
             if test_server {
                 println!("🧪 Publishing {np_file} to test server");
-                let _ = Nanopub::publish(&np_rdf, &profile, None).await;
+                let _ = Nanopub::new(&np_rdf)?.publish(&profile, None).await;
             } else {
                 let server = get_np_server(true);
                 println!("📬️ Publishing {np_file} to {server}");
-                let _ = Nanopub::publish(&np_rdf, &profile, Some(server)).await;
+                let _ = Nanopub::new(&np_rdf)?.publish(&profile, Some(server)).await;
             }
         }
         Some(("check", sub)) => {
@@ -124,7 +124,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Read RDF file
             let np_rdf = fs::read_to_string(np_file)?;
             println!("🔎 Checking {}", np_file);
-            Nanopub::check(&np_rdf)?;
+            Nanopub::new(&np_rdf)?.check()?;
             // println!("{}", np);
         }
         Some(("completions", sub)) => {

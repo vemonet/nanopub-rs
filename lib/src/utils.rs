@@ -57,6 +57,7 @@ pub fn serialize_rdf(dataset: &LightDataset, uri: &str, ns: &str) -> Result<Stri
         .with_pretty(true)
         .with_prefix_map(&prefixes[..]);
     let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
+    println!("PREFIXES GOT");
     Ok(trig_stringifier.serialize_dataset(&dataset)?.to_string())
 }
 

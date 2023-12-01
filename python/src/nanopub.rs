@@ -15,7 +15,9 @@ impl NanopubPy {
     #[staticmethod]
     #[pyo3(text_signature = "(rdf)")]
     fn check(rdf: &str) -> PyResult<Self> {
-        Nanopub::check(rdf)
+        Nanopub::new(rdf)
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))?
+            .check()
             .map(|np| Self { np })
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
     }
@@ -23,7 +25,9 @@ impl NanopubPy {
     #[staticmethod]
     #[pyo3(text_signature = "(rdf, profile)")]
     fn sign(rdf: &str, profile: &NpProfilePy) -> PyResult<Self> {
-        Nanopub::sign(rdf, &profile.profile)
+        Nanopub::new(rdf)
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Signing: {e}")))?
+            .sign(&profile.profile)
             .map(|np| Self { np })
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error Signing: {e}")))
     }
@@ -39,7 +43,9 @@ impl NanopubPy {
             PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
         })?;
         let result = rt.block_on(async move {
-            Nanopub::publish(&rdf, &profile, server_url.as_deref())
+            Nanopub::new(&rdf)
+                .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))?
+                .publish(&profile, server_url.as_deref())
                 .await
                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))
         });
@@ -108,7 +114,9 @@ impl NanopubPy {
     #[pyo3(text_signature = "($self)")]
     fn get_rdf(&self, _py: Python<'_>) -> PyResult<String> {
         // py.allow_threads(|| Ok(self.np.get_rdf()))
-        Ok(self.np.get_rdf())
+        self.np
+            .get_rdf()
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting RDF: {e}")))
     }
 }
 

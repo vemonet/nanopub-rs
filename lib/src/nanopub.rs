@@ -1,6 +1,6 @@
 use crate::constants::{BOLD, END, NP_TEMP_URI, TEST_SERVER};
 use crate::error::NpError;
-use crate::extract::extract_np_info;
+use crate::extract::{extract_np_info, NpInfo};
 use crate::network::{fetch_np, publish_np};
 use crate::profile::NpProfile;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
@@ -11,7 +11,6 @@ use base64::{engine, Engine as _};
 use chrono::Utc;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
-use serde::Serialize;
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, xsd, Namespace};
 use sophia::api::term::matcher::Any;
@@ -41,39 +40,35 @@ impl RdfSource for &String {
 }
 
 /// A nanopublication object
-#[derive(Clone, Serialize)]
+#[derive(Clone)]
 pub struct Nanopub {
-    pub uri: String,
-    pub ns: String,
-    pub rdf: String,
-    pub trusty_hash: String,
-    pub signature_hash: String,
-    pub public_key: String,
-    pub orcid: String,
-    pub published: bool,
-    // pub info: NpInfo,
-    // pub dataset: LightDataset,
+    pub info: NpInfo,
+    pub dataset: LightDataset,
 }
 
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "\n{}", self.rdf)?;
-        writeln!(f, "URI: {}", self.uri)?;
-        writeln!(f, "Trusty hash: {}", self.trusty_hash)?;
-        writeln!(f, "Signature hash: {}", self.signature_hash)?;
-        writeln!(f, "Public key: {}", self.public_key)?;
-        writeln!(f, "Published: {}", self.published)?;
+        // TODO: the get_rdf() creates a panic
+        // writeln!(f, "\n{:?}", self.get_rdf())?;
+        writeln!(f, "URI: {}", self.info.uri)?;
+        writeln!(f, "Trusty hash: {}", self.info.trusty_hash)?;
+        writeln!(f, "Signature hash: {}", self.info.signature)?;
+        writeln!(f, "Public key: {}", self.info.public_key)?;
+        writeln!(f, "Published: {}", self.info.published)?;
         Ok(())
     }
 }
 
 impl Nanopub {
     // // TODO: change approach to use Nanopub::new(rdf).sign()?
-    // pub fn new<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
-    //     let mut dataset = rdf.get_dataset()?;
-    //     let np_info = extract_np_info(&dataset, false)?;
-    //     // Ok(Self { info: np_info, dataset, published: false })
-    // }
+    pub fn new<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
+        let dataset = rdf.get_dataset()?;
+        let np_info = extract_np_info(&dataset, false)?;
+        Ok(Self {
+            info: np_info,
+            dataset,
+        })
+    }
 
     /// Fetch a Nanopub given its URI.
     ///
@@ -97,17 +92,11 @@ impl Nanopub {
     pub async fn fetch(url: &str) -> Result<Self, NpError> {
         let np_rdf = fetch_np(url).await?;
         let dataset: LightDataset = parse_rdf(&np_rdf)?;
-        let np_info = extract_np_info(&dataset, true)?;
-        // TODO: do a Nanopub::check()?
+        let mut np_info = extract_np_info(&dataset, true)?;
+        np_info.published = true;
         Ok(Self {
-            uri: np_info.uri.to_string(),
-            ns: np_info.ns.to_string(),
-            rdf: np_rdf,
-            trusty_hash: np_info.trusty_hash,
-            signature_hash: np_info.signature,
-            public_key: np_info.public_key,
-            orcid: np_info.orcid,
-            published: true,
+            info: np_info,
+            dataset,
         })
     }
     /// Check a given Nanopub RDF is valid (check trusty hash and signature).
@@ -127,57 +116,58 @@ impl Nanopub {
     /// let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig").unwrap();
     /// let orcid = "https://orcid.org/0000-0000-0000-0000";
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    /// let np = Nanopub::check(&np_rdf).unwrap();
+    /// let np = Nanopub::new(&np_rdf).unwrap().check();
     /// ```
-    pub fn check<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
-        let mut dataset = rdf.get_dataset()?;
-        let np_info = extract_np_info(&dataset, true)?;
+    pub fn check(&self) -> Result<Self, NpError> {
+        extract_np_info(&self.dataset, true)?;
+        // TODO: move the pubinfo checks in a separate function
 
         let mut msg: String = "".to_string();
-        if np_info.trusty_hash.is_empty() {
+        if self.info.trusty_hash.is_empty() {
             msg = format!("{}1 valid (not trusty)", msg);
         } else {
             // Check Trusty hash if found
             let expected_hash = make_trusty(
-                &dataset,
-                &np_info.ns,
-                &np_info.normalized_ns,
-                &np_info.separator_after_trusty,
+                &self.dataset,
+                &self.info.ns,
+                &self.info.normalized_ns,
+                &self.info.separator_after_trusty,
             )?;
-            if expected_hash != np_info.trusty_hash {
-                return Err(NpError(format!("Invalid Nanopub: the hash of the nanopublication is different than the expected hash \n{}\n{}", np_info.trusty_hash, expected_hash).to_string()));
+            if expected_hash != self.info.trusty_hash {
+                return Err(NpError(format!("Invalid Nanopub: the hash of the nanopublication is different than the expected hash \n{}\n{}", self.info.trusty_hash, expected_hash).to_string()));
             }
             msg = format!("{}1 trusty", msg);
         }
 
+        let mut unsigned_dataset = self.dataset.clone();
         // Check signature if found
-        if !np_info.signature.is_empty() {
+        if !self.info.signature.is_empty() {
             // Remove the signature from the graph before re-generating it
-            dataset.remove(
-                &np_info.signature_iri,
+            unsigned_dataset.remove(
+                &self.info.signature_iri,
                 ns("npx").get("hasSignature")?,
-                np_info.signature.as_str(),
-                Some(&np_info.pubinfo),
+                self.info.signature.as_str(),
+                Some(&self.info.pubinfo),
             )?;
             // Normalize nanopub nquads to a string
             let norm_quads = normalize_dataset(
-                &dataset,
-                &np_info.ns,
-                &np_info.normalized_ns,
-                &np_info.separator_after_trusty,
+                &unsigned_dataset,
+                &self.info.ns,
+                &self.info.normalized_ns,
+                &self.info.separator_after_trusty,
             )?;
             // println!("NORMED QUADS CHECK\n{}", norm_quads);
 
             // Load public key
             let pubkey = RsaPublicKey::from_public_key_der(
-                &engine::general_purpose::STANDARD.decode(&np_info.public_key)?,
+                &engine::general_purpose::STANDARD.decode(&self.info.public_key)?,
             )?;
 
             // Regenerate and check the signature hash
             pubkey.verify(
                 Pkcs1v15Sign::new::<Sha256>(),
                 &Sha256::digest(norm_quads.as_bytes()),
-                &engine::general_purpose::STANDARD.decode(np_info.signature.as_bytes())?,
+                &engine::general_purpose::STANDARD.decode(self.info.signature.as_bytes())?,
             )?;
             msg = format!("{} with signature", msg);
         } else {
@@ -186,20 +176,11 @@ impl Nanopub {
 
         println!(
             "\n✅ Nanopub {}{}{} is valid: {}",
-            BOLD, np_info.uri, END, msg
+            BOLD, self.info.uri, END, msg
         );
-        let rdf = serialize_rdf(&dataset, &np_info.uri.as_ref(), &np_info.ns.as_ref())?;
+        // let rdf = serialize_rdf(&self.dataset, &self.info.uri.as_ref(), &self.info.ns.as_ref())?;
         // TODO: check if the np has been published with Nanopub::fetch
-        Ok(Self {
-            uri: np_info.uri.to_string(),
-            ns: np_info.ns.to_string(),
-            rdf,
-            trusty_hash: np_info.trusty_hash,
-            signature_hash: np_info.signature,
-            public_key: np_info.public_key,
-            orcid: np_info.orcid,
-            published: false,
-        })
+        Ok(self.to_owned())
     }
 
     /// Sign an unsigned nanopub RDF and add trusty URI
@@ -218,49 +199,45 @@ impl Nanopub {
     /// let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
     /// let orcid = "https://orcid.org/0000-0000-0000-0000";
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
-    /// let np = Nanopub::sign(&np_rdf, &profile).unwrap();
+    /// let np = Nanopub::new(&np_rdf).unwrap().sign(&profile);
     /// ```
-    pub fn sign<T: RdfSource>(rdf: T, profile: &NpProfile) -> Result<Self, NpError> {
+    pub fn sign(mut self, profile: &NpProfile) -> Result<Self, NpError> {
         openssl_probe::init_ssl_cert_env_vars();
-        let mut dataset = rdf.get_dataset()?;
-
-        // Extract graph URLs from the nanopub (fails if np not valid)
-        let np_info = extract_np_info(&dataset, false)?;
-
-        dataset = replace_bnodes(&dataset, &np_info.ns, &np_info.uri)?;
-
-        let np_info = extract_np_info(&dataset, false)?;
+        self.dataset = replace_bnodes(&self.dataset, &self.info.ns, &self.info.uri)?;
+        self.info = extract_np_info(&self.dataset, false)?;
+        println!("SIGN INFO {}", self.info);
 
         // Add triples about the signature in the pubinfo
-        dataset.insert(
-            np_info.ns.get("sig")?,
+        self.dataset.insert(
+            self.info.ns.get("sig")?,
             ns("npx").get("hasPublicKey")?,
             &*profile.public_key,
-            Some(&np_info.pubinfo),
+            Some(&self.info.pubinfo),
         )?;
-        dataset.insert(
-            np_info.ns.get("sig")?,
+        self.dataset.insert(
+            self.info.ns.get("sig")?,
             ns("npx").get("hasAlgorithm")?,
             "RSA",
-            Some(&np_info.pubinfo),
+            Some(&self.info.pubinfo),
         )?;
-        dataset.insert(
-            np_info.ns.get("sig")?,
+        self.dataset.insert(
+            self.info.ns.get("sig")?,
             ns("npx").get("hasSignatureTarget")?,
-            np_info.ns.get("")?,
-            Some(&np_info.pubinfo),
+            self.info.ns.get("")?,
+            Some(&self.info.pubinfo),
         )?;
 
         // If not already set, automatically add the current date to pubinfo created
-        if dataset
+        if self
+            .dataset
             .quads_matching(
                 [
-                    &np_info.uri,
-                    &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
+                    &self.info.uri,
+                    &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
                 ],
                 [ns("dct").get("created")?],
                 Any,
-                [Some(&np_info.pubinfo)],
+                [Some(&self.info.pubinfo)],
             )
             .next()
             .is_none()
@@ -269,22 +246,23 @@ impl Nanopub {
             let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
             // TODO: there is an error when trying to cast the string to xsd::dateTime
             // let lit_date = "2019" * xsd::dateTime;
-            dataset.insert(
-                np_info.ns.as_iri_ref(),
+            self.dataset.insert(
+                self.info.ns.as_iri_ref(),
                 ns("dct").get("created")?,
                 SimpleTerm::LiteralDatatype(datetime_str.into(), xsd::dateTime.iriref()),
                 // datetime_str.as_str() * xsd::dateTime,
-                Some(&np_info.pubinfo),
+                Some(&self.info.pubinfo),
             )?;
         }
 
         // If ORCID provided and not already provided, add to pubinfo graph
         if !profile.orcid_id.is_empty()
-            && dataset
+            && self
+                .dataset
                 .quads_matching(
                     [
-                        &np_info.uri,
-                        &Iri::new_unchecked(np_info.ns.get("")?.to_string()),
+                        &self.info.uri,
+                        &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
                     ],
                     [
                         ns("dct").get("creator")?,
@@ -292,25 +270,25 @@ impl Nanopub {
                         ns("pav").get("createdBy")?,
                     ],
                     Any,
-                    [Some(&np_info.pubinfo)],
+                    [Some(&self.info.pubinfo)],
                 )
                 .next()
                 .is_none()
         {
-            dataset.insert(
-                np_info.ns.as_iri_ref(),
+            self.dataset.insert(
+                self.info.ns.as_iri_ref(),
                 ns("dct").get("creator")?,
                 Iri::new_unchecked(profile.orcid_id.clone()),
-                Some(&np_info.pubinfo),
+                Some(&self.info.pubinfo),
             )?;
         }
 
         // Normalize nanopub nquads to a string
         let norm_quads = normalize_dataset(
-            &dataset,
-            np_info.ns.as_str(),
-            &np_info.normalized_ns,
-            &np_info.separator_after_trusty,
+            &self.dataset,
+            self.info.ns.as_str(),
+            &self.info.normalized_ns,
+            &self.info.separator_after_trusty,
         )?;
         // println!("NORMED QUADS sign before add signature\n{}", norm_quads);
 
@@ -321,37 +299,33 @@ impl Nanopub {
         )?;
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
         // Add the signature to the pubinfo graph
-        dataset.insert(
-            np_info.ns.get("sig")?,
+        self.dataset.insert(
+            self.info.ns.get("sig")?,
             ns("npx").get("hasSignature")?,
             &*signature_hash,
-            Some(&np_info.pubinfo),
+            Some(&self.info.pubinfo),
         )?;
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
         let trusty_hash = make_trusty(
-            &dataset,
-            &np_info.ns,
-            &np_info.normalized_ns,
-            &np_info.separator_after_trusty,
+            &self.dataset,
+            &self.info.ns,
+            &self.info.normalized_ns,
+            &self.info.separator_after_trusty,
         )?;
-        let trusty_uri = format!("{}{trusty_hash}", np_info.normalized_ns);
+        let trusty_uri = format!("{}{trusty_hash}", self.info.normalized_ns);
         let trusty_ns = format!("{trusty_uri}#");
-        dataset =
-            replace_ns_in_quads(&dataset, &np_info.ns, &np_info.uri, &trusty_ns, &trusty_uri)?;
-
-        let rdf_str = serialize_rdf(&dataset, &trusty_uri, &trusty_ns)?;
+        self.dataset = replace_ns_in_quads(
+            &self.dataset,
+            &self.info.ns,
+            &self.info.uri,
+            &trusty_ns,
+            &trusty_uri,
+        )?;
+        // TODO: it would be more efficient to assign the self.info field directly in the code above
+        self.info = extract_np_info(&self.dataset, true)?;
         // Return the signed Nanopub object
-        Ok(Self {
-            uri: trusty_uri,
-            ns: trusty_ns,
-            rdf: rdf_str,
-            trusty_hash,
-            signature_hash,
-            public_key: profile.public_key.to_string(),
-            orcid: profile.orcid_id.to_string(),
-            published: false,
-        })
+        Ok(self)
     }
 
     /// Async function to sign and publish RDF to a nanopub server
@@ -376,25 +350,26 @@ impl Nanopub {
     /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
     ///
     /// let np = rt.block_on(async {
-    ///   Nanopub::publish(&np_rdf, &profile, None).await
+    ///   Nanopub::new(&np_rdf).unwrap().publish(&profile, None).await
     /// }).unwrap();
     /// ```
-    pub async fn publish<T: RdfSource>(
-        rdf: T,
+    pub async fn publish(
+        mut self,
         profile: &NpProfile,
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
-        openssl_probe::init_ssl_cert_env_vars();
-        let dataset = rdf.get_dataset()?;
-        let np_info = extract_np_info(&dataset, false)?;
-
-        let mut np = if np_info.signature.is_empty() {
+        println!("INFO PUBLISH {}", &self.info);
+        println!("PUBLISH 1 {:?}", self.dataset);
+        // println!("PUBLISH 1 {:?}", self.get_rdf()?);
+        self = if self.info.signature.is_empty() {
             println!("Nanopub not signed, signing it before publishing");
-            Nanopub::sign(rdf, profile)?
+            self.sign(profile)?
         } else {
             // If the nanopub is already signed we verify it, then publish it
-            Nanopub::check(rdf)?
+            self.check()?
         };
+        println!("PUBLISH 2");
+        println!("PUBLISH 3 {:?}", self.get_rdf()?);
 
         let server_url = if let Some(server_url) = server_url {
             server_url.to_string()
@@ -406,22 +381,24 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
-        let published = publish_np(&server_url, &np.get_rdf()).await?;
+        let published = publish_np(&server_url, &self.get_rdf()?).await?;
         if published {
             println!(
                 "\n🎉 Nanopublication published at {}{}{}",
-                BOLD, np.uri, END
+                BOLD, self.info.uri, END
             );
         } else {
-            println!("\n❌ Issue publishing the Nanopublication \n{}", np);
+            println!("\n❌ Issue publishing the Nanopublication \n{}", self);
             // TODO: when publish fails, should we return a Nanopub struct with published=false, or throw an error?
             return Err(NpError(format!(
                 "Issue publishing the Nanopublication \n{}",
-                np
+                self
             )));
         }
-        np.set_published(published);
-        Ok(np)
+        // self.set_published(published);
+        self.info.published = true;
+        println!("PUBLISH 4 {}", self.get_rdf()?);
+        Ok(self)
     }
 
     /// Async function to sign and publish a Nanopub intro for a Profile
@@ -444,61 +421,69 @@ impl Nanopub {
     /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
     ///
     /// let np = rt.block_on(async {
-    ///   Nanopub::publish_intro(&profile, None).await
+    ///   Nanopub::new_intro(&profile).unwrap().publish(&profile, None).await
     /// }).unwrap();
     /// ```
-    pub async fn publish_intro(
-        profile: &NpProfile,
-        server_url: Option<&str>,
-    ) -> Result<Self, NpError> {
-        let mut ds = create_base_dataset()?;
+    pub fn new_intro(profile: &NpProfile) -> Result<Self, NpError> {
+        println!("INTRO 1");
+        let mut dataset = create_base_dataset()?;
+        println!("INTRO 2");
         let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
         let assertion_graph = np_ns.get("assertion")?;
         let prov_graph = np_ns.get("provenance")?;
 
         // Assertion graph triples, add key declaration
-        ds.insert(
+        dataset.insert(
             np_ns.get("keyDeclaration")?,
             ns("npx").get("declaredBy")?,
             Iri::new_unchecked(profile.orcid_id.as_str()),
             Some(&assertion_graph),
         )?;
-        ds.insert(
+        dataset.insert(
             np_ns.get("keyDeclaration")?,
             ns("npx").get("hasAlgorithm")?,
             "RSA",
             Some(&assertion_graph),
         )?;
-        ds.insert(
+        dataset.insert(
             np_ns.get("keyDeclaration")?,
             ns("npx").get("hasPublicKey")?,
             profile.public_key.as_str(),
             Some(&assertion_graph),
         )?;
-        ds.insert(
+        dataset.insert(
             Iri::new_unchecked(profile.orcid_id.as_str()),
             ns("foaf").get("name")?,
             profile.name.as_str(),
             Some(&assertion_graph),
         )?;
         // Provenance graph triples
-        ds.insert(
+        dataset.insert(
             assertion_graph,
             ns("prov").get("wasAttributedTo")?,
             assertion_graph,
             Some(&prov_graph),
         )?;
-        Nanopub::publish(ds, profile, server_url).await
+        // let mut np = Nanopub::new(ds)?;
+        println!("INTRO LAST1");
+        // println!("INTRO LAST2 {:?}", np.get_rdf());
+        // np.publish(profile, server_url).await
+        // Nanopub::new(ds)?.publish(profile, server_url).await
+        let np_info = extract_np_info(&dataset, false)?;
+        Ok(Self {
+            info: np_info,
+            dataset,
+        })
     }
 
     /// Returns the RDF of the nanopub
-    pub fn get_rdf(&self) -> String {
-        self.rdf.clone()
+    pub fn get_rdf(&self) -> Result<String, NpError> {
+        serialize_rdf(&self.dataset, self.info.uri.as_str(), self.info.ns.as_str())
     }
 
     /// Sets if the nanopub has been published to the network
     pub fn set_published(&mut self, value: bool) {
-        self.published = value;
+        self.info.published = value;
     }
 }
 

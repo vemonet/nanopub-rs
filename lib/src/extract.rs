@@ -3,6 +3,7 @@ use crate::error::{NpError, TermError};
 use crate::utils::ns;
 
 use regex::Regex;
+use serde::Serialize;
 use sophia::api::dataset::Dataset;
 use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
@@ -31,6 +32,7 @@ pub struct NpInfo {
     pub algo: String,
     pub public_key: String,
     pub orcid: String,
+    pub published: bool,
 }
 
 impl fmt::Display for NpInfo {
@@ -323,5 +325,6 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),
         orcid: orcid.unwrap_or("".to_string()),
+        published: false,
     })
 }

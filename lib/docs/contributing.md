@@ -60,10 +60,10 @@ Run a specific test:
 cargo test sign_nanopub_blank -- --nocapture
 ```
 
-Test a specific package:
+If tests panic without telling on which test it failed:
 
 ```bash
-cargo test lib
+cargo test -- --test-threads=1
 ```
 
 > Checkout the README in the `python` and `js` folder for the instructions to build and test for each language

@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
 
 #[wasm_bindgen(js_name = Nanopub)]
-#[derive(Serialize)]
+#[derive(Clone)]
 pub struct NanopubJs {
     np: Nanopub,
     // ds: LightDataset
@@ -20,7 +20,9 @@ pub struct NanopubJs {
 impl NanopubJs {
     #[wasm_bindgen(static_method_of = NanopubJs)]
     pub fn check(rdf: &str) -> Result<NanopubJs, JsValue> {
-        Nanopub::check(rdf)
+        Nanopub::new(rdf)
+            .map_err(|e| JsValue::from_str(&e.to_string()))?
+            .check()
             .map(|np| Self { np })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
@@ -36,7 +38,9 @@ impl NanopubJs {
                 .as_string()
                 .ok_or_else(|| JsValue::from_str("Failed to convert JSON-LD object to string"))?
         };
-        Nanopub::sign(&rdf_str, &profile.profile)
+        Nanopub::new(&rdf_str)
+            .map_err(|e| JsValue::from_str(&e.to_string()))?
+            .sign(&profile.profile)
             .map(|np| Self { np })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
@@ -53,7 +57,11 @@ impl NanopubJs {
         .to_string();
         // console_log!("{}", server_url);
         future_to_promise(async move {
-            match Nanopub::publish(&rdf, &profile, Some(&server_url)).await {
+            let np = match Nanopub::new(&rdf) {
+                Ok(np) => np,
+                Err(e) => return Err(JsValue::from_str(&format!("Error parsing Nanopub: {e}"))),
+            };
+            match np.publish(&profile, Some(&server_url)).await {
                 Ok(np) => Ok(JsValue::from(NanopubJs { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
                     "Error publishing the Nanopub: {e}"
@@ -72,21 +80,31 @@ impl NanopubJs {
         }
         .to_string();
         future_to_promise(async move {
-            match Nanopub::publish_intro(&profile, Some(&server_url)).await {
+            let np = match Nanopub::new_intro(&profile) {
+                Ok(np) => np,
+                Err(e) => {
+                    return Err(JsValue::from_str(&format!(
+                        "Error publishing Nanopub Introduction: {e}"
+                    )))
+                }
+            };
+            match np.publish(&profile, Some(&server_url)).await {
                 Ok(np) => Ok(JsValue::from(NanopubJs { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
-                    "Error publishing the Nanopub Introduction: {e}"
+                    "Error publishing Nanopub Introduction: {e}"
                 ))),
             }
         })
     }
 
     pub fn get_rdf(&self) -> Result<String, JsValue> {
-        Ok(self.np.get_rdf())
+        self.np
+            .get_rdf()
+            .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     pub fn published(&self) -> Result<bool, JsValue> {
-        Ok(self.np.published)
+        Ok(self.np.info.published)
     }
 
     #[wasm_bindgen(js_name = toString)]
@@ -94,10 +112,10 @@ impl NanopubJs {
         self.np.to_string()
     }
 
-    #[wasm_bindgen(js_name = toJs)]
-    pub fn to_js(&self) -> Result<JsValue, JsValue> {
-        serde_wasm_bindgen::to_value(&self.np).map_err(|e| e.into())
-    }
+    // #[wasm_bindgen(js_name = toJs)]
+    // pub fn to_js(&self) -> Result<JsValue, JsValue> {
+    //     serde_wasm_bindgen::to_value(&self.np.info).map_err(|e| e.into())
+    // }
 }
 
 /// Nanopub profile in JavaScript

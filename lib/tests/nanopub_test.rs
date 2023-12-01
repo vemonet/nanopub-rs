@@ -19,15 +19,15 @@ fn get_test_key() -> String {
 async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, None).await?;
+    let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
     // println!("{}", np);
-    assert!(np.published);
+    assert!(np.info.published);
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
-        np.trusty_hash,
+        np.info.trusty_hash,
         "RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o"
     );
-    assert_eq!(np.signature_hash, "aG7rda/gmsu8hx1fTds9oqvogs4gv8xxkc/SJCtqJjUfgbtH6P3QMafIBdRApFI1WT7qrkYqg3Qs9ugTkOjwq2EJ+IoTJq1lgeo+66th3y2LnSdsI/Lsoa/mE6TIVbjpXvwYAqPGUI4BISISJhAslFFlP54obeBarh2nsiELdf4=");
+    assert_eq!(np.info.signature, "aG7rda/gmsu8hx1fTds9oqvogs4gv8xxkc/SJCtqJjUfgbtH6P3QMafIBdRApFI1WT7qrkYqg3Qs9ugTkOjwq2EJ+IoTJq1lgeo+66th3y2LnSdsI/Lsoa/mE6TIVbjpXvwYAqPGUI4BISISJhAslFFlP54obeBarh2nsiELdf4=");
     Ok(())
 }
 
@@ -36,9 +36,10 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("tests/testsuite/valid/plain/proteinatlas-16-1.trig")?;
     // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, None).await?;
-    assert!(np.published);
-    println!("{}", np);
+    let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
+    assert!(np.info.published);
+    println!("LEN {:?}", np.dataset);
+    println!("{}", np.get_rdf()?);
     Ok(())
 }
 
@@ -54,15 +55,15 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     )?;
     println!("{}", profile); // cov
     let _pubkey = profile.get_public_key(); // cov
-    let np = Nanopub::sign(&np_rdf, &profile)?;
-    assert!(!np.published);
+    let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
+    assert!(!np.info.published);
     Ok(())
 }
 
 #[test]
 fn check_valid_unsigned() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
-    let np = Nanopub::check(&np_rdf);
+    let np = Nanopub::new(&np_rdf)?.check();
     assert!(np.is_ok());
     Ok(())
 }
@@ -72,9 +73,9 @@ fn wrong_rdf_file() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./inexistent");
     assert!(np_rdf.is_err());
     let np_rdf = fs::read_to_string("./tests/resources/wrong-rdf.trig")?;
-    let np = Nanopub::check(&np_rdf);
+    let np = Nanopub::new(&np_rdf);
     assert!(np.is_err());
-    let np = Nanopub::check("{wrong");
+    let np = Nanopub::new("{wrong");
     assert!(np.is_err());
     Ok(())
 }
@@ -83,7 +84,9 @@ fn wrong_rdf_file() -> Result<(), Box<dyn Error>> {
 async fn publish_fail() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, Some("failing")).await;
+    let np = Nanopub::new(&np_rdf)?
+        .publish(&profile, Some("failing"))
+        .await;
     assert!(np.is_err());
     Ok(())
 }
@@ -98,7 +101,7 @@ fn profile_fail() -> Result<(), Box<dyn Error>> {
 #[test]
 fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/signed.nanopub_test_blank.trig")?;
-    Nanopub::check(&np_rdf)?;
+    Nanopub::new(&np_rdf)?.check()?;
     Ok(())
 }
 
@@ -115,9 +118,12 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
 async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    let np = Nanopub::publish(&np_rdf, &profile, None).await?;
-    println!("{}", np);
-    assert!(np.published);
+    println!("Yeah!");
+    let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
+    println!("Yeah222!");
+    // println!("{}", np); // TODO: THIS CREATES PANIC
+    assert!(np.info.published);
+    println!("Yeah33!");
     Ok(())
 }
 
@@ -129,9 +135,11 @@ async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
         &get_test_key(),
         None,
     )?;
-    let np = Nanopub::publish_intro(&profile, None).await?;
-    println!("{}", np);
-    assert!(np.published);
+    let np = Nanopub::new_intro(&profile)?
+        .publish(&profile, None)
+        .await?;
+    // println!("{}", np);
+    assert!(np.info.published);
     Ok(())
 }
 
@@ -173,7 +181,7 @@ fn test_get_ns_empty() -> Result<(), Box<dyn Error>> {
 async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
     let np_url = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
     let np = Nanopub::fetch(np_url).await?;
-    assert!(np.published);
+    assert!(np.info.published);
     println!("{}", np);
     Ok(())
 }
