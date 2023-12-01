@@ -3,14 +3,12 @@ use crate::error::{NpError, TermError};
 use crate::utils::ns;
 
 use regex::Regex;
-use serde::Serialize;
 use sophia::api::dataset::Dataset;
 use sophia::api::ns::{rdf, Namespace};
 use sophia::api::quad::Quad;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
-use std::collections::HashSet;
 use std::fmt;
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
@@ -49,7 +47,7 @@ impl fmt::Display for NpInfo {
 }
 
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
-pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<NpInfo, NpError> {
+pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut np_url: String = "".to_string();
     let mut head: String = "".to_string();
     let mut assertion: String = "".to_string();
@@ -239,74 +237,75 @@ pub fn extract_np_info(dataset: &LightDataset, check_pubinfo: bool) -> Result<Np
         orcid = Some(q?.o().iri().ok_or(TermError())?.to_string());
     }
 
-    // Check minimal required triples in assertion, prov, pubinfo graphs
     let assertion_iri = Iri::new_unchecked(assertion);
     let prov_iri = Iri::new_unchecked(prov);
-    if dataset
-        .quads_matching(Any, Any, Any, [Some(assertion_iri.clone())])
-        .next()
-        .is_none()
-    {
-        return Err(NpError(
-            "Invalid Nanopub: no triples in the assertion graph.".to_string(),
-        ));
-    }
-    if dataset
-        .quads_matching(Any, Any, Any, [Some(prov_iri.clone())])
-        .next()
-        .is_none()
-    {
-        return Err(NpError(
-            "Invalid Nanopub: no triples in the provenance graph.".to_string(),
-        ));
-    }
-    if dataset
-        .quads_matching([assertion_iri.clone()], Any, Any, [Some(prov_iri.clone())])
-        .next()
-        .is_none()
-    {
-        return Err(NpError("Invalid Nanopub: no triples with the assertion graph as subject in the provenance graph.".to_string()));
-    }
-    if check_pubinfo {
-        if dataset
-            .quads_matching(Any, Any, Any, [Some(pubinfo_iri.clone())])
-            .next()
-            .is_none()
-        {
-            return Err(NpError(
-                "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
-            ));
-        }
-        if dataset
-            .quads_matching(
-                [
-                    np_iri.clone(),
-                    Iri::new_unchecked(np_ns.get("")?.to_string()),
-                ],
-                Any,
-                Any,
-                [Some(pubinfo_iri.clone())],
-            )
-            .next()
-            .is_none()
-        {
-            return Err(NpError(
-                "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
-                    .to_string(),
-            ));
-        }
-    }
-    let mut graph_names = HashSet::new();
-    for g in dataset.graph_names() {
-        if let Some(graph_name) = g?.iri() {
-            graph_names.insert(graph_name.to_string());
-        }
-    }
-    if graph_names.len() > 4 {
-        return Err(NpError(
-            format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
-        ));
-    }
+
+    // Check minimal required triples in assertion, prov, pubinfo graphs
+    // if dataset
+    //     .quads_matching(Any, Any, Any, [Some(assertion_iri.clone())])
+    //     .next()
+    //     .is_none()
+    // {
+    //     return Err(NpError(
+    //         "Invalid Nanopub: no triples in the assertion graph.".to_string(),
+    //     ));
+    // }
+    // if dataset
+    //     .quads_matching(Any, Any, Any, [Some(prov_iri.clone())])
+    //     .next()
+    //     .is_none()
+    // {
+    //     return Err(NpError(
+    //         "Invalid Nanopub: no triples in the provenance graph.".to_string(),
+    //     ));
+    // }
+    // if dataset
+    //     .quads_matching([assertion_iri.clone()], Any, Any, [Some(prov_iri.clone())])
+    //     .next()
+    //     .is_none()
+    // {
+    //     return Err(NpError("Invalid Nanopub: no triples with the assertion graph as subject in the provenance graph.".to_string()));
+    // }
+    // if check_pubinfo {
+    //     if dataset
+    //         .quads_matching(Any, Any, Any, [Some(pubinfo_iri.clone())])
+    //         .next()
+    //         .is_none()
+    //     {
+    //         return Err(NpError(
+    //             "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
+    //         ));
+    //     }
+    //     if dataset
+    //         .quads_matching(
+    //             [
+    //                 np_iri.clone(),
+    //                 Iri::new_unchecked(np_ns.get("")?.to_string()),
+    //             ],
+    //             Any,
+    //             Any,
+    //             [Some(pubinfo_iri.clone())],
+    //         )
+    //         .next()
+    //         .is_none()
+    //     {
+    //         return Err(NpError(
+    //             "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
+    //                 .to_string(),
+    //         ));
+    //     }
+    // }
+    // let mut graph_names = HashSet::new();
+    // for g in dataset.graph_names() {
+    //     if let Some(graph_name) = g?.iri() {
+    //         graph_names.insert(graph_name.to_string());
+    //     }
+    // }
+    // if graph_names.len() > 4 {
+    //     return Err(NpError(
+    //         format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
+    //     ));
+    // }
 
     Ok(NpInfo {
         uri: np_iri,

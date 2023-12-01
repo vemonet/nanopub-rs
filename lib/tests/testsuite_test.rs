@@ -65,7 +65,11 @@ fn testsuite_check_invalid_signed() -> Result<(), Box<dyn Error>> {
             println!("\n☑️  [{}] Testing file check: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::new(&np_rdf)?.check();
-            assert!(np.is_err(), "The np check should have failed");
+            assert!(
+                np.is_err(),
+                "The np check should have failed for file: {}",
+                filename
+            );
         }
     }
     Ok(())
@@ -98,15 +102,19 @@ fn testsuite_check_invalid_plain() -> Result<(), Box<dyn Error>> {
         if !filename.ends_with("xml\"") && !filename.contains("valid") {
             println!("\n☑️  [{}] Testing file check: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
-            let np = Nanopub::new(&np_rdf)?.check();
-            assert!(np.is_err(), "The np check should have failed");
+            let result = Nanopub::new(&np_rdf).and_then(|np| np.check());
+            assert!(
+                result.is_err(),
+                "The np check should have failed for file: {}",
+                filename
+            );
         }
     }
     Ok(())
 }
 
-#[tokio::test]
-async fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
+#[test]
+fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
     let path = Path::new("tests/testsuite/invalid/plain");
     // Iterate over files
     for (index, entry) in fs::read_dir(path)?.enumerate() {
@@ -115,8 +123,16 @@ async fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
         if !filename.ends_with("xml\"") && !filename.contains("info") {
             println!("\n☑️  [{}] Testing file publish: {}", index, filename);
             let np_rdf = fs::read_to_string(file.path())?;
-            let np = Nanopub::new(&np_rdf)?.publish(&get_profile(), None).await;
-            assert!(np.is_err(), "The np check should have failed");
+            let result = Nanopub::new(&np_rdf).and_then(|np| {
+                tokio::runtime::Runtime::new()
+                    .unwrap()
+                    .block_on(np.publish(&get_profile(), None))
+            });
+            assert!(
+                result.is_err(),
+                "The np check should have failed for file: {}",
+                filename
+            );
         }
     }
     Ok(())

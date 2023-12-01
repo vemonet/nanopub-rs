@@ -38,8 +38,6 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
     let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
     assert!(np.info.published);
-    println!("LEN {:?}", np.dataset);
-    println!("{}", np.get_rdf()?);
     Ok(())
 }
 
@@ -108,7 +106,6 @@ fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_get_np_server() -> Result<(), Box<dyn Error>> {
     let np_server = get_np_server(true);
-    println!("{}", np_server);
     let np_server = get_np_server(false);
     assert_eq!(np_server, "https://server.np.trustyuri.net/");
     Ok(())
@@ -118,12 +115,8 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
 async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let profile = NpProfile::new("", "", &get_test_key(), None)?;
-    println!("Yeah!");
     let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
-    println!("Yeah222!");
-    // println!("{}", np); // TODO: THIS CREATES PANIC
     assert!(np.info.published);
-    println!("Yeah33!");
     Ok(())
 }
 
@@ -147,7 +140,7 @@ async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
 fn test_np_info() -> Result<(), Box<dyn Error>> {
     let rdf_str = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let dataset = parse_rdf(&rdf_str)?;
-    let np_info = extract_np_info(&dataset, true)?;
+    let np_info = extract_np_info(&dataset)?;
     println!("{}", np_info); // Required for coverage
     Ok(())
 }

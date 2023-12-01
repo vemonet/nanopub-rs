@@ -15,15 +15,15 @@ let private_key = r#"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxm
 let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig").unwrap();
 let profile = NpProfile::new("https://orcid.org/0000-0000-0000-0000", "", &private_key, None).unwrap();
 
-let signed_np = Nanopub::new(&np_rdf).unwrap().sign(&profile);
-let checked_np = Nanopub::new(&signed_np.rdf).unwrap().check();
+let signed_np = Nanopub::new(&np_rdf).unwrap().sign(&profile).unwrap();
+let checked_np = Nanopub::new(&signed_np.get_rdf().unwrap()).unwrap().check();
 
 // Publish is async
 let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 
 let published_np = rt.block_on(async {
-    Nanopub::new(&np_rdf).unwrap().publish(&profile, None).await
-}).unwrap();
+    Nanopub::new(&np_rdf).unwrap().publish(&profile, None).await.unwrap()
+});
 println!("{}", published_np)
 ```
 

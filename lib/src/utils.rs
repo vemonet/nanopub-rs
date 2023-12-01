@@ -51,13 +51,11 @@ pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
 
 /// Serialize RDF dataset to Trig
 pub fn serialize_rdf(dataset: &LightDataset, uri: &str, ns: &str) -> Result<String, NpError> {
-    // TODO: make uri and ns Option<>. If not provided we extract with extract_np_info
     let prefixes = get_prefixes(uri, ns);
     let trig_config = TrigConfig::new()
         .with_pretty(true)
         .with_prefix_map(&prefixes[..]);
     let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
-    println!("PREFIXES GOT");
     Ok(trig_stringifier.serialize_dataset(&dataset)?.to_string())
 }
 

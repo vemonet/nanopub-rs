@@ -14,9 +14,10 @@ use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, xsd, Namespace};
 use sophia::api::term::matcher::Any;
-use sophia::api::term::SimpleTerm;
+use sophia::api::term::{SimpleTerm, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::{AsIriRef, Iri};
+use std::collections::HashSet;
 use std::{fmt, str};
 
 /// Trait to provide the nanopub RDF as string or sophia dataset
@@ -48,8 +49,7 @@ pub struct Nanopub {
 
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO: the get_rdf() creates a panic
-        // writeln!(f, "\n{:?}", self.get_rdf())?;
+        writeln!(f, "\n{:?}", self.get_rdf())?;
         writeln!(f, "URI: {}", self.info.uri)?;
         writeln!(f, "Trusty hash: {}", self.info.trusty_hash)?;
         writeln!(f, "Signature hash: {}", self.info.signature)?;
@@ -63,7 +63,7 @@ impl Nanopub {
     // // TODO: change approach to use Nanopub::new(rdf).sign()?
     pub fn new<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
         let dataset = rdf.get_dataset()?;
-        let np_info = extract_np_info(&dataset, false)?;
+        let np_info = extract_np_info(&dataset)?;
         Ok(Self {
             info: np_info,
             dataset,
@@ -92,7 +92,7 @@ impl Nanopub {
     pub async fn fetch(url: &str) -> Result<Self, NpError> {
         let np_rdf = fetch_np(url).await?;
         let dataset: LightDataset = parse_rdf(&np_rdf)?;
-        let mut np_info = extract_np_info(&dataset, true)?;
+        let mut np_info = extract_np_info(&dataset)?;
         np_info.published = true;
         Ok(Self {
             info: np_info,
@@ -118,9 +118,8 @@ impl Nanopub {
     /// let profile = NpProfile::new(orcid, "", &private_key, None).unwrap();
     /// let np = Nanopub::new(&np_rdf).unwrap().check();
     /// ```
-    pub fn check(&self) -> Result<Self, NpError> {
-        extract_np_info(&self.dataset, true)?;
-        // TODO: move the pubinfo checks in a separate function
+    pub fn check(self) -> Result<Self, NpError> {
+        let _ = self.is_valid()?;
 
         let mut msg: String = "".to_string();
         if self.info.trusty_hash.is_empty() {
@@ -180,7 +179,7 @@ impl Nanopub {
         );
         // let rdf = serialize_rdf(&self.dataset, &self.info.uri.as_ref(), &self.info.ns.as_ref())?;
         // TODO: check if the np has been published with Nanopub::fetch
-        Ok(self.to_owned())
+        Ok(self)
     }
 
     /// Sign an unsigned nanopub RDF and add trusty URI
@@ -204,7 +203,7 @@ impl Nanopub {
     pub fn sign(mut self, profile: &NpProfile) -> Result<Self, NpError> {
         openssl_probe::init_ssl_cert_env_vars();
         self.dataset = replace_bnodes(&self.dataset, &self.info.ns, &self.info.uri)?;
-        self.info = extract_np_info(&self.dataset, false)?;
+        self.info = extract_np_info(&self.dataset)?;
         println!("SIGN INFO {}", self.info);
 
         // Add triples about the signature in the pubinfo
@@ -323,7 +322,8 @@ impl Nanopub {
             &trusty_uri,
         )?;
         // TODO: it would be more efficient to assign the self.info field directly in the code above
-        self.info = extract_np_info(&self.dataset, true)?;
+        self.info = extract_np_info(&self.dataset)?;
+        let _ = self.is_valid()?;
         // Return the signed Nanopub object
         Ok(self)
     }
@@ -358,9 +358,6 @@ impl Nanopub {
         profile: &NpProfile,
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
-        println!("INFO PUBLISH {}", &self.info);
-        println!("PUBLISH 1 {:?}", self.dataset);
-        // println!("PUBLISH 1 {:?}", self.get_rdf()?);
         self = if self.info.signature.is_empty() {
             println!("Nanopub not signed, signing it before publishing");
             self.sign(profile)?
@@ -368,8 +365,6 @@ impl Nanopub {
             // If the nanopub is already signed we verify it, then publish it
             self.check()?
         };
-        println!("PUBLISH 2");
-        println!("PUBLISH 3 {:?}", self.get_rdf()?);
 
         let server_url = if let Some(server_url) = server_url {
             server_url.to_string()
@@ -397,11 +392,10 @@ impl Nanopub {
         }
         // self.set_published(published);
         self.info.published = true;
-        println!("PUBLISH 4 {}", self.get_rdf()?);
         Ok(self)
     }
 
-    /// Async function to sign and publish a Nanopub intro for a Profile
+    /// Create a Nanopub intro for a Profile
     ///
     /// # Arguments
     ///
@@ -421,13 +415,11 @@ impl Nanopub {
     /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
     ///
     /// let np = rt.block_on(async {
-    ///   Nanopub::new_intro(&profile).unwrap().publish(&profile, None).await
-    /// }).unwrap();
+    ///   Nanopub::new_intro(&profile).unwrap().publish(&profile, None).await.unwrap()
+    /// });
     /// ```
     pub fn new_intro(profile: &NpProfile) -> Result<Self, NpError> {
-        println!("INTRO 1");
         let mut dataset = create_base_dataset()?;
-        println!("INTRO 2");
         let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
         let assertion_graph = np_ns.get("assertion")?;
         let prov_graph = np_ns.get("provenance")?;
@@ -464,16 +456,88 @@ impl Nanopub {
             assertion_graph,
             Some(&prov_graph),
         )?;
-        // let mut np = Nanopub::new(ds)?;
-        println!("INTRO LAST1");
-        // println!("INTRO LAST2 {:?}", np.get_rdf());
-        // np.publish(profile, server_url).await
-        // Nanopub::new(ds)?.publish(profile, server_url).await
-        let np_info = extract_np_info(&dataset, false)?;
         Ok(Self {
-            info: np_info,
+            info: extract_np_info(&dataset)?,
             dataset,
         })
+    }
+
+    /// Check if Nanopub is valid: minimal required triples in assertion, prov, pubinfo graphs
+    pub fn is_valid(&self) -> Result<bool, NpError> {
+        if self
+            .dataset
+            .quads_matching(Any, Any, Any, [Some(self.info.assertion.clone())])
+            .next()
+            .is_none()
+        {
+            return Err(NpError(
+                "Invalid Nanopub: no triples in the assertion graph.".to_string(),
+            ));
+        }
+        if self
+            .dataset
+            .quads_matching(Any, Any, Any, [Some(self.info.prov.clone())])
+            .next()
+            .is_none()
+        {
+            return Err(NpError(
+                "Invalid Nanopub: no triples in the provenance graph.".to_string(),
+            ));
+        }
+        if self
+            .dataset
+            .quads_matching(
+                [self.info.assertion.clone()],
+                Any,
+                Any,
+                [Some(self.info.prov.clone())],
+            )
+            .next()
+            .is_none()
+        {
+            return Err(NpError("Invalid Nanopub: no triples with the assertion graph as subject in the provenance graph.".to_string()));
+        }
+        if self
+            .dataset
+            .quads_matching(Any, Any, Any, [Some(self.info.pubinfo.clone())])
+            .next()
+            .is_none()
+        {
+            return Err(NpError(
+                "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
+            ));
+        }
+        if self
+            .dataset
+            .quads_matching(
+                [
+                    self.info.uri.clone(),
+                    Iri::new_unchecked(self.info.ns.get("")?.to_string()),
+                ],
+                Any,
+                Any,
+                [Some(self.info.pubinfo.clone())],
+            )
+            .next()
+            .is_none()
+        {
+            return Err(NpError(
+                "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
+                    .to_string(),
+            ));
+        }
+        let mut graph_names = HashSet::new();
+        for g in self.dataset.graph_names() {
+            if let Some(graph_name) = g?.iri() {
+                graph_names.insert(graph_name.to_string());
+            }
+        }
+        if graph_names.len() > 4 {
+            return Err(NpError(
+                format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
+            ));
+        }
+        Ok(true)
     }
 
     /// Returns the RDF of the nanopub
