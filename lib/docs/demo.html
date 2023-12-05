@@ -34,7 +34,7 @@
       <button id="switch-trig-jsonld" class="p-2 text-sm rounded-md bg-slate-600 hover:bg-slate-800 text-slate-400">Switch to JSON-LD</button>
 
       <!-- Input editor -->
-      <div id="rdf-input" class="w-full" style="min-height: 34em"></div>
+      <div id="rdf-input" style="min-height: 34em;"></div>
 
       <!-- Private key input -->
       <p class="text-sm text-center">
@@ -84,7 +84,7 @@
       </div>
 
       <!-- Output editor -->
-      <div id="rdf-output" class="w-full hidden" style="min-height: 54em; flex-grow: 0"></div>
+      <div id="rdf-output" class="hidden rounded-md" style="min-height: 54em; flex-grow: 0; overflow: hidden"></div>
       <br/><br/>
     </div>
 
@@ -210,7 +210,7 @@
         const introBtn = document.getElementById('publish-intro-btn')
         introBtn.addEventListener('click', async (event) => {
           let keypair = new KeyPair();
-          keypair = keypair.info();
+          keypair = keypair.toJs();
           const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
           // Publish nanopub link to public key
           const intro = Nanopub.publish_intro(profile, getNpServer(false))
@@ -294,12 +294,13 @@
     #orcidWidget a {
       color: rgb(148, 163, 184);
     }
-    /* Enable resize of editors */
+    /* Enable resize of editors
+    not possible for input because oveflow: hidden breaks the error popups */
     #rdf-input, #rdf-output {
       flex-shrink: 0;
       flex-basis: 1;
-      overflow: auto;
       resize: vertical;
+      width: 100%;
     }
   </style>
 </html>

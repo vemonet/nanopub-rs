@@ -1,9 +1,9 @@
 {
   "@id": "#Head",
   "@graph": {
-    "@type": "Nanopublication",
+    "@type": "np:Nanopublication",
     "@id": "#",
-    "hasAssertion": {
+    "np:hasAssertion": {
       "@id": "#assertion",
       "@context": {
         "ex": "http://example.org/"
@@ -17,7 +17,7 @@
         }
       ]
     },
-    "hasProvenance": {
+    "np:hasProvenance": {
       "@id": "#provenance",
       "@graph": [
         {
@@ -28,7 +28,7 @@
         }
       ]
     },
-    "hasPublicationInfo": {
+    "np:hasPublicationInfo": {
       "@id": "#pubinfo",
       "@graph": [
         {
@@ -50,18 +50,6 @@
     "prov": "http://www.w3.org/ns/prov#",
     "pav": "http://purl.org/pav/",
     "orcid": "https://orcid.org/",
-    "schema": "https://schema.org/",
-    "hasAssertion": {
-      "@id": "np:hasAssertion"
-    },
-    "hasProvenance": {
-      "@id": "np:hasProvenance"
-    },
-    "hasPublicationInfo": {
-      "@id": "np:hasPublicationInfo"
-    },
-    "Nanopublication": {
-      "@id": "np:Nanopublication"
-    }
+    "schema": "https://schema.org/"
   }
 }

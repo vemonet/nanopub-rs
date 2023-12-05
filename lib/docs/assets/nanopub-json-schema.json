@@ -57,18 +57,6 @@
         },
         "schema": {
           "type": "string"
-        },
-        "hasAssertion": {
-          "type": "object"
-        },
-        "hasProvenance": {
-          "type": "object"
-        },
-        "hasPublicationInfo": {
-          "type": "object"
-        },
-        "Nanopublication": {
-          "type": "object"
         }
       },
       "required": [
@@ -76,18 +64,7 @@
         "np",
         "npx",
         "rdf",
-        "rdfs",
-        "xsd",
-        "foaf",
-        "dct",
-        "prov",
-        "pav",
-        "orcid",
-        "schema",
-        "hasAssertion",
-        "hasProvenance",
-        "hasPublicationInfo",
-        "Nanopublication"
+        "rdfs"
       ]
     },
     "@id": {
@@ -102,22 +79,22 @@
         "@type": {
           "type": "string"
         },
-        "hasAssertion": {
+        "np:hasAssertion": {
           "$ref": "#/$defs/graph"
         },
-        "hasProvenance": {
+        "np:hasProvenance": {
           "$ref": "#/$defs/graph"
         },
-        "hasPublicationInfo": {
+        "np:hasPublicationInfo": {
           "$ref": "#/$defs/graph"
         }
       },
       "required": [
         "@id",
         "@type",
-        "hasAssertion",
-        "hasProvenance",
-        "hasPublicationInfo"
+        "np:hasAssertion",
+        "np:hasProvenance",
+        "np:hasPublicationInfo"
       ]
     }
   },
