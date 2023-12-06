@@ -88,12 +88,12 @@ npx http-server
 python -m http.server
 ```
 
-The nanopub test server is used if the last argument of `Nanopub.publish` is an empty string, to easily publish to a production server use `get_np_server()`:
+The nanopub test server is used if the last argument of `Nanopub.publish` is an empty string, to easily publish to a production server use `getNpServer()`:
 
 ```typescript
-import init, { Nanopub, NpProfile, get_np_server } from "https://unpkg.com/@nanopub/sign";
+import init, { Nanopub, NpProfile, getNpServer } from "https://unpkg.com/@nanopub/sign";
 
-const np = await new Nanopub(rdfStr).publish(profile, get_np_server());
+const np = await new Nanopub(rdfStr).publish(profile, getNpServer());
 ```
 
 ## 📥️ Install
@@ -127,7 +127,7 @@ For example, to use it in a nextjs react app:
     ```typescript
     'use client'
     import { useEffect, useState } from 'react';
-    import init, { Nanopub, NpProfile, get_np_server } from "@nanopub/sign";
+    import init, { Nanopub, NpProfile } from "@nanopub/sign";
 
     export default function Home() {
       const [rdfOutput, setRdfOutput] = useState('');
