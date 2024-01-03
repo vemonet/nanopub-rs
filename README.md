@@ -1,14 +1,39 @@
-# ✍️ Nanopub cross-platform toolkit ⚔️
+<h1 align="center">
+  ✍️ Nanopub cross-platform toolkit ⚔️
+</h1>
 
-[![crates.io](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
-[![Released API docs](https://docs.rs/nanopub/badge.svg)](https://docs.rs/nanopub)
-[![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
-[![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
+<p align="center">
+    <a href="https://crates.io/crates/nanopub">
+        <img alt="crates.io" src="https://img.shields.io/crates/v/nanopub.svg" />
+    </a>
+    <a href="https://www.npmjs.com/package/@nanopub/sign">
+        <img alt="npm" src="https://img.shields.io/npm/v/@nanopub/sign" />
+    </a>
+    <a href="https://pypi.org/project/nanopub-sign">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/nanopub-sign" />
+    </a>
+</p>
 
-[![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml)
-[![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/vemonet/nanopub-rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/vemonet/nanopub-rs)
-[![dependency status](https://deps.rs/repo/github/vemonet/nanopub-rs/status.svg)](https://deps.rs/repo/github/vemonet/nanopub-rs)
+<p align="center">
+    <a href="https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml">
+        <img alt="Test" src="https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg" />
+    </a>
+    <a href="https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml">
+        <img alt="Build" src="https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg" />
+    </a>
+    <a href="https://docs.rs/nanopub">
+        <img alt="crates" src="https://docs.rs/nanopub/badge.svg" />
+    </a>
+    <a href="https://deps.rs/repo/github/vemonet/nanopub-rs">
+        <img src="https://deps.rs/repo/github/vemonet/nanopub-rs/status.svg" alt="Dependency status" />
+    </a>
+    <a href="https://github.com/vemonet/nanopub-rs/blob/main/LICENSE">
+        <img alt="MIT license" src="https://img.shields.io/badge/License-MIT-brightgreen.svg" />
+    </a>
+    <a href="https://codecov.io/gh/vemonet/nanopub-rs/branch/main">
+        <img src="https://codecov.io/gh/vemonet/nanopub-rs/branch/main/graph/badge.svg" alt="Codecov status" />
+    </a>
+</p>
 
 This project aims to provide a comprehensive cross-platform toolkit to sign, publish, and check **[Nanopublications](https://nanopub.net)**.
 
