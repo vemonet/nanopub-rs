@@ -110,7 +110,7 @@ impl NanopubPy {
     //     // py: Python<'_>,
     // ) -> PyResult<Self> {
     //     // py.allow_threads(|| { // Put code in this block to enable true parallel https://pyo3.rs/v0.20.0/parallelism
-    //     // let profile = NpProfile::new(orcid, "", private_key, None).unwrap();
+    //     // let profile = NpProfile::new(private_key, orcid, "", None).unwrap();
     //     let rdf = rdf.to_string();
     //     let profile = profile.profile.clone();
     //     let server_url = server_url.map(str::to_string);
@@ -154,14 +154,14 @@ pub struct NpProfilePy {
 #[pymethods]
 impl NpProfilePy {
     #[new]
-    #[pyo3(text_signature = "(orcid_id, name, private_key, introduction_nanopub_uri)")]
+    #[pyo3(text_signature = "(private_key, orcid_id, name, introduction_nanopub_uri)")]
     fn new(
+        private_key: &str,
         orcid_id: &str,
         name: &str,
-        private_key: &str,
         introduction_nanopub_uri: Option<&str>,
     ) -> PyResult<Self> {
-        NpProfile::new(orcid_id, name, private_key, introduction_nanopub_uri)
+        NpProfile::new(private_key, orcid_id, name, introduction_nanopub_uri)
             .map(|profile| Self { profile })
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting profile: {e}")))
     }

@@ -79,7 +79,7 @@
           // const checked = Nanopub.check(rdfStr);
           // console.log("CHECKED", checked.info());
 
-          const profile = new NpProfile(orcid, "Your Name", privKey, "");
+          const profile = new NpProfile(privKey, orcid, "Your Name", "");
           // const np = await Nanopub.publish(rdfStr, profile, "")
           const np = await new Nanopub(rdfStr).publish(profile, "");
           // console.log(np.get_rdf());

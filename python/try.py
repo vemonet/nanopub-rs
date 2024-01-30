@@ -34,9 +34,9 @@ private_key = """MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxmak6S
 
 # Instantiate nanopub profile
 profile = NpProfile(
-    name="",
     private_key=private_key,
     orcid_id="https://orcid.org/0000-0000-0000-0000",
+    name="",
     introduction_nanopub_uri=""
 )
 

@@ -24,9 +24,9 @@ pub struct NpProfile {
 impl NpProfile {
     /// Create a new Nanopub profile
     pub fn new(
+        private_key: &str,
         orcid_id: &str,
         name: &str,
-        private_key: &str,
         introduction_nanopub_uri: Option<&str>,
     ) -> Result<Self, NpError> {
         let privkey =

@@ -19,7 +19,11 @@ pip install nanopub-sign
 
 ## 🚀 Use
 
-Create a `sign.py` file that takes a nanopub RDF and a private key as input:
+Create a `sign.py` file that takes a nanopub RDF and a private key as input.
+
+```admonish success title="Get a private key"
+You can easily create and register a new private key on the [demo page](https://vemonet.github.io/nanopub-rs/demo.html) after login with your ORCID.
+```
 
 ```python
 from nanopub_sign import Nanopub, NpProfile
@@ -56,24 +60,24 @@ private_key = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjY1gsFxmak6SOC
 
 # Instantiate nanopub profile
 profile = NpProfile(
-    name="",
     private_key=private_key,
     orcid_id="https://orcid.org/0000-0000-0000-0000",
+    name="Your Name",
     introduction_nanopub_uri=""
 )
 
-# Check
+# Check a nanopub RDF string
 np = Nanopub.check(rdf_str)
 print("Checked info dict:", np.info())
 
-# Sign
+# Sign a nanopub
 np = Nanopub.sign(
     rdf=rdf_str,
     profile=profile,
 )
 print("Signed info dict:", np.info())
 
-# Publish
+# Sign & publish
 np = Nanopub.publish(
     rdf=rdf_str,
     profile=profile,
@@ -89,7 +93,9 @@ Run the script:
 python sign.py
 ```
 
-The test server is used if the provided `server_url` is empty, to publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the main nanopub server, defaults to true.
+## 📡 Test and production servers
+
+The [nanopub test server](https://np.test.knowledgepixels.com/) is used if the provided `server_url` is empty, to publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the [main nanopub server](https://server.np.trustyuri.net/), defaults to true.
 
 ```python
 from nanopub_sign import Nanopub, NpProfile, get_np_server

@@ -128,12 +128,12 @@ pub struct NpProfileJs {
 impl NpProfileJs {
     #[wasm_bindgen(constructor)]
     pub fn new(
+        private_key: &str,
         orcid_id: &str,
         name: &str,
-        private_key: &str,
         introduction_nanopub_uri: &str,
     ) -> Result<NpProfileJs, JsValue> {
-        NpProfile::new(orcid_id, name, private_key, Some(introduction_nanopub_uri))
+        NpProfile::new(private_key, orcid_id, name, Some(introduction_nanopub_uri))
             .map(|profile: NpProfile| Self { profile })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }

@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file)?;
-                NpProfile::new(orcid, "", &private_key, None)?
+                NpProfile::new(&private_key, orcid, "", None)?
             } else {
                 NpProfile::from_file(profile_file)?
             };
@@ -106,7 +106,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
                 let private_key = fs::read_to_string(key_file)?;
-                NpProfile::new(orcid, "", &private_key, None)?
+                NpProfile::new(&private_key, orcid, "", None)?
             } else {
                 NpProfile::from_file(profile_file)?
             };
