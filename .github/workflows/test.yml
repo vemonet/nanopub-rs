@@ -116,7 +116,7 @@ jobs:
     - name: Install java and python tools
       run: |
         pip install --upgrade nanopub
-        wget -O nanopub.jar https://github.com/Nanopublication/nanopub-java/releases/latest/download/nanopub-1.47-jar-with-dependencies.jar
+        wget -O nanopub.jar https://github.com/Nanopublication/nanopub-java/releases/download/nanopub-1.55/nanopub-1.55-jar-with-dependencies.jar
 
     - name: Build ourself
       run: cargo build --release
