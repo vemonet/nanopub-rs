@@ -21,7 +21,8 @@ all-features = true
 base64 = "0.21"
 rsa = { version = "0.9.6", default-features = false, features = ["pem", "sha2"] }
 openssl-probe = "0.1"
-sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
+sophia = { version = "0.8.0", features = ["jsonld"] }
+# sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
 regex = "1.10"
 reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
