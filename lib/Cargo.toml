@@ -1,6 +1,6 @@
 [package]
 name = "nanopub"
-version = "0.0.17"
+version = "0.0.18"
 description = """
 A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
 """
@@ -22,7 +22,6 @@ base64 = "0.21"
 rsa = { version = "0.9.6", default-features = false, features = ["pem", "sha2"] }
 openssl-probe = "0.1"
 sophia = { version = "0.8.0", features = ["jsonld"] }
-# sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
 regex = "1.10"
 reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
@@ -32,6 +31,8 @@ getrandom = { version = "0.2", features = ["js"] }
 rand_core = { version = "0.6", features = ["std"] }
 # rand = { version = "0.8", features = ["std_rng"], default-features = false }
 # log = { version = "0.0.2", features = ["std"] }
+# futures = "0.3"
+# sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
 
 [dev-dependencies]
 mdbook = "0.4.35"

@@ -1,6 +1,6 @@
 [package]
 name = "nanopub-cli"
-version = "0.0.17"
+version = "0.0.18"
 description = """
 A cross-platform CLI tool written in Rust to sign Nanopublications.
 """
@@ -14,7 +14,7 @@ homepage.workspace = true
 categories.workspace = true
 
 [dependencies]
-nanopub = { version = "0.0.17", path = "../lib" }
+nanopub = { version = "0.0.18", path = "../lib" }
 clap = { version = "4.4", features = ["derive"] }
 clap_complete = "4.4"
 tokio = { version = "1.34", features = ["macros", "rt-multi-thread"] }
