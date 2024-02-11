@@ -38,11 +38,11 @@ jobs:
         env:
           BINDGEN_EXTRA_CLANG_ARGS: --sysroot /usr/aarch64-linux-gnu
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_x86_64_linux_gnu
           path: target/release/nanopub-cli
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_aarch64_linux_gnu
           path: target/aarch64-unknown-linux-gnu/release/nanopub-cli
@@ -83,11 +83,11 @@ jobs:
       - run: cargo build --release --target aarch64-apple-darwin
         working-directory: ./cli
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_x86_64_apple
           path: target/release/nanopub-cli
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_aarch64_apple
           path: target/aarch64-apple-darwin/release/nanopub-cli
@@ -118,7 +118,7 @@ jobs:
       - run: cargo build --release
         working-directory: ./cli
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_x86_64_windows_msvc
           path: target/release/nanopub-cli.exe
@@ -145,14 +145,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/${{ matrix.architecture }}
         if: github.event_name == 'release' && matrix.architecture != 'x86_64'
       - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/manylinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/manylinux_build_script.sh
       - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/manylinux2014_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/manylinux_build_script.sh
         if: github.event_name == 'release' || matrix.architecture == 'x86_64'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_${{ matrix.architecture }}_linux
           path: target/wheels/*.whl
@@ -177,14 +177,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/${{ matrix.architecture }}
         if: github.event_name == 'release' && matrix.architecture != 'x86_64'
       - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/musllinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/musllinux_build_script.sh
       - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/musllinux_1_1_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/musllinux_build_script.sh
         if: github.event_name == 'release' || matrix.architecture == 'x86_64'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_${{ matrix.architecture }}_linux_musl
           path: target/wheels/*.whl
@@ -210,7 +210,7 @@ jobs:
           submodules: true
       - run: rustup update && rustup target add aarch64-apple-darwin
       - uses: Swatinem/rust-cache@v2
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: pip
@@ -224,7 +224,7 @@ jobs:
         if: github.event_name == 'release'
       - run: maturin build --release --target aarch64-apple-darwin -m python/Cargo.toml
         if: github.event_name == 'release'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_universal2_mac
           path: target/wheels/*.whl
@@ -244,7 +244,7 @@ jobs:
           submodules: true
       - run: rustup update
       - uses: Swatinem/rust-cache@v2
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: pip
@@ -256,7 +256,7 @@ jobs:
       - run: rm -r target/wheels
       - run: maturin build --release -m python/Cargo.toml
       - run: maturin sdist -m python/Cargo.toml
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_x86_64_windows
           path: target/wheels/*.whl
@@ -273,7 +273,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodule: true
+          submodules: true
       - run: rustup update
       - uses: Swatinem/rust-cache@v2
 
@@ -293,7 +293,7 @@ jobs:
         working-directory: ./js
 
       - name: Upload tarball
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nanopub_sign_npm
           path: ./js/pkg

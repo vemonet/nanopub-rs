@@ -93,9 +93,11 @@ Run the script:
 python sign.py
 ```
 
-## 📡 Test and production servers
+## 🧪 Test and production servers
 
-The [nanopub test server](https://np.test.knowledgepixels.com/) is used if the provided `server_url` is empty, to publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the [main nanopub server](https://server.np.trustyuri.net/), defaults to true.
+If the provided `server_url` is empty, the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
+
+To publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the [main nanopub server](https://server.np.trustyuri.net/), defaults to true.
 
 ```python
 from nanopub_sign import Nanopub, NpProfile, get_np_server

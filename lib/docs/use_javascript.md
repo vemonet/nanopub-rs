@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/@nanopub/sign)](https://www.npmjs.com/package/@nanopub/sign)
 
-You can easily publish Nanopubs from JavaScript, or TypeScript with the [`@nanopub/sign`](https://www.npmjs.com/package/@nanopub/sign) NPM package.
+You can easily publish Nanopubs from JavaScript or TypeScript with the [`@nanopub/sign`](https://www.npmjs.com/package/@nanopub/sign) NPM package.
 
 ```admonish example title="Demo"
 Visit the **[demo page](https://vemonet.github.io/nanopub-rs/demo.html)** to sign nanopubs, or generate and register a new key pair, directly in your browser using this NPM package. You can checkout the [`demo.html`](https://github.com/vemonet/nanopub-rs/blob/main/lib/docs/demo.html) file as an example to use the package directly from HTML/JS.
@@ -24,7 +24,7 @@ npm install --save @nanopub/sign
 
 This package provides several functionalities related to the handling of Nanopublications, including signing, publishing, verifying, and fetching them:
 
-1. **Signing Nanopubs**
+### ✍️ Sign Nanopubs
 
 This process involves signing a Nanopublication RDF string using a specified RSA private key passed through the profile. The signing operation ensures that the Nanopub is authentically created by the holder of the private key.
 
@@ -40,7 +40,7 @@ const signed = new Nanopub(rdfStr).sign(profile);
 console.log("Signed:", signed.info());
 ```
 
-2. **Publishing Nanopubs**
+### 📬 Publish Nanopubs
 
 After signing a Nanopub, it can be published to a Nanopub server. This makes the Nanopub accessible to others in the network.
 
@@ -49,7 +49,11 @@ const np = await new Nanopub(rdfStr).publish(profile, "");
 console.log("Published:", np.info());
 ```
 
-If the the last argument of `Nanopub.publish` is an empty string it will be published to the [nanopub test server](https://np.test.knowledgepixels.com/). You can easily get the URL of a production server to publish to the network using `getNpServer(true)` (true will pick a random nanopub server on the production network, while false will pick the [main nanopub server](https://server.np.trustyuri.net/)):
+#### 🧪 Test and productions servers
+
+If the the last argument of `Nanopub.publish` is an empty string the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
+
+You can publish to the production network by getting the URL of a server using `getNpServer(true)` (true will pick a random nanopub server on the production network, while false will pick the [main nanopub server](https://server.np.trustyuri.net/)):
 
 ```typescript
 import init, { Nanopub, NpProfile, getNpServer } from "https://unpkg.com/@nanopub/sign";
@@ -57,7 +61,7 @@ import init, { Nanopub, NpProfile, getNpServer } from "https://unpkg.com/@nanopu
 const np = await new Nanopub(rdfStr).publish(profile, getNpServer(true));
 ```
 
-3. **Verifying Nanopubs**
+### ☑️ Verify Nanopubs
 
 This operation involves checking the integrity of Nanopubs. It ensures that a Nanopub is valid, regardless of whether it is signed or unsigned.
 
@@ -65,7 +69,7 @@ This operation involves checking the integrity of Nanopubs. It ensures that a Na
 const checked = new Nanopub(rdfStr).check();
 ```
 
-4. **Fetching Nanopubs**
+### 📡 Fetch Nanopubs
 
 This function allows you to retrieve Nanopubs from the network using their URI. It's useful for accessing and using Nanopubs created by others.
 

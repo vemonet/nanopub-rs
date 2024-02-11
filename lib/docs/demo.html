@@ -162,7 +162,7 @@
           if (serverUrl && publish) {
             console.log(`Publishing to ${serverUrl}`)
           }
-          const profile = new NpProfile(orcid, "Your Name", privKey, "");
+          const profile = new NpProfile(privKey, orcid, "Your Name", "");
           try {
             // const checked = new Nanopub(rdfStr).check();
             // console.log("CHECKED", checked.info());
@@ -211,7 +211,7 @@
         introBtn.addEventListener('click', async (event) => {
           let keypair = new KeyPair();
           keypair = keypair.toJs();
-          const profile = new NpProfile(orcidToken.orcid, orcidToken.fullName, keypair.private, "");
+          const profile = new NpProfile(keypair.private, orcidToken.orcid, orcidToken.fullName, "");
           // Publish nanopub link to public key
           const intro = Nanopub.publish_intro(profile, getNpServer(false))
             .then(np => {

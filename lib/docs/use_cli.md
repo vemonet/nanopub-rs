@@ -20,6 +20,16 @@ curl -sSL https://raw.github.com/vemonet/nanopub-rs/main/scripts/install-binary.
 
 ## ✍️ Sign
 
+You can define the path to the key pair used for signing in a `profile.yml` which contains the following information:
+
+```yaml
+orcid_id: https://orcid.org/0000-0000-0000-0000
+name: Your Name
+public_key: /home/user/.nanopub/id_rsa.pub
+private_key: /home/user/.nanopub/id_rsa
+introduction_nanopub_uri:
+```
+
 Sign a Nanopub, by default it will try to use the profile available at `~/.nanopub/profile.yml`
 
 ```bash

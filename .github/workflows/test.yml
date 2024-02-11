@@ -99,7 +99,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ env.STABLE_PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.STABLE_PYTHON_VERSION }}
 
@@ -129,7 +129,7 @@ jobs:
           'target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
 
     - name: Upload benchmark markdown
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: benchmark.md
         path: ./benchmark.md

@@ -378,6 +378,10 @@ impl Nanopub {
         };
         let published = publish_np(&server_url, &self.get_rdf()?).await?;
         if published {
+            if TEST_SERVER == server_url {
+                self.info.uri =
+                    Iri::new_unchecked(format!("{}/{}", server_url, self.info.trusty_hash));
+            }
             println!(
                 "\n🎉 Nanopublication published at {}{}{}",
                 BOLD, self.info.uri, END
