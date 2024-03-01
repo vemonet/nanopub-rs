@@ -350,17 +350,22 @@ impl Nanopub {
     /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
     ///
     /// let np = rt.block_on(async {
-    ///   Nanopub::new(&np_rdf).unwrap().publish(&profile, None).await
+    ///   Nanopub::new(&np_rdf).unwrap().publish(Some(&profile), None).await
     /// }).unwrap();
     /// ```
     pub async fn publish(
         mut self,
-        profile: &NpProfile,
+        profile: Option<&NpProfile>,
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
-        self = if self.info.signature.is_empty() {
+        self = if let Some(profile) = profile {
             println!("Nanopub not signed, signing it before publishing");
             self.sign(profile)?
+        } else if self.info.signature.is_empty() {
+            return Err(NpError(format!(
+                "No profile provided and nanopub not signed, could not sign the Nanopublication \n{}",
+                self
+            )));
         } else {
             // If the nanopub is already signed we verify it, then publish it
             self.check()?
@@ -419,7 +424,7 @@ impl Nanopub {
     /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
     ///
     /// let np = rt.block_on(async {
-    ///   Nanopub::new_intro(&profile).unwrap().publish(&profile, None).await.unwrap()
+    ///   Nanopub::new_intro(&profile).unwrap().publish(Some(&profile), None).await.unwrap()
     /// });
     /// ```
     pub fn new_intro(profile: &NpProfile) -> Result<Self, NpError> {

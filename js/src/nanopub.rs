@@ -59,7 +59,7 @@ impl NanopubJs {
         }
         .to_string();
         future_to_promise(async move {
-            match self.np.publish(&profile, Some(&server_url)).await {
+            match self.np.publish(Some(&profile), Some(&server_url)).await {
                 Ok(np) => Ok(JsValue::from(NanopubJs { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
                     "Error publishing the Nanopub: {e}"
@@ -86,7 +86,7 @@ impl NanopubJs {
                     )))
                 }
             };
-            match np.publish(&profile, Some(&server_url)).await {
+            match np.publish(Some(&profile), Some(&server_url)).await {
                 Ok(np) => Ok(JsValue::from(NanopubJs { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
                     "Error publishing Nanopub Introduction: {e}"

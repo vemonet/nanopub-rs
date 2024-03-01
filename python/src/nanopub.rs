@@ -63,7 +63,7 @@ impl NanopubPy {
         let result = rt.block_on(async move {
             Nanopub::new(&rdf)
                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))?
-                .publish(&profile, server_url.as_deref())
+                .publish(Some(&profile), server_url.as_deref())
                 .await
                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))
         });

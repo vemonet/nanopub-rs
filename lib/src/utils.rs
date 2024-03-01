@@ -85,6 +85,7 @@ pub fn ns(ns: &str) -> Namespace<String> {
     }
 }
 
+// TODO: improve to extract prefixes from the input RDF
 /// Get the prefixes of a Nanopub
 pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>); 14] {
     [
@@ -108,6 +109,7 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
             Prefix::new_unchecked("xsd".to_string()),
             Iri::new_unchecked("http://www.w3.org/2001/XMLSchema#".to_string()),
         ),
+        // TODO: use https:// by default?
         (
             Prefix::new_unchecked("schema".to_string()),
             Iri::new_unchecked("http://schema.org/".to_string()),

@@ -20,7 +20,7 @@ fn get_test_key() -> String {
 async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
-    let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
+    let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     println!("{}", np.get_rdf()?);
     assert!(np.info.published);
     // Values compiled with the nanopub java lib using the exact same RDF
@@ -37,7 +37,7 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("tests/testsuite/valid/plain/proteinatlas-16-1.trig")?;
     // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
-    let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
+    let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     assert!(np.info.published);
     Ok(())
 }
@@ -84,7 +84,7 @@ async fn publish_fail() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     let np = Nanopub::new(&np_rdf)?
-        .publish(&profile, Some("failing"))
+        .publish(Some(&profile), Some("failing"))
         .await;
     assert!(np.is_err());
     Ok(())
@@ -116,7 +116,7 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
 async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
-    let np = Nanopub::new(&np_rdf)?.publish(&profile, None).await?;
+    let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     assert!(np.info.published);
     Ok(())
 }
@@ -130,7 +130,7 @@ async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
         None,
     )?;
     let np = Nanopub::new_intro(&profile)?
-        .publish(&profile, None)
+        .publish(Some(&profile), None)
         .await?;
     // println!("{}", np);
     assert!(np.info.published);
@@ -212,7 +212,7 @@ async fn publish_from_scratch() -> Result<(), Box<dyn Error>> {
         Iri::new_unchecked("http://dx.doi.org/10.3233/ISU-2010-0613"),
         Some(&np.info.prov),
     )?;
-    let np = np.publish(&profile, None).await?;
+    let np = np.publish(Some(&profile), None).await?;
     println!("DEBUG: SCRATCH 2 {}", np.get_rdf()?);
     // assert!(res.is_err());
     Ok(())

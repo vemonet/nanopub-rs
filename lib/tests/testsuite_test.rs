@@ -15,7 +15,9 @@ async fn testsuite_publish_valid_plain() -> Result<(), Box<dyn Error>> {
         if filename.ends_with("trig\"") {
             println!("\n☑️  Testing file publish: {}", filename);
             let np_rdf = fs::read_to_string(file.path())?;
-            let np = Nanopub::new(&np_rdf)?.publish(&get_profile(), None).await?;
+            let np = Nanopub::new(&np_rdf)?
+                .publish(Some(&get_profile()), None)
+                .await?;
             assert!(np.info.published);
         }
     }
@@ -126,7 +128,7 @@ fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
             let result = Nanopub::new(&np_rdf).and_then(|np| {
                 tokio::runtime::Runtime::new()
                     .unwrap()
-                    .block_on(np.publish(&get_profile(), None))
+                    .block_on(np.publish(Some(&get_profile()), None))
             });
             assert!(
                 result.is_err(),
@@ -141,7 +143,9 @@ fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
 #[tokio::test]
 async fn testsuite_publish_transform_signed_simple1() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/testsuite/transform/signed/rsa-key1/simple1.in.trig")?;
-    let np = Nanopub::new(&np_rdf)?.publish(&get_profile(), None).await?;
+    let np = Nanopub::new(&np_rdf)?
+        .publish(Some(&get_profile()), None)
+        .await?;
     assert!(np.info.published);
     assert_eq!(
         np.info.trusty_hash,
@@ -156,7 +160,9 @@ async fn testsuite_publish_transform_signed_simple1() -> Result<(), Box<dyn Erro
 #[tokio::test]
 async fn testsuite_publish_transform_trusty_aida() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/testsuite/transform/trusty/aida1.in.trig")?;
-    let np = Nanopub::new(&np_rdf)?.publish(&get_profile(), None).await?;
+    let np = Nanopub::new(&np_rdf)?
+        .publish(Some(&get_profile()), None)
+        .await?;
     // println!("{}", np);
     assert!(np.info.published);
     // assert_eq!(np.trusty_hash, "RAPpJU5UOB4pavfWyk7FE3WQiam5yBpmIlviAQWtBSC4M");
@@ -166,7 +172,9 @@ async fn testsuite_publish_transform_trusty_aida() -> Result<(), Box<dyn Error>>
 #[tokio::test]
 async fn testsuite_publish_transform_trusty_simple1() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/testsuite/transform/trusty/simple1.in.trig")?;
-    let np = Nanopub::new(&np_rdf)?.publish(&get_profile(), None).await?;
+    let np = Nanopub::new(&np_rdf)?
+        .publish(Some(&get_profile()), None)
+        .await?;
     assert!(np.info.published);
     // assert_eq!(np.trusty_hash, "RAtAU6U_xKTH016Eoiu11SswQkBu1elB_3_BoDJWH3arA");
     Ok(())

@@ -112,11 +112,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             };
             if test_server {
                 println!("🧪 Publishing {np_file} to test server");
-                let _ = Nanopub::new(&np_rdf)?.publish(&profile, None).await;
+                let _ = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await;
             } else {
                 let server = get_np_server(true);
                 println!("📬️ Publishing {np_file} to {server}");
-                let _ = Nanopub::new(&np_rdf)?.publish(&profile, Some(server)).await;
+                let _ = Nanopub::new(&np_rdf)?
+                    .publish(Some(&profile), Some(server))
+                    .await;
             }
         }
         Some(("check", sub)) => {
