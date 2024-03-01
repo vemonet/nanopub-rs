@@ -81,6 +81,22 @@
         <button id="publish-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
           <i class="fas fa-upload mr-2"></i> Publish Nanopublication
         </button>
+        <!-- Toggle to publish to test or prod server -->
+        <div class="flex items-center justify-center">
+          <span class="mr-2 text-sm">Test Server</span>
+          <label for="toggleProd" class="flex items-center cursor-pointer">
+            <div class="relative">
+              <input type="checkbox" id="toggleProd" class="sr-only" />
+              <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+              <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+            </div>
+          </label>
+          <span class="ml-2 text-sm">Production Network</span>
+        </div>
+      </div>
+
+      <div id="success-msg" class="hidden mt-4 p-4 bg-green-800 rounded-md text-white">
+        <p>Successfully published to <a id="np-url" class="text-blue-300" target="_blank"></a></p>
       </div>
 
       <!-- Output editor -->
@@ -158,23 +174,34 @@
           monaco.editor.setModelMarkers(ieditor.getModel(), 'errors', []);
           const rdfStr = ieditor.getValue();
           const privKey = document.getElementById('private-key').value
-          const serverUrl = (publish) ? getNpServer() : "" // Empty is test server
-          if (serverUrl && publish) {
-            console.log(`Publishing to ${serverUrl}`)
-          }
           const profile = new NpProfile(privKey, orcid, "Your Name", "");
-          try {
-            // const checked = new Nanopub(rdfStr).check();
-            // console.log("CHECKED", checked.info());
-            // const np = new Nanopub(rdfStr).sign(profile)
+          if (!publish) {
+            try {
+              const signed = new Nanopub(rdfStr).sign(profile)
+              oeditor.setValue(signed.get_rdf());
+              console.log("Signed Nanopub:", signed.info());
+            } catch (err) {
+              displayError(err);
+              console.error("Error:", err);
+            }
+          } else {
+            const serverUrl = (document.getElementById('toggleProd').checked) ? getNpServer() : ""
+            // Empty is test server
+            try {
+              const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
+              oeditor.setValue(np.get_rdf());
+              console.log("Published Nanopub:", np.info());
+              const npUrlElem = document.getElementById('np-url');
+              const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
+              npUrlElem.textContent = npUrl;
+              npUrlElem.href = npUrl;
+              document.getElementById('success-msg').classList.remove('hidden');
 
-            const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
-            oeditor.setValue(np.get_rdf());
-            console.log("Published Nanopub:", np.info());
-          } catch (err) {
-            // oeditor.setValue(error.toString());
-            displayError(err);
-            console.error("Error:", err);
+            } catch (err) {
+              // oeditor.setValue(error.toString());
+              displayError(err);
+              console.error("Error:", err);
+            }
           }
           rdfOutput.classList.remove("hidden");
         }
@@ -230,6 +257,7 @@
 
         function displayError(err) {
           oeditor.setValue(err);
+          document.getElementById('success-msg').classList.add('hidden');
           // Handle error msg with line and position returned by nt/ttl/trig parsers
           const match = err.match(/(.*?) on line (\d+) at position (\d+)/);
           const [msg, lineNumber, position] = (match)
@@ -301,6 +329,20 @@
       flex-basis: 1;
       resize: vertical;
       width: 100%;
+    }
+    /* Additional styles for toggle button */
+    .dot {
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+    input:checked ~ .dot {
+      transform: translateX(100%);
+      opacity: 1;
+    }
+    .block, .dot {
+      opacity: 0.5;
+    }
+    input:checked ~ .block {
+      opacity: 1;
     }
   </style>
 </html>

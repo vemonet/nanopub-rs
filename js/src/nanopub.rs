@@ -150,7 +150,7 @@ impl NpProfileJs {
     }
 }
 
-/// Return a random server
+/// Return a random server or the main nanopub server. Default to random server
 #[wasm_bindgen(js_name = getNpServer)]
 pub fn get_np_server(random: Option<bool>) -> String {
     get_server(random.unwrap_or(true)).to_string()
