@@ -42,7 +42,7 @@ impl NanopubJs {
     }
 
     #[wasm_bindgen]
-    pub fn sign(self, profile: NpProfileJs) -> Result<NanopubJs, JsValue> {
+    pub fn sign(self, profile: &NpProfileJs) -> Result<NanopubJs, JsValue> {
         self.np
             .sign(&profile.profile)
             .map(|np| Self { np })
@@ -50,7 +50,7 @@ impl NanopubJs {
     }
 
     #[wasm_bindgen]
-    pub fn publish(self, profile: NpProfileJs, server_url: &str) -> Promise {
+    pub fn publish(self, profile: &NpProfileJs, server_url: &str) -> Promise {
         let profile = profile.profile.clone();
         let server_url = if server_url.is_empty() {
             TEST_SERVER
@@ -69,7 +69,7 @@ impl NanopubJs {
     }
 
     #[wasm_bindgen(static_method_of = NanopubJs)]
-    pub fn publish_intro(profile: NpProfileJs, server_url: &str) -> Promise {
+    pub fn publish_intro(profile: &NpProfileJs, server_url: &str) -> Promise {
         let profile = profile.profile.clone();
         let server_url = if server_url.is_empty() {
             TEST_SERVER

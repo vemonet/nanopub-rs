@@ -82,10 +82,16 @@
           const profile = new NpProfile(privKey, orcid, "Your Name", "");
           // const np = await Nanopub.publish(rdfStr, profile, "")
           const np = await new Nanopub(rdfStr).publish(profile, "");
+
           // console.log(np.get_rdf());
           // await np.publish(profile, "");
           rdfOutput.innerText = np.get_rdf();
+          console.log(profile)
           console.log("Published Nanopub:", np.info());
+
+          console.log(profile)
+          const np2 = await new Nanopub(rdfStr).publish(profile, "");
+          console.log("Published Nanopub:", np2.info());
           // new Nanopub(rdfStr).publish(profile, "")
           //   .then(np => {
           //     rdfOutput.innerText = np.get_rdf();
