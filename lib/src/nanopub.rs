@@ -372,7 +372,11 @@ impl Nanopub {
         };
 
         let server_url = if let Some(server_url) = server_url {
-            server_url.to_string()
+            if server_url.is_empty() {
+                TEST_SERVER.to_string()
+            } else {
+                server_url.to_string()
+            }
         } else {
             // Use test server if None provided
             println!(
@@ -381,6 +385,10 @@ impl Nanopub {
             );
             TEST_SERVER.to_string()
         };
+        // let server_url = server_url.unwrap_or_else(|| {
+        //     println!("No server URL provided, using the test server {}", TEST_SERVER);
+        //     TEST_SERVER
+        // }).to_string();
         let published = publish_np(&server_url, &self.get_rdf()?).await?;
         if published {
             if TEST_SERVER == server_url {

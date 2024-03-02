@@ -1,3 +1,5 @@
+extern crate alloc;
+
 use js_sys::Error;
 // #![allow(clippy::unused_unit)]
 use wasm_bindgen::prelude::*;

@@ -63,6 +63,7 @@
       const orcid="https://orcid.org/0000-0000-0000-0000";
 
       async function main() {
+        // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
         await init();
 
         const rdfInput = document.getElementById('rdf-input');
@@ -72,7 +73,6 @@
         form.addEventListener('submit', async (event) => {
           event.preventDefault();
           const rdfStr = rdfInput.value
-          // WebAssembly binary needs to be initialized. In async functions you can use "await init();"
           // const keypair = new KeyPair()
           // console.log("KEYS", keypair.info())
 
@@ -80,18 +80,12 @@
           // console.log("CHECKED", checked.info());
 
           const profile = new NpProfile(privKey, orcid, "Your Name", "");
-          // const np = await Nanopub.publish(rdfStr, profile, "")
           const np = await new Nanopub(rdfStr).publish(profile, "");
+          // const np = await new Nanopub(rdfStr).publish();
 
-          // console.log(np.get_rdf());
-          // await np.publish(profile, "");
-          rdfOutput.innerText = np.get_rdf();
-          console.log(profile)
           console.log("Published Nanopub:", np.info());
+          rdfOutput.innerText = np.getRdf();
 
-          console.log(profile)
-          const np2 = await new Nanopub(rdfStr).publish(profile, "");
-          console.log("Published Nanopub:", np2.info());
           // new Nanopub(rdfStr).publish(profile, "")
           //   .then(np => {
           //     rdfOutput.innerText = np.get_rdf();

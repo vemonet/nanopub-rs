@@ -255,6 +255,7 @@
           rdfOutput.classList.remove("hidden");
         });
 
+        // Display error in output editor with line and position
         function displayError(err) {
           oeditor.setValue(err);
           document.getElementById('success-msg').classList.add('hidden');

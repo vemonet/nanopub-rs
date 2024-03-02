@@ -1,24 +1,25 @@
 use js_sys::{Promise, JSON};
 use nanopub::{
-    constants::TEST_SERVER, get_np_server as get_server, profile::gen_keys, Nanopub, NpProfile,
+    constants::TEST_SERVER, get_np_server as get_server, profile::gen_keys, Nanopub as RsNanopub,
+    NpProfile as RsNpProfile,
 };
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_derive::TryFromJsValue;
 use wasm_bindgen_futures::future_to_promise;
 
-#[wasm_bindgen(js_name = Nanopub)]
+#[wasm_bindgen]
 #[derive(Clone)]
-pub struct NanopubJs {
-    np: Nanopub,
+pub struct Nanopub {
+    np: RsNanopub,
 }
 
-// Optional arguments: https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
 // Maybe try https://rustwasm.github.io/wasm-bindgen/reference/arbitrary-data-with-serde.html
 #[allow(unused_variables, clippy::inherent_to_string)]
-#[wasm_bindgen(js_class = Nanopub)]
-impl NanopubJs {
+#[wasm_bindgen]
+impl Nanopub {
     #[wasm_bindgen(constructor)]
-    pub fn new(rdf: JsValue) -> Result<NanopubJs, JsValue> {
+    pub fn new(rdf: JsValue) -> Result<Nanopub, JsValue> {
         let rdf_str = if rdf.is_string() {
             rdf.as_string()
                 .ok_or_else(|| JsValue::from_str("RDF input must be a string"))?
@@ -28,13 +29,13 @@ impl NanopubJs {
                 .as_string()
                 .ok_or_else(|| JsValue::from_str("Failed to convert JSON-LD object to string"))?
         };
-        Nanopub::new(&rdf_str)
+        RsNanopub::new(&rdf_str)
             .map(|np| Self { np })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     #[wasm_bindgen]
-    pub fn check(self) -> Result<NanopubJs, JsValue> {
+    pub fn check(self) -> Result<Nanopub, JsValue> {
         self.np
             .check()
             .map(|np| Self { np })
@@ -42,25 +43,45 @@ impl NanopubJs {
     }
 
     #[wasm_bindgen]
-    pub fn sign(self, profile: &NpProfileJs) -> Result<NanopubJs, JsValue> {
+    pub fn sign(self, profile: &NpProfile) -> Result<Nanopub, JsValue> {
         self.np
             .sign(&profile.profile)
             .map(|np| Self { np })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
+    // TODO: optional args https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
     #[wasm_bindgen]
-    pub fn publish(self, profile: &NpProfileJs, server_url: &str) -> Promise {
-        let profile = profile.profile.clone();
-        let server_url = if server_url.is_empty() {
-            TEST_SERVER
+    pub fn publish(self, profile: &OptionNpProfile, server_url: Option<String>) -> Promise {
+        // Handle null/undefined profile
+        let js_value: &JsValue = profile.as_ref();
+        let option_profile: Option<NpProfile> = if js_value.is_undefined() {
+            None
         } else {
-            server_url
-        }
-        .to_string();
+            Some(
+                NpProfile::try_from(js_value)
+                    .map_err(|e| JsValue::from_str(&e.to_string()))
+                    .unwrap(),
+            )
+        };
+        let profile = if let Some(option_profile) = option_profile {
+            Some(option_profile.profile.clone())
+        } else {
+            None
+        };
+        let server_url = if let Some(server_url) = server_url {
+            Some(server_url)
+        } else {
+            None
+        };
+        // TODO: make shorter
         future_to_promise(async move {
-            match self.np.publish(Some(&profile), Some(&server_url)).await {
-                Ok(np) => Ok(JsValue::from(NanopubJs { np })),
+            match self
+                .np
+                .publish(profile.as_ref(), server_url.as_deref())
+                .await
+            {
+                Ok(np) => Ok(JsValue::from(Nanopub { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
                     "Error publishing the Nanopub: {e}"
                 ))),
@@ -68,17 +89,17 @@ impl NanopubJs {
         })
     }
 
-    #[wasm_bindgen(static_method_of = NanopubJs)]
-    pub fn publish_intro(profile: &NpProfileJs, server_url: &str) -> Promise {
+    #[wasm_bindgen(static_method_of = Nanopub)]
+    pub fn publish_intro(profile: &NpProfile, server_url: String) -> Promise {
         let profile = profile.profile.clone();
         let server_url = if server_url.is_empty() {
             TEST_SERVER
         } else {
-            server_url
+            &server_url
         }
         .to_string();
         future_to_promise(async move {
-            let np = match Nanopub::new_intro(&profile) {
+            let np = match RsNanopub::new_intro(&profile) {
                 Ok(np) => np,
                 Err(e) => {
                     return Err(JsValue::from_str(&format!(
@@ -87,7 +108,7 @@ impl NanopubJs {
                 }
             };
             match np.publish(Some(&profile), Some(&server_url)).await {
-                Ok(np) => Ok(JsValue::from(NanopubJs { np })),
+                Ok(np) => Ok(JsValue::from(Nanopub { np })),
                 Err(e) => Err(JsValue::from_str(&format!(
                     "Error publishing Nanopub Introduction: {e}"
                 ))),
@@ -95,6 +116,7 @@ impl NanopubJs {
         })
     }
 
+    #[wasm_bindgen(js_name = getRdf)]
     pub fn get_rdf(&self) -> Result<String, JsValue> {
         self.np
             .get_rdf()
@@ -116,25 +138,33 @@ impl NanopubJs {
 }
 
 /// Nanopub profile in JavaScript
-#[wasm_bindgen(js_name = NpProfile)]
-#[derive(Serialize)]
-pub struct NpProfileJs {
-    profile: NpProfile,
+#[derive(TryFromJsValue)]
+#[wasm_bindgen]
+#[derive(Clone, Serialize)]
+pub struct NpProfile {
+    profile: RsNpProfile,
 }
-// pub struct NpProfileJs(NpProfile);
+
+// Optional arguments: https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
+// https://github.com/rustwasm/wasm-bindgen/issues/2370
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(typescript_type = "NpProfile | undefined")]
+    pub type OptionNpProfile;
+}
 
 #[allow(clippy::inherent_to_string)]
-#[wasm_bindgen(js_class = NpProfile)]
-impl NpProfileJs {
+#[wasm_bindgen]
+impl NpProfile {
     #[wasm_bindgen(constructor)]
     pub fn new(
         private_key: &str,
         orcid_id: &str,
         name: &str,
         introduction_nanopub_uri: &str,
-    ) -> Result<NpProfileJs, JsValue> {
-        NpProfile::new(private_key, orcid_id, name, Some(introduction_nanopub_uri))
-            .map(|profile: NpProfile| Self { profile })
+    ) -> Result<NpProfile, JsValue> {
+        RsNpProfile::new(private_key, orcid_id, name, Some(introduction_nanopub_uri))
+            .map(|profile: RsNpProfile| Self { profile })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
     // TODO: create from profile.yml file
@@ -179,7 +209,7 @@ impl KeyPair {
     }
 }
 
-// impl Into<JsValue> for NanopubJs {
+// impl Into<JsValue> for Nanopub {
 //     fn into(self) -> JsValue {
 //         // JsValue::from_serde(&self).unwrap()
 //         self.to_js()
