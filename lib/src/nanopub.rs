@@ -41,7 +41,7 @@ impl RdfSource for &String {
 }
 
 /// A nanopublication object
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Nanopub {
     pub info: NpInfo,
     pub dataset: LightDataset,
@@ -206,7 +206,11 @@ impl Nanopub {
         openssl_probe::init_ssl_cert_env_vars();
         self.dataset = replace_bnodes(&self.dataset, &self.info.ns, &self.info.uri)?;
         self.info = extract_np_info(&self.dataset)?;
-        // println!("DEBUG: sign info {}", self.info);
+        if !self.info.signature.is_empty() {
+            println!("Nanopub already signed, unsigning it before re-signing");
+            self = self.unsign()?;
+            // println!("DEBUG: Unsigned: {}", self.get_rdf()?);
+        }
 
         // Add triples about the signature in the pubinfo
         self.dataset.insert(
@@ -361,9 +365,12 @@ impl Nanopub {
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
         self = if let Some(profile) = profile {
+            // if !self.info.signature.is_empty() {
+            //     // TODO: handle when the user provide a Profile and a signed Nanopub.
+            //     // We should re-sign the Nanopub with the new profile
+            //     return Err(NpError("Profile provided to sign an already signed Nanopub. Re-signing an already signed Nanopub is not supported yet".to_string()));
+            // }
             println!("Profile provided, signing Nanopub before publishing");
-            // TODO: handle when the user provide a Profile and a signed Nanopub.
-            // We should re-sign the Nanopub with the new profile
             self.sign(profile)?
         } else if self.info.signature.is_empty() {
             return Err(NpError(format!(
@@ -402,6 +409,49 @@ impl Nanopub {
                 self
             )));
         }
+        Ok(self)
+    }
+
+    /// Unsign a signed nanopub RDF. Remove signature triples and replace trusty URI with default temp URI
+    pub fn unsign(mut self) -> Result<Self, NpError> {
+        self.dataset.remove(
+            &self.info.signature_iri,
+            ns("npx").get("hasPublicKey")?,
+            &*self.info.public_key,
+            Some(&self.info.pubinfo),
+        )?;
+        self.dataset.remove(
+            &self.info.signature_iri,
+            ns("npx").get("hasAlgorithm")?,
+            &*self.info.algo,
+            Some(&self.info.pubinfo),
+        )?;
+        self.dataset.remove(
+            &self.info.signature_iri,
+            ns("npx").get("hasSignatureTarget")?,
+            &self.info.uri,
+            Some(&self.info.pubinfo),
+        )?;
+        self.dataset.remove(
+            &self.info.signature_iri,
+            ns("npx").get("hasSignature")?,
+            &*self.info.signature,
+            Some(&self.info.pubinfo),
+        )?;
+        self.dataset = replace_ns_in_quads(
+            &self.dataset,
+            &self.info.ns,
+            &self.info.uri,
+            NP_TEMP_URI,
+            NP_TEMP_URI,
+        )?;
+        self.info.uri = Iri::new_unchecked(NP_TEMP_URI.to_string());
+        self.info.ns = Namespace::new_unchecked(NP_TEMP_URI.to_string());
+        self.info = extract_np_info(&self.dataset)?;
+        // self.info.published = None;
+        // self.info.trusty_hash = "".to_string();
+        // self.info.signature = "".to_string();
+        // self.info.public_key = "".to_string();
         Ok(self)
     }
 

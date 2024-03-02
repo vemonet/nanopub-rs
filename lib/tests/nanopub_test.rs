@@ -37,15 +37,28 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("tests/testsuite/valid/plain/proteinatlas-16-1.trig")?;
     // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
-    let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
+    let np = Nanopub::new(&np_rdf)?
+        .publish(Some(&profile), Some(""))
+        .await?;
     assert!(np.info.published.is_some());
     Ok(())
 }
 
 #[tokio::test]
-async fn publish_already_signed() -> Result<(), Box<dyn Error>> {
+async fn publish_already_signed_no_profile() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig")?;
-    let np = Nanopub::new(&np_rdf)?.publish(None, Some("")).await?;
+    let np = Nanopub::new(&np_rdf)?.publish(None, None).await?;
+    assert!(np.info.published.is_some());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_already_signed_with_profile() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig")?;
+    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
+    // println!("{}", np.info);
+    // println!("{}", np.get_rdf()?);
     assert!(np.info.published.is_some());
     Ok(())
 }

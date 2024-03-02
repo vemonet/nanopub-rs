@@ -16,6 +16,7 @@ pub const TEST_SERVER: &str = "https://np.test.knowledgepixels.com/";
 
 pub const NP_PREF_NS: &str = "https://w3id.org/np/";
 pub const NP_TEMP_URI: &str = "http://purl.org/nanopub/temp/";
+// pub const NP_TEMP_URI: &str = "http://purl.org/nanopub/temp/mynanopub#";
 
 pub const DEFAULT_NP_PROFILE: &str = "~/.nanopub/profile.yml";
 

@@ -39,6 +39,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           rustup update
+          cargo install wasm-pack
           ./scripts/test-js.sh
 
   test-python:
@@ -48,6 +49,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           rustup update
+          venv .venv
           ./scripts/test-python.sh
 
   cov:
@@ -103,7 +105,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
 
 
   compare:

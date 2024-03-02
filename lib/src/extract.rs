@@ -13,7 +13,7 @@ use sophia::iri::Iri;
 use std::fmt;
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Debug)]
 pub struct NpInfo {
     pub uri: Iri<String>,
     #[serde(serialize_with = "serialize_namespace")]

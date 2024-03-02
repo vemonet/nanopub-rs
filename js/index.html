@@ -80,7 +80,7 @@
           // console.log("CHECKED", checked.info());
 
           const profile = new NpProfile(privKey, orcid, "Your Name", "");
-          const np = await new Nanopub(rdfStr).publish(profile, "");
+          const np = await new Nanopub(rdfStr).publish(profile);
           // const np = await new Nanopub(rdfStr).publish();
 
           console.log("Published Nanopub:", np.info());

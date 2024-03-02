@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-if [ -d ".venv" ]; then
-    echo "Activating virtual environment"
-    source .venv/bin/activate
-else
-    echo ".venv directory does not exist running without virtual environment"
-fi
+echo "Activating virtual environment"
+source .venv/bin/activate
 
 cd python
 
