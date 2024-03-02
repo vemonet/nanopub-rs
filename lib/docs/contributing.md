@@ -83,13 +83,15 @@ cd nanopub-rs
 git checkout -b add-my-contribution
 ```
 
-###  🧪 Run tests
+###  🧪 Test Rust crate
 
-Run tests for all packages:
+Run tests for the rust crate:
 
 ```bash
 cargo test
 ```
+
+~~~admonish example title="Testing options"
 
 Display prints:
 
@@ -109,25 +111,20 @@ If tests panic without telling on which test it failed:
 cargo test -- --test-threads=1
 ```
 
+~~~
+
 Test the `nanopub` crate with code coverage:
 
 ```bash
 cargo tarpaulin -p nanopub --out html
 ```
 
-Test signing a nanopublication with the CLI:
+### 🐍 Test Python package
+
+Build the pip package and run `pytest` tests:
 
 ```bash
-cd cli
-cargo run -- sign ../lib/tests/resources/nanopub_test_blank.trig
-```
-
-### 🐍 Run python
-
-Build the pip package, and run the `python/try.py` script:
-
-```bash
-./scripts/run-python.sh
+./scripts/test-python.sh
 ```
 
 Or just run the script:
@@ -137,12 +134,12 @@ source .venv/bin/activate
 python python/try.py
 ```
 
-### 🟨 Run JavaScript
+### 🟨 Test JavaScript package
 
-Build the npm package:
+Build the npm package and run `jest` tests:
 
 ```bash
-./scripts/run-js.py
+./scripts/test-js.sh
 ```
 
 Start a web server to access the dev webpage:
@@ -152,6 +149,21 @@ python -m http.server 3000 --directory ./js
 ```
 
 Open [localhost:3000](http://localhost:3000) in your web browser.
+
+### ⌨️ Test CLI
+
+Test signing a nanopublication with the commandline interface:
+
+```bash
+cd cli
+cargo run -- sign ../lib/tests/resources/nanopub_test_blank.trig
+```
+
+### 🌈 Run all tests
+
+```bash
+./scripts/test-all.sh
+```
 
 ### ✨ Format
 

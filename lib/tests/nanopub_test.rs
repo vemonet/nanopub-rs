@@ -42,6 +42,22 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[tokio::test]
+async fn publish_already_signed() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig")?;
+    let np = Nanopub::new(&np_rdf)?.publish(None, Some("")).await?;
+    assert!(np.info.published.is_some());
+    Ok(())
+}
+
+#[tokio::test]
+async fn publish_unsigned_no_profile_error() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
+    let np = Nanopub::new(&np_rdf)?.publish(None, None).await;
+    assert!(np.is_err());
+    Ok(())
+}
+
 #[test]
 fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;

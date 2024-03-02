@@ -5,9 +5,9 @@
 You can easily publish Nanopubs from Python.
 
 
-```admonish info title="Build a Nanopublication"
+~~~admonish info title="Build a Nanopublication"
 This package takes an already prepared Nanopublication RDF string as input. If you want to build a Nanopublication programmatically, use the [`nanopub`](https://fair-workflows.github.io/nanopub) pip package. You can then feed the serialized RDF of the built Nanopub to this package functions.
-```
+~~~
 
 ## 📥️ Install
 
