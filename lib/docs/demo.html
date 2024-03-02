@@ -192,9 +192,9 @@
               oeditor.setValue(np.get_rdf());
               console.log("Published Nanopub:", np.info());
               const npUrlElem = document.getElementById('np-url');
-              const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
-              npUrlElem.textContent = npUrl;
-              npUrlElem.href = npUrl;
+              // const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
+              npUrlElem.textContent = np.info().published;
+              npUrlElem.href = np.info().published;
               document.getElementById('success-msg').classList.remove('hidden');
 
             } catch (err) {

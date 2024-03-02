@@ -22,7 +22,7 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     println!("{}", np.get_rdf()?);
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
         np.info.trusty_hash,
@@ -38,7 +38,7 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     Ok(())
 }
 
@@ -55,7 +55,7 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     println!("{}", profile); // cov
     let _pubkey = profile.get_public_key(); // cov
     let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
-    assert!(!np.info.published);
+    assert!(np.info.published.is_none());
     Ok(())
 }
 
@@ -117,7 +117,7 @@ async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     Ok(())
 }
 
@@ -133,7 +133,7 @@ async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
         .publish(Some(&profile), None)
         .await?;
     // println!("{}", np);
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     Ok(())
 }
 
@@ -175,7 +175,7 @@ fn test_get_ns_empty() -> Result<(), Box<dyn Error>> {
 async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
     let np_url = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
     let np = Nanopub::fetch(np_url).await?;
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     println!("{}", np);
     Ok(())
 }

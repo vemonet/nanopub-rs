@@ -32,7 +32,7 @@ pub struct NpInfo {
     pub algo: String,
     pub public_key: String,
     pub orcid: String,
-    pub published: bool,
+    pub published: Option<String>,
 }
 
 impl fmt::Display for NpInfo {
@@ -262,7 +262,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         public_key: pubkey.unwrap_or("".to_string()),
         algo: algo.unwrap_or("".to_string()),
         orcid: orcid.unwrap_or("".to_string()),
-        published: false,
+        published: None,
     })
 }
 

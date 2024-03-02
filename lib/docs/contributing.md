@@ -145,7 +145,7 @@ Build the npm package:
 ./scripts/run-js.py
 ```
 
-Start a web server:
+Start a web server to access the dev webpage:
 
 ```bash
 python -m http.server 3000 --directory ./js
@@ -170,6 +170,16 @@ cargo clippy --all --all-targets --all-features
 ```bash
 ./scripts/docs-serve.sh
 ```
+
+### 🎭️ Work on the demo webpage
+
+Start a web server:
+
+```bash
+python -m http.server 3000 --directory ./lib/docs
+```
+
+Access http://localhost:3000/demo.html
 
 ### 📦️ Build and run
 

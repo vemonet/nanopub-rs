@@ -69,12 +69,6 @@ impl Nanopub {
         } else {
             None
         };
-        let server_url = if let Some(server_url) = server_url {
-            Some(server_url)
-        } else {
-            None
-        };
-        // TODO: make shorter
         future_to_promise(async move {
             match self
                 .np
@@ -125,10 +119,6 @@ impl Nanopub {
 
     pub fn info(&self) -> Result<JsValue, JsValue> {
         serde_wasm_bindgen::to_value(&self.np.info).map_err(|e| e.into())
-    }
-
-    pub fn published(&self) -> Result<bool, JsValue> {
-        Ok(self.np.info.published)
     }
 
     #[wasm_bindgen(js_name = toString)]

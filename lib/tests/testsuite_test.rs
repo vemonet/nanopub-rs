@@ -18,7 +18,7 @@ async fn testsuite_publish_valid_plain() -> Result<(), Box<dyn Error>> {
             let np = Nanopub::new(&np_rdf)?
                 .publish(Some(&get_profile()), None)
                 .await?;
-            assert!(np.info.published);
+            assert!(np.info.published.is_some());
         }
     }
     Ok(())
@@ -146,7 +146,7 @@ async fn testsuite_publish_transform_signed_simple1() -> Result<(), Box<dyn Erro
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&get_profile()), None)
         .await?;
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     assert_eq!(
         np.info.trusty_hash,
         "RALbDbWVnLmLqpNgOsI_AaYfLbEnlOfZy3CoRRLs9XqVk"
@@ -164,7 +164,7 @@ async fn testsuite_publish_transform_trusty_aida() -> Result<(), Box<dyn Error>>
         .publish(Some(&get_profile()), None)
         .await?;
     // println!("{}", np);
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     // assert_eq!(np.trusty_hash, "RAPpJU5UOB4pavfWyk7FE3WQiam5yBpmIlviAQWtBSC4M");
     Ok(())
 }
@@ -175,7 +175,7 @@ async fn testsuite_publish_transform_trusty_simple1() -> Result<(), Box<dyn Erro
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&get_profile()), None)
         .await?;
-    assert!(np.info.published);
+    assert!(np.info.published.is_some());
     // assert_eq!(np.trusty_hash, "RAtAU6U_xKTH016Eoiu11SswQkBu1elB_3_BoDJWH3arA");
     Ok(())
 }

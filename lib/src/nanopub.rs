@@ -54,7 +54,9 @@ impl fmt::Display for Nanopub {
         writeln!(f, "Trusty hash: {}", self.info.trusty_hash)?;
         writeln!(f, "Signature hash: {}", self.info.signature)?;
         writeln!(f, "Public key: {}", self.info.public_key)?;
-        writeln!(f, "Published: {}", self.info.published)?;
+        if let Some(published) = &self.info.published {
+            writeln!(f, "Published: {:?}", published)?;
+        }
         Ok(())
     }
 }
@@ -93,7 +95,7 @@ impl Nanopub {
         let np_rdf = fetch_np(url).await?;
         let dataset: LightDataset = parse_rdf(&np_rdf)?;
         let mut np_info = extract_np_info(&dataset)?;
-        np_info.published = true;
+        np_info.published = Some(url.to_string());
         Ok(Self {
             info: np_info,
             dataset,
@@ -359,7 +361,9 @@ impl Nanopub {
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
         self = if let Some(profile) = profile {
-            println!("Nanopub not signed, signing it before publishing");
+            println!("Profile provided, signing Nanopub before publishing");
+            // TODO: handle when the user provide a Profile and a signed Nanopub.
+            // We should re-sign the Nanopub with the new profile
             self.sign(profile)?
         } else if self.info.signature.is_empty() {
             return Err(NpError(format!(
@@ -370,7 +374,7 @@ impl Nanopub {
             // If the nanopub is already signed we verify it, then publish it
             self.check()?
         };
-
+        // Use test server if None provided
         let server_url = if let Some(server_url) = server_url {
             if server_url.is_empty() {
                 TEST_SERVER.to_string()
@@ -378,37 +382,26 @@ impl Nanopub {
                 server_url.to_string()
             }
         } else {
-            // Use test server if None provided
-            println!(
-                "No server URL provided, using the test server {}",
-                TEST_SERVER
-            );
             TEST_SERVER.to_string()
         };
-        // let server_url = server_url.unwrap_or_else(|| {
-        //     println!("No server URL provided, using the test server {}", TEST_SERVER);
-        //     TEST_SERVER
-        // }).to_string();
         let published = publish_np(&server_url, &self.get_rdf()?).await?;
         if published {
             if TEST_SERVER == server_url {
-                self.info.uri =
-                    Iri::new_unchecked(format!("{}/{}", server_url, self.info.trusty_hash));
+                self.info.published = Some(format!("{}{}", server_url, self.info.trusty_hash));
+            } else {
+                self.info.published = Some(self.info.uri.to_string());
             }
             println!(
-                "\n🎉 Nanopublication published at {}{}{}",
-                BOLD, self.info.uri, END
+                "\n🎉 Nanopublication published at {}{:?}{}",
+                BOLD, self.info.published, END
             );
         } else {
             println!("\n❌ Issue publishing the Nanopublication \n{}", self);
-            // TODO: when publish fails, should we return a Nanopub struct with published=false, or throw an error?
             return Err(NpError(format!(
                 "Issue publishing the Nanopublication \n{}",
                 self
             )));
         }
-        // self.set_published(published);
-        self.info.published = true;
         Ok(self)
     }
 
@@ -560,11 +553,6 @@ impl Nanopub {
     /// Returns the RDF of the nanopub
     pub fn get_rdf(&self) -> Result<String, NpError> {
         serialize_rdf(&self.dataset, self.info.uri.as_str(), self.info.ns.as_str())
-    }
-
-    /// Sets if the nanopub has been published to the network
-    pub fn set_published(&mut self, value: bool) {
-        self.info.published = value;
     }
 }
 
