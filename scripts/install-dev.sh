@@ -10,7 +10,7 @@ pip install maturin pre-commit
 rustup update
 rustup component add rustfmt clippy
 
-cargo install wasm-pack cargo-tarpaulin cargo-make
+cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make
 
 source scripts/docs-install.sh
 

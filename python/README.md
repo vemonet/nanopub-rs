@@ -18,10 +18,10 @@ Start in dev:
 maturin develop
 ```
 
-Try the python lib:
+Test the python lib:
 
 ```bash
-python try.py
+pytest
 ```
 
 ## Build

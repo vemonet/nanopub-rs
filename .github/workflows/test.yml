@@ -47,6 +47,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
       - run: |
           rustup update
           venv .venv
@@ -70,6 +74,7 @@ jobs:
           fail_ci_if_error: true
           token: ${{secrets.CODECOV_TOKEN}}
 
+  # https://github.com/actions/starter-workflows/blob/main/pages/mdbook.yml
   docs:
     name: 📖 Update docs
     runs-on: ubuntu-latest
@@ -87,15 +92,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash ./scripts/docs-install.sh
-
-      # - name: Setup mdBook
-      #   uses: peaceiris/actions-mdbook@v1
-      #   with:
-      #     mdbook-version: 'latest'
-
       - run: bash ./scripts/docs-build.sh
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact

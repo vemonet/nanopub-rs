@@ -5,9 +5,9 @@ rm -rf target/doc
 
 mdbook build
 
-cargo doc --workspace --no-deps --exclude nanopub-cli --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc
+# NOTE: we can also add the docstrings to the generated docs under /doc/nanopub, but it is already available at https://docs.rs/nanopub
+# cargo doc --workspace --no-deps --exclude nanopub-cli --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc
 
-# cp js/index.html target/doc/demo.html
 
 echo "Docs generated in the target/doc folder"
 

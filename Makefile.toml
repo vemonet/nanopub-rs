@@ -10,7 +10,7 @@ default_to_workspace = false
 script="""
 rustup update
 rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish mdbook-pagetoc
+cargo install wasm-pack cargo-tarpaulin cargo-deny mdbook mdbook-admonish mdbook-pagetoc
 pipx install "maturin[patchelf]"
 pipx install pre-commit
 pre-commit install

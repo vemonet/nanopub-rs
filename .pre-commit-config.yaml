@@ -16,12 +16,23 @@ repos:
         name: 🪚 Fix end of files
     -   id: trailing-whitespace
         name: ✂️  Trim trailing whitespaces
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.19.0
+    hooks:
+    -   id: typos
+        name: ✒️  Check typos
+        # exclude: ^CHANGELOG.md$
 -   repo: local
     hooks:
       - id: rustfmt
         name: 🦀 Format Rust files
         description: Check if all files follow the rustfmt style
         entry: cargo fmt
+        language: system
+        pass_filenames: false
+      - id: deny
+        name: ❌ Check licenses
+        entry: cargo deny check licenses
         language: system
         pass_filenames: false
 ci:

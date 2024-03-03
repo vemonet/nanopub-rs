@@ -61,17 +61,20 @@ nanopub-rs/
 Install development dependencies:
 
 ```bash
-# Activate python virtual env
+# Create and activate python virtual env
 python3 -m venv .venv
 source .venv/bin/activate
+
 # Install python dependencies
 pip install maturin pre-commit
+
 # Install pre-commit hooks
 pre-commit install
+
 # Install rust dev tools
 rustup update
 rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin mdbook mdbook-admonish cargo-make
+cargo install wasm-pack cargo-tarpaulin cargo-deny mdbook mdbook-admonish cargo-make
 ```
 
 ### 📥️ Clone the repository
@@ -127,11 +130,12 @@ Build the pip package and run `pytest` tests:
 ./scripts/test-python.sh
 ```
 
-Or just run the script:
+Or just run the tests:
 
 ```bash
 source .venv/bin/activate
-python python/try.py
+cd python
+pytest
 ```
 
 ### 🟨 Test JavaScript package
@@ -200,6 +204,14 @@ All packages at once:
 ```bash
 cargo build --all
 cargo run --all-features
+```
+
+### ️⛓️ Check supply chain
+
+Check the dependency supply chain, only accept dependencies with OSI or FSF approved licenses.
+
+```bash
+cargo deny check
 ```
 
 ### 🏷️ New release
