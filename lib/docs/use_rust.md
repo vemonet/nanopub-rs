@@ -10,7 +10,6 @@ Check, sign, or publish a nanopub RDF string:
 
 ```rust
 use nanopub::{Nanopub, NpProfile, NpError};
-use std::fs;
 use tokio::runtime;
 
 let np_rdf = r#"@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
@@ -52,6 +51,8 @@ let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 
 let published_np = rt.block_on(async {
     Nanopub::new(np_rdf).unwrap().publish(Some(&profile), None).await.unwrap()
+    // Or provide a server to publish to production:
+    // Nanopub::new(np_rdf).unwrap().publish(Some(&profile), get_np_server(true)).await.unwrap()
 });
 println!("{}", published_np)
 ```
@@ -72,15 +73,7 @@ The `publish` function takes 2 optional arguments:
 
 If the the last argument of `publish()` is none the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
 
-You can publish to the production network by getting the URL of a server using `get_np_server(true)` (true will pick a random nanopub server on the production network, while false will pick the [main nanopub server](https://server.np.trustyuri.net/)), e.g.:
-
-```rust
-use nanopub::{Nanopub, NpProfile, NpError, get_np_server};
-
-let published_np = rt.block_on(async {
-    Nanopub::new(np_rdf).unwrap().publish(Some(&profile), get_np_server(false)).await.unwrap()
-});
-```
+You can publish to the production network by getting the URL of a server using `get_np_server(true)` (true will pick a random nanopub server on the production network, while false will pick the [main nanopub server](https://server.np.trustyuri.net/)).
 
 ## 🚀 Publish from scratch
 
