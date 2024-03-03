@@ -20,6 +20,12 @@ Install the `npm` package (use `yarn` or `pnpm` if you prefer) to use it from yo
 npm install --save @nanopub/sign
 ```
 
+Or directly import from a CDN in JavaScript code:
+
+```typescript
+import init, { Nanopub, NpProfile, getNpServer } from "https://unpkg.com/@nanopub/sign";
+```
+
 ## ℹ️ How it works
 
 This package provides several functionalities related to the handling of Nanopublications, including signing, publishing, verifying, and fetching them:
@@ -28,9 +34,9 @@ This package provides several functionalities related to the handling of Nanopub
 
 This process involves signing a Nanopublication RDF string using a specified RSA private key passed through the profile. The signing operation ensures that the Nanopub is authentically created by the holder of the private key.
 
-```admonish success title="Get a private key"
+~~~admonish success title="Get a private key"
 You can easily create and register a new private key on the [demo page](https://vemonet.github.io/nanopub-rs/demo.html) after login with your ORCID.
-```
+~~~
 
 ```typescript
 import init, { Nanopub, NpProfile, getNpServer } from "@nanopub/sign";
@@ -42,21 +48,36 @@ console.log("Signed:", signed.info());
 
 ### 📬 Publish Nanopubs
 
-After signing a Nanopub, it can be published to a Nanopub server. This makes the Nanopub accessible to others in the network.
+Signed Nanopubs can be published to a Nanopub server. This makes the Nanopub accessible to others in the network.
+
+Use the `publish` function on a Nanopub, the 2 arguments are optional:
+
+- `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
+- If the `server_url` is null it will be published to the test server
 
 ```typescript
-const np = await new Nanopub(rdfStr).publish(profile, "");
+import { Nanopub, NpProfile } from "@nanopub/sign";
+
+const profile = new NpProfile(privateKey, "https://orcid.org/0000-0000-0000-0000", "Your Name", "");
+const np = await new Nanopub(rdfStr).publish(profile, null);
 console.log("Published:", np.info());
 ```
 
+~~~admonish tip title="Provide the nanopub signed or unsigned"
+- If signed nanopub and profile not provided, we publish the signed nanopub as it is
+- If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
+- If unsigned nanopub and profile provided, we sign the nanopub
+- If unsigned nanopub and profile not provided, we throw an error
+~~~
+
 #### 🧪 Test and productions servers
 
-If the the last argument of `Nanopub.publish` is an empty string the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
+If the the last argument of `publish()` is null the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
 
 You can publish to the production network by getting the URL of a server using `getNpServer(true)` (true will pick a random nanopub server on the production network, while false will pick the [main nanopub server](https://server.np.trustyuri.net/)):
 
 ```typescript
-import init, { Nanopub, NpProfile, getNpServer } from "https://unpkg.com/@nanopub/sign";
+import init, { Nanopub, NpProfile, getNpServer } from "@nanopub/sign";
 
 const np = await new Nanopub(rdfStr).publish(profile, getNpServer(true));
 ```
@@ -72,6 +93,12 @@ const checked = new Nanopub(rdfStr).check();
 ### 📡 Fetch Nanopubs
 
 This function allows you to retrieve Nanopubs from the network using their URI. It's useful for accessing and using Nanopubs created by others.
+
+```typescript
+const npUri = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
+const np = await Nanopub.fetch(npUri);
+console.log(np.info())
+```
 
 
 ## 🚀 Use it in bare HTML files

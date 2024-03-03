@@ -36,13 +36,19 @@ const unsignedRdf = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 describe('Tests for the curies npm package', () => {
   // NOTE: `await init()` only needed in browser environment
 
-  test('publish np', async () => {
+  test('publish nanopub', async () => {
     const profile = new NpProfile(privKey, orcid, "Your Name", "");
     const np = await new Nanopub(unsignedRdf).publish(profile);
 
-    console.log("Published Nanopub:", np.info());
+    // console.log("Published Nanopub:", np.info());
     expect(np.info().published).toBeDefined();
     // expect(np.info().trusty_hash).toBe("RAE9traVUygMTJ-k8E1_pVNy3gtf7uUvtHJtPeU64WpA4");
+  });
+
+  test('fetch nanopub', async () => {
+    const npUri = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
+    const np = await Nanopub.fetch(npUri);
+    expect(np.info().published).toBeDefined();
   });
 
 });

@@ -84,6 +84,18 @@ impl Nanopub {
     }
 
     #[wasm_bindgen(static_method_of = Nanopub)]
+    pub fn fetch(uri: String) -> Promise {
+        future_to_promise(async move {
+            match RsNanopub::fetch(&uri).await {
+                Ok(np) => Ok(JsValue::from(Nanopub { np })),
+                Err(e) => Err(JsValue::from_str(&format!(
+                    "Error fetching the Nanopub: {e}"
+                ))),
+            }
+        })
+    }
+
+    #[wasm_bindgen(static_method_of = Nanopub)]
     pub fn publish_intro(profile: &NpProfile, server_url: String) -> Promise {
         let profile = profile.profile.clone();
         let server_url = if server_url.is_empty() {
