@@ -1,12 +1,14 @@
 name: Build
 on:
   workflow_dispatch:
-  release:
-    types:
-      - published
-  # push:
+  push:
+    tags:
+      - "v*.*.*"
   #   branches:
   #     - main
+  # release:
+  #   types:
+  #     - published
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -47,13 +49,13 @@ jobs:
           name: nanopub_aarch64_linux_gnu
           path: target/aarch64-unknown-linux-gnu/release/nanopub-cli
 
-      - if: github.event_name == 'release'
+      - if: startsWith(github.ref, 'refs/tags/')
         run: |
           mv target/release/nanopub-cli nanopub_x86_64_linux_gnu
           mv target/aarch64-unknown-linux-gnu/release/nanopub-cli nanopub_aarch64_linux_gnu
 
       - uses: softprops/action-gh-release@v1
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             nanopub_x86_64_linux_gnu
@@ -92,13 +94,13 @@ jobs:
           name: nanopub_aarch64_apple
           path: target/aarch64-apple-darwin/release/nanopub-cli
 
-      - if: github.event_name == 'release'
+      - if: startsWith(github.ref, 'refs/tags/')
         run: |
           mv target/release/nanopub-cli nanopub_x86_64_apple
           mv target/aarch64-apple-darwin/release/nanopub-cli nanopub_aarch64_apple
 
       - uses: softprops/action-gh-release@v1
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             nanopub_x86_64_apple
@@ -123,12 +125,12 @@ jobs:
           name: nanopub_x86_64_windows_msvc
           path: target/release/nanopub-cli.exe
 
-      - if: github.event_name == 'release'
+      - if: startsWith(github.ref, 'refs/tags/')
         run: |
           mv target/release/nanopub-cli.exe nanopub_x86_64_windows_msvc.exe
 
       - uses: softprops/action-gh-release@v1
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             nanopub_x86_64_windows_msvc.exe
@@ -148,10 +150,10 @@ jobs:
       - uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/${{ matrix.architecture }}
-        if: github.event_name == 'release' && matrix.architecture != 'x86_64'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.architecture != 'x86_64'
       - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/manylinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/manylinux_build_script.sh
       - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/manylinux2014_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/manylinux_build_script.sh
-        if: github.event_name == 'release' || matrix.architecture == 'x86_64'
+        if: startsWith(github.ref, 'refs/tags/') || matrix.architecture == 'x86_64'
       - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_${{ matrix.architecture }}_linux
@@ -161,7 +163,7 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: target/wheels
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
 
 
   wheel_linux_musl:
@@ -180,10 +182,10 @@ jobs:
       - uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/${{ matrix.architecture }}
-        if: github.event_name == 'release' && matrix.architecture != 'x86_64'
+        if: startsWith(github.ref, 'refs/tags/') && matrix.architecture != 'x86_64'
       - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/musllinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/musllinux_build_script.sh
       - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/musllinux_1_1_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/musllinux_build_script.sh
-        if: github.event_name == 'release' || matrix.architecture == 'x86_64'
+        if: startsWith(github.ref, 'refs/tags/') || matrix.architecture == 'x86_64'
       - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_${{ matrix.architecture }}_linux_musl
@@ -194,7 +196,7 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: target/wheels
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
 
 
   wheel_mac:
@@ -221,9 +223,9 @@ jobs:
       - run: rm -r target/wheels
       - run: maturin build --release --target universal2-apple-darwin -m python/Cargo.toml
       - run: maturin build --release -m python/Cargo.toml
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
       - run: maturin build --release --target aarch64-apple-darwin -m python/Cargo.toml
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
       - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_universal2_mac
@@ -232,7 +234,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
 
 
   wheel_windows:
@@ -264,7 +266,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
 
 
   npm_tarball:
@@ -302,11 +304,11 @@ jobs:
         working-directory: ./js
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
 
   publish_crates:
     name: 📦️ Publish crates to crates.io
-    if: github.event_name == 'release'
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -316,3 +318,29 @@ jobs:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
       - run: cargo publish
         working-directory: ./lib
+
+  generate-changelog:
+    name: 🏔️ Generate changelog for GitHub release
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@main
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGES.md
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: CHANGES.md
+        if: startsWith(github.ref, 'refs/tags/')

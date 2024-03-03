@@ -15,11 +15,12 @@ files=(
     "js/Cargo.toml"
 )
 
+sed -i "s/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"\$/version = \"$new_version\"/" "Cargo.toml"
+
 for file in "${files[@]}"; do
     if [ -f "$file" ]; then
-        sed -i "s/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"\$/version = \"$new_version\"/" "$file"
         sed -i "s/nanopub = { version = \"[0-9]*\.[0-9]*\.[0-9]*\"/nanopub = { version = \"$new_version\"/" "$file"
-        echo "🏷️  Updated version in $file"
+        echo "🏷️  Updated nanopub crate version in $file"
     else
         echo "⚠️ File not found: $file"
     fi

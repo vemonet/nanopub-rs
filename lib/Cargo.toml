@@ -1,10 +1,10 @@
 [package]
 name = "nanopub"
-version = "0.0.18"
 description = """
 A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
 """
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/lib"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 readme.workspace = true

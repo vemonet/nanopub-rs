@@ -1,8 +1,8 @@
 [package]
 name = "nanopub-js"
-version = "0.0.18"
 description = "JavaScript bindings for the Nanopub rust toolkit"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/js"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 readme.workspace = true

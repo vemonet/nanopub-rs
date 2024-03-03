@@ -208,7 +208,7 @@ cargo run --all-features
 
 ### ️⛓️ Check supply chain
 
-Check the dependency supply chain, only accept dependencies with OSI or FSF approved licenses.
+Check the dependency supply chain: licenses (only accept dependencies with OSI or FSF approved licenses), and vulnerabilities (CVE advisories).
 
 ```bash
 cargo deny check
@@ -231,15 +231,13 @@ cargo install cargo-release cargo-outdated
    cargo outdated
    ```
 
-2. Bump the version in the `Cargo.toml` file in folders `lib/`, `python`, `js`
+2. Run the release script, it will bump the version in the `Cargo.toml` files, generate the changelog, commit, create a new tag, and push to GitHub
 
    ```bash
-   ./scripts/bump.sh 0.0.2
+   ./scripts/release.sh 0.0.2
    ```
 
-3. Commit, push, and create a new release on GitHub
-
-4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), and add them to the new release.
+4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), create a new release on GitHub, and add the artifacts to the new release.
 
 <!-- Try `cargo release patch --no-tag --no-publish`? -->
 

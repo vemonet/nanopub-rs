@@ -1,8 +1,8 @@
 [package]
 name = "nanopub-sign"
-version = "0.0.18"
 description = "Python bindings for the Nanopub rust toolkit"
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/python"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 readme.workspace = true
