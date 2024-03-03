@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### ⚙️ Continuous Integration
 
 - Fix test workflow, add cargo deny - ([a418526](https://github.com/vemonet/nanopub-rs/commit/a4185260a111e5e4b5d2815115da0d5c82df506a))
+- Add git cliff to generate changelog - ([85d244f](https://github.com/vemonet/nanopub-rs/commit/85d244f0cfc21ef5fed9d9238cf72dfd892230c4))
 
 ### 🐛 Bug Fixes
 

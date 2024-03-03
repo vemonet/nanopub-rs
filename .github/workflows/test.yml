@@ -53,7 +53,6 @@ jobs:
           python-version: 3.12
       - run: |
           rustup update
-          python -m venv .venv
           ./scripts/test-python.sh
 
   cov:
