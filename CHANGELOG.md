@@ -2,16 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.0.18](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..0.0.18) - 2024-03-03
+## [0.1.0](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..0.1.0) - 2024-03-04
 
 ### ⚙️ Continuous Integration
 
-- Fix test workflow, add cargo deny - ([a418526](https://github.com/vemonet/nanopub-rs/commit/a4185260a111e5e4b5d2815115da0d5c82df506a))
-- Add git cliff to generate changelog - ([85d244f](https://github.com/vemonet/nanopub-rs/commit/85d244f0cfc21ef5fed9d9238cf72dfd892230c4))
+- Fix test workflow, add cargo deny - ([d618203](https://github.com/vemonet/nanopub-rs/commit/d618203c7ba74c636ff97ec407c90aa62a1732bc))
+- Add git cliff to generate changelog - ([69d5de9](https://github.com/vemonet/nanopub-rs/commit/69d5de97f288db9daeade7c5115861d1bd59fc63))
+- Fix release script - ([bfbc7ac](https://github.com/vemonet/nanopub-rs/commit/bfbc7ac15712af618674922c5e73598904ffad66))
+
+### ⛰️ Features
+
+- Now supports null for profile and string in JS np.publish(). Related to https://github.com/vemonet/nanopub-rs/issues/4 - ([63093e4](https://github.com/vemonet/nanopub-rs/commit/63093e4c89b4b0eb18b9836c425121b03d50bd24))
+- Add support for re-signing already signed Nanopubs. Related to https://github.com/vemonet/nanopub-rs/issues/4 - ([e8a37d9](https://github.com/vemonet/nanopub-rs/commit/e8a37d932496198b5c546b651ca0b101831f3362))
+- Add fetch static function to JS bindings - ([c5635da](https://github.com/vemonet/nanopub-rs/commit/c5635dabc9b9a997d1e2fa52cc55ec4416cf7212))
+- [**breaking**] Change the python API to use instantiated Nanopub objects instead of static functions on the Nanopub class to check/sign/publish - ([9e34dda](https://github.com/vemonet/nanopub-rs/commit/9e34dda7eb46e2ec431665e54943fd6860b78ecc))
 
 ### 🐛 Bug Fixes
 
-- Fix handling of published URI - ([09ea329](https://github.com/vemonet/nanopub-rs/commit/09ea3294e2459882c72c7d7535cd359ad0c1c401))
+- Fix handling of published URI - ([2840850](https://github.com/vemonet/nanopub-rs/commit/284085011a053a0f4cd8fdf2be2bf623bf9e6f56))
+
+### 📚 Documentation
+
+- Fix rust codeblocks in docs - ([2c82215](https://github.com/vemonet/nanopub-rs/commit/2c8221521e5541a453471db313c630ff83b2ced4))
+
+### 🛠️ Miscellaneous Tasks
+
+- Delete bump.sh script, now replaced by release.sh - ([0f72924](https://github.com/vemonet/nanopub-rs/commit/0f729249967d97a7518b34867b7c6da516001c5f))
+- Cleanup dev dependencies for python build - ([2aff338](https://github.com/vemonet/nanopub-rs/commit/2aff338047afaaffa951ce1af68775d1660b8669))
+
+### 🧪 Testing
+
+- Add tests for python and JS with pytest and jest. Update some gh actions versions - ([fdca2f7](https://github.com/vemonet/nanopub-rs/commit/fdca2f73d834b7b42fb57255c2a1a8805a515ef2))
 
 ## [0.0.17](https://github.com/vemonet/nanopub-rs/compare/v0.0.16..v0.0.17) - 2024-01-30
 
