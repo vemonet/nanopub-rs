@@ -370,7 +370,7 @@ impl Nanopub {
             //     // We should re-sign the Nanopub with the new profile
             //     return Err(NpError("Profile provided to sign an already signed Nanopub. Re-signing an already signed Nanopub is not supported yet".to_string()));
             // }
-            println!("Profile provided, signing Nanopub before publishing");
+            // println!("Profile provided, signing Nanopub before publishing");
             self.sign(profile)?
         } else if self.info.signature.is_empty() {
             return Err(NpError(format!(
@@ -398,10 +398,10 @@ impl Nanopub {
             } else {
                 self.info.published = Some(self.info.uri.to_string());
             }
-            println!(
-                "\n🎉 Nanopublication published at {}{:?}{}",
-                BOLD, self.info.published, END
-            );
+            // println!(
+            //     "\n🎉 Nanopublication published at {}{:?}{}",
+            //     BOLD, self.info.published, END
+            // );
         } else {
             println!("\n❌ Issue publishing the Nanopublication \n{}", self);
             return Err(NpError(format!(

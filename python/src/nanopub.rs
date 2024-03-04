@@ -21,49 +21,49 @@ impl NanopubPy {
             .map_err(|e| PyErr::new::<PyException, _>(format!("{e}")))
     }
 
-    #[staticmethod]
-    #[pyo3(text_signature = "(rdf)")]
-    fn check(rdf: &str) -> PyResult<Self> {
-        Nanopub::new(rdf)
-            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))?
+    // NOTE: we need to use staticmethod because we can't access self.np otherwise
+
+    // #[staticmethod]
+    // #[pyo3(text_signature = "(rdf)")]
+    // fn check(rdf: &str) -> PyResult<Self> {
+    //     Nanopub::new(rdf)
+    //         .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))?
+    //         .check()
+    //         .map(|np| Self { np })
+    //         .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
+    // }
+
+    // NOTE: should we make check a class method (instead of static)?
+    // But error with IRI in sophia dataset when cloning
+    #[pyo3(text_signature = "($self)")]
+    fn check(&self) -> PyResult<Self> {
+        self.np
+            .clone()
             .check()
             .map(|np| Self { np })
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
     }
 
-    // NOTE: should we make check a class method (instead of static)?
-    // But error with IRI in sophia dataset when cloning
-    // #[pyo3(text_signature = "(rdf)")]
-    // fn check(&mut self) -> PyResult<Self> {
-    //     self.clone().np.check()
-    //         .map(|np| Self { np })
-    //         .map_err(|e| PyErr::new::<PyException, _>(format!("Error Checking: {e}")))
-    // }
-
-    #[staticmethod]
-    #[pyo3(text_signature = "(rdf, profile)")]
-    fn sign(rdf: &str, profile: &NpProfilePy) -> PyResult<Self> {
-        Nanopub::new(rdf)
-            .map_err(|e| PyErr::new::<PyException, _>(format!("Error Signing: {e}")))?
+    #[pyo3(text_signature = "($self, profile)")]
+    fn sign(&self, profile: &NpProfilePy) -> PyResult<Self> {
+        self.np
+            .clone()
             .sign(&profile.profile)
             .map(|np| Self { np })
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error Signing: {e}")))
     }
 
-    #[staticmethod]
-    #[pyo3(text_signature = "(rdf, profile, server_url)")]
-    fn publish(rdf: &str, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
-        let rdf = rdf.to_string();
-        let profile = profile.profile.clone();
+    #[pyo3(text_signature = "($self, profile, server_url)")]
+    fn publish(&self, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
         let server_url = server_url.map(str::to_string);
         // Use a tokio runtime to wait on the async operation
         let rt = Runtime::new().map_err(|e| {
             PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
         })?;
         let result = rt.block_on(async move {
-            Nanopub::new(&rdf)
-                .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))?
-                .publish(Some(&profile), server_url.as_deref())
+            self.np
+                .clone()
+                .publish(Some(&profile.profile.clone()), server_url.as_deref())
                 .await
                 .map_err(|e| PyErr::new::<PyException, _>(format!("Error Publishing: {e}")))
         });

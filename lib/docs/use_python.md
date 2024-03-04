@@ -67,22 +67,16 @@ profile = NpProfile(
 )
 
 # Check a nanopub RDF string
-np = Nanopub.check(rdf_str)
+np = Nanopub(rdf_str).check()
 print("Checked info dict:", np.info())
 
 # Sign a nanopub
-np = Nanopub.sign(
-    rdf=rdf_str,
-    profile=profile,
-)
+np = Nanopub(rdf_str)
+np = np.sign(profile=profile)
 print("Signed info dict:", np.info())
 
 # Sign & publish
-np = Nanopub.publish(
-    rdf=rdf_str,
-    profile=profile,
-    server_url=None,
-)
+np = Nanopub(rdf_str).publish(profile=profile, server_url=None)
 print("Published info dict:", np.info())
 print(np.get_rdf())
 ```
