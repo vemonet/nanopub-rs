@@ -18,6 +18,14 @@ files=(
     "js/Cargo.toml"
 )
 sed -i "s/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"\$/version = \"$new_version\"/" "Cargo.toml"
+for file in "${files[@]}"; do
+    if [ -f "$file" ]; then
+        sed -i "s/nanopub = { version = \"[0-9]*\.[0-9]*\.[0-9]*\"/nanopub = { version = \"$new_version\"/" "$file"
+        echo "🔼  Updated version in $file"
+    else
+        echo "⚠️ File not found: $file"
+    fi
+done
 git cliff -o CHANGELOG.md --tag $new_version
 git add Cargo.toml */Cargo.toml CHANGELOG.md
 git commit -S -m "chore: Bump version to $new_version"
