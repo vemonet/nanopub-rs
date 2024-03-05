@@ -3,8 +3,22 @@ set -e
 
 cd js
 
+# Check for --no-build flag
+SKIP_BUILD=false
+for arg in "$@"; do
+    if [[ $arg == "--no-build" ]]; then
+        SKIP_BUILD=true
+        break
+    fi
+done
+
 npm install
-npm run test
+
+if [ "$SKIP_BUILD" = false ]; then
+    npm run test
+else
+    npm run jest
+fi
 
 # wasm-pack build --target web
 # cargo build --target=wasm32-unknown-unknown

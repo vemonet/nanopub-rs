@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
 
-You can easily publish Nanopubs from Python.
+You can use this toolkit to sign and publish Nanopublications from Python with the [`nanopub`](https://pypi.org/project/nanopub-sign/) pip package.
 
 
 ~~~admonish info title="Build a Nanopublication"
@@ -11,15 +11,15 @@ This package takes an already prepared Nanopublication RDF string as input. If y
 
 ## 📥️ Install
 
-Install the `pip` package:
+Install the package with pip:
 
 ```bash
 pip install nanopub-sign
 ```
 
-## 🚀 Use
+## ✍️ Sign Nanopubs
 
-Create a `sign.py` file that takes a nanopub RDF and a private key as input.
+This process involves signing a Nanopublication RDF string using a specified RSA private key passed through the profile. The signing operation ensures that the Nanopub is authentically created by the holder of the private key.
 
 ```admonish success title="Get a private key"
 You can easily create and register a new private key on the [demo page](https://vemonet.github.io/nanopub-rs/demo.html) after login with your ORCID.
@@ -66,19 +66,10 @@ profile = NpProfile(
     introduction_nanopub_uri=""
 )
 
-# Check a nanopub RDF string
-np = Nanopub(rdf_str).check()
-print("Checked info dict:", np.info())
-
 # Sign a nanopub
 np = Nanopub(rdf_str)
 np = np.sign(profile=profile)
 print("Signed info dict:", np.info())
-
-# Sign & publish
-np = Nanopub(rdf_str).publish(profile=profile, server_url=None)
-print("Published info dict:", np.info())
-print(np.get_rdf())
 ```
 
 Run the script:
@@ -87,7 +78,29 @@ Run the script:
 python sign.py
 ```
 
-## 🧪 Test and production servers
+## 📬 Publish Nanopubs
+
+Signed Nanopubs can be published to a Nanopub server. This makes the Nanopub accessible to others in the network.
+
+Use the `publish` function on a Nanopub, the 2 arguments are optional:
+
+- `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
+- If the `server_url` is null it will be published to the test server
+
+```typescript
+np = Nanopub(rdf_str).publish(profile=profile, server_url=None)
+print("Published info dict:", np.info())
+print(np.get_rdf())
+```
+
+```admonish tip title="Provide the nanopub signed or unsigned"
+- If signed nanopub and profile not provided, we publish the signed nanopub as it is
+- If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
+- If unsigned nanopub and profile provided, we sign the nanopub
+- If unsigned nanopub and profile not provided, we throw an error
+```
+
+### 🧪 Test and production servers
 
 If the provided `server_url` is empty, the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
 
@@ -101,4 +114,50 @@ np = Nanopub.publish(
     profile=profile,
     server_url=get_np_server(),
 )
+```
+
+## ☑️ Verify Nanopubs
+
+This operation involves checking the integrity of Nanopubs. It ensures that a Nanopub is valid, regardless of whether it is signed or unsigned.
+
+```python
+np = Nanopub(rdf_str).check()
+print("Checked info dict:", np.info())
+```
+
+## 📡 Fetch Nanopubs
+
+This function allows you to retrieve Nanopubs from the network using their URI. It's useful for accessing and using Nanopubs created by others.
+
+```python
+from nanopub_sign import Nanopub
+
+np = Nanopub.fetch("https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw")
+print(np.info())
+```
+
+## 🔑 Generate private key and publish introduction
+
+You can generate a new private/public key pair, and publish a nanopub introduction to register this key under your ORCID in the Nanopublications network:
+
+```python
+from nanopub_sign import Nanopub, NpProfile, KeyPair, get_np_server
+
+# Randomly generate a new private/public key pair
+keypair = KeyPair()
+
+# Create profile with new private key
+new_profile = NpProfile(
+    private_key=keypair.private,
+    orcid_id="https://orcid.org/0000-0000-0000-0000",
+    name="",
+    introduction_nanopub_uri=""
+)
+
+# Publish nanopub introduction for this profile
+np = Nanopub.publish_intro(new_profile, get_np_server())
+print(np.info())
+
+# Publish to the production network:
+# np = Nanopub.publish_intro(new_profile, get_np_server())
 ```

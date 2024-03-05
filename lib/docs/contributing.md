@@ -239,8 +239,6 @@ cargo install cargo-release cargo-outdated
 
 4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), create a new release on GitHub, and add the artifacts to the new release.
 
-<!-- Try `cargo release patch --no-tag --no-publish`? -->
-
 ## ⏱️ Speed comparison
 
 Speed taken when signing a nanopub using different languages implementations (in this order: [java](https://github.com/Nanopublication/nanopub-java), [python](https://github.com/fair-workflows/nanopub), rust):
@@ -252,3 +250,7 @@ Speed taken when signing a nanopub using different languages implementations (in
 | `target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 5.3 ± 0.1 | 5.1 | 6.3 | 1.00 |
 
 > Tested in GitHub actions on Ubuntu.
+
+## 🏔️ Changelog
+
+Version history is recorded in the [CHANGELOG.md](https://github.com/vemonet/nanopub-rs/blob/main/CHANGELOG.md).

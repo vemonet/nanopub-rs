@@ -23,6 +23,7 @@ fn nanopub_sign(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
     m.add_class::<NpProfilePy>()?;
     m.add_class::<NanopubPy>()?;
+    m.add_class::<KeyPair>()?;
     m.add_wrapped(wrap_pyfunction!(get_np_server))
     // m.add_function(wrap_pyfunction!(sum_as_string, m))
 }

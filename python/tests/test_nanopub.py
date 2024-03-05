@@ -1,5 +1,5 @@
 import pytest
-from nanopub_sign import Nanopub, NpProfile, get_np_server
+from nanopub_sign import KeyPair, Nanopub, NpProfile, get_np_server
 
 rdf_str = """@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -62,3 +62,20 @@ def test_publish():
 def test_get_np_server():
     print(f"Random server: {get_np_server()}")
     assert len(get_np_server()) > 3
+
+def test_publish_intro():
+    keypair = KeyPair()
+    new_profile = NpProfile(
+        private_key=keypair.private,
+        orcid_id="https://orcid.org/0000-0000-0000-0000",
+        name="",
+        introduction_nanopub_uri=""
+    )
+    np = Nanopub.publish_intro(new_profile)
+    assert np.info()["trusty_hash"]
+    assert np.info()["published"]
+
+def test_fetch():
+    np = Nanopub.fetch("https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw")
+    assert np.info()["trusty_hash"]
+    assert np.info()["published"]

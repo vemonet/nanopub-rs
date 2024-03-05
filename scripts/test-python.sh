@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
+# Check for --no-build flag
+SKIP_BUILD=false
+for arg in "$@"; do
+    if [[ $arg == "--no-build" ]]; then
+        SKIP_BUILD=true
+        break
+    fi
+done
+
 if [ ! -d ".venv" ]; then
     echo ".venv virtual environment does not exist. Creating it"
     python -m venv .venv
@@ -13,6 +22,8 @@ cd python
 
 python -m pip install pytest maturin
 
-maturin develop
+if [ "$SKIP_BUILD" = false ]; then
+    maturin develop
+fi
 
 python -m pytest -s

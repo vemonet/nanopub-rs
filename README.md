@@ -54,3 +54,7 @@ On all platforms:
 ## 📖 Documentation
 
 Checkout the **[documentation website](https://vemonet.github.io/nanopub-rs)** for more details on how to install and use it.
+
+## 🏔️ Changelog
+
+Version history is recorded in the [CHANGELOG.md](https://github.com/vemonet/nanopub-rs/blob/main/CHANGELOG.md).
