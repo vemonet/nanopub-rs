@@ -23,6 +23,6 @@ fi
 echo "Activating virtual environment"
 source .venv/bin/activate
 
-pip install -r lib/docs/requirements.txt
+pip install -q -r lib/docs/requirements.txt
 
 mkdocs serve -a localhost:8001 -f lib/docs/mkdocs.yml
