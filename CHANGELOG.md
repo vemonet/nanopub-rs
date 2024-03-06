@@ -2,7 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..0.1.0) - 2024-03-04
+## [0.1.1](https://github.com/vemonet/nanopub-rs/compare/v0.1.0..0.1.1) - 2024-03-06
+
+### ⛰️ Features
+
+- Add python bindings for generating private/public `KeyPair` and static method `Nanopub.publish_intro()` to publish an introduction - ([d02ef65](https://github.com/vemonet/nanopub-rs/commit/d02ef652e33d3d48a0ea70f11c912234b2442a4d))
+
+### 🐛 Bug Fixes
+
+- Fix tokio dev dependency for when runninv cov tests - ([de2a109](https://github.com/vemonet/nanopub-rs/commit/de2a1097979e4e8e8d76f6aeff2193d6238c14d7))
+
+### 📚 Documentation
+
+- Migrate docs from mdbook to material for mkdocs - ([d2785dc](https://github.com/vemonet/nanopub-rs/commit/d2785dc327be5bf875ca8c279a66f0f0d04bf12b))
+- Add service worker to playground to speed up loading assets - ([e2f6bfc](https://github.com/vemonet/nanopub-rs/commit/e2f6bfc108da52af7afd2a0d7234e214e26c6107))
+
+## [0.1.0](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..v0.1.0) - 2024-03-04
 
 ### ⚙️ Continuous Integration
 
@@ -29,6 +44,7 @@ All notable changes to this project will be documented in this file.
 
 - Delete bump.sh script, now replaced by release.sh - ([0f72924](https://github.com/vemonet/nanopub-rs/commit/0f729249967d97a7518b34867b7c6da516001c5f))
 - Cleanup dev dependencies for python build - ([2aff338](https://github.com/vemonet/nanopub-rs/commit/2aff338047afaaffa951ce1af68775d1660b8669))
+- Bump version to 0.1.0 - ([7841e1d](https://github.com/vemonet/nanopub-rs/commit/7841e1d05fba9be19451abf473a4b6eecd06d0a9))
 
 ### 🧪 Testing
 

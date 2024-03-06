@@ -15,7 +15,7 @@ categories.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-nanopub = { version = "0.1.0", path = "../lib" }
+nanopub = { version = "0.1.1", path = "../lib" }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 wasm-bindgen-derive = "0.2"
