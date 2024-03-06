@@ -47,6 +47,4 @@ When you sign a nanopub, if it has not already been defined in the pubinfo graph
 
 Experience `nanopub-rs` in action! Visit the **[playground page](playground.html)** to sign Nanopublications, or generate and register a new key pair, directly in your browser using the NPM version of this library.
 
-!!! bug "Feedback welcome"
-
-    **Facing a bug or have suggestions?** We welcome your input and feedback! If you encounter any issues or have ideas to enhance this tool, please [create an issue](https://github.com/vemonet/nanopub-rs/issues) on our GitHub repository.
+> **💡 Facing a bug or have suggestions?** We welcome your input and feedback! If you encounter any issues or have ideas to enhance this tool, please [create an issue](https://github.com/vemonet/nanopub-rs/issues) on our GitHub repository.

@@ -64,11 +64,12 @@ The `publish` function takes 2 optional arguments:
 - `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
 - If the `server_url` is none it will be published to the test server
 
-!!! tip "Provide the nanopub signed or unsigned"
-    - If signed nanopub and profile not provided, we publish the signed nanopub as it is
-    - If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
-    - If unsigned nanopub and profile provided, we sign the nanopub
-    - If unsigned nanopub and profile not provided, we throw an error
+> Provide the nanopub signed or unsigned:
+>
+> - [x] If signed nanopub and profile not provided, we publish the signed nanopub as it is
+> - [x] If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
+> - [x] If unsigned nanopub and profile provided, we sign the nanopub
+> - [ ] If unsigned nanopub and profile not provided, we throw an error
 
 #### 🧪 Test and productions servers
 
