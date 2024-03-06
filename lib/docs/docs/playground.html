@@ -178,7 +178,7 @@
           if (!publish) {
             try {
               const signed = new Nanopub(rdfStr).sign(profile)
-              oeditor.setValue(signed.get_rdf());
+              oeditor.setValue(signed.getRdf());
               console.log("Signed Nanopub:", signed.info());
             } catch (err) {
               displayError(err);
@@ -189,7 +189,7 @@
             // Empty is test server
             try {
               const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
-              oeditor.setValue(np.get_rdf());
+              oeditor.setValue(np.getRdf());
               console.log("Published Nanopub:", np.info());
               const npUrlElem = document.getElementById('np-url');
               // const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
@@ -242,7 +242,7 @@
           // Publish nanopub link to public key
           const intro = Nanopub.publish_intro(profile, getNpServer(false))
             .then(np => {
-              oeditor.setValue(np.get_rdf());
+              oeditor.setValue(np.getRdf());
               console.log("Published Introduction Nanopub:", np.info());
               // Display private key
               document.getElementById("privkey-card").classList.remove("hidden");
@@ -290,10 +290,10 @@
         }
         var config = {
           // "mode": "sandbox",
-          // "returnUrl": "http://localhost:3000/demo.html",
+          // "returnUrl": "http://localhost:3000/playground.html",
           "mode": "live",
           "clientId": "APP-TEANCMSUOPYZOGJ3",
-          "returnUrl": "https://vemonet.github.io/nanopub-rs/demo.html",
+          "returnUrl": "https://vemonet.github.io/nanopub-rs/playground.html",
           "onSuccess": onLogin,
           "onFail": onError,
           "buttonText": "Authenticate with ORCID",
@@ -324,7 +324,7 @@
       color: rgb(148, 163, 184);
     }
     /* Enable resize of editors
-    not possible for input because oveflow: hidden breaks the error popups */
+    not possible for input because overflow: hidden breaks the error popups */
     #rdf-input, #rdf-output {
       flex-shrink: 0;
       flex-basis: 1;

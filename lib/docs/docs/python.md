@@ -5,9 +5,8 @@
 You can use this toolkit to sign and publish Nanopublications from Python with the [`nanopub`](https://pypi.org/project/nanopub-sign/) pip package.
 
 
-~~~admonish info title="Build a Nanopublication"
-This package takes an already prepared Nanopublication RDF string as input. If you want to build a Nanopublication programmatically, use the [`nanopub`](https://fair-workflows.github.io/nanopub) pip package. You can then feed the serialized RDF of the built Nanopub to this package functions.
-~~~
+!!! info "Build a Nanopublication"
+    This package takes an already prepared Nanopublication RDF string as input. If you want to build a Nanopublication programmatically, use the [`nanopub`](https://fair-workflows.github.io/nanopub) pip package. You can then feed the serialized RDF of the built Nanopub to this package functions.
 
 ## 📥️ Install
 
@@ -21,11 +20,10 @@ pip install nanopub-sign
 
 This process involves signing a Nanopublication RDF string using a specified RSA private key passed through the profile. The signing operation ensures that the Nanopub is authentically created by the holder of the private key.
 
-```admonish success title="Get a private key"
-You can easily create and register a new private key on the [demo page](https://vemonet.github.io/nanopub-rs/demo.html) after login with your ORCID.
-```
+!!! success "Get a private key"
+    You can easily create and register a new private key on the [playground page](https://vemonet.github.io/nanopub-rs/playground.html) after login with your ORCID.
 
-```python
+```python title="sign.py"
 from nanopub_sign import Nanopub, NpProfile
 
 # Change the RDF and private key as you wish
@@ -93,16 +91,15 @@ print("Published info dict:", np.info())
 print(np.get_rdf())
 ```
 
-```admonish tip title="Provide the nanopub signed or unsigned"
-- If signed nanopub and profile not provided, we publish the signed nanopub as it is
-- If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
-- If unsigned nanopub and profile provided, we sign the nanopub
-- If unsigned nanopub and profile not provided, we throw an error
-```
+!!! tip "Provide the nanopub signed or unsigned"
+    - [x] If signed nanopub and profile not provided, we publish the signed nanopub as it is
+    - [x] If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
+    - [x] If unsigned nanopub and profile provided, we sign the nanopub
+    - [ ] If unsigned nanopub and profile not provided, we throw an error
 
 ### 🧪 Test and production servers
 
-If the provided `server_url` is empty, the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
+If the provided `server_url` is empty, the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at [https://w3id.org/np/](https://w3id.org/np/), but at [https://np.test.knowledgepixels.com/](https://np.test.knowledgepixels.com/), e.g. [https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM](https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM)
 
 To publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the [main nanopub server](https://server.np.trustyuri.net/), defaults to true.
 

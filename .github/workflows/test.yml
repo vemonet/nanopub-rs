@@ -73,25 +73,34 @@ jobs:
           fail_ci_if_error: true
           token: ${{secrets.CODECOV_TOKEN}}
 
-  # https://github.com/actions/starter-workflows/blob/main/pages/mdbook.yml
-  docs:
-    name: 📖 Update docs
+
+  publish-docs:
+    name: 📚 Update docs website
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
       id-token: write
-    # Allow one concurrent deployment
     concurrency:
       group: "pages"
       cancel-in-progress: true
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
-      - run: bash ./scripts/docs-install.sh
-      - run: bash ./scripts/docs-build.sh
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: pip install -r lib/docs/requirements.txt
+
+      - name: Deploy mkdocs on GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mkdocs build -f lib/docs/mkdocs.yml -d dist
+        # mkdocs gh-deploy dont support new pages
 
       - name: Setup Pages
         id: pages
@@ -100,11 +109,12 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './target/doc'
+          path: './lib/docs/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
 
 
   compare:

@@ -2,6 +2,8 @@
 
 [![crates.io](https://img.shields.io/crates/v/nanopub.svg)](https://crates.io/crates/nanopub)
 
+The core component of this toolkit is written in Rust.
+
 You can use the Rust crate to easily sign, publish, or check a Nanopub.
 
 ## 🧩 Publish from existing RDF
@@ -62,16 +64,15 @@ The `publish` function takes 2 optional arguments:
 - `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
 - If the `server_url` is none it will be published to the test server
 
-~~~admonish tip title="Provide the nanopub signed or unsigned"
-- If signed nanopub and profile not provided, we publish the signed nanopub as it is
-- If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
-- If unsigned nanopub and profile provided, we sign the nanopub
-- If unsigned nanopub and profile not provided, we throw an error
-~~~
+!!! tip "Provide the nanopub signed or unsigned"
+    - If signed nanopub and profile not provided, we publish the signed nanopub as it is
+    - If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
+    - If unsigned nanopub and profile provided, we sign the nanopub
+    - If unsigned nanopub and profile not provided, we throw an error
 
 #### 🧪 Test and productions servers
 
-If the the last argument of `publish()` is none the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at https://w3id.org/np/, but at https://np.test.knowledgepixels.com/, e.g. https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM
+If the the last argument of `publish()` is none the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at [https://w3id.org/np/](https://w3id.org/np/), but at [https://np.test.knowledgepixels.com/](https://np.test.knowledgepixels.com/), e.g. [https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM](https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM)
 
 You can publish to the production network by getting the URL of a server using `get_np_server(true)` (true will pick a random nanopub server on the production network, while false will pick the [main nanopub server](https://server.np.trustyuri.net/)).
 

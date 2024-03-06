@@ -1,4 +1,4 @@
-# ⌨️ Use from the CLI
+# ⌨️ Use from a Command Line Interface
 
 Check, sign, and publish Nanopubs from your terminal using the binary for your platform.
 
@@ -22,7 +22,7 @@ curl -sSL https://raw.github.com/vemonet/nanopub-rs/main/scripts/install-binary.
 
 You can define the path to the key pair used for signing in a `profile.yml` which contains the following information:
 
-```yaml
+```yaml title="~/.nanopub/profile.yml"
 orcid_id: https://orcid.org/0000-0000-0000-0000
 name: Your Name
 public_key: /home/user/.nanopub/id_rsa.pub

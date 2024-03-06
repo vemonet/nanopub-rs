@@ -10,7 +10,7 @@ default_to_workspace = false
 script="""
 rustup update
 rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin cargo-deny mdbook mdbook-admonish mdbook-pagetoc
+cargo install wasm-pack cargo-tarpaulin cargo-deny
 pipx install "maturin[patchelf]"
 pipx install pre-commit
 pre-commit install
@@ -52,18 +52,13 @@ dependencies = ["format"]
 cwd = "./python/"
 
 
-[tasks.mdbook]
-command = "mdbook"
-args = ["build"]
-dependencies = ["format"]
-
 [tasks.docs]
 command = "cargo doc --workspace --no-deps --exclude nanopub-cli --exclude nanopub-js --exclude nanopub-sign --target-dir target/doc"
 # args = [
 #     "doc", "--workspace", "--target-dir", "target/doc", "--no-deps",
 #     "--exclude", "nanopub-cli", "--exclude", "nanopub-js", "--exclude", "nanopub-sign",
 # ]
-dependencies = ["format", "mdbook"]
+dependencies = ["format"]
 
 
 
@@ -72,15 +67,6 @@ install_crate = "wasm-pack"
 
 [tasks.install-tarpaulin]
 install_crate = "cargo-tarpaulin"
-
-[tasks.install-mdbook]
-install_crate = "mdbook"
-
-[tasks.install-mdbook-admonish]
-install_crate = "mdbook-admonish"
-
-[tasks.install-mdbook-pagetoc]
-install_crate = "mdbook-pagetoc"
 
 
 [tasks.clean]

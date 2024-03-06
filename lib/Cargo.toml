@@ -35,7 +35,6 @@ rand_core = { version = "0.6", features = ["std"] }
 # sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
 
 [dev-dependencies]
-mdbook = "0.4.35"
 wasm-pack = "0.12.1"
 tokio = "1.34"
 

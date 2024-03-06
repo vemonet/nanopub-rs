@@ -52,7 +52,7 @@ nanopub-rs/
 - [ ] Integrate to the python `nanopub` library to perform signing?
 - [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
 - [ ] Add Java bindings? https://docs.rs/jni/latest/jni
-- [ ] Add brew packaging? (c.f. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))
+- [ ] Add brew packaging? (cf. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))
 
 ## 🧑‍💻 Development workflow
 
@@ -74,7 +74,7 @@ pre-commit install
 # Install rust dev tools
 rustup update
 rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin cargo-deny mdbook mdbook-admonish cargo-make
+cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make
 ```
 
 ### 📥️ Clone the repository
@@ -94,27 +94,28 @@ Run tests for the rust crate:
 cargo test
 ```
 
-~~~admonish example title="Testing options"
+!!! example "More options"
 
-Display prints:
+    Display prints:
 
-```bash
-cargo test -- --nocapture
-```
+    ```bash
+    cargo test -- --nocapture
+    ```
 
-Run a specific test:
+    Run a specific test:
 
-```bash
-cargo test sign_nanopub_blank -- --nocapture
-```
+    ```bash
+    cargo test sign_nanopub_blank -- --nocapture
+    ```
 
-If tests panic without telling on which test it failed:
+    If tests panic without telling on which test it failed:
 
-```bash
-cargo test -- --test-threads=1
-```
+    ```bash
+    cargo test -- --test-threads=1
+    ```
 
-~~~
+
+
 
 Test the `nanopub` crate with code coverage:
 
@@ -184,18 +185,16 @@ cargo clippy --all --all-targets --all-features
 ### 📖 Generate docs
 
 ```bash
-./scripts/docs-serve.sh
+./scripts/docs.sh
 ```
 
 ### 🎭️ Work on the demo webpage
 
-Start a web server:
+Start a web server at [localhost:3000/playground.html](http://localhost:3000/playground.html)
 
 ```bash
 python -m http.server 3000 --directory ./lib/docs
 ```
-
-Access http://localhost:3000/demo.html
 
 ### 📦️ Build and run
 
