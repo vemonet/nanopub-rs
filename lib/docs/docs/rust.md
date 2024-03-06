@@ -67,7 +67,7 @@ The `publish` function takes 2 optional arguments:
 > Provide the nanopub signed or unsigned:
 >
 > - [x] If signed nanopub and profile not provided, we publish the signed nanopub as it is
-> - [x] If signed nanopub and profile provided, we re-sign the nanopub (only the triples related to the signature are changed)
+> - [x] If signed nanopub and profile provided, we re-sign the nanopub (signature triples are updated)
 > - [x] If unsigned nanopub and profile provided, we sign the nanopub
 > - [ ] If unsigned nanopub and profile not provided, we throw an error
 
