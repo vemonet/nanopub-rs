@@ -152,10 +152,10 @@ jobs:
             target: i686
           - os: linux
             manylinux: auto
-            target: aarch64
+            target: aarch64 # -bit ARM
           - os: linux
             manylinux: auto
-            target: armv7
+            target: armv7  # 32-bit ARM
             interpreter: 3.8 3.9 3.10 3.11 3.12
           - os: linux
             manylinux: auto
@@ -195,18 +195,20 @@ jobs:
             target: i686
             python-architecture: x86
             interpreter: 3.8 3.9 3.10 3.11 3.12
-          # Ring cant target win aarch64 https://github.com/briansmith/ring/issues/1167
-          # - os: windows
-          #   target: aarch64
+          #  maturin failed Caused by: Failed to find a PyPy 3.8 interpreter in known sysconfig
+          - os: windows
+            target: aarch64
+            interpreter: "3.11"
           #   interpreter: 3.9 3.10 3.11 3.12
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
+        if: matrix.os == 'linux' && matrix.target == 'aarch64'
         with:
           platforms: linux/${{ matrix.target }}
-        if: matrix.os == 'linux' && matrix.target == 'aarch64'
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
