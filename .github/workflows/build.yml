@@ -135,13 +135,13 @@ jobs:
           files: |
             nanopub_x86_64_windows_msvc.exe
 
-  # https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
+  # Inspired by https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
   build_wheels:
     name: 🐍 Build wheel for ${{ matrix.os }} (${{ matrix.target }} - ${{ matrix.interpreter || 'all' }}${{ matrix.os == 'linux' && format(' - {0}', matrix.manylinux == 'auto' && 'manylinux' || matrix.manylinux) || '' }})
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macos] # windows
+        os: [linux, macos, windows]
         target: [x86_64, aarch64]
         manylinux: [auto]
         include:
@@ -195,7 +195,6 @@ jobs:
             target: i686
             python-architecture: x86
             interpreter: 3.8 3.9 3.10 3.11 3.12
-          #  maturin failed Caused by: Failed to find a PyPy 3.8 interpreter in known sysconfig
           - os: windows
             target: aarch64
             interpreter: 3.11 3.12
@@ -219,8 +218,6 @@ jobs:
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
-        env:
-          CFLAGS_aarch64_unknown_linux_gnu: -D__ARM_ARCH=8
         with:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}

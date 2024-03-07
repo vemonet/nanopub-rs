@@ -175,34 +175,35 @@
           monaco.editor.setModelMarkers(ieditor.getModel(), 'errors', []);
           const rdfStr = ieditor.getValue();
           const privKey = document.getElementById('private-key').value
-          const profile = new NpProfile(privKey, orcid, "Your Name", "");
-          if (!publish) {
-            try {
-              const signed = new Nanopub(rdfStr).sign(profile)
-              oeditor.setValue(signed.rdf());
-              console.log("Signed Nanopub:", signed.info());
-            } catch (err) {
-              displayError(err);
-              console.error("Error:", err);
-            }
-          } else {
-            const serverUrl = (document.getElementById('toggleProd').checked) ? getNpServer() : ""
-            // Empty is test server
-            try {
-              const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
-              oeditor.setValue(np.rdf());
-              console.log("Published Nanopub:", np.info());
-              const npUrlElem = document.getElementById('np-url');
-              // const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
-              npUrlElem.textContent = np.info().published;
-              npUrlElem.href = np.info().published;
-              document.getElementById('success-msg').classList.remove('hidden');
+          try {
+            const profile = new NpProfile(privKey, orcid, "Your Name", "");
+            if (!publish) {
+              try {
+                const signed = new Nanopub(rdfStr).sign(profile)
+                oeditor.setValue(signed.rdf());
+                console.log("Signed Nanopub:", signed.info());
+              } catch (err) {
+                displayError(err);
+              }
+            } else {
+              const serverUrl = (document.getElementById('toggleProd').checked) ? getNpServer() : ""
+              // Empty is test server
+              try {
+                const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
+                oeditor.setValue(np.rdf());
+                console.log("Published Nanopub:", np.info());
+                const npUrlElem = document.getElementById('np-url');
+                // const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
+                npUrlElem.textContent = np.info().published;
+                npUrlElem.href = np.info().published;
+                document.getElementById('success-msg').classList.remove('hidden');
 
-            } catch (err) {
-              // oeditor.setValue(error.toString());
-              displayError(err);
-              console.error("Error:", err);
+              } catch (err) {
+                displayError(err);
+              }
             }
+          } catch (err) {
+            displayError(err);
           }
           rdfOutput.classList.remove("hidden");
         }
@@ -258,6 +259,7 @@
 
         // Display error in output editor with line and position
         function displayError(err) {
+          console.error(err);
           oeditor.setValue(err);
           document.getElementById('success-msg').classList.add('hidden');
           // Handle error msg with line and position returned by nt/ttl/trig parsers
@@ -273,6 +275,7 @@
               message: msg,
               severity: monaco.MarkerSeverity.Error
           }]);
+          rdfOutput.classList.remove("hidden");
         }
 
         // Setup ORCID login https://github.com/ORCID/orcid-openid-examples/blob/master/js-widget/readme.md
