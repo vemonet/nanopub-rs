@@ -198,8 +198,7 @@ jobs:
           #  maturin failed Caused by: Failed to find a PyPy 3.8 interpreter in known sysconfig
           - os: windows
             target: aarch64
-            interpreter: "3.11"
-          #   interpreter: 3.9 3.10 3.11 3.12
+            interpreter: 3.11 3.12
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:

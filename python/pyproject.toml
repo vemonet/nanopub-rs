@@ -28,6 +28,9 @@ Homepage = "https://vemonet.github.io/nanopub-rs"
 Source = "https://github.com/vemonet/nanopub-rs/tree/main/python"
 Tracker = "https://github.com/vemonet/nanopub-rs/issues"
 
+[tool.maturin]
+features = ["pyo3/generate-import-lib"] # needed for Windows aarch64
+
 [tool.ruff]
 line-length = 120
 select = [
