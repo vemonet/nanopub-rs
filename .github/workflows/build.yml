@@ -137,7 +137,7 @@ jobs:
 
   # https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
   build_wheels:
-    name: build on ${{ matrix.os }} (${{ matrix.target }} - ${{ matrix.interpreter || 'all' }}${{ matrix.os == 'linux' && format(' - {0}', matrix.manylinux == 'auto' && 'manylinux' || matrix.manylinux) || '' }})
+    name: 🐍 Build wheel for ${{ matrix.os }} (${{ matrix.target }} - ${{ matrix.interpreter || 'all' }}${{ matrix.os == 'linux' && format(' - {0}', matrix.manylinux == 'auto' && 'manylinux' || matrix.manylinux) || '' }})
     strategy:
       fail-fast: false
       matrix:
@@ -212,7 +212,7 @@ jobs:
       - run: pip install -U twine 'ruff==0.1.3' typing_extensions
 
       # generate self-schema now, so we don't have to do so inside docker in maturin build
-      - run: python generate_self_schema.py
+      # - run: python generate_self_schema.py
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
