@@ -145,6 +145,7 @@ jobs:
         target: [x86_64, aarch64]
         manylinux: [auto]
         include:
+          # Using pypy when possible for performance
           # manylinux for various platforms, plus x86_64 pypy
           - os: linux
             manylinux: auto
@@ -208,7 +209,7 @@ jobs:
       - uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/${{ matrix.target }}
-        if: matrix.target == 'aarch64'
+        if: matrix.os == 'linux' && matrix.target == 'aarch64'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
