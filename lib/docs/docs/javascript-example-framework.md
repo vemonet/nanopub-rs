@@ -87,7 +87,7 @@ For example, to use it in a nextjs react app to publish a nanopub defined in JSO
 
           const np = await new Nanopub(rdf).publish(profile, serverUrl)
           console.log("Published info dict:", np.info());
-          setRdfOutput(np.get_rdf());
+          setRdfOutput(np.rdf());
         });
       }, []);
 

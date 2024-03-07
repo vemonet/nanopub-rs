@@ -21,7 +21,7 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
-    println!("{}", np.get_rdf()?);
+    println!("{}", np.rdf()?);
     assert!(np.info.published.is_some());
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
@@ -58,7 +58,7 @@ async fn publish_already_signed_with_profile() -> Result<(), Box<dyn Error>> {
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     // println!("{}", np.info);
-    // println!("{}", np.get_rdf()?);
+    // println!("{}", np.rdf()?);
     assert!(np.info.published.is_some());
     Ok(())
 }
@@ -227,7 +227,7 @@ async fn unit_publish_np_fail() -> Result<(), Box<dyn Error>> {
 #[tokio::test]
 async fn publish_from_scratch() -> Result<(), Box<dyn Error>> {
     let mut np = Nanopub::new(create_base_dataset()?)?;
-    println!("DEBUG: SCRATCH {}", np.get_rdf()?);
+    println!("DEBUG: SCRATCH {}", np.rdf()?);
     let profile = NpProfile::new(&get_test_key(), "", "", None)?;
     np.dataset.insert(
         Iri::new_unchecked("http://example.org/mosquitoes"),
@@ -242,7 +242,7 @@ async fn publish_from_scratch() -> Result<(), Box<dyn Error>> {
         Some(&np.info.prov),
     )?;
     let np = np.publish(Some(&profile), None).await?;
-    println!("DEBUG: SCRATCH 2 {}", np.get_rdf()?);
+    println!("DEBUG: SCRATCH 2 {}", np.rdf()?);
     // assert!(res.is_err());
     Ok(())
 }

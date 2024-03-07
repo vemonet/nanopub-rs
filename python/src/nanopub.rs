@@ -118,10 +118,10 @@ impl NanopubPy {
     }
 
     #[pyo3(text_signature = "($self)")]
-    fn get_rdf(&self, _py: Python<'_>) -> PyResult<String> {
-        // py.allow_threads(|| Ok(self.np.get_rdf()))
+    fn rdf(&self, _py: Python<'_>) -> PyResult<String> {
+        // py.allow_threads(|| Ok(self.np.rdf()))
         self.np
-            .get_rdf()
+            .rdf()
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting RDF: {e}")))
     }
 

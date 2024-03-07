@@ -2,14 +2,14 @@
 
 [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
 
-You can use this toolkit to sign and publish Nanopublications from Python with the [`nanopub`](https://pypi.org/project/nanopub-sign/) pip package.
+You can use this toolkit to sign and publish Nanopublications from Python with the [`nanopub-sign`](https://pypi.org/project/nanopub-sign/) pip package.
 
 !!! info "Build a Nanopublication"
     This package takes an already prepared Nanopublication RDF string as input. If you want to build a Nanopublication programmatically, use the [`nanopub`](https://fair-workflows.github.io/nanopub) pip package. You can then feed the serialized RDF of the built Nanopub to this package functions.
 
 ## 📥️ Install
 
-Install the package with pip:
+Install the package with pip or pipx:
 
 ```bash
 pip install nanopub-sign
@@ -84,10 +84,12 @@ Use the `publish` function on a Nanopub, the 2 arguments are optional:
 - `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
 - If the `server_url` is null it will be published to the test server
 
-```typescript
+```python
+from nanopub_sign import Nanopub, NpProfile, get_np_server
+
 np = Nanopub(rdf_str).publish(profile=profile, server_url=None)
 print("Published info dict:", np.info())
-print(np.get_rdf())
+print(np.rdf())
 ```
 
 !!! tip "Provide the nanopub signed or unsigned"
@@ -117,6 +119,8 @@ np = Nanopub.publish(
 This operation involves checking the integrity of Nanopubs. It ensures that a Nanopub is valid, regardless of whether it is signed or unsigned.
 
 ```python
+from nanopub_sign import Nanopub
+
 np = Nanopub(rdf_str).check()
 print("Checked info dict:", np.info())
 ```

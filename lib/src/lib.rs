@@ -33,7 +33,7 @@ pub use error::NpError;
 /// let profile = NpProfile::new(&private_key, "https://orcid.org/0000-0000-0000-0000", "", None).unwrap();
 ///
 /// let signed_np = Nanopub::new(&np_rdf).unwrap().sign(&profile).unwrap();
-/// let checked_np = Nanopub::new(&signed_np.get_rdf().unwrap()).unwrap().check();
+/// let checked_np = Nanopub::new(&signed_np.rdf().unwrap()).unwrap().check();
 /// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
 /// let published_np = rt.block_on(async {
 ///   Nanopub::new(&np_rdf).unwrap().publish(Some(&profile), None).await.unwrap()

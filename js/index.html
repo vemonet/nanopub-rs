@@ -81,11 +81,11 @@
           // const np = await new Nanopub(rdfStr).publish();
 
           console.log("Published Nanopub:", np.info());
-          rdfOutput.innerText = np.getRdf();
+          rdfOutput.innerText = np.rdf();
 
           // new Nanopub(rdfStr).publish(profile, "")
           //   .then(np => {
-          //     rdfOutput.innerText = np.get_rdf();
+          //     rdfOutput.innerText = np.rdf();
           //     console.log("Published Nanopub:", np.info());
           //   })
         })

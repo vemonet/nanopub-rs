@@ -141,7 +141,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macos, windows]
+        os: [linux, macos] # windows
         target: [x86_64, aarch64]
         manylinux: [auto]
         include:

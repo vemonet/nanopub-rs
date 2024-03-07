@@ -178,7 +178,7 @@
           if (!publish) {
             try {
               const signed = new Nanopub(rdfStr).sign(profile)
-              oeditor.setValue(signed.getRdf());
+              oeditor.setValue(signed.rdf());
               console.log("Signed Nanopub:", signed.info());
             } catch (err) {
               displayError(err);
@@ -189,7 +189,7 @@
             // Empty is test server
             try {
               const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
-              oeditor.setValue(np.getRdf());
+              oeditor.setValue(np.rdf());
               console.log("Published Nanopub:", np.info());
               const npUrlElem = document.getElementById('np-url');
               // const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
@@ -242,7 +242,7 @@
           // Publish nanopub link to public key
           const intro = Nanopub.publish_intro(profile, getNpServer(false))
             .then(np => {
-              oeditor.setValue(np.getRdf());
+              oeditor.setValue(np.rdf());
               console.log("Published Introduction Nanopub:", np.info());
               // Display private key
               document.getElementById("privkey-card").classList.remove("hidden");

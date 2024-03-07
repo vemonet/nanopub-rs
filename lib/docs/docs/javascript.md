@@ -33,7 +33,7 @@ This package provides several functionalities related to the handling of Nanopub
 This process involves signing a Nanopublication RDF string using a specified RSA private key passed through the profile. The signing operation ensures that the Nanopub is authentically created by the holder of the private key.
 
 !!! success "Get a private key"
-  You can easily create and register a new private key on the [playground page](https://vemonet.github.io/nanopub-rs/playground.html) after login with your ORCID.
+    You can easily create and register a new private key on the [playground page](https://vemonet.github.io/nanopub-rs/playground.html) after login with your ORCID.
 
 ```typescript
 import init, { Nanopub, NpProfile, getNpServer } from "@nanopub/sign";
@@ -66,7 +66,7 @@ const profile = new NpProfile(privateKey, "https://orcid.org/0000-0000-0000-0000
 
 // Sign the Nanopub RDF
 const signed = new Nanopub(rdfStr).sign(profile);
-console.log("Signed:", signed.info());
+console.log("Signed:", signed.info(), signed.rdf());
 ```
 
 ### 📬 Publish Nanopubs
@@ -83,7 +83,7 @@ import { Nanopub, NpProfile } from "@nanopub/sign";
 
 const profile = new NpProfile(privateKey, "https://orcid.org/0000-0000-0000-0000", "Your Name", "");
 const np = await new Nanopub(rdfStr).publish(profile, null);
-console.log("Published:", np.info());
+console.log("Published:", np.info(), signed.rdf());
 ```
 
 !!! tip "Provide the nanopub signed or unsigned"

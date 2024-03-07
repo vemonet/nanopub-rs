@@ -46,7 +46,7 @@ let profile = NpProfile::new(&private_key, "https://orcid.org/0000-0000-0000-000
 let signed_np = Nanopub::new(np_rdf).unwrap().sign(&profile).unwrap();
 
 // Check
-let checked_np = Nanopub::new(&signed_np.get_rdf().unwrap()).unwrap().check();
+let checked_np = Nanopub::new(&signed_np.rdf().unwrap()).unwrap().check();
 
 // Publish is async
 let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");

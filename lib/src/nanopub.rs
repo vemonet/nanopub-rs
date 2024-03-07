@@ -49,7 +49,7 @@ pub struct Nanopub {
 
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "\n{:?}", self.get_rdf())?;
+        writeln!(f, "\n{:?}", self.rdf())?;
         writeln!(f, "URI: {}", self.info.uri)?;
         writeln!(f, "Trusty hash: {}", self.info.trusty_hash)?;
         writeln!(f, "Signature hash: {}", self.info.signature)?;
@@ -209,7 +209,7 @@ impl Nanopub {
         if !self.info.signature.is_empty() {
             println!("Nanopub already signed, unsigning it before re-signing");
             self = self.unsign()?;
-            // println!("DEBUG: Unsigned: {}", self.get_rdf()?);
+            // println!("DEBUG: Unsigned: {}", self.rdf()?);
         }
 
         // Add triples about the signature in the pubinfo
@@ -391,7 +391,7 @@ impl Nanopub {
         } else {
             TEST_SERVER.to_string()
         };
-        let published = publish_np(&server_url, &self.get_rdf()?).await?;
+        let published = publish_np(&server_url, &self.rdf()?).await?;
         if published {
             if TEST_SERVER == server_url {
                 self.info.published = Some(format!("{}{}", server_url, self.info.trusty_hash));
@@ -601,7 +601,7 @@ impl Nanopub {
     }
 
     /// Returns the RDF of the nanopub
-    pub fn get_rdf(&self) -> Result<String, NpError> {
+    pub fn rdf(&self) -> Result<String, NpError> {
         serialize_rdf(&self.dataset, self.info.uri.as_str(), self.info.ns.as_str())
     }
 }

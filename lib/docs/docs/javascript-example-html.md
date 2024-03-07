@@ -58,7 +58,7 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
         // Sign & publish a nanopub
         const np = await new Nanopub(rdfStr).publish(profile, serverUrl);
         console.log("Published info dict:", np.info());
-        rdfText.innerText = np.get_rdf();
+        rdfText.innerText = np.rdf();
       }
       main()
     </script>

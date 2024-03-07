@@ -122,11 +122,9 @@ impl Nanopub {
         })
     }
 
-    #[wasm_bindgen(js_name = getRdf)]
-    pub fn get_rdf(&self) -> Result<String, JsValue> {
-        self.np
-            .get_rdf()
-            .map_err(|e| JsValue::from_str(&e.to_string()))
+    #[wasm_bindgen(js_name = rdf)]
+    pub fn rdf(&self) -> Result<String, JsValue> {
+        self.np.rdf().map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
     pub fn info(&self) -> Result<JsValue, JsValue> {

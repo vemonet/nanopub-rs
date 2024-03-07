@@ -93,7 +93,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .to_str()
                     .ok_or_else(|| NpError("Error getting signed path".to_string()))?
             );
-            let _ = fs::write(signed_path, np.get_rdf()?);
+            let _ = fs::write(signed_path, np.rdf()?);
         }
         Some(("publish", sub)) => {
             let orcid = "http://orcid.org/0000-0000-0000-0000";
