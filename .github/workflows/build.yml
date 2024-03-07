@@ -168,7 +168,7 @@ jobs:
           - os: linux
             manylinux: auto
             target: x86_64
-            interpreter: pypy3.8 pypy3.9 pypy3.10 3.11 3.12
+            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
 
           # musllinux
           - os: linux
@@ -185,7 +185,7 @@ jobs:
             target: x86_64
           - os: macos
             target: aarch64
-            interpreter: 3.8 3.9 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.9 pypy3.10
 
           # windows
           # x86_64 pypy builds are not PGO optimized, i686 not supported by pypy, aarch64 only 3.11 and up, also not PGO optimized
@@ -200,7 +200,7 @@ jobs:
           # Ring cant target win aarch64 https://github.com/briansmith/ring/issues/1167
           - os: windows
             target: aarch64
-            interpreter: 3.11 3.12
+            interpreter: 3.9 3.10 3.11 3.12
 
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
