@@ -222,18 +222,19 @@ jobs:
           args: --release --out dist --interpreter ${{ matrix.interpreter || '3.8 3.9 3.10 3.11 3.12 pypy3.9 pypy3.10' }}
           rust-toolchain: stable
           docker-options: -e CI
+          working-directory: python
 
-      - run: ${{ (matrix.os == 'windows' && 'dir') || 'ls -lh' }} dist/
-      - run: twine check --strict dist/*
+      - run: ${{ (matrix.os == 'windows' && 'dir') || 'ls -lh' }} python/dist/
+      - run: twine check --strict python/dist/*
 
       - uses: actions/upload-artifact@v4
         with:
           name: nanopub_wheel_${{ matrix.os }}_${{ matrix.target }}_${{ matrix.interpreter || 'all' }}_${{ matrix.manylinux }}
-          path: dist
+          path: python/dist
 
       - name: Publish to PyPI
         if: startsWith(github.ref, 'refs/tags/')
-        run: twine upload dist/*
+        run: twine upload python/dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
