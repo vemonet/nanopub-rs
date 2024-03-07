@@ -192,7 +192,8 @@ jobs:
           # aarch64 only 3.11 and up, also not PGO optimized
           - os: windows
             target: x86_64
-            interpreter: pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12
+          # pypy3.9 pypy3.10
           - os: windows
             target: i686
             python-architecture: x86
@@ -204,6 +205,10 @@ jobs:
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/${{ matrix.target }}
+        if: matrix.target == 'aarch64'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -216,6 +221,8 @@ jobs:
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
+        env:
+          CFLAGS_aarch64_unknown_linux_gnu: -D__ARM_ARCH=8
         with:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
