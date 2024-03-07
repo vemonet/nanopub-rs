@@ -28,8 +28,8 @@ serde_yaml = "0.9"
 chrono = "0.4.35"
 getrandom = { version = "0.2", features = ["js"] }
 rand_core = { version = "0.6", features = ["std"] }
-reqwest = { version = "0.11", default-features = false }
-# reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
+reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
+
 # rand = { version = "0.8", features = ["std_rng"], default-features = false }
 # log = { version = "0.0.2", features = ["std"] }
 # futures = "0.3"
@@ -43,13 +43,13 @@ tokio = { version = "1.36", features = ["full"] }
 futures = "0.3"
 # The JSON-LD parser uses futures::block_on which creates conflict when running in tokio runtime
 
-# Do not use rustls-tls on Windows aarch64 due to Ring dependency https://github.com/briansmith/ring/issues/1167
-[target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies.reqwest]
-version = "0.11"
-default-features = false
-features = ["native-tls"]
+# # Do not use rustls-tls on Windows aarch64 due to Ring dependency https://github.com/briansmith/ring/issues/1167
+# [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies.reqwest]
+# version = "0.11"
+# default-features = false
+# features = ["native-tls"]
 
-[target.'cfg(not(all(windows, target_arch = "aarch64")))'.dependencies.reqwest]
-version = "0.11"
-default-features = false
-features = ["rustls-tls"]
+# [target.'cfg(not(all(windows, target_arch = "aarch64")))'.dependencies.reqwest]
+# version = "0.11"
+# default-features = false
+# features = ["rustls-tls"]
