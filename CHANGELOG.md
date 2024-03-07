@@ -2,7 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1](https://github.com/vemonet/nanopub-rs/compare/v0.1.0..0.1.1) - 2024-03-06
+## [0.1.2](https://github.com/vemonet/nanopub-rs/compare/v0.1.1..0.1.2) - 2024-03-07
+
+### ⚙️ Continuous Integration
+
+- Improve wheel building in build workflow, use the maturin gh action inspired from pydantic2 - ([d26d008](https://github.com/vemonet/nanopub-rs/commit/d26d008ef73abbabc0b540ec3e778e11460f6d2d))
+- Fix wheel working dir - ([e3e0f30](https://github.com/vemonet/nanopub-rs/commit/e3e0f30bdc321034f47121a5e6e03b9eff682339))
+
+### 🚜 Refactor
+
+- Rename get_rdf() function to rdf() - ([bb28299](https://github.com/vemonet/nanopub-rs/commit/bb282990662ae0fdb284c6e005f6bab58d329cf6))
+
+## [0.1.1](https://github.com/vemonet/nanopub-rs/compare/v0.1.0..v0.1.1) - 2024-03-06
 
 ### ⛰️ Features
 
@@ -16,6 +27,10 @@ All notable changes to this project will be documented in this file.
 
 - Migrate docs from mdbook to material for mkdocs - ([d2785dc](https://github.com/vemonet/nanopub-rs/commit/d2785dc327be5bf875ca8c279a66f0f0d04bf12b))
 - Add service worker to playground to speed up loading assets - ([e2f6bfc](https://github.com/vemonet/nanopub-rs/commit/e2f6bfc108da52af7afd2a0d7234e214e26c6107))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.1 - ([b2ff457](https://github.com/vemonet/nanopub-rs/commit/b2ff4579880f524e08f12cf3bd3af94ed391c45e))
 
 ## [0.1.0](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..v0.1.0) - 2024-03-04
 
