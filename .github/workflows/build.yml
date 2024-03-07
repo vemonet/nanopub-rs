@@ -135,138 +135,116 @@ jobs:
           files: |
             nanopub_x86_64_windows_msvc.exe
 
-
-  wheel_linux:
-    name: 🐍🐧 Build wheel for Linux
-    runs-on: ubuntu-latest
+  # https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
+  build_wheels:
+    name: build on ${{ matrix.os }} (${{ matrix.target }} - ${{ matrix.interpreter || 'all' }}${{ matrix.os == 'linux' && format(' - {0}', matrix.manylinux == 'auto' && 'manylinux' || matrix.manylinux) || '' }})
     strategy:
+      fail-fast: false
       matrix:
-        architecture: [ "x86_64", "aarch64" ]
-    continue-on-error: true
+        os: [linux, macos, windows]
+        target: [x86_64, aarch64]
+        manylinux: [auto]
+        include:
+          # manylinux for various platforms, plus x86_64 pypy
+          - os: linux
+            manylinux: auto
+            target: i686
+          - os: linux
+            manylinux: auto
+            target: aarch64
+          - os: linux
+            manylinux: auto
+            target: armv7
+            interpreter: 3.8 3.9 3.10 3.11 3.12
+          - os: linux
+            manylinux: auto
+            target: ppc64le
+            interpreter: 3.8 3.9 3.10 3.11 3.12
+          - os: linux
+            manylinux: auto
+            target: s390x
+            interpreter: 3.8 3.9 3.10 3.11 3.12
+          - os: linux
+            manylinux: auto
+            target: x86_64
+            interpreter: pypy3.9 pypy3.10
+
+          # musllinux
+          - os: linux
+            manylinux: musllinux_1_1
+            target: x86_64
+          - os: linux
+            manylinux: musllinux_1_1
+            target: aarch64
+
+          # macos;
+          # all versions x86_64
+          # arm pypy and older pythons which can't be run on the arm hardware for PGO
+          - os: macos
+            target: x86_64
+          - os: macos
+            target: aarch64
+            interpreter: 3.8 3.9 pypy3.9 pypy3.10
+
+          # windows;
+          # x86_64 pypy builds are not PGO optimized
+          # i686 not supported by pypy
+          # aarch64 only 3.11 and up, also not PGO optimized
+          - os: windows
+            target: x86_64
+            interpreter: pypy3.9 pypy3.10
+          - os: windows
+            target: i686
+            python-architecture: x86
+            interpreter: 3.8 3.9 3.10 3.11 3.12
+          - os: windows
+            target: aarch64
+            interpreter: 3.11 3.12
+
+    runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: docker/setup-qemu-action@v3
-        with:
-          platforms: linux/${{ matrix.architecture }}
-        if: startsWith(github.ref, 'refs/tags/') && matrix.architecture != 'x86_64'
-      - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/manylinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/manylinux_build_script.sh
-      - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/manylinux2014_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/manylinux_build_script.sh
-        if: startsWith(github.ref, 'refs/tags/') || matrix.architecture == 'x86_64'
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_wheel_${{ matrix.architecture }}_linux
-          path: target/wheels/*.whl
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-          packages-dir: target/wheels
-        if: startsWith(github.ref, 'refs/tags/')
-
-
-  wheel_linux_musl:
-    name: 🐍🐧 Build wheel for MUSL Linux
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        architecture:
-          - "x86_64"
-          # - "aarch64" # Takes too long (1h30)
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: docker/setup-qemu-action@v3
-        with:
-          platforms: linux/${{ matrix.architecture }}
-        if: startsWith(github.ref, 'refs/tags/') && matrix.architecture != 'x86_64'
-      - run: sed 's/%arch%/${{ matrix.architecture }}/g' .github/workflows/musllinux_build.sh | sed 's/%for_each_version%/${{ github.event_name == 'release' || '' }}/g' > .github/workflows/musllinux_build_script.sh
-      - run: docker run -v "$(pwd)":/workdir --platform linux/${{ matrix.architecture }} quay.io/pypa/musllinux_1_1_${{ matrix.architecture }} /bin/bash /workdir/.github/workflows/musllinux_build_script.sh
-        if: startsWith(github.ref, 'refs/tags/') || matrix.architecture == 'x86_64'
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_wheel_${{ matrix.architecture }}_linux_musl
-          path: target/wheels/*.whl
-
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
-          packages-dir: target/wheels
-        if: startsWith(github.ref, 'refs/tags/')
-
-
-  wheel_mac:
-    name: 🐍🍎 Build wheel for MacOS
-    runs-on: macos-latest
-    env:
-      DEVELOPER_DIR: '/Applications/Xcode.app/Contents/Developer'
-      SDKROOT: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk'
-      MACOSX_DEPLOYMENT_TARGET: '10.14'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - run: rustup update && rustup target add aarch64-apple-darwin
-      - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
-          cache: pip
-          cache-dependency-path: '**/requirements.dev.txt'
-      - run: pip install -r python/requirements.dev.txt
-      - run: maturin build --release -m python/Cargo.toml
-      - run: pip install --no-index --find-links=target/wheels/ nanopub_sign
-      - run: rm -r target/wheels
-      - run: maturin build --release --target universal2-apple-darwin -m python/Cargo.toml
-      - run: maturin build --release -m python/Cargo.toml
-        if: startsWith(github.ref, 'refs/tags/')
-      - run: maturin build --release --target aarch64-apple-darwin -m python/Cargo.toml
-        if: startsWith(github.ref, 'refs/tags/')
+          python-version: '3.11'
+          architecture: ${{ matrix.python-architecture || 'x64' }}
+
+      - run: pip install -U twine 'ruff==0.1.3' typing_extensions
+
+      # generate self-schema now, so we don't have to do so inside docker in maturin build
+      - run: python generate_self_schema.py
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux }}
+          args: --release --out dist --interpreter ${{ matrix.interpreter || '3.8 3.9 3.10 3.11 3.12 pypy3.9 pypy3.10' }}
+          rust-toolchain: stable
+          docker-options: -e CI
+
+      - run: ${{ (matrix.os == 'windows' && 'dir') || 'ls -lh' }} dist/
+      - run: twine check --strict dist/*
+
       - uses: actions/upload-artifact@v4
         with:
-          name: nanopub_wheel_universal2_mac
-          path: target/wheels/*.whl
-      - run: pip install twine && twine upload target/wheels/*
+          name: nanopub_wheel_${{ matrix.os }}_${{ matrix.target }}_${{ matrix.interpreter || 'all' }}_${{ matrix.manylinux }}
+          path: dist
+
+      - name: Publish to PyPI
+        if: startsWith(github.ref, 'refs/tags/')
+        run: twine upload dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        if: startsWith(github.ref, 'refs/tags/')
 
-
-  wheel_windows:
-    name: 🐍🪟 Build wheel for Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - run: rustup update
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          cache: pip
-          cache-dependency-path: '**/requirements.dev.txt'
-      - run: Remove-Item -LiteralPath "C:\msys64\" -Force -Recurse
-      - run: pip install -r python/requirements.dev.txt
-      - run: maturin build --release -m python/Cargo.toml
-      - run: pip install --no-index --find-links=target/wheels/ nanopub_sign
-      - run: rm -r target/wheels
-      - run: maturin build --release -m python/Cargo.toml
-      - run: maturin sdist -m python/Cargo.toml
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_wheel_x86_64_windows
-          path: target/wheels/*.whl
-      - run: pip install twine && twine upload target/wheels/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        if: startsWith(github.ref, 'refs/tags/')
+      # - name: Publish to PyPI
+      #   uses: PyO3/maturin-action@v1
+      #   env:
+      #     MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      #   with:
+      #     command: upload
+      #     args: --non-interactive --skip-existing *
 
 
   npm_tarball:

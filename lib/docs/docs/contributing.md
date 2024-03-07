@@ -74,7 +74,7 @@ pre-commit install
 # Install rust dev tools
 rustup update
 rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make
+cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make git-cliff
 ```
 
 ### 📥️ Clone the repository
@@ -113,9 +113,6 @@ cargo test
     ```bash
     cargo test -- --test-threads=1
     ```
-
-
-
 
 Test the `nanopub` crate with code coverage:
 

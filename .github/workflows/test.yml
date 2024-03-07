@@ -84,7 +84,7 @@ jobs:
       id-token: write
     concurrency:
       group: "pages"
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v4
