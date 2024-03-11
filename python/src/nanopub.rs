@@ -57,9 +57,8 @@ impl NanopubPy {
     fn publish(&self, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
         let server_url = server_url.map(str::to_string);
         // Use a tokio runtime to wait on the async operation
-        let rt = Runtime::new().map_err(|e| {
-            PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
-        })?;
+        let rt = Runtime::new()
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Runtime failed: {e}")))?;
         let result: Result<Nanopub, PyErr> = rt.block_on(async move {
             self.np
                 .clone()
@@ -75,9 +74,8 @@ impl NanopubPy {
     fn publish_intro(profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
         let server_url = server_url.map(str::to_string);
         // Use a tokio runtime to wait on the async operation
-        let rt = Runtime::new().map_err(|e| {
-            PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
-        })?;
+        let rt = Runtime::new()
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Runtime failed: {e}")))?;
         let result = rt.block_on(async move {
             // let np = Nanopub::new_intro(&profile.profile)
             //     .map(|np| Self { np })
@@ -106,9 +104,8 @@ impl NanopubPy {
     #[staticmethod]
     #[pyo3(text_signature = "(uri)")]
     fn fetch(uri: &str) -> PyResult<Self> {
-        let rt = Runtime::new().map_err(|e| {
-            PyErr::new::<PyException, _>(format!("Failed to create Tokio runtime: {e}"))
-        })?;
+        let rt = Runtime::new()
+            .map_err(|e| PyErr::new::<PyException, _>(format!("Runtime failed: {e}")))?;
         let result = rt.block_on(async move {
             Nanopub::fetch(uri)
                 .await

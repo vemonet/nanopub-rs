@@ -75,8 +75,8 @@ Signed Nanopubs can be published to a Nanopub server. This makes the Nanopub acc
 
 Use the `publish` function on a Nanopub, the 2 arguments are optional:
 
-- `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
-- If the `server_url` is null it will be published to the test server
+- 🔑 `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
+- 🧫 If the `server_url` is null it will be published to the test server
 
 ```typescript
 import { Nanopub, NpProfile } from "@nanopub/sign";
@@ -133,11 +133,11 @@ import init, { Nanopub, NpProfile, KeyPair } from "@nanopub/sign";
 let keypair = new KeyPair();
 keypair = keypair.toJs();
 
-// Create profile with new private key
+// Create a profile with this new private key
 const orcid = "https://orcid.org/0000-0000-0000-0000"
 const profile = new NpProfile(keypair.private, orcid, "Your Name", "");
 
-// Publish nanopub introduction for this profile
+// Publish a nanopub introduction for this profile
 Nanopub.publish_intro(profile, getNpServer(false))
     .then(np => {
         console.log("Published Introduction Nanopub:", np.info());

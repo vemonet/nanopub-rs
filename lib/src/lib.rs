@@ -34,7 +34,7 @@ pub use error::NpError;
 ///
 /// let signed_np = Nanopub::new(&np_rdf).unwrap().sign(&profile).unwrap();
 /// let checked_np = Nanopub::new(&signed_np.rdf().unwrap()).unwrap().check();
-/// let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+/// let rt = runtime::Runtime::new().expect("Runtime failed");
 /// let published_np = rt.block_on(async {
 ///   Nanopub::new(&np_rdf).unwrap().publish(Some(&profile), None).await.unwrap()
 /// });

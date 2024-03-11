@@ -1,0 +1,4 @@
+/* We use emojis for every bullet lists */
+ul li {
+    list-style-type: none;
+}

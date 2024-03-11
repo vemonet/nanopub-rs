@@ -49,7 +49,7 @@ let signed_np = Nanopub::new(np_rdf).unwrap().sign(&profile).unwrap();
 let checked_np = Nanopub::new(&signed_np.rdf().unwrap()).unwrap().check();
 
 // Publish is async
-let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+let rt = runtime::Runtime::new().expect("Runtime failed");
 
 let published_np = rt.block_on(async {
     Nanopub::new(np_rdf).unwrap().publish(Some(&profile), None).await.unwrap()
@@ -61,8 +61,8 @@ println!("{}", published_np)
 
 The `publish` function takes 2 optional arguments:
 
-- `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
-- If the `server_url` is none it will be published to the test server
+- 🔑 `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
+- 🧫 If the `server_url` is none it will be published to the test server
 
 > Provide the nanopub signed or unsigned:
 >
@@ -119,12 +119,35 @@ The `fetch` static function on the `Nanopub` struct allows you to retrieve Nanop
 use nanopub::{Nanopub, NpProfile, NpError};
 use tokio::runtime;
 
-let url = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
-let rt = runtime::Runtime::new().expect("Failed to create Tokio runtime");
+let uri = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
+let rt = runtime::Runtime::new().expect("Runtime failed");
 
 let np = rt.block_on(async {
-    Nanopub::fetch(&url).await
+    Nanopub::fetch(&uri).await
 }).unwrap();
+```
+
+
+### 🔑 Generate private key and publish introduction
+
+You can generate a new private/public key pair, and publish a nanopub introduction to register this key under your ORCID in the Nanopublications network:
+
+```rust
+use nanopub::{profile::gen_keys, Nanopub, NpProfile};
+use tokio::runtime;
+
+// Randomly generate a new private/public key pair
+let (private_key, _pubkey) = gen_keys().unwrap();
+
+// Create a profile with this new private key
+let profile = NpProfile::new(&private_key, "https://orcid.org/0000-0000-0000-0000", "", None).unwrap();
+
+// Publish a nanopub introduction for this profile
+let rt = runtime::Runtime::new().expect("Runtime failed");
+let np = rt.block_on(async {
+    Nanopub::new_intro(&profile).unwrap()
+        .publish(Some(&profile), None).await.unwrap();
+});
 ```
 
 ## 📖 API reference

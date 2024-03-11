@@ -15,6 +15,7 @@ use crate::error::NpError;
 /// Parse RDF from various format to a `LightDataset` (trig, nquads, JSON-LD)
 pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
     let rdf = rdf.to_string();
+    // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
     let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
         parse_jsonld(&rdf)?
     } else {
@@ -87,7 +88,7 @@ pub fn ns(ns: &str) -> Namespace<String> {
 
 // TODO: improve to extract prefixes from the input RDF
 /// Get the prefixes of a Nanopub
-pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>); 14] {
+pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>); 18] {
     [
         (
             Prefix::new_unchecked("this".to_string()),
@@ -109,22 +110,29 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
             Prefix::new_unchecked("xsd".to_string()),
             Iri::new_unchecked("http://www.w3.org/2001/XMLSchema#".to_string()),
         ),
-        // TODO: use https:// by default?
         (
-            Prefix::new_unchecked("schema".to_string()),
-            Iri::new_unchecked("http://schema.org/".to_string()),
+            Prefix::new_unchecked("owl".to_string()),
+            Iri::new_unchecked("http://www.w3.org/2002/07/owl#".to_string()),
         ),
         (
-            Prefix::new_unchecked("foaf".to_string()),
-            Iri::new_unchecked("http://xmlns.com/foaf/0.1/".to_string()),
-        ),
-        (
-            Prefix::new_unchecked("biolink".to_string()),
-            Iri::new_unchecked("https://w3id.org/biolink/vocab/".to_string()),
+            Prefix::new_unchecked("skos".to_string()),
+            Iri::new_unchecked("http://www.w3.org/2004/02/skos/core#".to_string()),
         ),
         (
             Prefix::new_unchecked("np".to_string()),
             Iri::new_unchecked(ns("np").to_string()),
+        ),
+        (
+            Prefix::new_unchecked("npx".to_string()),
+            Iri::new_unchecked(ns("npx").to_string()),
+        ),
+        (
+            Prefix::new_unchecked("dc".to_string()),
+            Iri::new_unchecked("http://purl.org/dc/elements/1.1/".to_string()),
+        ),
+        (
+            Prefix::new_unchecked("dcterms".to_string()),
+            Iri::new_unchecked("http://purl.org/dc/terms/".to_string()),
         ),
         (
             Prefix::new_unchecked("prov".to_string()),
@@ -135,16 +143,24 @@ pub fn get_prefixes(np_uri: &str, np_ns: &str) -> [(Prefix<String>, Iri<String>)
             Iri::new_unchecked("http://purl.org/pav/".to_string()),
         ),
         (
-            Prefix::new_unchecked("dcterms".to_string()),
-            Iri::new_unchecked("http://purl.org/dc/terms/".to_string()),
+            Prefix::new_unchecked("schema".to_string()),
+            Iri::new_unchecked("https://schema.org/".to_string()),
+        ),
+        (
+            Prefix::new_unchecked("foaf".to_string()),
+            Iri::new_unchecked("http://xmlns.com/foaf/0.1/".to_string()),
         ),
         (
             Prefix::new_unchecked("orcid".to_string()),
             Iri::new_unchecked("https://orcid.org/".to_string()),
         ),
         (
-            Prefix::new_unchecked("npx".to_string()),
-            Iri::new_unchecked(ns("npx").to_string()),
+            Prefix::new_unchecked("biolink".to_string()),
+            Iri::new_unchecked("https://w3id.org/biolink/vocab/".to_string()),
+        ),
+        (
+            Prefix::new_unchecked("infores".to_string()),
+            Iri::new_unchecked("https://w3id.org/biolink/infores/".to_string()),
         ),
     ]
 }

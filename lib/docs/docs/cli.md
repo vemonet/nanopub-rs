@@ -70,21 +70,21 @@ np check signed.nanopub.trig
 
 You can generate and enable completions for your shell:
 
-- ZSH
+- 🪐 ZSH
 
     ```bash
     np completions zsh > ~/.zsh/completion/np
     source ~/.zsh/completion/np
     ```
 
-- Bash
+- 🥊 Bash
 
     ```bash
     np completions bash > ~/.bash_completion.d/np
     source ~/.bash_completion.d/np
     ```
 
-- Fish
+- 🐟 Fish
 
     ```bash
     np completions bash > ~/.config/fish/completions/np

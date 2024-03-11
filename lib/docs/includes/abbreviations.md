@@ -6,6 +6,7 @@
 *[OSI]: Open Source Initiative
 *[FSF]: Free Software Foundation
 *[CVE]: Common Vulnerabilities and Exposures
+*[WSL]: Windows Subsystem Linux
 *[LLM]: Large Language Model
 *[LLMs]: Large Language Models
 *[ML]: Machine Learning

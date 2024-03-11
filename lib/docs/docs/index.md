@@ -10,48 +10,29 @@ Whether you're a developer looking to integrate nanopub functionalities into you
 
 ## 🪄 Nanopub management
 
-<ul>
-    <li style="list-style-type: '✍️'">
-        &nbsp;<b>Sign & Publish</b> nanopubs using a RSA private key. Customize your workflow with a <code>profile.yml</code> file.
-    </li>
-    <li style="list-style-type: '🔍'">
-        &nbsp;<b>Verify</b>: ensure the integrity of nanopubs by checking their validity, whether they are signed or unsigned.
-    </li>
-    <li style="list-style-type: '📡'">
-        &nbsp;<b>Fetch</b> nanopubs from the network using their URI.
-    </li>
-</ul>
+- ✍️ **Sign & Publish** nanopublications RDF using a RSA private key. Support for user profile defined in a `profile.yml` file.
+- 🔍 **Verify**: ensure the integrity of nanopubs by checking their validity, whether they are signed or unsigned.
+- 📥 **Fetch** nanopubs from the network using their URI.
 
 ## 📦️ Packaged for multiple interfaces
 
 This library is packaged for easy use across various interfaces and languages:
 
-<ul>
-    <li style="list-style-type: '🦀'">
-        &nbsp;<a href="rust.md"><b>Rust developers</b></a>: available as a Rust crate <code>nanopub</code>.
-    </li>
-    <li style="list-style-type: '🐍'">
-        &nbsp;<a href="python.md"><b>Python programmers</b></a>: available as a Python pip package <code>nanopub-sign</code>.
-    </li>
-    <li style="list-style-type: '🌐'">
-        &nbsp;<a href="javascript.md"><b>Web developers</b></a>: available as a NPM package <code>@nanopub/sign</code>, compiled to <a href="https://webassembly.org/">WebAssembly</a>, for browser integrations with JavaScript, or NodeJS.
-    </li>
-    <li style="list-style-type: '⌨️'">
-        &nbsp;<a href="cli.md"><b>Terminal enthusiasts</b></a>: binary with a Command Line Interface (CLI) for straightforward terminal operations.
-    </li>
-</ul>
+- [🦀 **Rust developers**](rust.md): available as a Rust crate `nanopub`.
+- [🐍 **Python programmers**](python.md): available as a Python pip package `nanopub-sign`.
+- [🌐 **Web developers**](javascript.md): available as a NPM package `@nanopub/sign`, compiled to [WebAssembly](https://webassembly.org/), for browser integrations with JavaScript, or NodeJS.
+- [⌨️  **Terminal enthusiasts**](cli.md): binary with a Command Line Interface (CLI) for straightforward terminal operations.
 
 
 ## ⚔️ Cross-platform support
 
 It runs seamlessly on:
 
-<ul>
-    <li style="list-style-type: '🦊'">&nbsp;Web browsers
-    <li style="list-style-type: '🐧'">&nbsp;Linux
-    <li style="list-style-type: '🍎'">&nbsp;MacOS
-    <li style="list-style-type: '🪟'">&nbsp;Windows
-</ul>
+
+- 🦊 Web browsers
+- 🐧 Linux
+- 🍎 MacOS
+- 🪟 Windows
 
 
 ## 🧩 RDF serialization support
@@ -60,16 +41,10 @@ The library handles most RDF serializations supporting quads, including TriG, Nq
 
 ## 📝 Automated metadata creation
 
-When you sign a nanopub, if it has not already been defined in the pubinfo graph yet:
+When you sign a nanopub some metadata is added, if it has not already been defined in the pubinfo graph:
 
-<ul>
-    <li style="list-style-type: '🕓'">
-        &nbsp;<b>Automatic timestamp</b>: the <code>dct:created</code> attribute is used to add the date and time of creation.
-    </li>
-    <li style="list-style-type: '🪪'">
-        &nbsp;<b>Creator identification</b>: if an ORCID is provided in the profile, it's added using <code>dct:creator</code>. The library also checks for ORCID set with  <code>prov:wasAttributedTo</code> or <code>pav:createdBy</code>.
-    </li>
-</ul>
+- 🕓 **Automatic timestamp**: the `dct:created` attribute is used to add the date and time of creation.
+- 🪪 **Creator identification**: if an ORCID is provided in the profile, it's added using `dct:creator`. The library also checks for ORCID already set with `prov:wasAttributedTo` or `pav:createdBy`.
 
 ## 👆 Interactive playground
 

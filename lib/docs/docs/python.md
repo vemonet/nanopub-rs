@@ -81,8 +81,8 @@ Signed Nanopubs can be published to a Nanopub server. This makes the Nanopub acc
 
 Use the `publish` function on a Nanopub, the 2 arguments are optional:
 
-- `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
-- If the `server_url` is null it will be published to the test server
+- 🔑 `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
+- 🧫 If the `server_url` is null it will be published to the test server
 
 ```python
 from nanopub_sign import Nanopub, NpProfile, get_np_server
@@ -146,7 +146,7 @@ from nanopub_sign import Nanopub, NpProfile, KeyPair, get_np_server
 # Randomly generate a new private/public key pair
 keypair = KeyPair()
 
-# Create profile with new private key
+# Create a profile with this new private key
 new_profile = NpProfile(
     private_key=keypair.private,
     orcid_id="https://orcid.org/0000-0000-0000-0000",
@@ -154,7 +154,7 @@ new_profile = NpProfile(
     introduction_nanopub_uri=""
 )
 
-# Publish nanopub introduction for this profile
+# Publish a nanopub introduction for this profile
 np = Nanopub.publish_intro(new_profile, get_np_server())
 print(np.info())
 
