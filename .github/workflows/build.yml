@@ -50,16 +50,21 @@ jobs:
       - name: Add target
         run: rustup update && rustup target add ${{ matrix.target }}
 
-      - name: Install aarch64 dependencies
-        if: matrix.target == 'aarch64-unknown-linux-gnu' || matrix.target == 'aarch64-apple-darwin'
+      - name: Install aarch64 linux dependencies
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: sudo apt update && sudo apt install -y g++-aarch64-linux-gnu
-      # echo -e "\n\n[target.aarch64-unknown-linux-gnu]\nlinker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config.toml
+
+      - name: Add aarch64 linker
+        if: matrix.target == 'aarch64-unknown-linux-gnu' || matrix.target == 'aarch64-apple-darwin'
+        run: echo -e "\n\n[target.aarch64-unknown-linux-gnu]\nlinker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config.toml
+        # This can't be directly added to cargo config.toml because it makes the wheel build fails
 
       - uses: Swatinem/rust-cache@v2
 
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
         working-directory: ./cli
+        # NOTE: for linux aarch64, we might need to set the sysroot
         # env:
         #   BINDGEN_EXTRA_CLANG_ARGS: --sysroot /usr/aarch64-linux-gnu
 

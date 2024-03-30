@@ -37,10 +37,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: "./js/package.json"
       - run: |
           rustup update
           cargo install wasm-pack
-          ./scripts/test-js.sh
+      - name: Run tests
+        run: ./scripts/test-js.sh
 
   test-python:
     name: 🐍 Tests Python
@@ -51,9 +59,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
-      - run: |
-          rustup update
-          ./scripts/test-python.sh
+      - run: rustup update
+      - name: Run tests
+        run: ./scripts/test-python.sh
 
   cov:
     name: ☂️ Coverage
