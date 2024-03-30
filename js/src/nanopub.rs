@@ -161,11 +161,16 @@ impl NpProfile {
         private_key: &str,
         orcid_id: &str,
         name: &str,
-        introduction_nanopub_uri: String,
+        introduction_nanopub_uri: &str,
     ) -> Result<NpProfile, JsValue> {
-        RsNpProfile::new(private_key, orcid_id, name, Some(introduction_nanopub_uri))
-            .map(|profile: RsNpProfile| Self { profile })
-            .map_err(|e| JsValue::from_str(&e.to_string()))
+        RsNpProfile::new(
+            private_key,
+            orcid_id,
+            name,
+            Some(introduction_nanopub_uri.to_string()),
+        )
+        .map(|profile: RsNpProfile| Self { profile })
+        .map_err(|e| JsValue::from_str(&e.to_string()))
     }
     // TODO: create from profile.yml file?
 
