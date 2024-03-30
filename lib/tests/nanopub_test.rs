@@ -163,6 +163,16 @@ async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
         .await?;
     // println!("{}", np);
     assert!(np.info.published.is_some());
+    // Test error when Profile not complete
+    let profile = NpProfile::new(
+        &get_test_key(),
+        "https://orcid.org/0000-0000-0000-0000",
+        "",
+        None,
+    )?;
+    assert!(Nanopub::new_intro(&profile).is_err());
+    let profile = NpProfile::new(&get_test_key(), "", "Test User", None)?;
+    assert!(Nanopub::new_intro(&profile).is_err());
     Ok(())
 }
 

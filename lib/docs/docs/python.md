@@ -150,7 +150,7 @@ keypair = KeyPair()
 new_profile = NpProfile(
     private_key=keypair.private,
     orcid_id="https://orcid.org/0000-0000-0000-0000",
-    name="",
+    name="Your Name",
     introduction_nanopub_uri=""
 )
 

@@ -50,7 +50,7 @@ impl Nanopub {
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
 
-    // TODO: optional args https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
+    // NOTE: optional args docs https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments
     #[wasm_bindgen]
     pub fn publish(self, profile: &OptionNpProfile, server_url: Option<String>) -> Promise {
         // Handle null/undefined profile
@@ -161,13 +161,13 @@ impl NpProfile {
         private_key: &str,
         orcid_id: &str,
         name: &str,
-        introduction_nanopub_uri: &str,
+        introduction_nanopub_uri: String,
     ) -> Result<NpProfile, JsValue> {
         RsNpProfile::new(private_key, orcid_id, name, Some(introduction_nanopub_uri))
             .map(|profile: RsNpProfile| Self { profile })
             .map_err(|e| JsValue::from_str(&e.to_string()))
     }
-    // TODO: create from profile.yml file
+    // TODO: create from profile.yml file?
 
     #[wasm_bindgen(js_name = toString)]
     pub fn to_string(&self) -> String {

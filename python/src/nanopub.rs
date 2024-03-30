@@ -203,7 +203,7 @@ impl NpProfilePy {
         private_key: &str,
         orcid_id: &str,
         name: &str,
-        introduction_nanopub_uri: Option<&str>,
+        introduction_nanopub_uri: Option<String>,
     ) -> PyResult<Self> {
         NpProfile::new(private_key, orcid_id, name, introduction_nanopub_uri)
             .map(|profile| Self { profile })

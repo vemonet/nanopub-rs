@@ -13,8 +13,7 @@ use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, xsd, Namespace};
-use sophia::api::term::matcher::Any;
-use sophia::api::term::{SimpleTerm, Term};
+use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::{AsIriRef, Iri};
 use std::collections::HashSet;
@@ -40,7 +39,7 @@ impl RdfSource for &String {
     }
 }
 
-/// A nanopublication object
+/// A Nanopublication, contains the nanopub info (graphs URIs, signature, etc), and the RDF dataset.
 #[derive(Clone, Debug)]
 pub struct Nanopub {
     pub info: NpInfo,
@@ -62,7 +61,6 @@ impl fmt::Display for Nanopub {
 }
 
 impl Nanopub {
-    // // TODO: change approach to use Nanopub::new(rdf).sign()?
     pub fn new<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
         let dataset = rdf.get_dataset()?;
         let np_info = extract_np_info(&dataset)?;
@@ -122,7 +120,6 @@ impl Nanopub {
     /// ```
     pub fn check(self) -> Result<Self, NpError> {
         let _ = self.is_valid()?;
-
         let mut msg: String = "".to_string();
         if self.info.trusty_hash.is_empty() {
             msg = format!("{}1 valid (not trusty)", msg);
@@ -140,8 +137,8 @@ impl Nanopub {
             msg = format!("{}1 trusty", msg);
         }
 
+        // Check the signature is valid if found
         let mut unsigned_dataset = self.dataset.clone();
-        // Check signature if found
         if !self.info.signature.is_empty() {
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(
@@ -180,11 +177,12 @@ impl Nanopub {
             BOLD, self.info.uri, END, msg
         );
         // let rdf = serialize_rdf(&self.dataset, &self.info.uri.as_ref(), &self.info.ns.as_ref())?;
-        // TODO: check if the np has been published with Nanopub::fetch
+        // TODO: should check return a string or a Nanopub? A string is not easy to process by machines
+        // Should we check if the np has been published with Nanopub::fetch?
         Ok(self)
     }
 
-    /// Sign an unsigned nanopub RDF and add trusty URI
+    /// Sign a nanopub: generate and add signature and trusty URI. If the nanopub is already signed, unsign it first.
     ///
     /// # Arguments
     ///
@@ -249,13 +247,10 @@ impl Nanopub {
         {
             let now = Utc::now();
             let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
-            // TODO: there is an error when trying to cast the string to xsd::dateTime
-            // let lit_date = "2019" * xsd::dateTime;
             self.dataset.insert(
                 self.info.ns.as_iri_ref(),
                 ns("dct").get("created")?,
-                SimpleTerm::LiteralDatatype(datetime_str.into(), xsd::dateTime.iriref()),
-                // datetime_str.as_str() * xsd::dateTime,
+                datetime_str.as_str() * xsd::dateTime,
                 Some(&self.info.pubinfo),
             )?;
         }
@@ -334,7 +329,7 @@ impl Nanopub {
         Ok(self)
     }
 
-    /// Async function to sign and publish RDF to a nanopub server
+    /// Publish a nanopub to a nanopub server. If the nanopub is not signed and a profile is provided, it will be signed before publishing.
     ///
     /// # Arguments
     ///
@@ -365,23 +360,19 @@ impl Nanopub {
         server_url: Option<&str>,
     ) -> Result<Self, NpError> {
         self = if let Some(profile) = profile {
-            // if !self.info.signature.is_empty() {
-            //     // TODO: handle when the user provide a Profile and a signed Nanopub.
-            //     // We should re-sign the Nanopub with the new profile
-            //     return Err(NpError("Profile provided to sign an already signed Nanopub. Re-signing an already signed Nanopub is not supported yet".to_string()));
-            // }
-            // println!("Profile provided, signing Nanopub before publishing");
+            // If profile provided we sign the nanopub
             self.sign(profile)?
         } else if self.info.signature.is_empty() {
+            // If no profile and nanopub not signed we throw an error
             return Err(NpError(format!(
                 "No profile provided and nanopub not signed, could not sign the Nanopublication \n{}",
                 self
             )));
         } else {
-            // If the nanopub is already signed we verify it, then publish it
+            // If no profile provided, but the nanopub is already signed, we verify it, then publish it
             self.check()?
         };
-        // Use test server if None provided
+        // Use test server if server_url not provided
         let server_url = if let Some(server_url) = server_url {
             if server_url.is_empty() {
                 TEST_SERVER.to_string()
@@ -403,7 +394,6 @@ impl Nanopub {
             //     BOLD, self.info.published, END
             // );
         } else {
-            println!("\n❌ Issue publishing the Nanopublication \n{}", self);
             return Err(NpError(format!(
                 "Issue publishing the Nanopublication \n{}",
                 self
@@ -448,10 +438,6 @@ impl Nanopub {
         self.info.uri = Iri::new_unchecked(NP_TEMP_URI.to_string());
         self.info.ns = Namespace::new_unchecked(NP_TEMP_URI.to_string());
         self.info = extract_np_info(&self.dataset)?;
-        // self.info.published = None;
-        // self.info.trusty_hash = "".to_string();
-        // self.info.signature = "".to_string();
-        // self.info.public_key = "".to_string();
         Ok(self)
     }
 
@@ -479,6 +465,12 @@ impl Nanopub {
     /// });
     /// ```
     pub fn new_intro(profile: &NpProfile) -> Result<Self, NpError> {
+        if profile.orcid_id.is_empty() {
+            return Err(NpError("Invalid Profile: ORCID is empty.".to_string()));
+        }
+        if profile.name.is_empty() {
+            return Err(NpError("Invalid Profile: name is empty.".to_string()));
+        }
         let mut dataset = create_base_dataset()?;
         let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
         let assertion_graph = np_ns.get("assertion")?;

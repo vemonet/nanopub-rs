@@ -140,7 +140,7 @@ use tokio::runtime;
 let (private_key, _pubkey) = gen_keys().unwrap();
 
 // Create a profile with this new private key
-let profile = NpProfile::new(&private_key, "https://orcid.org/0000-0000-0000-0000", "", None).unwrap();
+let profile = NpProfile::new(&private_key, "https://orcid.org/0000-0000-0000-0000", "Your Name", None).unwrap();
 
 // Publish a nanopub introduction for this profile
 let rt = runtime::Runtime::new().expect("Runtime failed");

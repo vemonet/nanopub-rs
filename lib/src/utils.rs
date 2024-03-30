@@ -19,10 +19,18 @@ pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
     let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
         parse_jsonld(&rdf)?
     } else {
+        // TODO: extract prefixes https://github.com/pchampin/sophia_rs/issues/45
         // The TriG parser handles nquads
         trig::parse_str(&rdf)
             .collect_quads()
             .map_err(|e| NpError(format!("Error parsing TriG: {e}")))?
+        // NOTE: we can access the trig parser prefixes, but we always get an empty map, because it's not parsed yet
+        // let parser = trig::parse_str(&rdf);
+        // let prefixes = parser.0.prefixes();
+        // println!("PREFIXES: {:?}", prefixes);
+        // let dataset = parser.collect_quads()
+        //     .map_err(|e| NpError(format!("Error parsing TriG: {e}")))?;
+        // dataset
     };
     Ok(dataset)
 }

@@ -27,7 +27,7 @@ impl NpProfile {
         private_key: &str,
         orcid_id: &str,
         name: &str,
-        introduction_nanopub_uri: Option<&str>,
+        introduction_nanopub_uri: Option<String>,
     ) -> Result<Self, NpError> {
         let privkey =
             RsaPrivateKey::from_pkcs8_der(&engine::general_purpose::STANDARD.decode(private_key)?)?;
@@ -37,7 +37,7 @@ impl NpProfile {
             name: name.to_string(),
             public_key: get_pubkey_str(&pubkey)?,
             private_key: private_key.to_string(),
-            introduction_nanopub_uri: Some(introduction_nanopub_uri.unwrap_or("").to_string()),
+            introduction_nanopub_uri,
         })
     }
 
