@@ -33,7 +33,7 @@ const unsignedRdf = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
     a npx:ExampleNanopub .
 }`
 
-describe('Tests for the curies npm package', () => {
+describe('Tests for the @nanopub/sign npm package', () => {
   // NOTE: `await init()` only needed in browser environment
 
   test('publish nanopub', async () => {

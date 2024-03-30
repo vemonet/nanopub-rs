@@ -26,7 +26,7 @@ jobs:
   # '--target', 'x86_64-linux-android',
 
   build_binaries:
-    name: Build binaries for ${{ matrix.target }}
+    name: 📦️ Build binaries for ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -239,7 +239,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
 
   publish_crates:
-    name: 📦️ Publish crates to crates.io
+    name: 🦀 Publish nanopub crate to crates.io
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
