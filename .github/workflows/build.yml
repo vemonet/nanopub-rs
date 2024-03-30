@@ -17,123 +17,69 @@ concurrency:
 # cf. https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
 jobs:
 
-  binary_linux:
-    name: 🐧 Build binaries for Linux
-    runs-on: ubuntu-latest
+  # Build binary for more targets?
+  # '--target', 'i686-pc-windows-msvc',
+  # '--target', 'armv7-linux-androideabi',
+  # '--target', 'thumbv7neon-linux-androideabi',
+  # '--target', 'aarch64-linux-android',
+  # '--target', 'i686-linux-android',
+  # '--target', 'x86_64-linux-android',
+
+  build_binaries:
+    name: Build binaries for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - run: rustup update && rustup target add aarch64-unknown-linux-gnu
 
-      - run: |
-          sudo apt update && sudo apt install -y g++-aarch64-linux-gnu
-          echo -e "\n\n[target.aarch64-unknown-linux-gnu]\nlinker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config.toml
+      - name: Add target
+        run: rustup update && rustup target add ${{ matrix.target }}
+
+      - name: Install aarch64 dependencies
+        if: matrix.target == 'aarch64-unknown-linux-gnu' || matrix.target == 'aarch64-apple-darwin'
+        run: sudo apt update && sudo apt install -y g++-aarch64-linux-gnu
+      # echo -e "\n\n[target.aarch64-unknown-linux-gnu]\nlinker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config.toml
 
       - uses: Swatinem/rust-cache@v2
 
-      - run: cargo build --release
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }}
         working-directory: ./cli
+        # env:
+        #   BINDGEN_EXTRA_CLANG_ARGS: --sysroot /usr/aarch64-linux-gnu
 
-      - run: cargo build --release --target aarch64-unknown-linux-gnu
-        working-directory: ./cli
-        env:
-          BINDGEN_EXTRA_CLANG_ARGS: --sysroot /usr/aarch64-linux-gnu
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: nanopub_x86_64_linux_gnu
-          path: target/release/nanopub-cli
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_aarch64_linux_gnu
-          path: target/aarch64-unknown-linux-gnu/release/nanopub-cli
+          name: nanopub_${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/nanopub-cli${{ matrix.os == 'Windows' && '.exe' || '' }}
 
       - if: startsWith(github.ref, 'refs/tags/')
+        name: Prepare for release
         run: |
-          mv target/release/nanopub-cli nanopub_x86_64_linux_gnu
-          mv target/aarch64-unknown-linux-gnu/release/nanopub-cli nanopub_aarch64_linux_gnu
+          mv target/${{ matrix.target }}/release/nanopub-cli${{ matrix.os == 'Windows' && '.exe' || '' }} nanopub_${{ matrix.target }}${{ matrix.os == 'Windows' && '.exe' || '' }}
 
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            nanopub_x86_64_linux_gnu
-            nanopub_aarch64_linux_gnu
-          # nanopub_${{ github.event.release.tag_name }}_x86_64_linux_gnu
-          # tag_name: ${{ github.event.release.tag_name }}
+            nanopub_${{ matrix.target }}${{ matrix.os == 'Windows' && '.exe' || '' }}
 
-
-  binary_mac:
-    name: 🍎 Build binaries for MacOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - run: rustup update && rustup target add aarch64-apple-darwin
-
-      - run: |
-          sudo apt update && sudo apt install -y g++-aarch64-linux-gnu
-          echo -e "\n\n[target.aarch64-unknown-linux-gnu]\nlinker = \"aarch64-linux-gnu-gcc\"" >> .cargo/config.toml
-
-      - uses: Swatinem/rust-cache@v2
-
-      - run: cargo build --release
-        working-directory: ./cli
-
-      - run: cargo build --release --target aarch64-apple-darwin
-        working-directory: ./cli
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_x86_64_apple
-          path: target/release/nanopub-cli
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_aarch64_apple
-          path: target/aarch64-apple-darwin/release/nanopub-cli
-
-      - if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          mv target/release/nanopub-cli nanopub_x86_64_apple
-          mv target/aarch64-apple-darwin/release/nanopub-cli nanopub_aarch64_apple
-
-      - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            nanopub_x86_64_apple
-            nanopub_aarch64_apple
-
-
-  binary_windows:
-    name: 🪟 Build binaries for Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - run: rustup update
-      - uses: Swatinem/rust-cache@v2
-
-      - run: cargo build --release
-        working-directory: ./cli
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nanopub_x86_64_windows_msvc
-          path: target/release/nanopub-cli.exe
-
-      - if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          mv target/release/nanopub-cli.exe nanopub_x86_64_windows_msvc.exe
-
-      - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            nanopub_x86_64_windows_msvc.exe
 
   # Inspired by https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
   build_wheels:
