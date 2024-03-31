@@ -1,4 +1,4 @@
-# 🛠️ Contributing
+# 🛠️ Development
 
 [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/vemonet/nanopub-rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/vemonet/nanopub-rs) [![dependency status](https://deps.rs/repo/github/vemonet/nanopub-rs/status.svg)](https://deps.rs/repo/github/vemonet/nanopub-rs)
 
@@ -9,60 +9,20 @@ The usual process to make a contribution is to:
 3. Make your changes
 4. Make sure formatting, linting and tests passes.
 5. Add tests if possible to cover the lines you added.
-6. Commit, and send a Pull Request.
+6. [Commit](https://www.conventionalcommits.org/en/v1.0.0/), and send a Pull Request.
 
-## ️🗺️ Architecture details
+## 📥️ Clone the repository
 
-### 🗃️ Folder structure
+Clone the `nanopub-rs` repository, and `cd` into it:
 
-```
-nanopub-rs/
-├── lib/
-│   ├── src/
-│   │   └── 🦀 Source code for the core Rust crate.
-│   ├── tests/
-│   │   └── 🧪 Tests for the core Rust crate.
-│   └── docs/
-│       └── 📖 Markdown and HTML files for the documentation website.
-├── python/
-│   └── 🐍 Python bindings for interacting with the Rust crate.
-├── js/
-│   └── 🌐 JavaScript bindings for integrating into JS environments.
-├── cli/
-│   └── ⌨️ Scripts for the command-line interface.
-├── scripts/
-│   └── 🛠️ Development scripts (build docs, testing).
-└── .github/
-    └── workflows/
-        └── ⚙️ Automated CI/CD workflows.
+```bash
+git clone https://github.com/vemonet/nanopub-rs.git
+cd nanopub-rs
 ```
 
-### ✒️ Nanopub signing process
+## ⚙️ Install dependencies
 
-- Preliminary nanopub is created with blank space in URIs at the places where the trusty URI code will appear (normalized URI: `https://w3id.org/np/ `, cf. [original java implementation](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/trusty/TempUriReplacer.java#L12)); this includes the signature part, except the triple that is stating the actual signature
-- Preliminary nanopub is serialized in a normalized fashion (basically each quad on four lines with minimal escaping)
-- Signature is calculated on this normalized representation (cf. most of the process in the [trusty-uri python lib](https://github.dev/trustyuri/trustyuri-python/blob/9f29732c4abae9d630d36e6da24720e02f543ebf/trustyuri/rdf/RdfHasher.py#L15), see also [SignatureUtils](https://github.com/Nanopublication/nanopub-java/blob/22bba0e79508309f1c6163970f49ab596beadeb0/src/main/java/org/nanopub/extra/security/SignatureUtils.java#L196) and [trusty-uri](https://github.com/trustyuri/trustyuri-java/blob/08b61fbb13d20a5cbefde617bd9a9e9b0b03d780/src/main/java/net/trustyuri/rdf/RdfHasher.java#L86))
-- Signature triple is added
-- Trusty URI code is calculated on normalized representation that includes signature
-- Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
-
-### 🛠️ Notes about maintenance and stability
-
-Cross-compiling to many targets brings some complexity to the build process, especially that the nanopub lib packs a lot of features: processing RDF, RSA signing and key generation, querying a HTTP server, getting current datetime access.
-
-This means we need to make sure the dependencies we use work for all compilation targets (e.g. aarch64, wasm).
-
-### ☑️ To do
-
-- [ ] Add possibility to build the nanopub from scratch for JS and python
-- [ ] Integrate to the python `nanopub` library to perform signing?
-- [ ] Add Ruby bindings? https://docs.rs/magnus/latest/magnus https://github.com/ankane/tokenizers-ruby
-- [ ] Add Java bindings? https://docs.rs/jni/latest/jni
-- [ ] Add brew packaging? (cf. [ripgrep](https://github.com/BurntSushi/ripgrep/blob/master/pkg/brew/ripgrep-bin.rb))
-
-## 🧑‍💻 Development workflow
-
-[Rust](https://www.rust-lang.org/tools/install), python, and NodeJS are required for development.
+[Rust](https://www.rust-lang.org/tools/install), [Python](https://www.python.org/downloads/), and [NodeJS](https://nodejs.org/en/download) are required for development.
 
 Install development dependencies:
 
@@ -79,19 +39,12 @@ pre-commit install
 
 # Install rust dev tools
 rustup update
-cargo install wasm-pack cargo-tarpaulin cargo-deny git-cliff
+cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-outdated git-cliff
 ```
 
-### 📥️ Clone the repository
+## 🧪 Run tests
 
-Clone the `nanopub-rs` repository, `cd` into it, and create a new branch for your contribution:
-
-```bash
-cd nanopub-rs
-git checkout -b add-my-contribution
-```
-
-###  🧪 Test Rust crate
+### 🦀 Test Rust crate
 
 Run tests for the rust crate:
 
@@ -119,7 +72,7 @@ cargo test
     cargo test -- --test-threads=1
     ```
 
-Test the `nanopub` crate with code coverage:
+Test the `nanopub` crate with code coverage (much slower):
 
 ```bash
 cargo tarpaulin -p nanopub --out html
@@ -172,25 +125,29 @@ cargo run -- sign ../lib/tests/resources/nanopub_test_blank.trig
 ./scripts/test-all.sh
 ```
 
-### ✨ Format
+## 🧼 Format & lint
+
+Automatically format the codebase using `rustfmt`:
 
 ```bash
 cargo fmt
 ```
 
-### 🧹 Lint
+Lint with `clippy`:
 
 ```bash
 cargo clippy --all --all-targets --all-features
 ```
 
-### 📖 Generate docs
+## 📖 Generate docs
+
+Start docs website locally with mkdocs:
 
 ```bash
 ./scripts/docs.sh
 ```
 
-### 🎭️ Work on the demo webpage
+## 🎭️ Work on the demo webpage
 
 Start a web server at [localhost:3000/playground.html](http://localhost:3000/playground.html)
 
@@ -198,16 +155,7 @@ Start a web server at [localhost:3000/playground.html](http://localhost:3000/pla
 python -m http.server 3000 --directory ./lib/docs
 ```
 
-### 📦️ Build and run
-
-All packages at once:
-
-```bash
-cargo build --all
-cargo run --all-features
-```
-
-### ️⛓️ Check supply chain
+## ️⛓️ Check supply chain
 
 Check the dependency supply chain: licenses (only accept dependencies with OSI or FSF approved licenses), and vulnerabilities (CVE advisories).
 
@@ -215,43 +163,23 @@ Check the dependency supply chain: licenses (only accept dependencies with OSI o
 cargo deny check
 ```
 
-### 🏷️ New release
-
-Publishing artifacts will be done by the `build.yml` workflow, make sure you have set the following tokens as secrets for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
-
-Install dependency:
+Make sure dependencies have been updated:
 
 ```bash
-cargo install cargo-release cargo-outdated
+cargo update
+cargo outdated
 ```
 
-1. Make sure dependencies have been updated:
+## 🏷️ Publish a new release
 
-   ```bash
-   cargo update
-   cargo outdated
-   ```
+Building and publishing artifacts will be done by the [`build.yml`](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) GitHub actions workflow, make sure you have set the following tokens as secrets for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
 
-2. Run the release script, it will bump the version in the `Cargo.toml` files, generate the changelog, commit, create a new tag, and push to GitHub
+Then just run the release script providing the new version following [semantic versioning](https://semver.org), it will bump the version in the `Cargo.toml` files, generate the changelog from commit messages, create a new tag, and push to GitHub:
 
-   ```bash
-   ./scripts/release.sh 0.0.2
-   ```
+```bash
+./scripts/release.sh 0.0.2
+```
 
-4. The `build.yml` workflow will automatically build artifacts (binary, pip wheel, npm package), create a new release on GitHub, and add the artifacts to the new release.
+!!! success "Automated release"
 
-## ⏱️ Speed comparison
-
-Speed taken when signing a nanopub using different languages implementations (in this order: [java](https://github.com/Nanopublication/nanopub-java), [python](https://github.com/fair-workflows/nanopub), rust):
-
-| Command | Mean [ms] | Min [ms] | Max [ms] | Relative |
-|:---|---:|---:|---:|---:|
-| `java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 319.5 ± 11.2 | 296.0 | 337.5 | 60.74 ± 2.49 |
-| `np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 446.6 ± 3.2 | 441.2 | 457.6 | 84.93 ± 1.93 |
-| `target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa` | 5.3 ± 0.1 | 5.1 | 6.3 | 1.00 |
-
-> Tested in GitHub actions on Ubuntu.
-
-## 🏔️ Changelog
-
-Version history is recorded in the [CHANGELOG.md](https://github.com/vemonet/nanopub-rs/blob/main/CHANGELOG.md).
+    The `build.yml` workflow will automatically build artifacts (binaries, pip wheels, npm package), create a new release on GitHub, and add the generated artifacts to the new release.

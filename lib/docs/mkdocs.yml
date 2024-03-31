@@ -1,5 +1,5 @@
 site_name: Nanopub cross-platform toolkit
-site_description: A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
+site_description: A cross-platform toolkit to sign and publish Nanopublications, written in Rust with bindings to Python and JS (wasm)
 site_author: Vincent Emonet
 site_url: https://vemonet.github.io/nanopub-rs
 repo_name: vemonet/nanopub-rs
@@ -15,7 +15,7 @@ theme:
     admonition:
       server: material/server
   language: en
-  # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#primary-color
+  # Change color: https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#primary-color
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -32,35 +32,32 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
   features:
-    - content.code.copy
-    - content.code.annotate
-    - content.code.select # Still experimental
-    # - content.tabs.link
-    # - header.autohide
-    # - navigation.expand
     - navigation.indexes
-    # - navigation.instant
     - navigation.sections
     - navigation.tabs
-    # - navigation.tabs.sticky
     - navigation.top
     - navigation.tracking
+    - content.code.copy
+    - content.code.annotate
+    - content.code.select
     - search.highlight
     - search.share
     - search.suggest
     - toc.follow
+    # - header.autohide
+    # - navigation.tabs.sticky
+    # - navigation.expand
+    # - navigation.instant
+    # - content.tabs.link
 
-# https://fontawesome.com/icons/
+# Find icons: https://fontawesome.com/icons/
 # https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
 nav:
   - Docs:
     - Introduction: index.md
     - Command Line Interface: cli.md
     - Use from Rust: rust.md
-    # - Deploy:
-    #   - 🐳 With Docker: use-docker.md
-    #   - 🐍 With pip: use-pip.md
-    # - Advanced:
+    - Architecture details: architecture.md
     - Development: contributing.md
   - JavaScript:
     - Use from JavaScript: javascript.md
@@ -88,7 +85,8 @@ watch:
   - docs
 
 markdown_extensions:
-  - admonition # https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
+  - admonition
+  # Supported admonititions: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
@@ -114,9 +112,13 @@ extra_css:
 
 extra:
   social:
+    - icon: fontawesome/brands/rust
+      link: https://crates.io/crates/nanopub
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/@nanopub/sign
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/nanopub
+      link: https://pypi.org/project/nanopub-sign
+    - icon: fontawesome/brands/github
+      link: https://github.com/Nanopublication
     # - icon: fontawesome/brands/docker
     #   link: https://github.com/vemonet/nanopub-rs/pkgs/container/nanopub-rs
-    - icon: fontawesome/brands/github
-      link: https://github.com/vemonet
