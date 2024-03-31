@@ -35,6 +35,12 @@ repos:
         entry: cargo deny check licenses
         language: system
         pass_filenames: false
+# NOTE: better done from the commandline since we install it already with cargo
+# -   repo: https://github.com/EmbarkStudios/cargo-deny
+#     rev: 0.14.20
+#     hooks:
+#     -   id: cargo-deny
+#         args: ["--all-features", "check", "licenses"]
 ci:
     autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
     autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate

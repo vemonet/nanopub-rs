@@ -26,28 +26,28 @@ jobs:
   # '--target', 'x86_64-linux-android',
 
   build_binaries:
-    name: 📦️ Build binaries for ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+    name: 📦️ Binaries for ${{ matrix.os }} (${{ matrix.target }})
+    runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: linux
             target: x86_64-unknown-linux-gnu
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
-          - os: macos-latest
+          - os: macos
             target: x86_64-apple-darwin
-          - os: macos-latest
+          - os: macos
             target: aarch64-apple-darwin
-          - os: windows-latest
+          - os: windows
             target: x86_64-pc-windows-msvc
-          - os: windows-latest
+          - os: windows
             target: aarch64-pc-windows-msvc
     steps:
       - uses: actions/checkout@v4
 
-      - name: Add target
+      - name: Add cross-compilation target
         run: rustup update && rustup target add ${{ matrix.target }}
 
       - name: Install aarch64 linux dependencies
@@ -69,23 +69,23 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nanopub_${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/nanopub-cli${{ matrix.os == 'Windows' && '.exe' || '' }}
+          path: target/${{ matrix.target }}/release/nanopub-cli${{ matrix.os == 'windows' && '.exe' || '' }}
 
       - if: startsWith(github.ref, 'refs/tags/')
         name: Prepare for release
         run: |
-          mv target/${{ matrix.target }}/release/nanopub-cli${{ matrix.os == 'Windows' && '.exe' || '' }} nanopub_${{ matrix.target }}${{ matrix.os == 'Windows' && '.exe' || '' }}
+          mv target/${{ matrix.target }}/release/nanopub-cli${{ matrix.os == 'windows' && '.exe' || '' }} nanopub_${{ matrix.target }}${{ matrix.os == 'windows' && '.exe' || '' }}
 
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            nanopub_${{ matrix.target }}${{ matrix.os == 'Windows' && '.exe' || '' }}
+            nanopub_${{ matrix.target }}${{ matrix.os == 'windows' && '.exe' || '' }}
 
 
   # Inspired by https://github.com/pydantic/pydantic-core/blob/main/.github/workflows/ci.yml
   build_wheels:
-    name: 🐍 Build wheel for ${{ matrix.os }} (${{ matrix.target }} - ${{ matrix.interpreter || 'all' }}${{ matrix.os == 'linux' && format(' - {0}', matrix.manylinux == 'auto' && 'manylinux' || matrix.manylinux) || '' }})
+    name: 🐍 Wheels for ${{ matrix.os }} (${{ matrix.target }} - ${{ matrix.interpreter || 'all' }}${{ matrix.os == 'linux' && format(' - {0}', matrix.manylinux == 'auto' && 'manylinux' || matrix.manylinux) || '' }})
     strategy:
       fail-fast: false
       matrix:
@@ -125,15 +125,13 @@ jobs:
             manylinux: musllinux_1_1
             target: aarch64
 
-          # macos
-          # all versions x86_64
-          # arm pypy and older pythons which can't be run on the arm hardware for PGO
+          # MacOS
           - os: macos
             target: x86_64
           - os: macos
             target: aarch64
 
-          # windows
+          # Windows
           # x86_64 pypy builds are not PGO optimized, i686 not supported by pypy, aarch64 only 3.11 and up, also not PGO optimized
           - os: windows
             target: x86_64
@@ -168,8 +166,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         env:
           CFLAGS_aarch64_unknown_linux_gnu: -D__ARM_ARCH=8
-          # ring linux aarch64 error: https://github.com/briansmith/ring/issues/1789
-          # https://github.com/briansmith/ring/issues/1728
+          # NOTE: ring linux aarch64 error: https://github.com/briansmith/ring/issues/1728
         with:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}

@@ -8,7 +8,7 @@ source .venv/bin/activate
 pip install maturin pre-commit
 
 rustup update
-rustup component add rustfmt clippy
+# rustup component add rustfmt clippy
 
 cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make git-cliff
 

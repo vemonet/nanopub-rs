@@ -46,6 +46,12 @@ nanopub-rs/
 - Trusty URI code is calculated on normalized representation that includes signature
 - Trusty URI code is added in place of all the occurrences of blank spaces in the URIs, leading to the final trusty nanopub
 
+### Notes about maintenance and stability
+
+Cross-compiling to many targets brings some complexity to the build process, especially that the nanopub lib packs a lot of features: processing RDF, RSA signing and key generation, querying a HTTP server, getting current datetime access.
+
+This means we need to make sure the dependencies we use works for all targets.
+
 ### ☑️ To do
 
 - [ ] Add possibility to build the nanopub from scratch for JS and python
@@ -73,8 +79,7 @@ pre-commit install
 
 # Install rust dev tools
 rustup update
-rustup component add rustfmt clippy
-cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make git-cliff
+cargo install wasm-pack cargo-tarpaulin cargo-deny git-cliff
 ```
 
 ### 📥️ Clone the repository
