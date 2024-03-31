@@ -166,6 +166,10 @@ jobs:
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
+        env:
+          CFLAGS_aarch64_unknown_linux_gnu: -D__ARM_ARCH=8
+          # ring linux aarch64 error: https://github.com/briansmith/ring/issues/1789
+          # https://github.com/briansmith/ring/issues/1728
         with:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}

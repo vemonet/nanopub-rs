@@ -13,7 +13,7 @@ use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::{rdf, xsd, Namespace};
-use sophia::api::term::{matcher::Any, SimpleTerm, Term};
+use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::{AsIriRef, Iri};
 use std::collections::HashSet;
@@ -245,13 +245,11 @@ impl Nanopub {
             .next()
             .is_none()
         {
-            let now = Utc::now();
-            let datetime_str = now.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
+            let datetime_now = Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
             self.dataset.insert(
                 self.info.ns.as_iri_ref(),
                 ns("dct").get("created")?,
-                SimpleTerm::LiteralDatatype(datetime_str.into(), xsd::dateTime.iriref()),
-                // TODO: datetime_str.as_str() * xsd::dateTime,
+                datetime_now.as_str() * xsd::dateTime,
                 Some(&self.info.pubinfo),
             )?;
         }

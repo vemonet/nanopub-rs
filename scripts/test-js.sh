@@ -15,9 +15,9 @@ done
 npm install
 
 if [ "$SKIP_BUILD" = false ]; then
-    npm run test
+    npm run test -- --silent=false
 else
-    npm run jest
+    npm run jest -- --silent=false
 fi
 
 # wasm-pack build --target web

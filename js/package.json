@@ -1,7 +1,7 @@
 {
   "version": "0.0.0",
   "name": "@nanopub/sign",
-  "description": "JavaScript bindings for the Nanopub toolkit writen in Rust",
+  "description": "JavaScript bindings for the Nanopub toolkit written in Rust",
   "license": "MIT",
   "homepage": "https://github.com/vemonet/nanopub-rs",
   "module": "web.js",
@@ -22,7 +22,7 @@
   "scripts": {
     "fmt": "prettier \"**/*.{ts,tsx,js,cjs,json,md,html}\" --ignore-path .gitignore --write",
     "old-test": "wasm-pack build --debug --target nodejs && mocha",
-    "jest" : "jest",
+    "jest" : "jest --verbose false",
     "test": "npm run build && jest",
     "build": "rm -rf pkg pkg-web pkg-node && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web pkg-node",
     "start": "http-server ./",
