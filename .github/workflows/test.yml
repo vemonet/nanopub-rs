@@ -15,7 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: rustup update
-      # - run: rustup update && rustup component add clippy rustfmt
       - run: cargo fmt -- --check
       - run: cargo clippy --all --all-targets --all-features
 
