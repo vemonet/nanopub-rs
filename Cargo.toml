@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
 edition = "2021"
 repository = "https://github.com/vemonet/nanopub-rs"

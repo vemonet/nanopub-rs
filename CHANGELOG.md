@@ -2,7 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.2](https://github.com/vemonet/nanopub-rs/compare/v0.1.1..0.1.2) - 2024-03-07
+## [0.1.3](https://github.com/vemonet/nanopub-rs/compare/v0.1.2..0.1.3) - 2024-03-31
+
+### ⚙️ Continuous Integration
+
+- Improve build process to use a matrix and add binary for windows aarch64 - ([ab8f3ba](https://github.com/vemonet/nanopub-rs/commit/ab8f3baecee5b7d542761f3ffab02b0124bf1d6c))
+- Fix aarch64 binary builds - ([888c734](https://github.com/vemonet/nanopub-rs/commit/888c73443707dca018674aca269d99ab0dd37031))
+- Fix linux aarch64 build - ([24e8fc5](https://github.com/vemonet/nanopub-rs/commit/24e8fc56e3e5e062108c5a6dc78d3d09c15a9530))
+
+### 🐛 Bug Fixes
+
+- Fix wheel building on windows aarch64 - ([a7ef4a5](https://github.com/vemonet/nanopub-rs/commit/a7ef4a570c9fe38ff7d29f88af0194d137e43049))
+- Add content type header to nanopub server request (fix error when running test with jest and nodejs). Add env variable to try fix build on aarch64 - ([c464e63](https://github.com/vemonet/nanopub-rs/commit/c464e63abe0f30f34a27d9b99d94972411d9ae48))
+
+### 📚 Documentation
+
+- Improve error msg display in playground page - ([dfa0d44](https://github.com/vemonet/nanopub-rs/commit/dfa0d443e0442758d73c773f2d58c1a06c035242))
+- Add loader icon for editor - ([a13b4fb](https://github.com/vemonet/nanopub-rs/commit/a13b4fb2ec7599660dae8b07238c26be3bca6ea9))
+
+### 🚜 Refactor
+
+- Creating a new intro nanopub now fails if the ORCID or name of the introduced Profile are empty - ([2a7fae5](https://github.com/vemonet/nanopub-rs/commit/2a7fae51c161c4eb888e71bb49d82793d06a3af2))
+
+### 🛠️ Miscellaneous Tasks
+
+- Improve the list of prefixes used when building thenanopub, using https://schema.org/ instead of http://schema.org/ - ([b534f7f](https://github.com/vemonet/nanopub-rs/commit/b534f7f038fa20f8882684d965b2f9bad8204014))
+- Upgrade reqwest to 0.12 - ([a9f3eaa](https://github.com/vemonet/nanopub-rs/commit/a9f3eaa0ea36ba0a9022011b2e516caec99f6299))
+- Use rust-toolchain.toml for components - ([2a380c8](https://github.com/vemonet/nanopub-rs/commit/2a380c85085728d8a53190c6ee8866fd03d38703))
+
+### 🧪 Testing
+
+- Test with reqwest native-tls - ([5cae658](https://github.com/vemonet/nanopub-rs/commit/5cae658d3afc37fbca2b0441c0d464c375d135b0))
+
+## [0.1.2](https://github.com/vemonet/nanopub-rs/compare/v0.1.1..v0.1.2) - 2024-03-07
 
 ### ⚙️ Continuous Integration
 
@@ -12,6 +44,10 @@ All notable changes to this project will be documented in this file.
 ### 🚜 Refactor
 
 - Rename get_rdf() function to rdf() - ([bb28299](https://github.com/vemonet/nanopub-rs/commit/bb282990662ae0fdb284c6e005f6bab58d329cf6))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.2 - ([85d2bde](https://github.com/vemonet/nanopub-rs/commit/85d2bdef310e0d378a307d2dacf0dc6d8b1e4002))
 
 ## [0.1.1](https://github.com/vemonet/nanopub-rs/compare/v0.1.0..v0.1.1) - 2024-03-06
 
