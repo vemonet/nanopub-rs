@@ -34,7 +34,7 @@ jobs:
         include:
           - os: linux
             target: x86_64-unknown-linux-gnu
-          - os: ubuntu-latest
+          - os: linux
             target: aarch64-unknown-linux-gnu
           - os: macos
             target: x86_64-apple-darwin
@@ -200,7 +200,7 @@ jobs:
 
 
   npm_tarball:
-    name: 🦊 Build npm package
+    name: 🦊 Wasm and npm package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

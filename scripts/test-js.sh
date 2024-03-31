@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-cd js
-
 # Check for --no-build flag
 SKIP_BUILD=false
 for arg in "$@"; do
@@ -12,6 +10,7 @@ for arg in "$@"; do
     fi
 done
 
+cd js
 npm install
 
 if [ "$SKIP_BUILD" = false ]; then
