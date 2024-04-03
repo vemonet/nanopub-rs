@@ -5,13 +5,12 @@ set -e
 python3 -m venv .venv
 source .venv/bin/activate
 
-pip install maturin pre-commit
+pip install -r python/requirements.txt
+pip install -r lib/docs/requirements.txt
 
 rustup update
 # rustup component add rustfmt clippy
 
 cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-make git-cliff
-
-source scripts/docs-install.sh
 
 pre-commit install

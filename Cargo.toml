@@ -18,7 +18,8 @@ license-file = "LICENSE.txt"
 keywords = ["nanopublications", "rdf", "linked-data", "semantic-web"]
 categories = ["science", "encoding", "database-interface", "cryptography"]
 
-# [workspace.dependencies]
+[workspace.dependencies]
+nanopub = { version = "0.1.3", path = "./lib" }
 
 [profile.release]
 lto = true

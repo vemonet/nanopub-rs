@@ -129,6 +129,7 @@ impl NanopubPy {
         })
     }
 
+    // TODO: use pyo3-asyncio https://pyo3.rs/v0.21.1/ecosystem/async-await
     // ASYNC WITH TOKIO
     // #[staticmethod]
     // #[pyo3(text_signature = "(rdf, profile, server_url)")]

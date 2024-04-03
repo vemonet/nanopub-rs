@@ -32,7 +32,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 # Install python dependencies
-pip install maturin pre-commit
+pip install -r python/requirements.txt
 
 # Install pre-commit hooks
 pre-commit install

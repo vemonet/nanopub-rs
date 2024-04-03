@@ -20,7 +20,7 @@ source .venv/bin/activate
 
 cd python
 
-python -m pip install pytest maturin
+python -m pip install -q -r python/requirements.txt
 
 if [ "$SKIP_BUILD" = false ]; then
     maturin develop
