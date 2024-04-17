@@ -1,4 +1,4 @@
-# 🛠️ Development
+# 🛠️ Contributing
 
 [![Build](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) [![Lint and Test](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml/badge.svg)](https://github.com/vemonet/nanopub-rs/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/vemonet/nanopub-rs/graph/badge.svg?token=BF15PSO6GN)](https://codecov.io/gh/vemonet/nanopub-rs) [![dependency status](https://deps.rs/repo/github/vemonet/nanopub-rs/status.svg)](https://deps.rs/repo/github/vemonet/nanopub-rs)
 
@@ -27,19 +27,7 @@ cd nanopub-rs
 Install development dependencies:
 
 ```bash
-# Create and activate python virtual env
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install python dependencies
-pip install -r python/requirements.txt
-
-# Install pre-commit hooks
-pre-commit install
-
-# Install rust dev tools
-rustup update
-cargo install wasm-pack cargo-tarpaulin cargo-deny cargo-outdated git-cliff
+./scripts/install-dev.sh
 ```
 
 ## 🧪 Run tests

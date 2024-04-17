@@ -14,7 +14,6 @@ concurrency:
 # cf. https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
 jobs:
 
-  # Build binaries for more targets? e.g. aarch64-linux-android, x86_64-linux-android
   build_binaries:
     name: 📦️ Binaries for ${{ matrix.os }} (${{ matrix.target }})
     strategy:

@@ -58,3 +58,4 @@
 *[GO]: Gene Ontology
 *[ChEBI]: Chemical Entities of Biological Interest
 *[NCBI]: The National Center for Biotechnology Information (USA)
+*[VSCode]: VisualStudio Code

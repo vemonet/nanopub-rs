@@ -1,6 +1,7 @@
 # 🐍 Use from Python
 
 [![PyPI](https://img.shields.io/pypi/v/nanopub-sign)](https://pypi.org/project/nanopub-sign/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nanopub-sign.svg?logo=python&label=Python&logoColor=silver)](https://pypi.org/project/nanopub-sign)
 
 You can use this toolkit to sign and publish Nanopublications from Python with the [`nanopub-sign`](https://pypi.org/project/nanopub-sign/) pip package.
 

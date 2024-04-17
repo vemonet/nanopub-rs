@@ -43,6 +43,9 @@ describe('Tests for the @nanopub/sign npm package', () => {
 
     // console.log("Published Nanopub:", np.info());
     expect(np.info().published).toBeDefined();
+    console.log({ profile, np });
+    console.log({ profile, nanopub: np.info() });
+    // console.log({ profile, nanopub: nanopub.info(), signed: signed.info() });
     // expect(np.info().trusty_hash).toBe("RAE9traVUygMTJ-k8E1_pVNy3gtf7uUvtHJtPeU64WpA4");
   });
 

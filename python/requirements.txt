@@ -1,4 +1,4 @@
-maturin[patchelf]
+maturin
 pre-commit
 pytest
 mktestdocs

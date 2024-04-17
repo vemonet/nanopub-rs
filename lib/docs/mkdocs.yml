@@ -7,6 +7,25 @@ repo_url: https://github.com/vemonet/nanopub-rs
 edit_uri: "edit/main/docs/"
 copyright: Copyright &copy; 2023 Vincent Emonet
 
+# Find icons: https://fontawesome.com/icons/
+# https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
+nav:
+  - Docs:
+    - Introduction: index.md
+    - Command Line Interface: cli.md
+    - Architecture details: architecture.md
+    - Contributing: contributing.md
+  - Rust:
+    - Use from Rust: rust.md
+  - JavaScript:
+    - Use from JavaScript: javascript.md
+    - Example bare HTML: javascript-example-html.md
+    - Example JS framework: javascript-example-framework.md
+  - Python:
+    - Use from Python: python.md
+  - Playground: playground.html" target="_blank
+  # - Issues: https://github.com/vemonet/nanopub-rs/issues" target="_blank
+
 theme:
   name: "material"
   favicon: assets/logo.png
@@ -50,24 +69,6 @@ theme:
     # - navigation.instant
     # - content.tabs.link
 
-# Find icons: https://fontawesome.com/icons/
-# https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/
-nav:
-  - Docs:
-    - Introduction: index.md
-    - Command Line Interface: cli.md
-    - Use from Rust: rust.md
-    - Architecture details: architecture.md
-    - Development: contributing.md
-  - JavaScript:
-    - Use from JavaScript: javascript.md
-    - Example bare HTML: javascript-example-html.md
-    - Example JS framework: javascript-example-framework.md
-  - Python:
-    - Use from Python: python.md
-  - Playground: playground.html" target="_blank
-  # - Issues: https://github.com/vemonet/nanopub-rs/issues" target="_blank
-
 plugins:
 - search
 - open-in-new-tab
@@ -79,10 +80,6 @@ plugins:
         options:
           show_source: true
     # custom_templates: templates
-
-watch:
-  - ../src
-  - docs
 
 markdown_extensions:
   - admonition
@@ -106,7 +103,6 @@ markdown_extensions:
   - smarty
   # - md_in_html
 
-
 extra_css:
   - assets/custom.css
 
@@ -122,3 +118,7 @@ extra:
       link: https://github.com/Nanopublication
     # - icon: fontawesome/brands/docker
     #   link: https://github.com/vemonet/nanopub-rs/pkgs/container/nanopub-rs
+
+watch:
+  - ../src
+  - docs

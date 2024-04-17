@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 # Most of the metadata are in Cargo.toml and injected by maturin
-# version = "0.0.0"
+version = "0.0.0"
 name = "nanopub-sign"
 classifiers = [
     "Development Status :: 4 - Beta",
