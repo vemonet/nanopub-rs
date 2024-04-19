@@ -7,7 +7,7 @@ use nanopub::{
     profile::gen_keys,
     sign::normalize_dataset,
     utils::{ns, parse_rdf},
-    Nanopub, NpProfile,
+    Nanopub, ProfileBuilder,
 };
 use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset, iri::Iri};
 use std::{error::Error, fs};
@@ -19,7 +19,7 @@ fn get_test_key() -> String {
 #[tokio::test]
 async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
-    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     println!("{}", np.rdf()?);
     assert!(np.info.published.is_some());
@@ -36,7 +36,7 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
 async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("tests/testsuite/valid/plain/proteinatlas-16-1.trig")?;
     // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
-    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&profile), Some(""))
         .await?;
@@ -55,7 +55,7 @@ async fn publish_already_signed_no_profile() -> Result<(), Box<dyn Error>> {
 #[tokio::test]
 async fn publish_already_signed_with_profile() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/signed.simple1-rsa.trig")?;
-    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     // println!("{}", np.info);
     // println!("{}", np.rdf()?);
@@ -75,16 +75,31 @@ async fn publish_unsigned_no_profile_error() -> Result<(), Box<dyn Error>> {
 fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
 
-    let profile = NpProfile::new(
-        &get_test_key(),
-        "https://orcid.org/0000-0000-0000-0000",
-        "",
-        None,
-    )?;
+    let profile = ProfileBuilder::new(get_test_key())
+        .with_orcid("https://orcid.org/0000-0000-0000-0000".to_string())
+        .with_name("Test User".to_string())
+        .with_intro_nanopub(
+            "https://w3id.org/np/RAqz9iOB9hMkNmH9m6e2FvbZRrLgb9aMBfKSklMVh9LrM".to_string(),
+        )
+        .build()?;
     println!("{}", profile); // cov
     let _pubkey = profile.get_public_key(); // cov
     let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
     assert!(np.info.published.is_none());
+    Ok(())
+}
+
+#[test]
+fn load_profile_yml() -> Result<(), Box<dyn Error>> {
+    let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
+
+    let profile = ProfileBuilder::from_file("tests/resources/profile.yml").unwrap();
+    let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
+    assert!(!np.info.signature.is_empty());
+
+    let profile = ProfileBuilder::from_file("tests/resources/profile_no_orcid.yml").unwrap();
+    let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
+    assert!(!np.info.signature.is_empty());
     Ok(())
 }
 
@@ -111,7 +126,7 @@ fn wrong_rdf_file() -> Result<(), Box<dyn Error>> {
 #[tokio::test]
 async fn publish_fail() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
-    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&profile), Some("failing"))
         .await;
@@ -121,7 +136,7 @@ async fn publish_fail() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn profile_fail() -> Result<(), Box<dyn Error>> {
-    let profile = NpProfile::new("failing", "", "", None);
+    let profile = ProfileBuilder::new("failing".to_string()).build();
     assert!(profile.is_err());
     Ok(())
 }
@@ -144,7 +159,7 @@ fn test_get_np_server() -> Result<(), Box<dyn Error>> {
 #[tokio::test]
 async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
-    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
     assert!(np.info.published.is_some());
     Ok(())
@@ -152,26 +167,23 @@ async fn publish_jsonld() -> Result<(), Box<dyn Error>> {
 
 #[tokio::test]
 async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
-    let profile = NpProfile::new(
-        &get_test_key(),
-        "https://orcid.org/0000-0000-0000-0000",
-        "Test User",
-        None,
-    )?;
+    let profile = ProfileBuilder::new(get_test_key())
+        .with_orcid("https://orcid.org/0000-0000-0000-0000".to_string())
+        .with_name("Test User".to_string())
+        .build()?;
     let np = Nanopub::new_intro(&profile)?
         .publish(Some(&profile), None)
         .await?;
     // println!("{}", np);
     assert!(np.info.published.is_some());
     // Test error when Profile not complete
-    let profile = NpProfile::new(
-        &get_test_key(),
-        "https://orcid.org/0000-0000-0000-0000",
-        "",
-        None,
-    )?;
+    let profile = ProfileBuilder::new(get_test_key())
+        .with_orcid("https://orcid.org/0000-0000-0000-0000".to_string())
+        .build()?;
     assert!(Nanopub::new_intro(&profile).is_err());
-    let profile = NpProfile::new(&get_test_key(), "", "Test User", None)?;
+    let profile = ProfileBuilder::new(get_test_key())
+        .with_name("Test User".to_string())
+        .build()?;
     assert!(Nanopub::new_intro(&profile).is_err());
     Ok(())
 }
@@ -187,7 +199,7 @@ fn test_np_info() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn default_profile_file() -> Result<(), Box<dyn Error>> {
-    let _profile = NpProfile::from_file("");
+    let _profile = ProfileBuilder::from_file("");
     Ok(())
 }
 
@@ -238,7 +250,7 @@ async fn unit_publish_np_fail() -> Result<(), Box<dyn Error>> {
 async fn publish_from_scratch() -> Result<(), Box<dyn Error>> {
     let mut np = Nanopub::new(create_base_dataset()?)?;
     println!("DEBUG: SCRATCH {}", np.rdf()?);
-    let profile = NpProfile::new(&get_test_key(), "", "", None)?;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
     np.dataset.insert(
         Iri::new_unchecked("http://example.org/mosquitoes"),
         Iri::new_unchecked("http://example.org/transmits"),

@@ -1,6 +1,6 @@
 use clap::{arg, value_parser, Command};
 use clap_complete::{generate, Generator, Shell};
-use nanopub::{error::NpError, get_np_server, Nanopub, NpProfile};
+use nanopub::{error::NpError, get_np_server, Nanopub, ProfileBuilder};
 use std::{error::Error, fs, io, path::Path};
 
 // https://github.com/clap-rs/clap/blob/master/examples/git.rs
@@ -60,7 +60,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match matches.subcommand() {
         Some(("sign", sub)) => {
-            let orcid = "http://orcid.org/0000-0000-0000-0000";
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
@@ -68,10 +67,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Read RDF from file, and get profile from YAML file or key
             let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
-                let private_key = fs::read_to_string(key_file)?;
-                NpProfile::new(&private_key, orcid, "", None)?
+                let privkey = fs::read_to_string(key_file)?;
+                ProfileBuilder::new(privkey).build()?
             } else {
-                NpProfile::from_file(profile_file)?
+                ProfileBuilder::from_file(profile_file)?
             };
             println!("✍️  Signing {}", np_file);
             let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
@@ -82,21 +81,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let parent = path.parent().unwrap_or_else(|| Path::new(""));
             let file_name = path
                 .file_name()
-                .ok_or_else(|| NpError("Error getting filename".to_string()))?
+                .ok_or_else(|| NpError(format!("Error getting filename from {:?}", path)))?
                 .to_str()
-                .ok_or_else(|| NpError("Error getting filename".to_string()))?;
+                .ok_or_else(|| NpError(format!("Error getting filename from {:?}", path)))?;
             let new_file_name = format!("signed.{}", file_name);
             let signed_path = parent.join(new_file_name);
             println!(
                 "📁 Signed Nanopub stored to {}",
-                signed_path
-                    .to_str()
-                    .ok_or_else(|| NpError("Error getting signed path".to_string()))?
+                signed_path.to_str().ok_or_else(|| NpError(format!(
+                    "Error getting signed path {:?}",
+                    signed_path
+                )))?
             );
             let _ = fs::write(signed_path, np.rdf()?);
         }
         Some(("publish", sub)) => {
-            let orcid = "http://orcid.org/0000-0000-0000-0000";
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
             let key_file = sub.get_one::<String>("key").unwrap();
             let profile_file = sub.get_one::<String>("profile").unwrap();
@@ -105,10 +104,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Read RDF from file, and get profile from YAML file or key
             let np_rdf = fs::read_to_string(np_file)?;
             let profile = if !key_file.is_empty() {
-                let private_key = fs::read_to_string(key_file)?;
-                NpProfile::new(&private_key, orcid, "", None)?
+                let privkey = fs::read_to_string(key_file)?;
+                ProfileBuilder::new(privkey).build()?
             } else {
-                NpProfile::from_file(profile_file)?
+                ProfileBuilder::from_file(profile_file)?
             };
             if test_server {
                 println!("🧪 Publishing {np_file} to test server");

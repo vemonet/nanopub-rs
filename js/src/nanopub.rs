@@ -1,7 +1,7 @@
 use js_sys::{Promise, JSON};
 use nanopub::{
     constants::TEST_SERVER, get_np_server as get_server, profile::gen_keys, Nanopub as RsNanopub,
-    NpProfile as RsNpProfile,
+    NpProfile as RsNpProfile, ProfileBuilder,
 };
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
@@ -158,19 +158,26 @@ extern "C" {
 impl NpProfile {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        private_key: &str,
-        orcid_id: &str,
-        name: &str,
-        introduction_nanopub_uri: &str,
+        private_key: String,
+        orcid_id: Option<String>,
+        name: Option<String>,
+        introduction_nanopub_uri: Option<String>,
     ) -> Result<NpProfile, JsValue> {
-        RsNpProfile::new(
-            private_key,
-            orcid_id,
-            name,
-            Some(introduction_nanopub_uri.to_string()),
-        )
-        .map(|profile: RsNpProfile| Self { profile })
-        .map_err(|e| JsValue::from_str(&e.to_string()))
+        let mut profile = ProfileBuilder::new(private_key);
+        if let Some(orcid_id) = orcid_id {
+            profile = profile.with_orcid(orcid_id);
+        };
+        if let Some(name) = name {
+            profile = profile.with_name(name);
+        };
+        if let Some(intro_np_uri) = introduction_nanopub_uri {
+            profile = profile.with_intro_nanopub(intro_np_uri);
+        };
+        Ok(Self {
+            profile: profile
+                .build()
+                .map_err(|e| JsValue::from_str(&e.to_string()))?,
+        })
     }
     // TODO: create from profile.yml file?
 

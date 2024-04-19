@@ -24,7 +24,6 @@ openssl-probe = "0.1"
 sophia = { version = "0.8.0", features = ["jsonld"] }
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.9"
 chrono = "0.4.35"
 getrandom = { version = "0.2", features = ["js"] }
 rand_core = { version = "0.6", features = ["std"] }

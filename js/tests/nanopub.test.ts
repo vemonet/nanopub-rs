@@ -38,7 +38,7 @@ describe('Tests for the @nanopub/sign npm package', () => {
   // NOTE: `await init()` only needed in browser environment
 
   test('publish nanopub', async () => {
-    const profile = new NpProfile(privKey, orcid, "Your Name", "");
+    const profile = new NpProfile(privKey, orcid, "Your Name");
     const np = await new Nanopub(unsignedRdf).publish(profile);
 
     // console.log("Published Nanopub:", np.info());

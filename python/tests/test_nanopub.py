@@ -38,7 +38,6 @@ profile = NpProfile(
     private_key=private_key,
     orcid_id="https://orcid.org/0000-0000-0000-0000",
     name="Your Name",
-    introduction_nanopub_uri=""
 )
 
 def test_check():
@@ -69,7 +68,6 @@ def test_publish_intro():
         private_key=keypair.private,
         orcid_id="https://orcid.org/0000-0000-0000-0000",
         name="Your Name",
-        introduction_nanopub_uri=""
     )
     np = Nanopub.publish_intro(new_profile)
     assert np.info()["trusty_hash"]

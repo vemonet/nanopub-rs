@@ -29,6 +29,11 @@ impl fmt::Display for NpError {
         write!(f, "{}", self.0)
     }
 }
+// InvalidNanopub
+// InvalidSignature
+// InvalidProfile
+// ProfileMissing
+// ErrorPublishing
 
 // Add handling for errors from external dependencies
 // to be able to use ? more to handle errors
@@ -95,11 +100,6 @@ impl From<rsa::pkcs8::Error> for NpError {
 impl From<rsa::pkcs8::spki::Error> for NpError {
     fn from(err: rsa::pkcs8::spki::Error) -> Self {
         NpError(format!("Invalid RSA public key error: {err}"))
-    }
-}
-impl From<serde_yaml::Error> for NpError {
-    fn from(err: serde_yaml::Error) -> Self {
-        NpError(format!("Parse profile YAML error: {err}"))
     }
 }
 impl From<reqwest::Error> for NpError {

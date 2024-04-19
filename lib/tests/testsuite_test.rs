@@ -1,8 +1,8 @@
-use nanopub::{Nanopub, NpProfile};
+use nanopub::{Nanopub, NpProfile, ProfileBuilder};
 use std::{error::Error, fs, path::Path};
 
 fn get_profile() -> NpProfile {
-    NpProfile::from_file("tests/resources/profile.yml").unwrap()
+    ProfileBuilder::from_file("tests/resources/profile_no_orcid.yml").unwrap()
 }
 
 #[tokio::test]
@@ -146,6 +146,8 @@ async fn testsuite_publish_transform_signed_simple1() -> Result<(), Box<dyn Erro
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&get_profile()), None)
         .await?;
+    println!("{}", np.rdf()?);
+    println!("{}", get_profile());
     assert!(np.info.published.is_some());
     assert_eq!(
         np.info.trusty_hash,

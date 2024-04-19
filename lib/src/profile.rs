@@ -1,48 +1,93 @@
 use base64::{engine, Engine as _};
 use getrandom::getrandom;
 use rand_core::{impls, CryptoRng, RngCore};
-use rsa::{RsaPrivateKey, RsaPublicKey};
-// use rsa::pkcs1::{DecodeRsaPrivateKey, EncodeRsaPrivateKey};
 use rsa::pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey};
+use rsa::{RsaPrivateKey, RsaPublicKey};
 use serde::{Deserialize, Serialize};
-use serde_yaml;
 use std::fmt;
-use std::io::Read;
+use std::io::{BufRead as _, BufReader};
 use std::{env, fs};
 
 use crate::error::NpError;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NpProfile {
-    pub orcid_id: String,
-    pub name: String,
     pub private_key: String,
     pub public_key: String,
+    pub orcid_id: Option<String>,
+    pub name: Option<String>,
     pub introduction_nanopub_uri: Option<String>,
 }
 
-impl NpProfile {
-    /// Create a new Nanopub profile
-    pub fn new(
-        private_key: &str,
-        orcid_id: &str,
-        name: &str,
-        introduction_nanopub_uri: Option<String>,
-    ) -> Result<Self, NpError> {
-        let privkey =
-            RsaPrivateKey::from_pkcs8_der(&engine::general_purpose::STANDARD.decode(private_key)?)?;
-        let pubkey = RsaPublicKey::from(&privkey);
-        Ok(Self {
-            orcid_id: orcid_id.to_string(),
-            name: name.to_string(),
-            public_key: get_pubkey_str(&pubkey)?,
-            private_key: private_key.to_string(),
-            introduction_nanopub_uri,
+pub struct ProfileBuilder {
+    pub private_key: String,
+    pub public_key: Option<String>,
+    pub orcid_id: Option<String>,
+    pub name: Option<String>,
+    pub introduction_nanopub_uri: Option<String>,
+}
+
+impl ProfileBuilder {
+    pub fn new(private_key: String) -> Self {
+        ProfileBuilder {
+            private_key,
+            public_key: None,
+            orcid_id: None,
+            name: None,
+            introduction_nanopub_uri: None,
+        }
+    }
+
+    pub fn with_orcid(mut self, orcid: String) -> Self {
+        self.orcid_id = Some(orcid);
+        self
+    }
+
+    pub fn with_name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
+    }
+
+    pub fn with_intro_nanopub(mut self, introduction_nanopub_uri: String) -> Self {
+        self.introduction_nanopub_uri = Some(introduction_nanopub_uri);
+        self
+    }
+
+    pub fn with_public_key(mut self, public_key: String) -> Self {
+        self.public_key = Some(public_key);
+        self
+    }
+
+    /// Build a `NpProfile` struct
+    pub fn build(self) -> Result<NpProfile, NpError> {
+        let pubkey = if let Some(pubkey) = self.public_key {
+            pubkey
+        } else {
+            // Generate public key from private key
+            let privkey = RsaPrivateKey::from_pkcs8_der(
+                &engine::general_purpose::STANDARD.decode(&self.private_key)?,
+            )?;
+            get_pubkey_str(&RsaPublicKey::from(&privkey))?
+        };
+        // Check ORCID is valid
+        if let Some(orcid) = &self.orcid_id {
+            if !orcid.starts_with("https://orcid.org/") {
+                return Err(NpError(
+                    "The ORCID should start with https://orcid.org/".to_string(),
+                ));
+            }
+        };
+        Ok(NpProfile {
+            private_key: self.private_key,
+            public_key: pubkey,
+            orcid_id: self.orcid_id,
+            name: self.name,
+            introduction_nanopub_uri: self.introduction_nanopub_uri,
         })
     }
 
-    /// Create a Nanopub profile from a YAML file
-    pub fn from_file(filepath: &str) -> Result<Self, NpError> {
+    /// Create a `NpProfile` from a YAML file, Default to home dir if empty string provided
+    pub fn from_file(filepath: &str) -> Result<NpProfile, NpError> {
         let filepath = if filepath.is_empty() {
             // Default to home dir if nothing provided
             format!(
@@ -54,16 +99,50 @@ impl NpProfile {
         } else {
             filepath.to_string()
         };
-        let mut file = fs::File::open(filepath)?;
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)?;
-        let mut profile: NpProfile = serde_yaml::from_str(&contents)?;
-        // Read private and public keys from file
-        profile.private_key = normalize_key(&fs::read_to_string(&profile.private_key)?)?;
-        profile.public_key = normalize_key(&fs::read_to_string(&profile.public_key)?)?;
-        Ok(profile)
+        let file = fs::File::open(filepath)?;
+        let reader = BufReader::new(file);
+        let mut privkey_path = None;
+        let mut pubkey_path = None;
+        let mut orcid = None;
+        let mut name = None;
+        let mut intro_np_uri = None;
+        for line in reader.lines() {
+            let line =
+                line.map_err(|_| NpError("Failed to read line in profile.yml".to_string()))?;
+            if let Some((key, value)) = line.split_once(": ") {
+                match key.trim() {
+                    "private_key" => privkey_path = Some(remove_quotes(value)),
+                    "public_key" => pubkey_path = Some(remove_quotes(value)),
+                    "orcid_id" => orcid = Some(remove_quotes(value)).filter(|s| !s.is_empty()),
+                    "name" => name = Some(remove_quotes(value)).filter(|s| !s.is_empty()),
+                    "introduction_nanopub_uri" => {
+                        intro_np_uri = Some(remove_quotes(value)).filter(|s| !s.is_empty())
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let privkey = normalize_key(&fs::read_to_string(privkey_path.as_ref().ok_or_else(
+            || NpError("Invalid Profile: private key file is empty.".to_string()),
+        )?)?)?;
+        let mut profile = ProfileBuilder::new(privkey);
+        if let Some(pubkey_path) = pubkey_path {
+            profile = profile.with_public_key(normalize_key(&fs::read_to_string(pubkey_path)?)?);
+        }
+        if let Some(orcid) = orcid {
+            profile = profile.with_orcid(orcid);
+        }
+        if let Some(name) = name {
+            profile = profile.with_name(name);
+        }
+        if let Some(intro_nanopub_uri) = intro_np_uri {
+            profile = profile.with_intro_nanopub(intro_nanopub_uri);
+        }
+        profile.build()
     }
+}
 
+impl NpProfile {
     /// Get the private key as `RsaPrivateKey` struct
     pub fn get_private_key(&self) -> Result<RsaPrivateKey, NpError> {
         Ok(RsaPrivateKey::from_pkcs8_der(
@@ -79,18 +158,16 @@ impl NpProfile {
 impl fmt::Display for NpProfile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "\nNanopub Profile:")?;
-        writeln!(f, "ORCID:{}", self.orcid_id)?;
-        writeln!(f, "Name:{}", self.name)?;
         writeln!(f, "Public key: {}", self.public_key)?;
         writeln!(f, "Private key: {}", self.private_key)?;
-        if self.introduction_nanopub_uri.is_some() {
-            writeln!(
-                f,
-                "Introduction URI: {}",
-                self.introduction_nanopub_uri
-                    .clone()
-                    .unwrap_or("".to_string())
-            )?;
+        if let Some(orcid) = &self.orcid_id {
+            writeln!(f, "ORCID: {}", orcid)?;
+        }
+        if let Some(name) = &self.name {
+            writeln!(f, "Name: {}", name)?;
+        }
+        if let Some(intro_np_uri) = &self.introduction_nanopub_uri {
+            writeln!(f, "Introduction URI: {}", intro_np_uri)?;
         }
         Ok(())
     }
@@ -139,6 +216,15 @@ pub fn gen_keys() -> Result<(String, String), NpError> {
         normalize_key(&priv_key.to_pkcs8_pem(rsa::pkcs8::LineEnding::LF)?)?,
         get_pubkey_str(&pub_key)?,
     ))
+}
+
+/// Removes leading and trailing quotes from a string slice, e.g. YAML value
+fn remove_quotes(value: &str) -> String {
+    value
+        .trim()
+        .trim_matches(|c| c == '"' || c == '\'')
+        .trim()
+        .to_string()
 }
 
 // Because of wasm we can't use the rand crate

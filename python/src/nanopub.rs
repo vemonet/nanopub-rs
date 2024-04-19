@@ -1,4 +1,4 @@
-use nanopub::{get_np_server as get_server, profile::gen_keys, Nanopub, NpProfile};
+use nanopub::{get_np_server as get_server, profile::gen_keys, Nanopub, NpProfile, ProfileBuilder};
 use pyo3::{exceptions::PyException, prelude::*};
 use pythonize::pythonize;
 // use pyo3::types::IntoPyDict;
@@ -155,7 +155,6 @@ impl NanopubPy {
     //     // py: Python<'_>,
     // ) -> PyResult<Self> {
     //     // py.allow_threads(|| { // Put code in this block to enable true parallel https://pyo3.rs/v0.20.0/parallelism
-    //     // let profile = NpProfile::new(private_key, orcid, "", None).unwrap();
     //     let rdf = rdf.to_string();
     //     let profile = profile.profile.clone();
     //     let server_url = server_url.map(str::to_string);
@@ -201,14 +200,27 @@ impl NpProfilePy {
     #[new]
     #[pyo3(text_signature = "(private_key, orcid_id, name, introduction_nanopub_uri)")]
     fn new(
-        private_key: &str,
-        orcid_id: &str,
-        name: &str,
+        private_key: String,
+        orcid_id: Option<String>,
+        name: Option<String>,
         introduction_nanopub_uri: Option<String>,
     ) -> PyResult<Self> {
-        NpProfile::new(private_key, orcid_id, name, introduction_nanopub_uri)
-            .map(|profile| Self { profile })
-            .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting profile: {e}")))
+        let mut profile = ProfileBuilder::new(private_key);
+        if let Some(orcid_id) = orcid_id {
+            profile = profile.with_orcid(orcid_id);
+        };
+        if let Some(name) = name {
+            profile = profile.with_name(name);
+            // profile = profile.with_name(name);
+        };
+        if let Some(intro_np_uri) = introduction_nanopub_uri {
+            profile = profile.with_intro_nanopub(intro_np_uri);
+        };
+        Ok(Self {
+            profile: profile
+                .build()
+                .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting profile: {e}")))?,
+        })
     }
 }
 
