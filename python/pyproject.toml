@@ -4,7 +4,6 @@ build-backend = "maturin"
 
 [project]
 # Most of the metadata are in Cargo.toml and injected by maturin
-version = "0.0.0"
 name = "nanopub-sign"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -20,6 +19,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">=3.8"
+dynamic = ["version"]
 
 [project.urls]
 Changelog = "https://github.com/vemonet/nanopub-rs/blob/main/CHANGELOG.md"
