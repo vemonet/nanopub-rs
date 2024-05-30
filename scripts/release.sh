@@ -11,15 +11,8 @@ new_version=$1
 echo ""
 echo "  🏔️ Update version in Cargo.toml"
 echo ""
-files=(
-    "lib/Cargo.toml"
-    "cli/Cargo.toml"
-    "python/Cargo.toml"
-    "js/Cargo.toml"
-)
 sed -i "s/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"\$/version = \"$new_version\"/" "Cargo.toml"
 sed -i "s/nanopub = { version = \"[0-9]*\.[0-9]*\.[0-9]*\"/nanopub = { version = \"$new_version\"/" "Cargo.toml"
-echo "🔼  Updated version in Cargo.toml"
 
 git cliff -o CHANGELOG.md --tag $new_version
 git add Cargo.toml */Cargo.toml CHANGELOG.md

@@ -47,9 +47,10 @@ def test_check():
 
 def test_sign():
     np = Nanopub(rdf_str)
-    np = np.sign(profile=profile)
-    assert np.info()["trusty_hash"]
-    assert not np.info()["published"]
+    signed = np.sign(profile=profile)
+    assert not np.info()["trusty_hash"]
+    assert signed.info()["trusty_hash"]
+    assert not signed.info()["published"]
 
 def test_publish():
     np = Nanopub(rdf_str).publish(profile=profile, server_url=None)
