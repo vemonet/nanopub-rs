@@ -40,13 +40,19 @@ describe('Tests for the @nanopub/sign npm package', () => {
   test('publish nanopub', async () => {
     const profile = new NpProfile(privKey, orcid, "Your Name");
     const np = await new Nanopub(unsignedRdf).publish(profile);
-
-    // console.log("Published Nanopub:", np.info());
     expect(np.info().published).toBeDefined();
-    console.log({ profile, np });
-    console.log({ profile, nanopub: np.info() });
+    // console.log({ profile, np });
+    // console.log({ profile, nanopub: np.info() });
     // console.log({ profile, nanopub: nanopub.info(), signed: signed.info() });
     // expect(np.info().trusty_hash).toBe("RAE9traVUygMTJ-k8E1_pVNy3gtf7uUvtHJtPeU64WpA4");
+  });
+
+  test('publish nanopub default profile', async () => {
+    const profile = new NpProfile(privKey);
+    const np = await new Nanopub(unsignedRdf).publish(profile);
+    expect(np.info().published).toBeDefined();
+    // console.log({ profile, np });
+    // console.log({ profile, nanopub: np.info() });
   });
 
   test('fetch nanopub', async () => {
