@@ -2,7 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.3](https://github.com/vemonet/nanopub-rs/compare/v0.1.2..0.1.3) - 2024-03-31
+## [0.1.4](https://github.com/vemonet/nanopub-rs/compare/v0.1.3..0.1.4) - 2024-05-30
+
+### ⛰️ Features
+
+- [**breaking**] Update the `NpProfile` struct to make ORCID and name optional, and use the builder pattern to build a profile. Remove dependency on serde_yaml (YAML profile file parsed manually) - ([c3e30fa](https://github.com/vemonet/nanopub-rs/commit/c3e30fa250dfd3a9cdfe67dd71735a15ee6bf48a))
+
+### 🐛 Bug Fixes
+
+- Fix python build in workflow - ([90a6a83](https://github.com/vemonet/nanopub-rs/commit/90a6a836527c99607e22d9718d5f2f04669ac47a))
+
+### 📚 Documentation
+
+- Small improvements - ([6b0c599](https://github.com/vemonet/nanopub-rs/commit/6b0c599f1f9d303266c37c722e24abcbcef1ff8b))
+
+### 🛠️ Miscellaneous Tasks
+
+- Improve dependency setup - ([09a5e08](https://github.com/vemonet/nanopub-rs/commit/09a5e086591be4b064c977b34b39c8701bc6b940))
+
+### 🧪 Testing
+
+- Improve JS tests to test profile with default args - ([44bc7e6](https://github.com/vemonet/nanopub-rs/commit/44bc7e61d97f61658652a33fe55d6ad8bb81f0b8))
+
+## [0.1.3](https://github.com/vemonet/nanopub-rs/compare/v0.1.2..v0.1.3) - 2024-03-31
 
 ### ⚙️ Continuous Integration
 
@@ -29,6 +51,7 @@ All notable changes to this project will be documented in this file.
 - Improve the list of prefixes used when building thenanopub, using https://schema.org/ instead of http://schema.org/ - ([b534f7f](https://github.com/vemonet/nanopub-rs/commit/b534f7f038fa20f8882684d965b2f9bad8204014))
 - Upgrade reqwest to 0.12 - ([a9f3eaa](https://github.com/vemonet/nanopub-rs/commit/a9f3eaa0ea36ba0a9022011b2e516caec99f6299))
 - Use rust-toolchain.toml for components - ([2a380c8](https://github.com/vemonet/nanopub-rs/commit/2a380c85085728d8a53190c6ee8866fd03d38703))
+- Bump version to 0.1.3 - ([0cc3a18](https://github.com/vemonet/nanopub-rs/commit/0cc3a18e272fed9c4438c7b9b656f9a421b10336))
 
 ### 🧪 Testing
 
@@ -68,7 +91,7 @@ All notable changes to this project will be documented in this file.
 
 - Bump version to 0.1.1 - ([b2ff457](https://github.com/vemonet/nanopub-rs/commit/b2ff4579880f524e08f12cf3bd3af94ed391c45e))
 
-## [0.1.0](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..v0.1.0) - 2024-03-04
+## [0.1.0](https://github.com/vemonet/nanopub-rs/compare/v0.0.18..v0.1.0) - 2024-03-04
 
 ### ⚙️ Continuous Integration
 
@@ -100,6 +123,8 @@ All notable changes to this project will be documented in this file.
 ### 🧪 Testing
 
 - Add tests for python and JS with pytest and jest. Update some gh actions versions - ([fdca2f7](https://github.com/vemonet/nanopub-rs/commit/fdca2f73d834b7b42fb57255c2a1a8805a515ef2))
+
+## [0.0.18](https://github.com/vemonet/nanopub-rs/compare/v0.0.17..v0.0.18) - 2024-02-01
 
 ## [0.0.17](https://github.com/vemonet/nanopub-rs/compare/v0.0.16..v0.0.17) - 2024-01-30
 
