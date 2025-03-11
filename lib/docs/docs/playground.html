@@ -43,12 +43,19 @@
 
 
       <!-- Private key input -->
-      <p class="text-sm text-center">
+      <p class="text-sm">
         You will need to provide a
-        <a href="https://raw.github.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
+        <a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)" target="_blank" rel="noopener noreferrer">
           RSA private key file
         </a>
-        that will be used to sign the Nanopub. Save it in your password manager to reuse it easily 💡
+        that will be used to sign the Nanopub (you can use
+        <a href="https://raw.github.com/vemonet/nanopub-rs/main/lib/tests/resources/id_rsa" target="_blank" rel="noopener noreferrer">
+          this one
+        </a>
+        for testing).
+      </p>
+      <p class="text-sm">
+        💡 Save your private key in your password manager to reuse it easily
       </p>
       <input type="password" id="private-key" placeholder="Enter Private Key" class="text-black text-center rounded-md"></input>
 
@@ -58,10 +65,8 @@
           If you don't have a private key yet, you can generate one that will be linked to your ORCID by a Nanopublication published to the network.
         </p>
         <div class="flex justify-center space-x-2">
-          <div id="orcidWidget" class="inline-flex p-2 space-x-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900 cursor-pointer">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/ORCID_iD.svg" width="20" height="20" alt="ORCID" />
-          </div>
-          <button id="publish-intro-btn" class="hidden p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900">
+          <div id="orcidWidget"></div>
+          <button id="publish-intro-btn" class="hidden p-2 rounded-md text-slate-400 bg-slate-700 hover:bg-slate-900" title="Clicking here will generate a private key and publish an introduction Nanopub to the network to link it to your ORCID">
             <i class="fas fa-key mr-2"></i> Generate key and publish introduction
           </button>
         </div>
@@ -81,23 +86,23 @@
 
       <!-- Btn to submit the nanopub -->
       <div class="flex space-x-4">
-        <button id="sign-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
+        <button id="sign-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600" title="Just sign the Nanopub locally using the private key, without publishing it">
           <i class="fas fa-pen-nib mr-2"></i> Sign Nanopublication
         </button>
-        <button id="publish-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600">
+        <button id="publish-btn" class="p-2 rounded-md text-slate-400 bg-slate-800 hover:bg-slate-600" title="Sign and publish the Nanopub to the network (test or production)">
           <i class="fas fa-upload mr-2"></i> Publish Nanopublication
         </button>
         <!-- Toggle to publish to test or prod server -->
         <div class="flex items-center justify-center">
-          <span class="mr-2 text-sm">Test Server</span>
-          <label for="toggleProd" class="flex items-center cursor-pointer">
+          <span class="mr-2 text-sm" title="https://np.test.knowledgepixels.com">Test Server</span>
+            <label for="toggleProd" class="flex items-center cursor-pointer" title="Test server: https://np.test.knowledgepixels.com&#10;List of production servers: https://monitor.np.trustyuri.net">
             <div class="relative">
               <input type="checkbox" id="toggleProd" class="sr-only" />
               <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
               <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
             </div>
-          </label>
-          <span class="ml-2 text-sm">Production Network</span>
+            </label>
+          <span class="ml-2 text-sm" title="https://monitor.np.trustyuri.net">Production Network</span>
         </div>
       </div>
 
@@ -117,7 +122,6 @@
 
       // TODO: get ORCID based on the public key registered in the nanopub network?
       let orcidToken = null;
-      let orcid = "";
       let privKey = null;
 
       async function main() {
@@ -183,7 +187,7 @@
           const rdfStr = ieditor.getValue();
           const privKey = document.getElementById('private-key').value
           try {
-            const profile = new NpProfile(privKey, orcid, "Your Name", "");
+            const profile = new NpProfile(privKey);
             if (!publish) {
               try {
                 const signed = new Nanopub(rdfStr).sign(profile)
@@ -303,8 +307,8 @@
           // "mode": "sandbox",
           // "returnUrl": "http://localhost:3000/playground.html",
           "mode": "live",
-          "clientId": "APP-TEANCMSUOPYZOGJ3",
           "returnUrl": "https://vemonet.github.io/nanopub-rs/playground.html",
+          "clientId": "APP-TEANCMSUOPYZOGJ3",
           "onSuccess": onLogin,
           "onFail": onError,
           "buttonText": "Authenticate with ORCID",

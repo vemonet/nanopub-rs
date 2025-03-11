@@ -140,7 +140,7 @@ Start docs website locally with mkdocs:
 Start a web server at [localhost:3000/playground.html](http://localhost:3000/playground.html)
 
 ```bash
-python -m http.server 3000 --directory ./lib/docs
+python -m http.server 3000 --directory ./lib/docs/docs
 ```
 
 ## ️⛓️ Check supply chain
