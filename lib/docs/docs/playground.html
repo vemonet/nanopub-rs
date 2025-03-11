@@ -295,7 +295,7 @@
         function onLogin(idToken) {
           idToken.orcid = idToken.iss + '/' + idToken.sub
           idToken.fullName = idToken.given_name + " " + idToken.family_name
-          orcid = idToken.orcid;
+          // orcid = idToken.orcid;
           orcidToken = idToken
           introBtn.classList.remove("hidden");
           console.log("Logged in", idToken);
