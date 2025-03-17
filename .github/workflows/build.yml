@@ -82,6 +82,7 @@ jobs:
         os: [linux, macos, windows]
         target: [x86_64, aarch64]
         manylinux: [auto]
+        # interpreter: ["3.8 3.9 3.10 3.11 3.12 3.13"]
         include:
           # Using pypy when possible for performance
           # manylinux for various platforms, plus x86_64 pypy
@@ -257,7 +258,7 @@ jobs:
           OUTPUT: CHANGES.md
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.2.1
         with:
           body_path: CHANGES.md
         if: startsWith(github.ref, 'refs/tags/')

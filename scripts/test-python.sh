@@ -10,20 +10,10 @@ for arg in "$@"; do
     fi
 done
 
-if [ ! -d ".venv" ]; then
-    echo ".venv virtual environment does not exist. Creating it"
-    python -m venv .venv
-fi
-
-echo "Activating virtual environment"
-source .venv/bin/activate
-
-python -m pip install -q -r python/requirements.txt
-
 cd python
 
 if [ "$SKIP_BUILD" = false ]; then
-    maturin develop
+    uv run maturin develop
 fi
 
-python -m pytest -s
+uv run pytest -s

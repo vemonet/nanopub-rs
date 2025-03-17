@@ -3,11 +3,10 @@ use crate::error::NpError;
 /// Publish nanopub RDF string to a given nanopub server URL
 pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
     let server = server.to_string();
-    let np = np.to_string();
     let client = reqwest::Client::new();
     let res = client
         .post(&server)
-        .body(np)
+        .body(np.to_string())
         .header(reqwest::header::CONTENT_TYPE, "application/trig")
         // .header(reqwest::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         .send()

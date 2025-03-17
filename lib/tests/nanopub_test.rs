@@ -39,6 +39,7 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&profile), Some(""))
+        // .publish(Some(&profile), Some(get_np_server(false))) // in case we need to test directly on prod servers
         .await?;
     assert!(np.info.published.is_some());
     Ok(())
@@ -82,7 +83,7 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
             "https://w3id.org/np/RAqz9iOB9hMkNmH9m6e2FvbZRrLgb9aMBfKSklMVh9LrM".to_string(),
         )
         .build()?;
-    println!("{}", profile); // cov
+    println!("{}", profile); // to cover fmt in code cov
     let _pubkey = profile.get_public_key(); // cov
     let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
     assert!(np.info.published.is_none());

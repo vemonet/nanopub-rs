@@ -11,7 +11,7 @@ for arg in "$@"; do
 done
 
 cd js
-npm install
+npm i
 
 if [ "$SKIP_BUILD" = false ]; then
     npm run test -- --silent=false

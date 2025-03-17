@@ -1,5 +1,4 @@
 #![doc = include_str!("../docs/docs/index.md")]
-#![doc = include_str!("../docs/docs/rust.md")]
 // # extern crate sophia;
 // #![warn(missing_docs)]
 // #![doc(html_favicon_url = "https://raw.github.com/MaastrichtU-IDS/knowledge-collaboratory/main/frontend/app/assets/icon.png")]
@@ -7,6 +6,7 @@
 // #![doc(issue_tracker_base_url = "https://github.com/vemonet/nanopub-rs/issues/")]
 // #![ no_implicit_prelude ]
 
+// #![doc = include_str!("../docs/docs/rust.md")]
 // https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html
 // Can't publish because outside of pkg: #![doc = include_str!("../../docs/introduction.md")]
 

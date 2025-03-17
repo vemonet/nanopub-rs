@@ -19,9 +19,9 @@ all-features = true
 
 [dependencies]
 base64 = "0.22"
-rsa = { version = "0.9.6", default-features = false, features = ["pem", "sha2"] }
+rsa = { version = "0.9.5", default-features = false, features = ["pem", "sha2"] }
 openssl-probe = "0.1"
-sophia = { version = "0.8.0", features = ["jsonld"] }
+sophia = { version = "0.9", features = ["jsonld"] }
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
 chrono = "0.4.35"
@@ -36,7 +36,7 @@ reqwest = { version = "0.12", default-features = false }
 # sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
 
 [dev-dependencies]
-wasm-pack = "0.12.1"
+wasm-pack = "0.13"
 tokio = { version = "1.36", features = ["full"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

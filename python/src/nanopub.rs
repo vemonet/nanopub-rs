@@ -1,5 +1,5 @@
 use nanopub::{get_np_server as get_server, profile::gen_keys, Nanopub, NpProfile, ProfileBuilder};
-use pyo3::{exceptions::PyException, prelude::*};
+use pyo3::{exceptions::PyException, prelude::*, pymethods, types::PyType};
 use pythonize::pythonize;
 // use pyo3::types::IntoPyDict;
 // use pyo3_asyncio::generic::future_into_py;
@@ -14,7 +14,7 @@ pub struct NanopubPy {
 #[pymethods]
 impl NanopubPy {
     #[new]
-    #[pyo3(text_signature = "(rdf)")]
+    #[pyo3(signature = (rdf))]
     fn new(rdf: &str) -> PyResult<Self> {
         Nanopub::new(rdf)
             .map(|np| Self { np })
@@ -35,7 +35,7 @@ impl NanopubPy {
 
     // NOTE: should we make check a class method (instead of static)?
     // But error with IRI in sophia dataset when cloning
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3()]
     fn check(&self) -> PyResult<Self> {
         self.np
             .clone()
@@ -44,7 +44,7 @@ impl NanopubPy {
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error checking: {e}")))
     }
 
-    #[pyo3(text_signature = "($self, profile)")]
+    #[pyo3(signature = (profile))]
     fn sign(&self, profile: &NpProfilePy) -> PyResult<Self> {
         self.np
             .clone()
@@ -53,7 +53,7 @@ impl NanopubPy {
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error signing: {e}")))
     }
 
-    #[pyo3(text_signature = "($self, profile, server_url)")]
+    #[pyo3(signature = (profile, server_url=None))]
     fn publish(&self, profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
         let server_url = server_url.map(str::to_string);
         // Use a tokio runtime to wait on the async operation
@@ -70,8 +70,12 @@ impl NanopubPy {
     }
 
     #[staticmethod]
-    #[pyo3(text_signature = "(profile, server_url=None)")]
-    fn publish_intro(profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
+    #[pyo3(signature = (_cls, profile, server_url=None))]
+    fn publish_intro(
+        _cls: &Bound<'_, PyType>,
+        profile: &NpProfilePy,
+        server_url: Option<&str>,
+    ) -> PyResult<Self> {
         let server_url = server_url.map(str::to_string);
         // Use a tokio runtime to wait on the async operation
         let rt = Runtime::new()
@@ -101,9 +105,9 @@ impl NanopubPy {
         result.map(|np| Self { np })
     }
 
-    #[staticmethod]
-    #[pyo3(text_signature = "(uri)")]
-    fn fetch(uri: &str) -> PyResult<Self> {
+    #[classmethod]
+    #[pyo3(signature = (uri))]
+    fn fetch(_cls: &Bound<'_, PyType>, uri: &str) -> PyResult<Self> {
         let rt = Runtime::new()
             .map_err(|e| PyErr::new::<PyException, _>(format!("Runtime failed: {e}")))?;
         let result = rt.block_on(async move {
@@ -114,7 +118,7 @@ impl NanopubPy {
         result.map(|np| Self { np })
     }
 
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3()]
     fn rdf(&self, _py: Python<'_>) -> PyResult<String> {
         // py.allow_threads(|| Ok(self.np.rdf()))
         self.np
@@ -122,11 +126,13 @@ impl NanopubPy {
             .map_err(|e| PyErr::new::<PyException, _>(format!("Error getting RDF: {e}")))
     }
 
-    #[pyo3(text_signature = "($self)")]
+    #[pyo3()]
     fn info(&self, py: Python<'_>) -> PyResult<PyObject> {
-        pythonize(py, &self.np.info).map_err(|e| {
-            PyErr::new::<PyException, _>(format!("Error converting struct info to dict: {e}"))
-        })
+        pythonize(py, &self.np.info)
+            .map(|bound| bound.into())
+            .map_err(|e| {
+                PyErr::new::<PyException, _>(format!("Error converting struct info to dict: {e}"))
+            })
     }
 
     // TODO: use pyo3-asyncio https://pyo3.rs/v0.21.1/ecosystem/async-await
@@ -198,7 +204,7 @@ pub struct NpProfilePy {
 #[pymethods]
 impl NpProfilePy {
     #[new]
-    #[pyo3(text_signature = "(private_key, orcid_id, name, introduction_nanopub_uri)")]
+    #[pyo3(signature = (private_key, orcid_id, name, introduction_nanopub_uri))]
     fn new(
         private_key: String,
         orcid_id: Option<String>,
@@ -236,7 +242,7 @@ pub struct KeyPair {
 #[pymethods]
 impl KeyPair {
     #[new]
-    #[pyo3(text_signature = "()")]
+    #[pyo3(signature = ())]
     fn new() -> PyResult<Self> {
         gen_keys()
             .map(|(private, public)| Self { private, public })
@@ -246,7 +252,7 @@ impl KeyPair {
 
 /// Return a random server
 #[pyfunction]
-#[pyo3(text_signature = "(random)")]
+#[pyo3(signature = (random))]
 pub fn get_np_server(random: Option<bool>) -> PyResult<String> {
     Ok(get_server(random.unwrap_or(true)).to_string())
 }

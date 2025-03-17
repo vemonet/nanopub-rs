@@ -22,7 +22,11 @@ cd nanopub-rs
 
 ## ⚙️ Install dependencies
 
-[Rust](https://www.rust-lang.org/tools/install), [Python](https://www.python.org/downloads/), and [NodeJS](https://nodejs.org/en/download) are required for development.
+Required for development:
+
+- [🦀 Rust](https://www.rust-lang.org/tools/install)
+- [🐍 `uv`](https://docs.astral.sh/uv/getting-started/installation/) to easily handle Python scripts and virtual environments
+- [🟨 NodeJS](https://nodejs.org/en/download)
 
 Install development dependencies:
 
@@ -77,9 +81,8 @@ Build the pip package and run `pytest` tests:
 Or just run the tests:
 
 ```bash
-source .venv/bin/activate
 cd python
-pytest
+uv run pytest
 ```
 
 ### 🟨 Test JavaScript package

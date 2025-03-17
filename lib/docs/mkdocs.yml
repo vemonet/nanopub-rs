@@ -12,17 +12,14 @@ copyright: Copyright &copy; 2023 Vincent Emonet
 nav:
   - Docs:
     - Introduction: index.md
+    - Packages: packages.md
     - Command Line Interface: cli.md
-    - Architecture details: architecture.md
-    - Contributing: contributing.md
-  - Rust:
-    - Use from Rust: rust.md
-  - JavaScript:
-    - Use from JavaScript: javascript.md
-    - Example bare HTML: javascript-example-html.md
-    - Example JS framework: javascript-example-framework.md
-  - Python:
-    - Use from Python: python.md
+    - JavaScript:
+      - Example bare HTML: javascript-example-html.md
+      - Example JS framework: javascript-example-framework.md
+    - Development:
+      - Architecture details: architecture.md
+      - Contributing: contributing.md
   - Playground: playground.html" target="_blank
   # - Issues: https://github.com/vemonet/nanopub-rs/issues" target="_blank
 
@@ -38,15 +35,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: lime
-      accent: deep orange
+      primary: blue
+      accent: white
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: lime
-      accent: deep orange
+      primary: blue
+      accent: white
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -56,9 +53,13 @@ theme:
     - navigation.tabs
     - navigation.top
     - navigation.tracking
+    - navigation.footer
     - content.code.copy
     - content.code.annotate
     - content.code.select
+    - content.tabs.link # Group tabs switch
+    - content.action.edit
+    - content.action.view
     - search.highlight
     - search.share
     - search.suggest
@@ -67,7 +68,6 @@ theme:
     # - navigation.tabs.sticky
     # - navigation.expand
     # - navigation.instant
-    # - content.tabs.link
 
 plugins:
 - search
@@ -91,6 +91,9 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+      # slugify: !!python/object/apply:pymdownx.slugs.slugify
+      #   kwds:
+      #     case: lower
   - pymdownx.details
   - pymdownx.extra
   - abbr

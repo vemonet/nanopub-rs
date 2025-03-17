@@ -1,6 +1,6 @@
 # 🚀 Example in bare HTML files
 
-You can easily import the NPM package from a CDN, and sign a Nanopublication from a simple `index.html` file. There is no need to install the `npm` package in this case, but you will need to initialize the WebAssembly binary when using it on the client (for JS running in the browser):
+You can import the NPM package from a CDN, and sign a Nanopublication from a simple `index.html` file. There is no need to install the `npm` package in this case, but you will need to initialize the WebAssembly binary when using it on the client (for JS running in the browser):
 
 ```html title="index.html"
 <!DOCTYPE html>
@@ -13,7 +13,10 @@ You can easily import the NPM package from a CDN, and sign a Nanopublication fro
     <pre><code id="rdf-text"></code></pre>
 
     <script type="module">
+      // Import from a CDN
       import init, { Nanopub, NpProfile } from "https://unpkg.com/@nanopub/sign";
+      // We recommend to use a compiler like vite:
+      // import init, { Nanopub, NpProfile } from "@nanopub/sign";
 
       // Change the RDF and private key as you wish
       const rdfStr = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .

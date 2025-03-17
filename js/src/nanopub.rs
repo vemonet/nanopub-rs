@@ -48,6 +48,14 @@ impl Nanopub {
             .sign(&profile.profile)
             .map(|np| Self { np })
             .map_err(|e| JsValue::from_str(&e.to_string()))
+        // Alternative:
+        // match self.np.sign(&profile.profile) {
+        //     Ok(np) => {
+        //         self.np = np;
+        //         Ok(self)
+        //     }
+        //     Err(e) => Err(JsValue::from_str(&e.to_string()))
+        // }
     }
 
     // NOTE: optional args docs https://docs.rs/wasm-bindgen-derive/latest/wasm_bindgen_derive/#optional-arguments

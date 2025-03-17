@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: 3.12
       - run: rustup update
@@ -69,7 +69,7 @@ jobs:
         run: cargo tarpaulin -p nanopub --out xml --exclude-files lib/src/error.rs --verbose --timeout 120
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           # fail_ci_if_error: true
@@ -89,23 +89,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
 
-      - name: Install dependencies
-        run: pip install -r lib/docs/requirements.txt
+      - name: Set up Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: 3.12
 
       - name: Deploy mkdocs on GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mkdocs build -f lib/docs/mkdocs.yml -d dist
+        run: |
+          cd lib/docs
+          uv run mkdocs build -d dist
         # mkdocs gh-deploy dont support new pages
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -3,7 +3,7 @@ requires = ["maturin~=1.0"]
 build-backend = "maturin"
 
 [project]
-# Most of the metadata are in Cargo.toml and injected by maturin
+# NOTE: Most of the metadata are in Cargo.toml and injected by maturin
 name = "nanopub-sign"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Rust",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8, <3.13"
 dynamic = ["version"]
 
 [project.urls]
@@ -30,6 +30,16 @@ Tracker = "https://github.com/vemonet/nanopub-rs/issues"
 
 [tool.maturin]
 features = ["pyo3/generate-import-lib"] # needed for Windows aarch64
+
+[dependency-groups]
+dev = [
+    "maturin",
+    # Linux specific dependency:
+    # "maturin[patchelf]",
+    "pytest >=8.3.4",
+    "mktestdocs",
+    "pre-commit",
+]
 
 [tool.ruff]
 line-length = 120
@@ -50,7 +60,6 @@ select = [
     "RUF",
     "SIM",
     "T10",
-    "TCH",
     "TID",
     "UP",
     "W",

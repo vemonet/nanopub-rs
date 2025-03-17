@@ -20,9 +20,9 @@ Whether you're a developer looking to integrate nanopub functionalities into you
 
 This library is packaged for easy use across various interfaces and languages:
 
-- [🦀 **Rust developers**](rust.md): available as a Rust crate `nanopub`.
-- [🐍 **Python programmers**](python.md): available as a Python pip package `nanopub-sign`.
-- [🌐 **Web developers**](javascript.md): available as a NPM package `@nanopub/sign`, compiled to [WebAssembly](https://webassembly.org/), for browser integrations with JavaScript, or NodeJS.
+- [🦀 **Rust developers**](packages.md): available as a Rust crate `nanopub`.
+- [🐍 **Python programmers**](packages.md): available as a Python pip package `nanopub-sign`.
+- [🌐 **Web developers**](packages.md): available as a NPM package `@nanopub/sign`, compiled to [WebAssembly](https://webassembly.org/), for browser integrations with JavaScript, or NodeJS.
 - [⌨️  **Terminal enthusiasts**](cli.md): binary with a Command Line Interface (CLI) for straightforward terminal operations.
 
 

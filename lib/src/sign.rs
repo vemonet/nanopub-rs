@@ -113,9 +113,9 @@ pub fn replace_bnodes(
             });
             let object = format!("{}_{}", base_ns, bnode_map[&bnode_id]);
             new_dataset.insert(
-                &Iri::new_unchecked(subject),
+                Iri::new_unchecked(subject),
                 quad.p(),
-                &Iri::new_unchecked(object),
+                Iri::new_unchecked(object),
                 graph,
             )?;
         } else if quad.o().is_iri() {
@@ -132,16 +132,16 @@ pub fn replace_bnodes(
                 object_iri.truncate(object_iri.len() - matche.len()); // Remove the original ending
                 object_iri.push_str(&new_ending);
                 new_dataset.insert(
-                    &Iri::new_unchecked(subject),
+                    Iri::new_unchecked(subject),
                     quad.p(),
-                    &Iri::new_unchecked(object_iri),
+                    Iri::new_unchecked(object_iri),
                     graph,
                 )?;
             } else {
-                new_dataset.insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
+                new_dataset.insert(Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
             }
         } else {
-            new_dataset.insert(&Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
+            new_dataset.insert(Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
         };
     }
     Ok(new_dataset)
@@ -182,14 +182,14 @@ pub fn replace_ns_in_quads(
                 new.insert(
                     &subject,
                     quad.p(),
-                    &Iri::new_unchecked(new_uri.to_string()),
+                    Iri::new_unchecked(new_uri.to_string()),
                     graph,
                 )?;
             } else {
                 new.insert(
                     &subject,
                     quad.p(),
-                    &Iri::new_unchecked(o.replace(old_ns, new_ns)),
+                    Iri::new_unchecked(o.replace(old_ns, new_ns)),
                     graph,
                 )?;
             }

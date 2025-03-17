@@ -37,6 +37,24 @@ const unsignedRdf = `@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
 describe('Tests for the @nanopub/sign npm package', () => {
   // NOTE: `await init()` only needed in browser environment
 
+  test('sign nanopub', async () => {
+    const profile = new NpProfile(privKey, orcid, "Your Name");
+    const np = new Nanopub(unsignedRdf).sign(profile);
+    // console.log({ profile, np });
+    // console.log({ profile, nanopub: np.info() });
+    // console.log({ profile, nanopub: nanopub.info(), signed: signed.info() });
+    expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
+    expect(np.info().trusty_hash).toBe("RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o");
+  });
+
+  test('sign nanopub in 2 steps', async () => {
+    const profile = new NpProfile(privKey, orcid, "Your Name");
+    let np = new Nanopub(unsignedRdf);
+    np = np.sign(profile);
+    // np.sign(profile);
+    expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
+  });
+
   test('publish nanopub', async () => {
     const profile = new NpProfile(privKey, orcid, "Your Name");
     const np = await new Nanopub(unsignedRdf).publish(profile);
