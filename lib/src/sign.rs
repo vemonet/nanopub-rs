@@ -59,12 +59,12 @@ pub fn replace_bnodes(
             re_underscore_uri.captures(&quad.s().iri().ok_or(TermError())?.as_ref())
         {
             let mut subject_iri = quad.s().iri().ok_or(TermError())?.to_string();
-            let matche = caps
+            let matching = caps
                 .get(1)
                 .ok_or(NpError("Error with regex".to_string()))?
                 .as_str();
-            let new_ending = matche.replacen('_', "__", 1);
-            subject_iri.truncate(subject_iri.len() - matche.len()); // Remove the original ending
+            let new_ending = matching.replacen('_', "__", 1);
+            subject_iri.truncate(subject_iri.len() - matching.len()); // Remove the original ending
             subject_iri.push_str(&new_ending);
             subject_iri
         } else {
@@ -85,12 +85,12 @@ pub fn replace_bnodes(
                 .iri()
                 .ok_or(TermError())?
                 .to_string();
-            let matche = caps
+            let matching = caps
                 .get(1)
                 .ok_or(NpError("Error with regex".to_string()))?
                 .as_str();
-            let new_ending = matche.replacen('_', "__", 1);
-            graph_iri.truncate(graph_iri.len() - matche.len()); // Remove the original ending
+            let new_ending = matching.replacen('_', "__", 1);
+            graph_iri.truncate(graph_iri.len() - matching.len()); // Remove the original ending
             graph_iri.push_str(&new_ending);
             Some(Iri::new_unchecked(graph_iri))
         } else {
@@ -124,12 +124,12 @@ pub fn replace_bnodes(
                 re_underscore_uri.captures(&quad.o().iri().ok_or(TermError())?.as_ref())
             {
                 let mut object_iri = quad.o().iri().ok_or(TermError())?.to_string();
-                let matche = caps
+                let matching = caps
                     .get(1)
                     .ok_or(NpError("Error with regex".to_string()))?
                     .as_str();
-                let new_ending = matche.replacen('_', "__", 1);
-                object_iri.truncate(object_iri.len() - matche.len()); // Remove the original ending
+                let new_ending = matching.replacen('_', "__", 1);
+                object_iri.truncate(object_iri.len() - matching.len()); // Remove the original ending
                 object_iri.push_str(&new_ending);
                 new_dataset.insert(
                     Iri::new_unchecked(subject),

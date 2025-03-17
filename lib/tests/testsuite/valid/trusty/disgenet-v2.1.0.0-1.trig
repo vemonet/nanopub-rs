@@ -22,19 +22,19 @@ dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_head {
                 np:hasProvenance dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_provenance ;
                 np:hasPublicationInfo dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_publicationInfo ;
                 a np:Nanopublication .
-        
+
         dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_assertion a np:Assertion .
-        
+
         dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_provenance a np:Provenance .
-        
+
         dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_publicationInfo a np:PublicationInfo .
 }
 
 dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_assertion {
         miriam-gene:4885 a ncit:C16612 .
-        
+
         lld:C1883552 a ncit:C7057 .
-        
+
         dgn-gda:DGN011a38aec86b971a8d96339204a6b393 sio:SIO_000628 miriam-gene:4885 , lld:C1883552 ;
                 a sio:SIO_001121 .
 }
@@ -45,9 +45,9 @@ dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_provenance {
                 sio:SIO_000772 miriam-pubmed:17545557 ;
                 prov:wasDerivedFrom dgn-void:befree-20140225 ;
                 prov:wasGeneratedBy eco:ECO_0000203 .
-        
+
         dgn-void:befree-20140225 pav:importedOn "2014-02-25"^^xsd:date .
-        
+
         dgn-void:source_evidence_literature a eco:ECO_0000212 ;
                 rdfs:comment "Gene-disease associations inferred from text-mining the literature."@en ;
                 rdfs:label "DisGeNET evidence - LITERATURE"@en .
@@ -62,6 +62,6 @@ dgn-np:NP940023.RAOc-0FFscmxA46PLX7nZMeDgLauxcJjZSzd2W5Q2IJcI130_publicationInfo
                 pav:authoredBy <http://orcid.org/0000-0001-5999-6269> , <http://orcid.org/0000-0002-7534-7661> , <http://orcid.org/0000-0002-9383-528X> , <http://orcid.org/0000-0003-0169-8159> , <http://orcid.org/0000-0003-1244-7654> ;
                 pav:createdBy <http://orcid.org/0000-0003-0169-8159> ;
                 pav:version "v2.1.0.0"^^xsd:string .
-        
+
         dgn-void:disgenetrdf pav:version "v2.1.0"^^xsd:string .
 }

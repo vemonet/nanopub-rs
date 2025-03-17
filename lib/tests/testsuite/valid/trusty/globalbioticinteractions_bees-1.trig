@@ -17,16 +17,16 @@ sub:Head {
 sub:Assertion {
   sub:Interaction obo:RO_0000057 sub:Organism_1, sub:Organism_2;
     a obo:GO_0044419 .
-  
+
   sub:Organism_1 obo:RO_0002622 sub:Organism_2;
     rdfs:label "Lasioglossum mosselinum" .
-  
+
   sub:Organism_2 rdfs:label "Compositae" .
 }
 
 sub:Provenance {
   sub:Assertion prov:wasDerivedFrom sub:Study .
-  
+
   sub:Study dcterms:bibliographicCitation "Pauly, A., J. Gibbs and M. Kuhlmann. 2012. Capalictus, a new subgenus of Lasioglossum Curtis, 1833 from South Africa, with description of three new species (Hymenoptera, Apoidea, Halictidae). European Journal of Taxonomy 28: 1-28" .
 }
 
@@ -34,6 +34,6 @@ sub:Pubinfo {
   this: dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
     pav:createdBy <https://doi.org/10.5281/zenodo.1212599>;
     prov:wasDerivedFrom <https://doi.org/10.5281/zenodo.229519> .
-  
+
   <https://doi.org/10.5281/zenodo.229519> dcterms:bibliographicCitation "Eardley C, Coetzer W. 2011. Catalogue of Afrotropical Bees. http://doi.org/10.15468/u9ezbh" .
 }

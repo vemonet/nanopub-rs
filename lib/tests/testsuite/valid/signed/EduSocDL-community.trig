@@ -35,7 +35,7 @@ sub:pubinfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCK4NfUi+AdFS8l/WeyiKQmCyFyjrjfGnpHvUvdGUlkg2+FkOY3+31U4a4SdeLUdhf4hnxL8kQOjD8BuggdBkuwUoMA0RXPv+RblmlF5INhXDJvxTqeUMLj1EVuOtotpl//NVFZ3BE0zeuscT35szmX4L+2m14Z/PqreP2lMzbj3wIDAQAB";
     npx:hasSignature "bjcX/F0FWKJldeC1/8UuLDiiqw+zumSJTnQ3Pc2QZK1f6hsY9qteB4y7fGOoh2sD558pE6JFtjozp3UsuFkvzZB7KUCTu2HRu5aek3wrQtUpYPYEiW2BJNyqlkVwF7Hkm8Cw5GfSUi1cIaE817KaOWS9DiuzJ9xnPqLYNm/NZwE=";
     npx:hasSignatureTarget this: .
-  
+
   this: dct:created "2020-10-05T16:20:03.409+02:00"^^xsd:dateTime;
     dct:creator orcid:0000-0003-3517-8071;
     npx:introduces sub:EduSocDL;
@@ -43,5 +43,3 @@ sub:pubinfo {
     nt:wasCreatedFromPubinfoTemplate <http://purl.org/np/RAA2MfqdBCzmz9yVWjKLXNbyfBNcwsMmOqcNUxkk1maIM>;
     nt:wasCreatedFromTemplate <http://purl.org/np/RALjGBdI-nfsJeGy2Me7G6ekE0jKeoM28TUDb36S8pCEg> .
 }
-
-

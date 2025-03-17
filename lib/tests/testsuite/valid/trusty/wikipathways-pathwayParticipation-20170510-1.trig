@@ -22,13 +22,13 @@ sub:assertion {
         <http://identifiers.org/reactome/R-HSA-74294> dcterms:isPartOf <http://identifiers.org/wikipathways/WP1978> ;
                 wp:organismName "Homo sapiens" ;
                 a wp:Complex .
-        
+
         <http://identifiers.org/wikipathways/WP1978> wp:pathwayOntologyTag obo:PW_0000003 , obo:PW_0001162 .
 }
 
 sub:provenance {
         <http://identifiers.org/wikipathways/WP1978_r88062> dc:title "Opioid Signalling"@en .
-        
+
         sub:assertion has-source: pmid:7526403 , <http://identifiers.org/wikipathways/WP1978_r88062> .
 }
 
@@ -36,7 +36,7 @@ sub:publicationInfo {
         sub:activity a prov:Activity ;
                 prov:atLocation wd:Q1137652 ;
                 prov:used <https://github.com/wikipathways/nanopublications> .
-        
+
         this: dcterms:created "2017-05-10T00:18:36.600+02:00"^^xsd:dateTime ;
                 dcterms:rights <https://creativecommons.org/licenses/by/3.0/> ;
                 prov:wasDerivedFrom <http://identifiers.org/wikipathways/WP1978_r88062> ;

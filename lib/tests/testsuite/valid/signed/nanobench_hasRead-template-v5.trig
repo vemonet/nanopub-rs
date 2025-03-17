@@ -23,30 +23,30 @@ sub:assertion {
   sub:assertion a nt:AssertionTemplate;
     rdfs:label "Announcing a paper that I have read";
     nt:hasStatement sub:st1, sub:st2 .
-  
+
   sub:comment a nt:LiteralPlaceholder;
     rdfs:label "comment text" .
-  
+
   sub:paper a nt:UriPlaceholder;
     rdfs:label "DOI for the paper starting with '10.'";
     nt:hasPrefix "https://doi.org/";
     nt:hasPrefixLabel "the paper with DOI";
     nt:hasRegex "10.(\\d)+/(\\S)+" .
-  
+
   sub:st1 rdf:object sub:paper;
     rdf:predicate pc:hasRead;
     rdf:subject nt:CREATOR;
     a rdf:Statement;
     nt:statementOrder 1 .
-  
+
   sub:st2 rdf:object sub:comment;
     rdf:predicate rdfs:comment;
     rdf:subject sub:paper;
     a nt:OptionalStatement;
     nt:statementOrder 2 .
-  
+
   pc:hasRead rdfs:label "have read the paper" .
-  
+
   rdfs:comment rdfs:label "has my comment" .
 }
 
@@ -59,7 +59,7 @@ sub:pubinfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwUtewGCpT5vIfXYE1bmf/Uqu1ojqnWdYxv+ySO80ul8Gu7m8KoyPAwuvaPj0lvPtHrg000qMmkxzKhYknEjq8v7EerxZNYp5B3/3+5ZpuWOYAs78UnQVjbHSmDdmryr4D4VvvNIiUmd0yxci47dTFUj4DvfHnGd6hVe5+goqdcwIDAQAB";
     npx:hasSignature "GJs6X2F9V9bRnL+DGujqWDUwlNVFM2KAGJQGjw2bUjaIn/irTQRGwGmaBJ8YEzIOQxlZqTbwCSxnWx5J8tqgg2QuPRvyLw+IKR20IdjWeupNkLeSrJqHOhcj6Fn7iPlxgHkduzHSt2mzBJ/BFt9qSZsZWFjrkJIBqwoRMsSrVQ8=";
     npx:hasSignatureTarget this: .
-  
+
   this: dct:created "2020-04-27T14:57:06.343+02:00"^^xsd:dateTime;
     npx:supersedes <http://purl.org/np/RAeyFN1C7zRfcPoEmGdwWHHgrE8vJHBONVgpq4JHDGyX0>,
       <http://purl.org/np/RAz2LI_DNLC8GAJBKmaEzvgY5-pKlRC7Ph3mJ44LMzkEI>;

@@ -21,7 +21,7 @@ sub:Head {
 sub:assertion {
   wd:Q15978631 rdfs:label "Homo sapiens"@en;
     skos:exactMatch <http://purl.obolibrary.org/obo/NCBITaxon_9606> .
-  
+
   wd:Q4596897 has-inchikey: "CQOQDQWUFQDJMK-SSTWWWIQSA-N";
     rdfs:label "2-methoxyestradiol"@en;
     wdt:P703 wd:Q15978631 .
@@ -29,7 +29,7 @@ sub:assertion {
 
 sub:provenance {
   sub:assertion has-source: wd:Q2013, wd:Q28601559 .
-  
+
   wd:Q28601559 rdfs:label "Recon 2.2: from reconstruction to model of human metabolism"@en;
     owl:sameAs <https://doi.org/10.1007/S11306-016-1051-4> .
 }

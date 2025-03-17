@@ -22,17 +22,17 @@ sub:assertion {
   sub:assertion a nt:ProvenanceTemplate;
     rdfs:label "Attributed to somebody else";
     nt:hasStatement sub:st1 .
-  
+
   sub:somebodyElse a nt:UriPlaceholder;
     rdfs:label "ORCID identifier of the person to be attributed";
     nt:hasPrefix "https://orcid.org/";
     nt:hasRegex "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]" .
-  
+
   sub:st1 rdf:object sub:somebodyElse;
     rdf:predicate prov:wasAttributedTo;
     rdf:subject nt:ASSERTION;
     a rdf:Statement .
-  
+
   prov:wasAttributedTo rdfs:label "is attributed to" .
 }
 
@@ -45,7 +45,7 @@ sub:pubinfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCwUtewGCpT5vIfXYE1bmf/Uqu1ojqnWdYxv+ySO80ul8Gu7m8KoyPAwuvaPj0lvPtHrg000qMmkxzKhYknEjq8v7EerxZNYp5B3/3+5ZpuWOYAs78UnQVjbHSmDdmryr4D4VvvNIiUmd0yxci47dTFUj4DvfHnGd6hVe5+goqdcwIDAQAB";
     npx:hasSignature "pHlUZFzESjBcAFEQeyDN5qagrzloaWEAvmKr7a6UIP7w7iJVDqR7ERe1GQWY+1MXjvWIeIpofF0Q1wQW+XVubxHz/+DgAJtNfTVnDlrv2kTyR9JapNUYGuPuvixJ9T6lNj8kf9vXVtDtJPKYsttaQJrnMSz5Ww8FDVa3xXMXBgA=";
     npx:hasSignatureTarget this: .
-  
+
   this: dct:created "2020-07-07T20:13:18.606+02:00"^^xsd:dateTime;
     pav:createdBy orcid:0000-0002-1267-0234 .
 }

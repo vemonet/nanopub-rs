@@ -22,19 +22,19 @@ dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_head {
 		np:hasProvenance dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_provenance ;
 		np:hasPublicationInfo dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_publicationInfo ;
 		a np:Nanopublication .
-	
+
 	dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_assertion a np:Assertion .
-	
+
 	dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_provenance a np:Provenance .
-	
+
 	dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_publicationInfo a np:PublicationInfo .
 }
 
 dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_assertion {
 	miriam-gene:102724023 a ncit:C16612 .
-	
+
 	lld:C0035412 a ncit:C7057 .
-	
+
 	dgn-gda:DGN3b53ea037f55c5beeac8a85909a77158 sio:SIO_000628 miriam-gene:102724023 , lld:C0035412 ;
 		a sio:SIO_001121 .
 }
@@ -45,9 +45,9 @@ dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_provenance {
 		sio:SIO_000772 miriam-pubmed:20022559 ;
 		prov:wasDerivedFrom dgn-void:befree-20150227 ;
 		prov:wasGeneratedBy eco:ECO_0000203 .
-	
+
 	dgn-void:befree-20150227 pav:importedOn "2015-02-27"^^xsd:date .
-	
+
 	dgn-void:source_evidence_literature a eco:ECO_0000212 ;
 		rdfs:comment "Gene-disease associations inferred from text-mining the literature."@en ;
 		rdfs:label "DisGeNET evidence - LITERATURE"@en .
@@ -62,6 +62,6 @@ dgn-np:NP1018131.RA_gZ5_7VswlR91iNxwIQZj33tOrzZHDug6ix4FPs6h7s130_publicationInf
 		pav:authoredBy <http://orcid.org/0000-0001-5999-6269> , <http://orcid.org/0000-0002-7534-7661> , <http://orcid.org/0000-0002-9383-528X> , <http://orcid.org/0000-0003-0169-8159> , <http://orcid.org/0000-0003-1244-7654> ;
 		pav:createdBy <http://orcid.org/0000-0003-0169-8159> ;
 		pav:version "v3.0.0.0" .
-	
+
 	dgn-void:disgenetv3.0rdf pav:version "v3.0.0" .
 }

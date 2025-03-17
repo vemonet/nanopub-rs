@@ -29,12 +29,12 @@ sub:assertion {
 
 sub:provenance {
         sub:assertion prov:wasGeneratedBy sub:dataset_extraction .
-        
+
         sub:dataset_extraction dcterms:creator ddir:mappingSoftware ;
                 dcterms:title "Software Generated."@en ;
                 a prov:Activity ;
                 prov:startedAtTime "2015-07-17T03:40:07.572343"^^xsd:dateTime .
-        
+
         ddir:mappingSoftware dcterms:title "Event Mapping Script"@en ;
                 a prov:SoftwareAgent ;
                 prov:Location <http://github.com/jmbanda/LIDDI/ddi_generation/> .

@@ -17,16 +17,16 @@ sub:Head {
 sub:Assertion {
   sub:Interaction obo:RO_0000057 sub:Organism_1, sub:Organism_2;
     a obo:GO_0044419 .
-  
+
   sub:Organism_1 obo:RO_0002556 sub:Organism_2;
     rdfs:label "Agraricales" .
-  
+
   sub:Organism_2 rdfs:label "Pennisetum clandestinum" .
 }
 
 sub:Provenance {
   sub:Assertion prov:wasDerivedFrom sub:Study .
-  
+
   sub:Study dcterms:bibliographicCitation "Richard W. Smiley, primary collator* (last update 7/18/05). Diseases of Turfgrasses. The American Phytopathological Society. Accessed on 2017-05-25 at http://www.apsnet.org/publications/commonnames/Pages/Turfgrasses.aspx" .
 }
 
@@ -34,7 +34,7 @@ sub:Pubinfo {
   this: dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
     pav:createdBy <https://doi.org/10.5281/zenodo.1212599>;
     prov:wasDerivedFrom <https://github.com/globalbioticinteractions/aps-turfgrasses> .
-  
+
   <https://github.com/globalbioticinteractions/aps-turfgrasses> dcterms:bibliographicCitation
       "Poelen, JH (2017). Plant pathogen-host interactions semi-automatically scraped from Common Names of Plant Diseases published by the American Phytopathological Society at http://www.apsnet.org/publications/commonnames/Pages/Turfgrasses.aspx using Samara, a Planteome (http://planteome.org) plant-trait scraper." .
 }

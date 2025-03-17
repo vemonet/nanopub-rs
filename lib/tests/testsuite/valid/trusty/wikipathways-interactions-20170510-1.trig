@@ -19,9 +19,9 @@ sub:head {
 
 sub:assertion {
         <http://identifiers.org/chebi/CHEBI:15946> a wp:Metabolite .
-        
+
         <http://identifiers.org/chebi/CHEBI:17665> a wp:Metabolite .
-        
+
         <http://rdf.wikipathways.org/Pathway/WP1848_r86536/WP/Interaction/d564c> wp:organismName "Homo sapiens" ;
                 wp:source <http://identifiers.org/chebi/CHEBI:17665> ;
                 wp:target <http://identifiers.org/chebi/CHEBI:15946> ;
@@ -30,7 +30,7 @@ sub:assertion {
 
 sub:provenance {
         <http://identifiers.org/wikipathways/WP1848_r86536> dc:title "Metabolism of carbohydrates"@en .
-        
+
         sub:assertion has-source: pmid:11371164 , pmid:13538944 , pmid:7989588 , <http://identifiers.org/wikipathways/WP1848_r86536> .
 }
 
@@ -38,7 +38,7 @@ sub:publicationInfo {
         sub:activity a prov:Activity ;
                 prov:atLocation wd:Q1137652 ;
                 prov:used <https://github.com/wikipathways/nanopublications> .
-        
+
         this: dcterms:created "2017-05-10T00:15:24.459+02:00"^^xsd:dateTime ;
                 dcterms:rights <https://creativecommons.org/licenses/by/3.0/> ;
                 prov:wasDerivedFrom <http://identifiers.org/wikipathways/WP1848_r86536> ;

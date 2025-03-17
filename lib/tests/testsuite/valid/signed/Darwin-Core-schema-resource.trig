@@ -40,5 +40,3 @@ sub:pubinfo {
     nt:wasCreatedFromPubinfoTemplate <http://purl.org/np/RAA2MfqdBCzmz9yVWjKLXNbyfBNcwsMmOqcNUxkk1maIM>;
     nt:wasCreatedFromTemplate <http://purl.org/np/RAHvHX5qjbdnYXsZWsRMO3KuFekGUFR6LuPjigZns9_VA> .
 }
-
-

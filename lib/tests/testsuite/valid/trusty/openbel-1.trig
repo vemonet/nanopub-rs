@@ -32,16 +32,16 @@ sub:Head {
 sub:assertion {
         sub:_1 hasAgent: sub:_2 ;
                 a go:0003824 .
-        
+
         sub:_2 geneProductOf: hgnc:12517 ;
                 a Protein: .
-        
+
         sub:_3 occursIn: obo:UBERON_0001134 , species:9606 ;
                 rdf:object sub:_1 ;
                 rdf:predicate belv:decreases ;
                 rdf:subject schem:Adenosine%20triphosphate ;
                 a rdf:Statement .
-        
+
         sub:assertion rdfs:label "a(SCHEM:\"Adenosine triphosphate\") -| cat(p(HGNC:UCP1))" .
 }
 
@@ -51,12 +51,12 @@ sub:provenance {
                 dce:title "BEL Framework Large Corpus Document" ;
                 pav:authoredBy sub:_5 ;
                 pav:version "20131211" .
-        
+
         sub:_4 prov:value "UCP1 contains six potential transmembrane a-helices (72) and acts under the form of a homodimer (73). Its uncoupling activity is increased by FFA (74–77) and by long chain fatty acyl CoA esters (78, 79), and decreased by purine nucleotide di- or tri-phosphates (12, 74)." ;
                 prov:wasQuotedFrom pubmed:9703368 .
-        
+
         sub:_5 rdfs:label "Selventa" .
-        
+
         sub:assertion prov:hadPrimarySource pubmed:9703368 ;
                 prov:wasDerivedFrom beldoc: , sub:_4 .
 }

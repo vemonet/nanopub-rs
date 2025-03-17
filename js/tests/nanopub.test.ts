@@ -53,6 +53,7 @@ describe('Tests for the @nanopub/sign npm package', () => {
     np = np.sign(profile);
     // np.sign(profile);
     expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
+    expect(np.info().trusty_hash).toBe("RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o");
   });
 
   test('publish nanopub', async () => {

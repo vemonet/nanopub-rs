@@ -25,16 +25,16 @@ sub:assertion {
 		schema:email "t.kuhn@vu.nl" ;
 		schema:name "Tobias Kuhn" ;
 		a foaf:Person .
-	
+
 	orcid:0000-0003-4727-9435 schema:affiliation :mu-ids ;
 		schema:email "michel.dumontier@maastrichtuniversity.nl" ;
 		schema:name "Michel Dumontier" ;
 		a foaf:Person .
-	
+
 	:mu-ids schema:name "Institute of Data Science, Maastricht University, Netherlands" .
-	
+
 	:vu-cs schema:name "Department of Computer Science, VU University Amsterdam, Netherlands" .
-	
+
 	paper: prism:keyword "Linked Data" , "scholarly communication" , "semantic publishing" ;
 		dct:title "Genuine Semantic Publishing" ;
 		pav:authoredBy orcid:0000-0002-1267-0234 , orcid:0000-0003-4727-9435 ;

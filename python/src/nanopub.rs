@@ -204,7 +204,9 @@ pub struct NpProfilePy {
 #[pymethods]
 impl NpProfilePy {
     #[new]
-    #[pyo3(signature = (private_key, orcid_id, name, introduction_nanopub_uri))]
+    // #[args(orcid_id = "None", name = "None", introduction_nanopub_uri = "None")]
+    #[pyo3(signature = (private_key, orcid_id=None, name=None, introduction_nanopub_uri=None))]
+    // #[pyo3(text_signature = "(private_key, orcid_id=None, name=None, introduction_nanopub_uri=None)")]
     fn new(
         private_key: String,
         orcid_id: Option<String>,
@@ -217,7 +219,6 @@ impl NpProfilePy {
         };
         if let Some(name) = name {
             profile = profile.with_name(name);
-            // profile = profile.with_name(name);
         };
         if let Some(intro_np_uri) = introduction_nanopub_uri {
             profile = profile.with_intro_nanopub(intro_np_uri);

@@ -18,11 +18,11 @@ sub:Head {
 
 sub:assertion {
   sub:a a "int", pplan:Variable .
-  
+
   sub:add_output1 a "int", pplan:Variable .
-  
+
   sub:b a "int", pplan:Variable .
-  
+
   sub:step ns1:description """@mark_as_fairstep(label='add integers', is_script_task=True)
 def add(a: int, b: int) -> int:
     \"\"\"
@@ -45,7 +45,7 @@ sub:pubInfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDHcBtjfkmhqvHAg/vG73ky2txQkMk+QSrN6i+DvOGEXhv0g4hf89gqfg0gYIn8pHykxnrEyk6pC+3rcYVxqjsQ6l7XN/b2Q7FKKOJxt/qpLmrIe4/XNxVBeceTIdxrRy9r4dVBI4o5BzKFiNSM6PPToWtOoHR7obxL8gfRPfcXWQIDAQAB";
     npx:hasSignature "mpQaGvS/Z0bBgyEaaTEzP9xbSMUF5bDgMLmahBSM9WYX7tWFmv5cmowobNQYL4gTMLn6fc3eNZeqIY95yGWFcBJpqrnZsl/HCUuEmxYI/tqruDYa5gJXv3tJQuOJsNFDe/Bss2dkSU+/htsKpqbVL5pWrlH9U+7diHi9ou17kCU=";
     npx:hasSignatureTarget this: .
-  
+
   this: npx:introduces sub:step;
     prov:generatedAtTime "2020-12-29T16:54:20.582254"^^xsd:dateTime;
     prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0000> .

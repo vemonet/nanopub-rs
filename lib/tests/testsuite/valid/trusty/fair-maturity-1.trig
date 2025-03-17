@@ -39,7 +39,7 @@ sub:provenance {
   sub:_1 dce:format "text/markdown";
     a void:Dataset, dcat:Distribution;
     dcat:downloadURL fairmi:Gen2_MI_A2.md .
-  
+
   sub:assertion pav:authoredBy orcid:0000-0001-5306-5690, orcid:0000-0001-6960-357X,
       orcid:0000-0001-8888-635X, orcid:0000-0002-1164-1351, orcid:0000-0003-4727-9435;
     dcat:distribution sub:_1 .
@@ -47,7 +47,7 @@ sub:provenance {
 
 sub:pubinfo {
   orcid:0000-0001-6960-357X foaf:name "Mark Wilkinson" .
-  
+
   this: dcterms:created "2019-02-26"^^xsd:dateTime;
     dcterms:rights <https://creativecommons.org/publicdomain/zero/1.0/>;
     dcterms:rightsHolder <http://fairmetrics.org>;

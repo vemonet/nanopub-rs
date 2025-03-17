@@ -37,7 +37,7 @@ sub:pubinfo {
     npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCk/t11RFdsK8IUlbD7CznUrl1IYZtmFhTuGCtzFASFh3p0KsIDEAJtmYJ0CRWUlolT9XPht31Rh0iKGsJpr1PP1H/bcnV0ogspLq5JQj7LNoldB28Mz0/TDGN/YUYVvJjomkEEXHFnKR5vPRYb8gTMifFaTWYYv6JIYVPWJJ+4YwIDAQAB";
     npx:hasSignature "I3xNAfKMtDofyvHmfbw/SZhGNhBoBgmlRySf34uVutbnINtvjmJr7IYNed0VERhHmPeFAsohAysf3e0wHgcKkO+6aNkMuJaXTjiagUvTdJr4l8UWB/hR2536PTI4IlxiKiBiP8jHCT6cYFS3NWTKydDQ71/960qwhvRbhGfuByA=";
     npx:hasSignatureTarget this: .
-  
+
   this: dct:created "2020-04-30T00:07:02.805+02:00"^^xsd:dateTime;
     dct:creator orcid:0000-0002-6007-4023;
     nt:wasCreatedFromTemplate <http://purl.org/np/RAqWlNPJt3Eb4HkmPCpjaiRHGCzKIZag6cBNMkG8nxu6I> .

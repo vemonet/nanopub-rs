@@ -203,7 +203,10 @@ impl Nanopub {
     /// let np = Nanopub::new(&np_rdf).unwrap().sign(&profile);
     /// ```
     pub fn sign(mut self, profile: &NpProfile) -> Result<Self, NpError> {
-        openssl_probe::init_ssl_cert_env_vars();
+        // openssl_probe::init_ssl_cert_env_vars();
+        // unsafe {
+        //     openssl_probe::init_openssl_env_vars();
+        // }
         self.dataset = replace_bnodes(&self.dataset, &self.info.ns, &self.info.uri)?;
         self.info = extract_np_info(&self.dataset)?;
         if !self.info.signature.is_empty() {

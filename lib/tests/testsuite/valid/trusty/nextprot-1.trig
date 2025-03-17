@@ -30,27 +30,27 @@ sub:assertion {
 sub:provenance {
 	<http://www.nextprot.org/help/quality_criteria/gold> a eco:ECO_0000205 ;
 		rdfs:label "neXtProt gold" .
-	
+
 	sub:_1 a efo:EFO_00027688 .
-	
+
 	sub:_10 a eco:ECO_0000218 .
-	
+
 	sub:_2 a eco:ECO_0000218 .
-	
+
 	sub:_3 a efo:EFO_00027688 .
-	
+
 	sub:_4 a eco:ECO_0000218 .
-	
+
 	sub:_5 a efo:EFO_00027688 .
-	
+
 	sub:_6 a eco:ECO_0000218 .
-	
+
 	sub:_7 a efo:EFO_00027688 .
-	
+
 	sub:_8 a eco:ECO_0000218 .
-	
+
 	sub:_9 a efo:EFO_00027688 .
-	
+
 	sub:assertion prv:usedData <http://bgee.unil.ch/bgee/bgee?page=expression&action=data&stage_id=HsapDO:0000001&amp;organ_id=EV:0100124&amp;gene_id=ENSG00000154027> , <http://bgee.unil.ch/bgee/bgee?page=expression&action=data&stage_id=HsapDO:0000044&amp;organ_id=EV:0100124&amp;gene_id=ENSG00000154027> , <http://bgee.unil.ch/bgee/bgee?page=expression&action=data&stage_id=HsapDO:0000087&amp;organ_id=EV:0100124&amp;gene_id=ENSG00000154027> , <http://bgee.unil.ch/bgee/bgee?page=expression&action=data&stage_id=HsapDO:0000090&amp;organ_id=EV:0100124&amp;gene_id=ENSG00000154027&amp;stage_children=on> , <http://bgee.unil.ch/bgee/bgee?page=expression&action=data&stage_id=HsapDO:0000092&amp;organ_id=EV:0100124&amp;gene_id=ENSG00000154027&amp;stage_children=on> ;
 		wi:evidence <http://www.nextprot.org/help/quality_criteria/gold> ;
 		a eco:ECO_0000220 ;
@@ -67,14 +67,14 @@ sub:pubinfo {
 		pav:authoredBy "CALIPHO project" , <http://orcid.org/0000-0001-6710-1373> , <http://orcid.org/0000-0001-6818-334X> , <http://orcid.org/0000-0002-1303-2189> , <http://orcid.org/0000-0003-1813-6857> ;
 		pav:versionNumber "2" ;
 		prov:wasGeneratedBy sub:_11 , sub:_12 , sub:_13 , sub:_14 , sub:_15 .
-	
+
 	sub:_11 a eco:ECO_0000205 .
-	
+
 	sub:_12 a eco:ECO_0000205 .
-	
+
 	sub:_13 a eco:ECO_0000205 .
-	
+
 	sub:_14 a eco:ECO_0000205 .
-	
+
 	sub:_15 a eco:ECO_0000205 .
 }
