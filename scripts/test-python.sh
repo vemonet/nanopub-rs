@@ -13,7 +13,8 @@ done
 cd python
 
 if [ "$SKIP_BUILD" = false ]; then
-    uv run maturin develop
+    uv run maturin develop --uv
+    # uv run maturin develop
 fi
 
 uv run pytest -s

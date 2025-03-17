@@ -1,5 +1,5 @@
 use nanopub::{get_np_server as get_server, profile::gen_keys, Nanopub, NpProfile, ProfileBuilder};
-use pyo3::{exceptions::PyException, prelude::*, pymethods, types::PyType};
+use pyo3::{exceptions::PyException, prelude::*, pymethods};
 use pythonize::pythonize;
 // use pyo3::types::IntoPyDict;
 // use pyo3_asyncio::generic::future_into_py;
@@ -70,12 +70,8 @@ impl NanopubPy {
     }
 
     #[staticmethod]
-    #[pyo3(signature = (_cls, profile, server_url=None))]
-    fn publish_intro(
-        _cls: &Bound<'_, PyType>,
-        profile: &NpProfilePy,
-        server_url: Option<&str>,
-    ) -> PyResult<Self> {
+    #[pyo3(signature = (profile, server_url=None))]
+    fn publish_intro(profile: &NpProfilePy, server_url: Option<&str>) -> PyResult<Self> {
         let server_url = server_url.map(str::to_string);
         // Use a tokio runtime to wait on the async operation
         let rt = Runtime::new()
@@ -105,9 +101,9 @@ impl NanopubPy {
         result.map(|np| Self { np })
     }
 
-    #[classmethod]
+    #[staticmethod]
     #[pyo3(signature = (uri))]
-    fn fetch(_cls: &Bound<'_, PyType>, uri: &str) -> PyResult<Self> {
+    fn fetch(uri: &str) -> PyResult<Self> {
         let rt = Runtime::new()
             .map_err(|e| PyErr::new::<PyException, _>(format!("Runtime failed: {e}")))?;
         let result = rt.block_on(async move {
@@ -253,7 +249,7 @@ impl KeyPair {
 
 /// Return a random server
 #[pyfunction]
-#[pyo3(signature = (random))]
+#[pyo3(signature = (random=true))]
 pub fn get_np_server(random: Option<bool>) -> PyResult<String> {
     Ok(get_server(random.unwrap_or(true)).to_string())
 }
