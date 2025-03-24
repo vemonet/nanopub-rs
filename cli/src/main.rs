@@ -79,12 +79,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // Prefix the nanopub filename with "signed."
             let path = Path::new(np_file);
             let parent = path.parent().unwrap_or_else(|| Path::new(""));
-            let file_name = path
-                .file_name()
+            let file_name_without_extension = path
+                .file_stem()
                 .ok_or_else(|| NpError(format!("Error getting filename from {:?}", path)))?
                 .to_str()
                 .ok_or_else(|| NpError(format!("Error getting filename from {:?}", path)))?;
-            let new_file_name = format!("signed.{}", file_name);
+            let new_file_name = format!("signed.{}.trig", file_name_without_extension);
             let signed_path = parent.join(new_file_name);
             println!(
                 "📁 Signed Nanopub stored to {}",
