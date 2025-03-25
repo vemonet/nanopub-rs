@@ -457,3 +457,10 @@ You can generate a new private/public key pair, and publish a nanopub introducti
             .publish(Some(&profile), None).await.unwrap();
     });
     ```
+
+!!! warning "Key format"
+    The key needs to be in format `PKCS8`, the default OpenSSH format is not supported. Alternatively you can generate a key using the following command:
+
+    ```bash
+    ssh-keygen -t rsa -m PKCS8 -b 4096 -f ~/.nanopub/id_rsa -C "your@email.com"
+    ```

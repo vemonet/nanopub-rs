@@ -30,6 +30,13 @@ private_key: /home/user/.nanopub/id_rsa
 introduction_nanopub_uri:
 ```
 
+!!! warning "Generate a key"
+    The key needs to be in format `PKCS8`, the default OpenSSH format is not supported. You can generate a key using the following command:
+
+    ```bash
+    ssh-keygen -t rsa -m PKCS8 -b 4096 -f ~/.nanopub/id_rsa -C "your@email.com"
+    ```
+
 Sign a Nanopub, by default it will try to use the profile available at `~/.nanopub/profile.yml`
 
 ```bash

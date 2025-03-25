@@ -1,11 +1,8 @@
 /// List of available Nanopub servers
 /// Checkout the live list at https://monitor.np.trustyuri.net/
-pub const LIST_SERVERS: [&str; 7] = [
+pub const LIST_SERVERS: [&str; 4] = [
     "https://server.np.trustyuri.net/",
-    "https://app.tkuhn.eculture.labs.vu.nl/nanopub-server-1/",
-    "https://app.tkuhn.eculture.labs.vu.nl/nanopub-server-2/",
-    "https://app.tkuhn.eculture.labs.vu.nl/nanopub-server-3/",
-    "https://app.tkuhn.eculture.labs.vu.nl/nanopub-server-4/",
+    "https://np.knowledgepixels.com/",
     "http://server.nanopubs.lod.labs.vu.nl/",
     "https://server.np.dumontierlab.com/",
 ];

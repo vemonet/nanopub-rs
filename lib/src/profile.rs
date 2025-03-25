@@ -102,7 +102,7 @@ impl ProfileBuilder {
         let file = fs::File::open(filepath)?;
         let reader = BufReader::new(file);
         let mut privkey_path = None;
-        let mut pubkey_path = None;
+        // let mut pubkey_path = None;
         let mut orcid = None;
         let mut name = None;
         let mut intro_np_uri = None;
@@ -112,7 +112,7 @@ impl ProfileBuilder {
             if let Some((key, value)) = line.split_once(": ") {
                 match key.trim() {
                     "private_key" => privkey_path = Some(remove_quotes(value)),
-                    "public_key" => pubkey_path = Some(remove_quotes(value)),
+                    // "public_key" => pubkey_path = Some(remove_quotes(value)),
                     "orcid_id" => orcid = Some(remove_quotes(value)).filter(|s| !s.is_empty()),
                     "name" => name = Some(remove_quotes(value)).filter(|s| !s.is_empty()),
                     "introduction_nanopub_uri" => {
@@ -126,9 +126,11 @@ impl ProfileBuilder {
             || NpError("Invalid Profile: private key file is empty.".to_string()),
         )?)?)?;
         let mut profile = ProfileBuilder::new(privkey);
-        if let Some(pubkey_path) = pubkey_path {
-            profile = profile.with_public_key(normalize_key(&fs::read_to_string(pubkey_path)?)?);
-        }
+        // NOTE: we dont get the public key anymore when loading from profile, to avoid issues with keys in OpenSSH format
+        // The public key is always generated from the private key now
+        // if let Some(pubkey_path) = pubkey_path {
+        //     profile = profile.with_public_key(normalize_key(&fs::read_to_string(pubkey_path)?)?);
+        // }
         if let Some(orcid) = orcid {
             profile = profile.with_orcid(orcid);
         }
@@ -149,6 +151,7 @@ impl NpProfile {
             &engine::general_purpose::STANDARD.decode(&self.private_key)?,
         )?)
     }
+
     /// Get the public key as `RsaPublicKey` struct
     pub fn get_public_key(&self) -> Result<RsaPublicKey, NpError> {
         Ok(RsaPublicKey::from(&self.get_private_key()?))
@@ -176,6 +179,12 @@ impl fmt::Display for NpProfile {
 /// Normalize a private or public key string (remove prefix, suffix, newlines)
 pub fn normalize_key(key: &str) -> Result<String, NpError> {
     let mut normed_key = key.trim().to_string();
+    // Check for OpenSSH format keys
+    if normed_key.starts_with("-----BEGIN OPENSSH PRIVATE KEY-----") {
+        return Err(NpError(
+            "Keys in OpenSSH format are not supported. Please convert to PKCS8 format, or generate a new one with `ssh-keygen -t rsa -m PKCS8 -b 4096 -f ~/.nanopub/id_rsa -C 'your@email.com'`".to_string(),
+        ));
+    }
     let start_patterns = [
         "-----BEGIN PUBLIC KEY-----",
         "-----BEGIN PRIVATE KEY-----",
