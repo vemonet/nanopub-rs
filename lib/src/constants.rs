@@ -1,10 +1,9 @@
 /// List of available Nanopub servers
 /// Checkout the live list at https://monitor.np.trustyuri.net/
-pub const LIST_SERVERS: [&str; 4] = [
-    "https://server.np.trustyuri.net/",
-    "https://np.knowledgepixels.com/",
-    "http://server.nanopubs.lod.labs.vu.nl/",
-    "https://server.np.dumontierlab.com/",
+pub const LIST_SERVERS: [&str; 3] = [
+    "https://registry.np.trustyuri.net/",
+    "https://registry.knowledgepixels.com/",
+    "https://registry.petapico.org/",
 ];
 
 /// Nanopub test server URL

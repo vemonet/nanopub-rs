@@ -2,10 +2,9 @@ use crate::error::NpError;
 
 /// Publish nanopub RDF string to a given nanopub server URL
 pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
-    let server = server.to_string();
     let client = reqwest::Client::new();
     let res = client
-        .post(&server)
+        .post(server)
         .body(np.to_string())
         .header(reqwest::header::CONTENT_TYPE, "application/trig")
         // .header(reqwest::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
@@ -13,10 +12,16 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         .await?;
     match res.status() {
         reqwest::StatusCode::CREATED => Ok(true),
+        reqwest::StatusCode::OK => Ok(true),
         _ => {
             // Get the error message from the response body
+            let status = res.status();
             let error_msg = res.text().await?;
-            Err(NpError(error_msg))
+            if error_msg.is_empty() {
+                Err(NpError(format!("{}", status)))
+            } else {
+                Err(NpError(format!("{}: {}", status, error_msg)))
+            }
         }
     }
 }

@@ -21,10 +21,12 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("./tests/resources/simple1-rsa.trig")?;
     let profile = ProfileBuilder::new(get_test_key()).build()?;
     let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), None).await?;
+
     // NOTE: in case the test server suddenly starts to throw error, you can easily validate that the generated nanopubs
     // are valid, and that the problem is on the test server that is not working.
     // let np = Nanopub::new(&np_rdf)?.publish(Some(&profile), Some(get_np_server(true))).await?;
     // println!("{}", np.rdf()?);
+
     assert!(np.info.published.is_some());
     // Values compiled with the nanopub java lib using the exact same RDF
     assert_eq!(
