@@ -10,12 +10,13 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         // .header(reqwest::header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         .send()
         .await?;
-    match res.status() {
+    // Get the error message from the response body
+    let status = res.status();
+    // println!("Response: {:?} {}", status, error_msg);
+    match status {
         reqwest::StatusCode::CREATED => Ok(true),
         reqwest::StatusCode::OK => Ok(true),
         _ => {
-            // Get the error message from the response body
-            let status = res.status();
             let error_msg = res.text().await?;
             if error_msg.is_empty() {
                 Err(NpError(format!("{}", status)))

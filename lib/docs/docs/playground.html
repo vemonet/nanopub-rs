@@ -94,8 +94,8 @@
         </button>
         <!-- Toggle to publish to test or prod server -->
         <div class="flex items-center justify-center">
-          <span class="mr-2 text-sm" title="https://np.test.knowledgepixels.com">Test Server</span>
-            <label for="toggleProd" class="flex items-center cursor-pointer" title="Test server: https://np.test.knowledgepixels.com&#10;List of production servers: https://monitor.np.trustyuri.net">
+          <span class="mr-2 text-sm" title="https://test.registry.knowledgepixels.com">Test Server</span>
+            <label for="toggleProd" class="flex items-center cursor-pointer" title="Test server: https://test.registry.knowledgepixels.com&#10;List of production servers: https://monitor.np.trustyuri.net">
             <div class="relative">
               <input type="checkbox" id="toggleProd" class="sr-only" />
               <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
@@ -204,7 +204,7 @@
                 oeditor.setValue(np.rdf());
                 console.log("Published Nanopub:", np.info());
                 const npUrlElem = document.getElementById('np-url');
-                // const npUrl = (serverUrl) ? np.info().uri : `https://np.test.knowledgepixels.com/${np.info().trusty_hash}`
+                // const npUrl = (serverUrl) ? np.info().uri : `https://test.registry.knowledgepixels.com/np/${np.info().trusty_hash}`
                 npUrlElem.textContent = np.info().published;
                 npUrlElem.href = np.info().published;
                 document.getElementById('success-msg').classList.remove('hidden');

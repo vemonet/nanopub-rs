@@ -256,9 +256,9 @@ Signed Nanopubs can be published to a Nanopub server. This makes the Nanopub acc
 Use the `publish` function on a Nanopub, the 2 arguments are optional:
 
 - 🔑 `profile` is required if you want to also sign the nanopub, it is not required if you provide a signed nanopub
-- 🧪 If the `server_url` is null it will be published to the [test server](https://np.test.knowledgepixels.com/)
+- 🧪 If the `server_url` is null it will be published to the [test server](https://test.registry.knowledgepixels.com/)
 
-If the provided `server_url` is empty or null, the nanopub will be published to the [test server](https://np.test.knowledgepixels.com/). In this case the nanopub will not be available at [https://w3id.org/np/](https://w3id.org/np/), but at [https://np.test.knowledgepixels.com/](https://np.test.knowledgepixels.com/), e.g. [https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM](https://np.test.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM)
+If the provided `server_url` is empty or null, the nanopub will be published to the [test server](https://test.registry.knowledgepixels.com/). In this case the nanopub will not be available at [https://w3id.org/np/](https://w3id.org/np/), but at [https://test.registry.knowledgepixels.com/](https://test.registry.knowledgepixels.com/), e.g. [https://test.registry.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM](https://test.registry.knowledgepixels.com/RAKObyGXmbgTYWj2iN0XGgJv0yWNDQd_DTmAWUouGfIsM)
 
 To publish to a production server use `get_np_server(true)`. With true for a random server in the network, and false for the [main nanopub server](https://server.np.trustyuri.net/), defaults to true.
 

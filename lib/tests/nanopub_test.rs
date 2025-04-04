@@ -46,6 +46,7 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
         .publish(Some(&profile), Some(""))
         // .publish(Some(&profile), Some(get_np_server(false))) // in case we need to test directly on prod servers
         .await?;
+    println!("{}", np.info.trusty_hash);
     assert!(np.info.published.is_some());
     Ok(())
 }
@@ -158,7 +159,7 @@ fn check_nanopub_test_blank() -> Result<(), Box<dyn Error>> {
 fn test_get_np_server() -> Result<(), Box<dyn Error>> {
     let _np_server = get_np_server(true);
     let np_server = get_np_server(false);
-    assert_eq!(np_server, "https://server.np.trustyuri.net/");
+    assert_eq!(np_server, "https://registry.np.trustyuri.net/");
     Ok(())
 }
 

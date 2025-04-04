@@ -7,7 +7,7 @@ pub const LIST_SERVERS: [&str; 3] = [
 ];
 
 /// Nanopub test server URL
-pub const TEST_SERVER: &str = "https://np.test.knowledgepixels.com/";
+pub const TEST_SERVER: &str = "https://test.registry.knowledgepixels.com/";
 // pub const TEST_SERVER_GRLC: &str = "https://grlc.test.nps.knowledgepixels.com/api/local/local/";
 
 pub const NP_PREF_NS: &str = "https://w3id.org/np/";
