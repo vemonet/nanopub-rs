@@ -174,7 +174,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             .to_string();
     }
     if trusty_hash.is_empty() && separator_after_trusty.is_empty() {
-        separator_after_trusty = "#".to_string()
+        separator_after_trusty = "/".to_string()
     };
 
     // Generate normalized namespace without trusty

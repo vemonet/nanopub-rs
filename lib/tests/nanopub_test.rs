@@ -28,12 +28,13 @@ async fn publish_nanopub_simple_rsa() -> Result<(), Box<dyn Error>> {
     // println!("{}", np.rdf()?);
 
     assert!(np.info.published.is_some());
-    // Values compiled with the nanopub java lib using the exact same RDF
-    assert_eq!(
-        np.info.trusty_hash,
-        "RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o"
-    );
-    assert_eq!(np.info.signature, "aG7rda/gmsu8hx1fTds9oqvogs4gv8xxkc/SJCtqJjUfgbtH6P3QMafIBdRApFI1WT7qrkYqg3Qs9ugTkOjwq2EJ+IoTJq1lgeo+66th3y2LnSdsI/Lsoa/mE6TIVbjpXvwYAqPGUI4BISISJhAslFFlP54obeBarh2nsiELdf4=");
+    // Values compiled with the nanopub java lib using the exact same RDF cannot be used anymore
+    // Because it was compiled using # after trusty, now we moved to /
+    // assert_eq!(
+    //     np.info.trusty_hash,
+    //     "RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o"
+    // );
+    // assert_eq!(np.info.signature, "aG7rda/gmsu8hx1fTds9oqvogs4gv8xxkc/SJCtqJjUfgbtH6P3QMafIBdRApFI1WT7qrkYqg3Qs9ugTkOjwq2EJ+IoTJq1lgeo+66th3y2LnSdsI/Lsoa/mE6TIVbjpXvwYAqPGUI4BISISJhAslFFlP54obeBarh2nsiELdf4=");
     Ok(())
 }
 

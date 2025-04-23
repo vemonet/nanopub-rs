@@ -44,7 +44,7 @@ describe('Tests for the @nanopub/sign npm package', () => {
     // console.log({ profile, nanopub: np.info() });
     // console.log({ profile, nanopub: nanopub.info(), signed: signed.info() });
     expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
-    expect(np.info().trusty_hash).toBe("RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o");
+    expect(np.info().trusty_hash).toBe("RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4");
   });
 
   test('sign nanopub in 2 steps', async () => {
@@ -53,7 +53,7 @@ describe('Tests for the @nanopub/sign npm package', () => {
     np = np.sign(profile);
     // np.sign(profile);
     expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
-    expect(np.info().trusty_hash).toBe("RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o");
+    expect(np.info().trusty_hash).toBe("RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4");
   });
 
   test('publish nanopub', async () => {
