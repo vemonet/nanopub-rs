@@ -36,6 +36,7 @@
 *[GPTQ]: GPTQ is a quantization algorithm that lightly reoptimizes the weights during quantization so that the accuracy loss is compensated relative to a round-to-nearest quantization. 4-bit GPTQ models reduce VRAM usage by about 75%.
 *[URL]: Uniform Resource Locator
 *[URI]: Uniform Resource Identifier
+*[IRI]: Internationalized Resource Identifier
 *[vectorstore]: A vector store takes care of storing embedded data, and performing vector search for you
 *[GPU]: Graphics Processing Unit
 *[CPU]: Central Processing Unit

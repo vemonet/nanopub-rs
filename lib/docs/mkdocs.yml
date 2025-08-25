@@ -101,7 +101,7 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.snippets:
       auto_append:
-        - lib/docs/includes/abbreviations.md
+        - includes/abbreviations.md
   - attr_list
   - smarty
   # - md_in_html
