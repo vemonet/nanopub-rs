@@ -16,7 +16,7 @@ homepage = "https://vemonet.github.io/nanopub-rs"
 readme = "./README.md"
 license-file = "LICENSE.txt"
 keywords = ["nanopublications", "rdf", "linked-data", "semantic-web"]
-categories = ["science", "encoding", "database-interface", "cryptography"]
+categories = ["science", "encoding", "cryptography"]
 
 [workspace.dependencies]
 nanopub = { version = "0.1.5", path = "./lib" }
