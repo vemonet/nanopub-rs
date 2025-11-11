@@ -15,6 +15,7 @@ sed -i "" "s/^version = \"[0-9]*\.[0-9]*\.[0-9]*\"\$/version = \"$new_version\"/
 sed -i "" "s/nanopub = { version = \"[0-9]*\.[0-9]*\.[0-9]*\"/nanopub = { version = \"$new_version\"/" "Cargo.toml"
 
 git cliff -o CHANGELOG.md --tag $new_version
+cargo update
 git add Cargo.toml Cargo.lock */Cargo.toml CHANGELOG.md
 git commit -m "chore: Bump version to $new_version"
 git push
