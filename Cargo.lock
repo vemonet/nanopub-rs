@@ -1671,7 +1671,7 @@ checksum = "b33dce847b8623c1f2e473ed3a05e43d0c395e3b93fab62378b6ae94b0a1c42c"
 
 [[package]]
 name = "nanopub"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "base64",
  "chrono",
@@ -1689,7 +1689,7 @@ dependencies = [
 
 [[package]]
 name = "nanopub-cli"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clap",
  "clap_complete",
@@ -1699,7 +1699,7 @@ dependencies = [
 
 [[package]]
 name = "nanopub-js"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
@@ -1714,7 +1714,7 @@ dependencies = [
 
 [[package]]
 name = "nanopub-sign"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "nanopub",
  "pyo3",
