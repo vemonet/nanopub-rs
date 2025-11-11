@@ -11,11 +11,16 @@ for (const file of fs.readdirSync("./pkg-web")) {
 for (const file of fs.readdirSync("./pkg-node")) {
     fs.copyFileSync(`./pkg-node/${file}`, `./pkg/${file}`);
 }
+for (const file of fs.readdirSync("./pkg-bundler")) {
+    fs.copyFileSync(`./pkg-bundler/${file}`, `./pkg/${file}`);
+}
 
 const pkg = JSON.parse(fs.readFileSync("./pkg/package.json"));
 pkg.name = "@nanopub/sign";
 pkg.main = "node.js";
+pkg.module = "bundler.js";
 pkg.browser = "web.js";
+pkg.types = "bundler.d.ts";
 pkg.files = ["*.{js,wasm,d.ts}"];
 pkg.homepage = "https://github.com/vemonet/nanopub-rs/tree/main/js";
 pkg.license = "MIT";

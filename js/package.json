@@ -24,7 +24,7 @@
     "old-test": "wasm-pack build --debug --target nodejs && mocha",
     "jest" : "jest --verbose false",
     "test": "npm run build && jest",
-    "build": "rm -rf pkg pkg-web pkg-node && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web pkg-node",
+    "build": "rm -rf pkg pkg-web pkg-node pkg-bundler && wasm-pack build --release --target web --out-name web && mv pkg pkg-web && wasm-pack build --release --target bundler --out-name bundler && mv pkg pkg-bundler && wasm-pack build --release --target nodejs --out-name node && mv pkg pkg-node && node build_package.js && rm -r pkg-web pkg-node pkg-bundler",
     "start": "http-server ./",
     "release": "npm run build && npm publish ./pkg --access public",
     "pack": "npm run build && npm pack ./pkg"

@@ -35,7 +35,7 @@ jobs:
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Add cross-compilation target
         run: rustup update && rustup target add ${{ matrix.target }}
@@ -135,13 +135,13 @@ jobs:
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: docker/setup-qemu-action@v3
         if: matrix.os == 'linux' && matrix.target == 'aarch64'
         with:
           platforms: linux/${{ matrix.target }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           architecture: ${{ matrix.python-architecture || 'x64' }}
@@ -191,7 +191,7 @@ jobs:
     name: 🦊 Wasm and npm package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: true
       - run: rustup update
@@ -201,7 +201,7 @@ jobs:
         run: cargo install wasm-pack || true
 
       - name: Setup NodeJS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
@@ -229,7 +229,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: rustup update
       - run: cargo login $CRATES_IO_TOKEN
         env:
@@ -244,7 +244,7 @@ jobs:
       release_body: ${{ steps.git-cliff.outputs.content }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
