@@ -133,6 +133,7 @@ jobs:
             target: aarch64
             interpreter: 3.11 3.12 3.13 3.14
             runs-on: windows-11-arm
+            python-architecture: arm64
 
     runs-on: ${{ matrix.runs-on || format('{0}-latest', (matrix.os == 'linux' && 'ubuntu') || matrix.os) }}
     # runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
