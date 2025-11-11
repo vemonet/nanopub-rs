@@ -1,5 +1,4 @@
 target/
-Cargo.lock
 tarpaulin-report.html
 
 # JS
@@ -8,13 +7,13 @@ pkg*/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-*.lock
 js/LICENSE.txt
 
 # Python
 .venv
 __pycache__/
 .pytest_cache
+uv.lock
 
 # HTML docs
 
