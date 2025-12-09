@@ -319,7 +319,7 @@ impl Nanopub {
             &self.info.separator_after_trusty,
         )?;
         let trusty_uri = format!("{}{trusty_hash}", self.info.normalized_ns);
-        let trusty_ns = format!("{trusty_uri}#");
+        let trusty_ns = format!("{trusty_uri}/");
         self.dataset = replace_ns_in_quads(
             &self.dataset,
             &self.info.ns,
