@@ -1,7 +1,8 @@
 use base64::{engine, Engine as _};
 use getrandom::getrandom;
 use rand_core::{impls, CryptoRng, RngCore};
-use rsa::pkcs8::{DecodePrivateKey, EncodePrivateKey, EncodePublicKey};
+use rsa::pkcs1::{DecodeRsaPrivateKey, DecodeRsaPublicKey};
+use rsa::pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePrivateKey, EncodePublicKey};
 use rsa::{RsaPrivateKey, RsaPublicKey};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -60,12 +61,15 @@ impl ProfileBuilder {
 
     /// Build a `NpProfile` struct
     pub fn build(self) -> Result<NpProfile, NpError> {
+        // Normalize the private key to ensure it's in the correct format
+        let normalized_privkey = normalize_key(&self.private_key)?;
+
         let pubkey = if let Some(pubkey) = self.public_key {
             pubkey
         } else {
             // Generate public key from private key
             let privkey = RsaPrivateKey::from_pkcs8_der(
-                &engine::general_purpose::STANDARD.decode(&self.private_key)?,
+                &engine::general_purpose::STANDARD.decode(&normalized_privkey)?,
             )?;
             get_pubkey_str(&RsaPublicKey::from(&privkey))?
         };
@@ -78,7 +82,7 @@ impl ProfileBuilder {
             }
         };
         Ok(NpProfile {
-            private_key: self.private_key,
+            private_key: normalized_privkey,
             public_key: pubkey,
             orcid_id: self.orcid_id,
             name: self.name,
@@ -176,38 +180,54 @@ impl fmt::Display for NpProfile {
     }
 }
 
-/// Normalize a private or public key string (remove prefix, suffix, newlines)
+/// Normalize a private or public key string - remove headers/footers and newlines
 pub fn normalize_key(key: &str) -> Result<String, NpError> {
-    let mut normed_key = key.trim().to_string();
-    // Check for OpenSSH format keys
-    if normed_key.starts_with("-----BEGIN OPENSSH PRIVATE KEY-----") {
+    let key_trimmed = key.trim();
+    // Check for OpenSSH format keys (not supported)
+    if key_trimmed.starts_with("-----BEGIN OPENSSH PRIVATE KEY-----") {
         return Err(NpError(
             "Keys in OpenSSH format are not supported. Please convert to PKCS8 format, or generate a new one with `ssh-keygen -t rsa -m PKCS8 -b 4096 -f ~/.nanopub/id_rsa -C 'your@email.com'`".to_string(),
         ));
     }
-    let start_patterns = [
-        "-----BEGIN PUBLIC KEY-----",
-        "-----BEGIN PRIVATE KEY-----",
-        "-----BEGIN RSA PRIVATE KEY-----",
-    ];
-    for pattern in start_patterns.iter() {
-        if normed_key.starts_with(pattern) {
-            normed_key = normed_key[pattern.len()..].to_string();
-            break;
+
+    // If it has PEM headers, parse and extract the base64 content
+    if key_trimmed.starts_with("-----BEGIN") {
+        // Try parsing as PKCS8 PEM private key
+        if let Ok(private_key) = RsaPrivateKey::from_pkcs8_pem(key_trimmed) {
+            let der = private_key.to_pkcs8_der()?;
+            return Ok(engine::general_purpose::STANDARD.encode(der.as_bytes()));
         }
-    }
-    let end_patterns = [
-        "-----END PUBLIC KEY-----",
-        "-----END PRIVATE KEY-----",
-        "-----END RSA PRIVATE KEY-----",
-    ];
-    for pattern in end_patterns.iter() {
-        if normed_key.ends_with(pattern) {
-            normed_key = normed_key[..normed_key.len() - pattern.len()].to_string();
-            break;
+        // Try parsing as PKCS1 PEM private key
+        if let Ok(private_key) = RsaPrivateKey::from_pkcs1_pem(key_trimmed) {
+            let der = private_key.to_pkcs8_der()?;
+            return Ok(engine::general_purpose::STANDARD.encode(der.as_bytes()));
         }
+        // Try parsing as PKCS8 PEM public key
+        if let Ok(public_key) = RsaPublicKey::from_public_key_pem(key_trimmed) {
+            let der = public_key.to_public_key_der()?;
+            return Ok(engine::general_purpose::STANDARD.encode(der.as_bytes()));
+        }
+        // Try parsing as PKCS1 PEM public key
+        if let Ok(public_key) = RsaPublicKey::from_pkcs1_pem(key_trimmed) {
+            let der = public_key.to_public_key_der()?;
+            return Ok(engine::general_purpose::STANDARD.encode(der.as_bytes()));
+        }
+        return Err(NpError("Failed to parse PEM key".to_string()));
     }
-    Ok(normed_key.trim().replace('\n', ""))
+    // // Alternative: if it has PEM headers, just strip them and extract base64
+    // if key_trimmed.starts_with("-----BEGIN") {
+    //     let mut result = String::new();
+    //     for line in key_trimmed.lines() {
+    //         if !line.starts_with("-----") {
+    //             result.push_str(line.trim());
+    //         }
+    //     }
+    //     return Ok(result);
+    // }
+
+    // No headers - assume it's already base64 without headers/newlines
+    // Just remove any whitespace and return as-is
+    Ok(key_trimmed.replace(['\n', '\r', ' ', '\t'], ""))
 }
 
 /// Get a public key string for a `RsaPublicKey`
