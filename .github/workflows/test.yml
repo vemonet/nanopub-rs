@@ -144,11 +144,11 @@ jobs:
     - name: Install java and python tools
       run: |
         pip install --upgrade nanopub
-        curl -s https://api.github.com/repos/Nanopublication/nanopub-java/releases/latest \
+        JAR_URL=$(curl -s https://api.github.com/repos/Nanopublication/nanopub-java/releases/latest \
           | grep "browser_download_url" \
           | grep "with-dependencies.jar" \
-          | cut -d '"' -f 4 \
-          | xargs curl -LO
+          | cut -d '"' -f 4)
+        curl -Lo nanopub.jar "$JAR_URL"
 
     - name: Build ourself
       run: cargo build --release
