@@ -33,22 +33,7 @@ tag-prefix = "v"
 tag-name = "v{{version}}"
 sign-tag = false
 push = true
-publish = false  # Set to true if you want to publish to crates.io
+publish = false  # Publishing lib to crates.io is done in gh workflow
 pre-release-hook = ["git-cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
+consolidate-commits = true
 pre-release-commit-message = "chore: Bump version to {{version}}"
-
-[[workspace.metadata.release.packages]]
-name = "nanopub"
-# publish = true
-
-[[workspace.metadata.release.packages]]
-name = "nanopub-cli"
-
-# Python/JS bindings are not published to crates.io
-[[workspace.metadata.release.packages]]
-name = "nanopub-sign"
-release = false
-
-[[workspace.metadata.release.packages]]
-name = "nanopub-js"
-release = false
