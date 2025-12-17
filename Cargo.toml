@@ -23,3 +23,32 @@ nanopub = { version = "0.1.5", path = "./lib" }
 
 [profile.release]
 lto = true
+
+# cargo-release configuration
+# Run with: cargo release patch|minor|major --execute
+# Dry run (default): cargo release patch
+[workspace.metadata.release]
+shared-version = true
+tag-prefix = "v"
+tag-name = "v{{version}}"
+sign-tag = false
+push = true
+publish = false  # Set to true if you want to publish to crates.io
+pre-release-hook = ["git-cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
+pre-release-commit-message = "chore: Bump version to {{version}}"
+
+[[workspace.metadata.release.packages]]
+name = "nanopub"
+# publish = true
+
+[[workspace.metadata.release.packages]]
+name = "nanopub-cli"
+
+# Python/JS bindings are not published to crates.io
+[[workspace.metadata.release.packages]]
+name = "nanopub-sign"
+release = false
+
+[[workspace.metadata.release.packages]]
+name = "nanopub-js"
+release = false
