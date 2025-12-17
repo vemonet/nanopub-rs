@@ -17,6 +17,9 @@ categories.workspace = true
 [package.metadata.docs.rs]
 all-features = true
 
+[package.metadata.release]
+pre-release-hook = ["git-cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
+
 [dependencies]
 base64 = "0.22"
 rsa = { version = "0.9.8", default-features = false, features = ["pem", "sha2"] }
