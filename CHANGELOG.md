@@ -2,7 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.5](https://github.com/vemonet/nanopub-rs/compare/v0.1.4..0.1.5) - 2025-11-11
+## [0.1.6](https://github.com/vemonet/nanopub-rs/compare/v0.1.5..0.1.6) - 2025-12-17
+
+### ⚙️ Continuous Integration
+
+- Update script to ddl latest nanopub jar version in benchmark run, fixes https://github.com/vemonet/nanopub-rs/issues/19 - ([c8d7b10](https://github.com/vemonet/nanopub-rs/commit/c8d7b10adec54233d99cdeaf219700f9e4f7f82e))
+- Move npm publish out of CI - ([23b1058](https://github.com/vemonet/nanopub-rs/commit/23b105869ee5241a79826394ea92a930794e7334))
+- Update release process to use cargo-release - ([40f474a](https://github.com/vemonet/nanopub-rs/commit/40f474a59df5cb9259b15412a383ff86b9d1b8e7))
+- Fix cargo release config - ([458def5](https://github.com/vemonet/nanopub-rs/commit/458def595755a55aec3a203d88a27650c09a1a04))
+- Put back old school release script without cargo-release - ([5695885](https://github.com/vemonet/nanopub-rs/commit/5695885d5e6d38ac96e6d236b9402377d7b4237e))
+
+### ⛰️ Features
+
+- [**breaking**] Now using `/` instead of `#` as ending separator for the trusty namespace when signing a nanopub - ([fce8dc7](https://github.com/vemonet/nanopub-rs/commit/fce8dc7c9cc3bb7d3d2d710a1b3b48f7b40c6e27))
+
+### 🐛 Bug Fixes
+
+- Fix cargo categories - ([4c1ae0e](https://github.com/vemonet/nanopub-rs/commit/4c1ae0ed69ac243683a7bd9a971af96c46cefb50))
+- Improve how private/public keys are parsed using built-in pem parsers from rsa crate - ([bb33cba](https://github.com/vemonet/nanopub-rs/commit/bb33cbafbb136c07ab9fc3c75ff737b932f3345c))
+- Fix benchmark in workflow - ([84f0691](https://github.com/vemonet/nanopub-rs/commit/84f06916d087297a950471ed2f481912b65287d9))
+
+### 🚜 Refactor
+
+- Fix warnings - ([4737c9b](https://github.com/vemonet/nanopub-rs/commit/4737c9b9b5e60f60e19d4073c79f77c30049aa78))
+
+## [0.1.5](https://github.com/vemonet/nanopub-rs/compare/v0.1.4..v0.1.5) - 2025-11-11
 
 ### Bug
 
@@ -43,6 +67,7 @@ All notable changes to this project will be documented in this file.
 - Chore: improve pyo3 functions signatures
 fix: Fix issues with pyo3 signature, and fix playground.html import - ([23a52bf](https://github.com/vemonet/nanopub-rs/commit/23a52bf24567baba4a722b4036a7c9de4bcf8428))
 - Upgrade pyo3 dependency hoping it will fix windows aarch64 wheel build and commit Cargo.lock - ([c5b85de](https://github.com/vemonet/nanopub-rs/commit/c5b85de9171ef4859ec38acd324811a6d8a86bde))
+- Bump version to 0.1.5 - ([ebf9c16](https://github.com/vemonet/nanopub-rs/commit/ebf9c16181ff130fc30552ea0b21837b4dd13e6b))
 
 ## [0.1.4](https://github.com/vemonet/nanopub-rs/compare/v0.1.3..v0.1.4) - 2024-05-30
 
