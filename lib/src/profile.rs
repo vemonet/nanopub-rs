@@ -168,13 +168,13 @@ impl fmt::Display for NpProfile {
         writeln!(f, "Public key: {}", self.public_key)?;
         writeln!(f, "Private key: {}", self.private_key)?;
         if let Some(orcid) = &self.orcid_id {
-            writeln!(f, "ORCID: {}", orcid)?;
+            writeln!(f, "ORCID: {orcid}")?;
         }
         if let Some(name) = &self.name {
-            writeln!(f, "Name: {}", name)?;
+            writeln!(f, "Name: {name}")?;
         }
         if let Some(intro_np_uri) = &self.introduction_nanopub_uri {
-            writeln!(f, "Introduction URI: {}", intro_np_uri)?;
+            writeln!(f, "Introduction URI: {intro_np_uri}")?;
         }
         Ok(())
     }

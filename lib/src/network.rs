@@ -19,9 +19,9 @@ pub async fn publish_np(server: &str, np: &str) -> Result<bool, NpError> {
         _ => {
             let error_msg = res.text().await?;
             if error_msg.is_empty() {
-                Err(NpError(format!("{}", status)))
+                Err(NpError(format!("{status}")))
             } else {
-                Err(NpError(format!("{}: {}", status, error_msg)))
+                Err(NpError(format!("{status}: {error_msg}")))
             }
         }
     }

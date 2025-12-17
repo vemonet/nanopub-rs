@@ -84,7 +84,7 @@ impl From<base64::DecodeError> for NpError {
 }
 impl From<base64::alphabet::ParseAlphabetError> for NpError {
     fn from(err: base64::alphabet::ParseAlphabetError) -> Self {
-        NpError(format!("Parse base64 alphabet error: {}", err))
+        NpError(format!("Parse base64 alphabet error: {err}"))
     }
 }
 impl From<rsa::Error> for NpError {

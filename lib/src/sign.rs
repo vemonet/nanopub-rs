@@ -41,7 +41,7 @@ pub fn replace_bnodes(
     let mut new_dataset = LightDataset::new();
     let mut bnode_map: HashMap<String, usize> = HashMap::new();
     let mut bnode_counter = 1;
-    let re_underscore_uri = Regex::new(&format!(r"{}.?(_+[a-zA-Z0-9^_]+)$", base_uri))?;
+    let re_underscore_uri = Regex::new(&format!(r"{base_uri}.?(_+[a-zA-Z0-9^_]+)$"))?;
 
     for quad in dataset.quads() {
         let quad = quad?;
@@ -243,7 +243,7 @@ pub fn normalize_dataset(
     separator: &str,
 ) -> Result<String, NpError> {
     let mut quads_vec: Vec<NormQuad> = vec![];
-    let norm_uri = format!("{} ", norm_ns);
+    let norm_uri = format!("{norm_ns} ");
     // println!("DEBUG: NORMALIZE {} {} {}", base_ns, norm_ns, separator);
     // Example already signed: http://www.nextprot.org/nanopubs#NX_Q9Y6K8_ESTEvidence_TS-2083.RAr9ao0vjXtLf3d9U4glE_uQWSknfYoPlIzKBq6ybOO5k.
     // Not signed yet: http://www.proteinatlas.org/about/nanopubs/ENSG00000000003_ih_TS_0030_head

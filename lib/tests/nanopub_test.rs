@@ -95,7 +95,7 @@ fn sign_nanopub_blank() -> Result<(), Box<dyn Error>> {
             "https://w3id.org/np/RAqz9iOB9hMkNmH9m6e2FvbZRrLgb9aMBfKSklMVh9LrM".to_string(),
         )
         .build()?;
-    println!("{}", profile); // to cover fmt in code cov
+    println!("{profile}"); // to cover fmt in code cov
     let _pubkey = profile.get_public_key(); // cov
     let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
     assert!(np.info.published.is_none());
@@ -206,7 +206,7 @@ fn test_np_info() -> Result<(), Box<dyn Error>> {
     let rdf_str = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let dataset = parse_rdf(&rdf_str)?;
     let np_info = extract_np_info(&dataset)?;
-    println!("{}", np_info); // Required for coverage
+    println!("{np_info}"); // Required for coverage
     Ok(())
 }
 
@@ -240,14 +240,14 @@ async fn fetch_nanopub() -> Result<(), Box<dyn Error>> {
     let np_url = "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw";
     let np = Nanopub::fetch(np_url).await?;
     assert!(np.info.published.is_some());
-    println!("{}", np);
+    println!("{np}");
     Ok(())
 }
 
 #[test]
 fn test_gen_keys() -> Result<(), Box<dyn Error>> {
     let (privkey, _pubkey) = gen_keys()?;
-    println!("{}", privkey);
+    println!("{privkey}");
     assert!(privkey.len() > 10);
     Ok(())
 }

@@ -179,7 +179,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
 
     // Generate normalized namespace without trusty
     let norm_ns = if !trusty_hash.is_empty() {
-        format!("{}{}", base_uri, separator_before_trusty)
+        format!("{base_uri}{separator_before_trusty}")
     } else if original_ns.starts_with(NP_TEMP_URI) {
         NP_PREF_NS.to_string()
     } else if !original_ns.ends_with('#')

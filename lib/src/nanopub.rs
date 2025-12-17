@@ -54,7 +54,7 @@ impl fmt::Display for Nanopub {
         writeln!(f, "Signature hash: {}", self.info.signature)?;
         writeln!(f, "Public key: {}", self.info.public_key)?;
         if let Some(published) = &self.info.published {
-            writeln!(f, "Published: {:?}", published)?;
+            writeln!(f, "Published: {published:?}")?;
         }
         Ok(())
     }
@@ -123,7 +123,7 @@ impl Nanopub {
         let _ = self.is_valid()?;
         let mut msg: String = "".to_string();
         if self.info.trusty_hash.is_empty() {
-            msg = format!("{}1 valid (not trusty)", msg);
+            msg = format!("{msg}1 valid (not trusty)");
         } else {
             // Check Trusty hash if found
             let expected_hash = make_trusty(
@@ -135,7 +135,7 @@ impl Nanopub {
             if expected_hash != self.info.trusty_hash {
                 return Err(NpError(format!("Invalid Nanopub: the hash of the nanopublication is different than the expected hash \n{}\n{}", self.info.trusty_hash, expected_hash).to_string()));
             }
-            msg = format!("{}1 trusty", msg);
+            msg = format!("{msg}1 trusty");
         }
 
         // Check the signature is valid if found
@@ -168,9 +168,9 @@ impl Nanopub {
                 &Sha256::digest(norm_quads.as_bytes()),
                 &engine::general_purpose::STANDARD.decode(self.info.signature.as_bytes())?,
             )?;
-            msg = format!("{} with signature", msg);
+            msg = format!("{msg} with signature");
         } else {
-            msg = format!("{} without signature", msg);
+            msg = format!("{msg} without signature");
         }
 
         println!(
@@ -371,8 +371,7 @@ impl Nanopub {
         } else if self.info.signature.is_empty() {
             // If no profile and nanopub not signed we throw an error
             return Err(NpError(format!(
-                "No profile provided and nanopub not signed, could not sign the Nanopublication \n{}",
-                self
+                "No profile provided and nanopub not signed, could not sign the Nanopublication \n{self}"
             )));
         } else {
             // If no profile provided, but the nanopub is already signed, we verify it, then publish it
@@ -401,8 +400,7 @@ impl Nanopub {
             // );
         } else {
             return Err(NpError(format!(
-                "Issue publishing the Nanopublication \n{}",
-                self
+                "Issue publishing the Nanopublication \n{self}"
             )));
         }
         Ok(self)

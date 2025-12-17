@@ -21,7 +21,6 @@ git commit -m "chore: Bump version to $new_version"
 git push
 
 cd js
-npm run pack
 npm run release
 cd ..
 

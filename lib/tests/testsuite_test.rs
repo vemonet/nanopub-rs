@@ -13,7 +13,7 @@ async fn testsuite_publish_valid_plain() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if filename.ends_with("trig\"") {
-            println!("\n☑️  Testing file publish: {}", filename);
+            println!("\n☑️  Testing file publish: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::new(&np_rdf)?
                 .publish(Some(&get_profile()), None)
@@ -32,7 +32,7 @@ fn testsuite_check_valid_signed() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if !filename.ends_with("xml\"") && !filename.contains("simple1-signed-dsa") {
-            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            println!("\n☑️  [{index}] Testing file check: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let _np = Nanopub::new(&np_rdf)?.check().expect("Failed check");
         }
@@ -48,7 +48,7 @@ fn testsuite_check_valid_trusty() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if !filename.ends_with("xml\"") && !filename.contains("simple1-signed-dsa") {
-            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            println!("\n☑️  [{index}] Testing file check: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let _np = Nanopub::new(&np_rdf)?.check().expect("Failed check");
         }
@@ -64,13 +64,12 @@ fn testsuite_check_invalid_signed() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if !filename.ends_with("xml\"") && !filename.contains("simple1-signed-dsa") {
-            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            println!("\n☑️  [{index}] Testing file check: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::new(&np_rdf)?.check();
             assert!(
                 np.is_err(),
-                "The np check should have failed for file: {}",
-                filename
+                "The np check should have failed for file: {filename}"
             );
         }
     }
@@ -85,7 +84,7 @@ fn testsuite_check_invalid_trusty() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if !filename.ends_with("xml\"") && !filename.contains("simple1-signed-dsa") {
-            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            println!("\n☑️  [{index}] Testing file check: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let np = Nanopub::new(&np_rdf)?.check();
             assert!(np.is_err(), "The np check should have failed");
@@ -102,13 +101,12 @@ fn testsuite_check_invalid_plain() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if !filename.ends_with("xml\"") && !filename.contains("valid") {
-            println!("\n☑️  [{}] Testing file check: {}", index, filename);
+            println!("\n☑️  [{index}] Testing file check: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let result = Nanopub::new(&np_rdf).and_then(|np| np.check());
             assert!(
                 result.is_err(),
-                "The np check should have failed for file: {}",
-                filename
+                "The np check should have failed for file: {filename}"
             );
         }
     }
@@ -123,7 +121,7 @@ fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
         let file = entry?;
         let filename = format!("{:?}", file.file_name());
         if !filename.ends_with("xml\"") && !filename.contains("info") {
-            println!("\n☑️  [{}] Testing file publish: {}", index, filename);
+            println!("\n☑️  [{index}] Testing file publish: {filename}");
             let np_rdf = fs::read_to_string(file.path())?;
             let result = Nanopub::new(&np_rdf).and_then(|np| {
                 tokio::runtime::Runtime::new()
@@ -132,8 +130,7 @@ fn testsuite_publish_invalid_plain() -> Result<(), Box<dyn Error>> {
             });
             assert!(
                 result.is_err(),
-                "The np check should have failed for file: {}",
-                filename
+                "The np check should have failed for file: {filename}"
             );
         }
     }
