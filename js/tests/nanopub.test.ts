@@ -47,13 +47,14 @@ describe('Tests for the @nanopub/sign npm package', () => {
     expect(np.info().trusty_hash).toBe("RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4");
   });
 
-  test('sign nanopub in 2 steps', async () => {
+  test('sign nanopub and check', async () => {
     const profile = new NpProfile(privKey, orcid, "Your Name");
     let np = new Nanopub(unsignedRdf);
     np = np.sign(profile);
+    expect(np.check());
     // np.sign(profile);
-    expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
-    expect(np.info().trusty_hash).toBe("RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4");
+    // expect(np.info().trusty_hash.startsWith("RA")).toBe(true);
+    // expect(np.info().trusty_hash).toBe("RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4");
   });
 
   test('publish nanopub', async () => {

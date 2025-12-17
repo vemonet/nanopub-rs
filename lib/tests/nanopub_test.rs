@@ -43,6 +43,11 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let np_rdf = fs::read_to_string("tests/testsuite/valid/plain/proteinatlas-16-1.trig")?;
     // let np_rdf = fs::read_to_string("./tests/resources/nanopub_test_blank.trig")?;
     let profile = ProfileBuilder::new(get_test_key()).build()?;
+
+    let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
+    // println!("{}", np.rdf()?);
+    println!("{}", np.check()?);
+
     let np = Nanopub::new(&np_rdf)?
         .publish(Some(&profile), Some(""))
         // .publish(Some(&profile), Some(get_np_server(false))) // in case we need to test directly on prod servers

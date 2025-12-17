@@ -20,6 +20,11 @@ git add Cargo.toml Cargo.lock */Cargo.toml CHANGELOG.md
 git commit -m "chore: Bump version to $new_version"
 git push
 
+cd js
+npm run pack
+npm run release
+cd ..
+
 echo ""
 echo "  🏷️  Create and push tag"
 echo ""
