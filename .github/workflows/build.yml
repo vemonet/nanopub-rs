@@ -251,7 +251,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
           cache: npm
           cache-dependency-path: "./js/package.json"
@@ -266,6 +266,7 @@ jobs:
           name: nanopub_sign_npm
           path: ./js/pkg
 
-      - run: npm run release
-        working-directory: ./js
+      - name: Publish to npm
+        run: npm run build && npm publish ./pkg --provenance --access public
+        working-directory: ./js/pkg
         if: startsWith(github.ref, 'refs/tags/')
