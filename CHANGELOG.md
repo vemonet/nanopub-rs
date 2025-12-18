@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.7](https://github.com/vemonet/nanopub-rs/compare/v0.1.6..0.1.7) - 2025-12-18
+## [0.1.8](https://github.com/vemonet/nanopub-rs/compare/v0.1.7..0.1.8) - 2025-12-18
+
+### ⚙️ Continuous Integration
+
+- Fix permissions in build workflow and improve release docs - ([3b21463](https://github.com/vemonet/nanopub-rs/commit/3b2146372ec0ff12eab52eb49e0913cb4da05d7a))
+
+## [0.1.7](https://github.com/vemonet/nanopub-rs/compare/v0.1.6..v0.1.7) - 2025-12-18
 
 ### ⚙️ Continuous Integration
 
@@ -11,6 +17,10 @@ All notable changes to this project will be documented in this file.
 ### 🐛 Bug Fixes
 
 - Improve handling of wrong namespace to avoid `.unwrap()` panics - ([4e81ab7](https://github.com/vemonet/nanopub-rs/commit/4e81ab79608822deed8f6181b78a3c1acfe596eb))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.7 - ([c7515a3](https://github.com/vemonet/nanopub-rs/commit/c7515a36e08e60c4b2d6ad13b4478e929ba5cd1d))
 
 ## [0.1.6](https://github.com/vemonet/nanopub-rs/compare/v0.1.5..v0.1.6) - 2025-12-17
 

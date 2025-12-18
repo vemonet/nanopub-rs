@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Vincent Emonet <vincent.emonet@gmail.com>"]
 edition = "2021"
 repository = "https://github.com/vemonet/nanopub-rs"
@@ -19,7 +19,7 @@ keywords = ["nanopublications", "rdf", "linked-data", "semantic-web"]
 categories = ["science", "encoding", "cryptography"]
 
 [workspace.dependencies]
-nanopub = { version = "0.1.7", path = "./lib" }
+nanopub = { version = "0.1.8", path = "./lib" }
 
 [profile.release]
 lto = true
