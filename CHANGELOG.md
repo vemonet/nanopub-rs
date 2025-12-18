@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.6](https://github.com/vemonet/nanopub-rs/compare/v0.1.5..0.1.6) - 2025-12-17
+## [0.1.7](https://github.com/vemonet/nanopub-rs/compare/v0.1.6..0.1.7) - 2025-12-18
+
+### ⚙️ Continuous Integration
+
+- Update release process to use cargo-release and move cliff config in `Cargo.toml` file, put back npm publish in `build.yml` workflow using OIDC trusted publisher - ([b96ba30](https://github.com/vemonet/nanopub-rs/commit/b96ba308014c4953ffb51a70410df187c26e0ffc))
+
+### 🐛 Bug Fixes
+
+- Improve handling of wrong namespace to avoid `.unwrap()` panics - ([4e81ab7](https://github.com/vemonet/nanopub-rs/commit/4e81ab79608822deed8f6181b78a3c1acfe596eb))
+
+## [0.1.6](https://github.com/vemonet/nanopub-rs/compare/v0.1.5..v0.1.6) - 2025-12-17
 
 ### ⚙️ Continuous Integration
 
@@ -25,6 +35,10 @@ All notable changes to this project will be documented in this file.
 ### 🚜 Refactor
 
 - Fix warnings - ([4737c9b](https://github.com/vemonet/nanopub-rs/commit/4737c9b9b5e60f60e19d4073c79f77c30049aa78))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.6 - ([97d4a87](https://github.com/vemonet/nanopub-rs/commit/97d4a8758fce49e809340c610211ef1002ccb2ba))
 
 ## [0.1.5](https://github.com/vemonet/nanopub-rs/compare/v0.1.4..v0.1.5) - 2025-11-11
 
