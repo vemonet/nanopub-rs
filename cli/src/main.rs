@@ -61,8 +61,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     match matches.subcommand() {
         Some(("sign", sub)) => {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
-            let key_file = sub.get_one::<String>("key").unwrap();
-            let profile_file = sub.get_one::<String>("profile").unwrap();
+            let key_file = sub.get_one::<String>("key").expect("has default value");
+            let profile_file = sub.get_one::<String>("profile").expect("has default value");
 
             // Read RDF from file, and get profile from YAML file or key
             let np_rdf = fs::read_to_string(np_file)?;
@@ -97,8 +97,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         Some(("publish", sub)) => {
             let np_file = sub.get_one::<String>("NANOPUB_FILE").expect("required");
-            let key_file = sub.get_one::<String>("key").unwrap();
-            let profile_file = sub.get_one::<String>("profile").unwrap();
+            let key_file = sub.get_one::<String>("key").expect("has default value");
+            let profile_file = sub.get_one::<String>("profile").expect("has default value");
             let test_server = sub.get_flag("test");
 
             // Read RDF from file, and get profile from YAML file or key

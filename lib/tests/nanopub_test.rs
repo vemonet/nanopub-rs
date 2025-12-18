@@ -225,14 +225,8 @@ fn test_normalize() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_get_ns_empty() -> Result<(), Box<dyn Error>> {
-    let ns = std::panic::catch_unwind(|| {
-        ns("not there");
-    });
-    // ns.is_err()
-    match ns {
-        Ok(_) => panic!("No panic occurred"),
-        Err(_) => Ok(()),
-    }
+    assert!(ns("not there").is_err());
+    Ok(())
 }
 
 #[tokio::test]

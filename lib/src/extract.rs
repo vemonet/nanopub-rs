@@ -57,7 +57,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut pubinfo: String = "".to_string();
 
     // Extract nanopub URL and head graph
-    for q in dataset.quads_matching(Any, [&rdf::type_], [ns("np").get("Nanopublication")?], Any) {
+    for q in dataset.quads_matching(Any, [&rdf::type_], [ns("np")?.get("Nanopublication")?], Any) {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
@@ -85,7 +85,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_matching(
         [&np_iri],
-        [ns("np").get("hasAssertion")?],
+        [ns("np")?.get("hasAssertion")?],
         Any,
         [Some(&head_iri)],
     ) {
@@ -93,7 +93,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     }
     for q in dataset.quads_matching(
         [&np_iri],
-        [ns("np").get("hasProvenance")?],
+        [ns("np")?.get("hasProvenance")?],
         Any,
         [Some(&head_iri)],
     ) {
@@ -101,7 +101,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     }
     for q in dataset.quads_matching(
         [&np_iri],
-        [ns("np").get("hasPublicationInfo")?],
+        [ns("np")?.get("hasPublicationInfo")?],
         Any,
         [Some(&head_iri)],
     ) {
@@ -197,7 +197,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut signature_iri: Iri<String> = Iri::new_unchecked(np_ns.get("sig")?.to_string());
     for q in dataset.quads_matching(
         Any,
-        [ns("npx").get("hasSignature")?],
+        [ns("npx")?.get("hasSignature")?],
         Any,
         [Some(&pubinfo_iri)],
     ) {
@@ -209,7 +209,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut pubkey: Option<String> = None;
     for q in dataset.quads_matching(
         [&signature_iri],
-        [ns("npx").get("hasPublicKey")?],
+        [ns("npx")?.get("hasPublicKey")?],
         Any,
         [Some(&pubinfo_iri)],
     ) {
@@ -220,7 +220,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut algo: Option<String> = None;
     for q in dataset.quads_matching(
         [&signature_iri],
-        [ns("npx").get("hasAlgorithm")?],
+        [ns("npx")?.get("hasAlgorithm")?],
         Any,
         [Some(&pubinfo_iri)],
     ) {
@@ -232,9 +232,9 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     for q in dataset.quads_matching(
         [&np_iri, &Iri::new_unchecked(original_ns.to_string())],
         [
-            ns("dct").get("creator")?,
-            ns("prov").get("wasAttributedTo")?,
-            ns("pav").get("createdBy")?,
+            ns("dct")?.get("creator")?,
+            ns("prov")?.get("wasAttributedTo")?,
+            ns("pav")?.get("createdBy")?,
         ],
         Any,
         [Some(&pubinfo_iri)],

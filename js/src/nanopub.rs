@@ -66,11 +66,10 @@ impl Nanopub {
         let option_profile: Option<NpProfile> = if js_value.is_undefined() {
             None
         } else {
-            Some(
-                NpProfile::try_from(js_value)
-                    .map_err(|e| JsValue::from_str(&e.to_string()))
-                    .unwrap(),
-            )
+            match NpProfile::try_from(js_value) {
+                Ok(profile) => Some(profile),
+                Err(e) => return Promise::reject(&JsValue::from_str(&e.to_string())),
+            }
         };
         let profile = if let Some(option_profile) = option_profile {
             Some(option_profile.profile.clone())

@@ -144,7 +144,7 @@ impl Nanopub {
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(
                 &self.info.signature_iri,
-                ns("npx").get("hasSignature")?,
+                ns("npx")?.get("hasSignature")?,
                 self.info.signature.as_str(),
                 Some(&self.info.pubinfo),
             )?;
@@ -218,19 +218,19 @@ impl Nanopub {
         // Add triples about the signature in the pubinfo
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx").get("hasPublicKey")?,
+            ns("npx")?.get("hasPublicKey")?,
             &*profile.public_key,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx").get("hasAlgorithm")?,
+            ns("npx")?.get("hasAlgorithm")?,
             "RSA",
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx").get("hasSignatureTarget")?,
+            ns("npx")?.get("hasSignatureTarget")?,
             self.info.ns.get("")?,
             Some(&self.info.pubinfo),
         )?;
@@ -243,7 +243,7 @@ impl Nanopub {
                     &self.info.uri,
                     &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
                 ],
-                [ns("dct").get("created")?],
+                [ns("dct")?.get("created")?],
                 Any,
                 [Some(&self.info.pubinfo)],
             )
@@ -253,7 +253,7 @@ impl Nanopub {
             let datetime_now = Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
             self.dataset.insert(
                 self.info.ns.as_iri_ref(),
-                ns("dct").get("created")?,
+                ns("dct")?.get("created")?,
                 datetime_now.as_str() * xsd::dateTime,
                 Some(&self.info.pubinfo),
             )?;
@@ -269,9 +269,9 @@ impl Nanopub {
                         &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
                     ],
                     [
-                        ns("dct").get("creator")?,
-                        ns("prov").get("wasAttributedTo")?,
-                        ns("pav").get("createdBy")?,
+                        ns("dct")?.get("creator")?,
+                        ns("prov")?.get("wasAttributedTo")?,
+                        ns("pav")?.get("createdBy")?,
                     ],
                     Any,
                     [Some(&self.info.pubinfo)],
@@ -281,7 +281,7 @@ impl Nanopub {
             {
                 self.dataset.insert(
                     self.info.ns.as_iri_ref(),
-                    ns("dct").get("creator")?,
+                    ns("dct")?.get("creator")?,
                     Iri::new_unchecked(orcid.clone()),
                     Some(&self.info.pubinfo),
                 )?;
@@ -306,7 +306,7 @@ impl Nanopub {
         // Add the signature to the pubinfo graph
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx").get("hasSignature")?,
+            ns("npx")?.get("hasSignature")?,
             &*signature_hash,
             Some(&self.info.pubinfo),
         )?;
@@ -410,25 +410,25 @@ impl Nanopub {
     pub fn unsign(mut self) -> Result<Self, NpError> {
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx").get("hasPublicKey")?,
+            ns("npx")?.get("hasPublicKey")?,
             &*self.info.public_key,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx").get("hasAlgorithm")?,
+            ns("npx")?.get("hasAlgorithm")?,
             &*self.info.algo,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx").get("hasSignatureTarget")?,
+            ns("npx")?.get("hasSignatureTarget")?,
             &self.info.uri,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx").get("hasSignature")?,
+            ns("npx")?.get("hasSignature")?,
             &*self.info.signature,
             Some(&self.info.pubinfo),
         )?;
@@ -491,32 +491,32 @@ impl Nanopub {
         // Assertion graph triples, add key declaration
         dataset.insert(
             np_ns.get("keyDeclaration")?,
-            ns("npx").get("declaredBy")?,
+            ns("npx")?.get("declaredBy")?,
             Iri::new_unchecked(orcid),
             Some(&assertion_graph),
         )?;
         dataset.insert(
             np_ns.get("keyDeclaration")?,
-            ns("npx").get("hasAlgorithm")?,
+            ns("npx")?.get("hasAlgorithm")?,
             "RSA",
             Some(&assertion_graph),
         )?;
         dataset.insert(
             np_ns.get("keyDeclaration")?,
-            ns("npx").get("hasPublicKey")?,
+            ns("npx")?.get("hasPublicKey")?,
             profile.public_key.as_str(),
             Some(&assertion_graph),
         )?;
         dataset.insert(
             Iri::new_unchecked(orcid),
-            ns("foaf").get("name")?,
+            ns("foaf")?.get("name")?,
             name,
             Some(&assertion_graph),
         )?;
         // Provenance graph triples
         dataset.insert(
             assertion_graph,
-            ns("prov").get("wasAttributedTo")?,
+            ns("prov")?.get("wasAttributedTo")?,
             assertion_graph,
             Some(&prov_graph),
         )?;
@@ -619,26 +619,26 @@ pub fn create_base_dataset() -> Result<LightDataset, NpError> {
     // Add Head graph triples
     dataset.insert(
         np_iri,
-        ns("np").get("hasAssertion")?,
+        ns("np")?.get("hasAssertion")?,
         np_ns.get("assertion")?,
         Some(head_graph),
     )?;
     dataset.insert(
         np_iri,
-        ns("np").get("hasProvenance")?,
+        ns("np")?.get("hasProvenance")?,
         np_ns.get("provenance")?,
         Some(head_graph),
     )?;
     dataset.insert(
         np_iri,
-        ns("np").get("hasPublicationInfo")?,
+        ns("np")?.get("hasPublicationInfo")?,
         np_ns.get("pubinfo")?,
         Some(&head_graph),
     )?;
     dataset.insert(
         np_iri,
         rdf::type_,
-        ns("np").get("Nanopublication")?,
+        ns("np")?.get("Nanopublication")?,
         Some(&head_graph),
     )?;
     Ok(dataset)
