@@ -163,14 +163,26 @@ cargo outdated
 
 ## 🏷️ Publish a new release
 
-Building and publishing artifacts will be done by the [`build.yml`](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) GitHub actions workflow, make sure you have set the following tokens as secrets for this repository: `PYPI_TOKEN`, `NPM_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`
+!!! warning "Publisher tokens"
 
-Then just run the release script providing the new version following [semantic versioning](https://semver.org), it will bump the version in the `Cargo.toml` files, generate the changelog from commit messages, create a new tag, and push to GitHub:
+    Building and publishing artifacts will be done by the [`build.yml`](https://github.com/vemonet/nanopub-rs/actions/workflows/build.yml) GitHub actions workflow, make sure you have set the following tokens as secrets for this repository: `PYPI_TOKEN`, `CRATES_IO_TOKEN`, `CODECOV_TOKEN`. As well as properly configured the [trusted publisher on npm](https://www.npmjs.com/package/@nanopub/sign/access).
 
-```bash
-./scripts/release.sh 0.0.2
+Dry run:
+
+```sh
+cargo release patch
+```
+
+> Available: `patch` | `minor` | `major`
+
+Create release:
+
+```sh
+cargo release patch --execute
 ```
 
 !!! success "Automated release"
 
-    The `build.yml` workflow will automatically build artifacts (binaries, pip wheels, npm package), create a new release on GitHub, and add the generated artifacts to the new release.
+    This will bump the version in the `Cargo.toml` files, generate the changelog from commit messages, create a new tag, and push to GitHub
+
+    The `build.yml` workflow will then automatically build artifacts (binaries, pip wheels, npm package), create a new release on GitHub, and add the generated artifacts to the new release.

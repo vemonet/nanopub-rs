@@ -11,10 +11,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  id-token: write  # Required for OIDC (npm publish)
-  contents: read
-
 # cf. https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
 jobs:
 
@@ -237,9 +233,10 @@ jobs:
           body_path: CHANGES.md
         if: startsWith(github.ref, 'refs/tags/')
 
-  # https://docs.npmjs.com/trusted-publishers
   npm_tarball:
     name: 🦊 Wasm and npm package
+    permissions:
+      id-token: write  # Required for https://docs.npmjs.com/trusted-publishers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
