@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.9](https://github.com/vemonet/nanopub-rs/compare/v0.1.8..0.1.9) - 2025-12-18
+## [0.1.10](https://github.com/vemonet/nanopub-rs/compare/v0.1.9..0.1.10) - 2025-12-18
+
+### ⚙️ Continuous Integration
+
+- Fix npm trusted publishing through gh workflow - ([23776bc](https://github.com/vemonet/nanopub-rs/commit/23776bc32f64d6155663ccad7683eff892308952))
+
+## [0.1.9](https://github.com/vemonet/nanopub-rs/compare/v0.1.8..v0.1.9) - 2025-12-18
 
 ### ⚙️ Continuous Integration
 
 - Try to fix broken npm trusted publisher workflow - ([bdb5edc](https://github.com/vemonet/nanopub-rs/commit/bdb5edcaefda2ade1e178fa9d2a98cd954e0c28a))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.9 - ([404c63c](https://github.com/vemonet/nanopub-rs/commit/404c63c61d147bd0f09d1997c2c4ecbaaf853f28))
 
 ## [0.1.8](https://github.com/vemonet/nanopub-rs/compare/v0.1.7..v0.1.8) - 2025-12-18
 
