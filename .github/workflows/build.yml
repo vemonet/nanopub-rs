@@ -11,6 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  id-token: write  # Required for OIDC (npm publish)
+  contents: read
+
 # cf. https://github.com/oxigraph/oxigraph/blob/main/.github/workflows/artifacts.yml
 jobs:
 
@@ -35,7 +39,7 @@ jobs:
 
     runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Add cross-compilation target
         run: rustup update && rustup target add ${{ matrix.target }}
@@ -142,7 +146,7 @@ jobs:
     runs-on: ${{ matrix.runs-on || format('{0}-latest', (matrix.os == 'linux' && 'ubuntu') || matrix.os) }}
     # runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: docker/setup-qemu-action@v3
         if: matrix.os == 'linux' && matrix.target == 'aarch64'
         with:
@@ -199,7 +203,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: rustup update
       - run: cargo login $CRATES_IO_TOKEN
         env:
@@ -214,7 +218,7 @@ jobs:
       release_body: ${{ steps.git-cliff.outputs.content }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -233,39 +237,38 @@ jobs:
           body_path: CHANGES.md
         if: startsWith(github.ref, 'refs/tags/')
 
-  # npm_tarball:
-  #   name: 🦊 Wasm and npm package
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v5
-  #       with:
-  #         submodules: true
-  #     - run: rustup update
-  #     - uses: Swatinem/rust-cache@v2
+  # https://docs.npmjs.com/trusted-publishers
+  npm_tarball:
+    name: 🦊 Wasm and npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+      - run: rustup update
+      - uses: Swatinem/rust-cache@v2
 
-  #     - name: Install wasm-pack for JS
-  #       run: cargo install wasm-pack || true
+      - name: Install wasm-pack for JS
+        run: cargo install wasm-pack || true
 
-  #     - name: Setup NodeJS
-  #       uses: actions/setup-node@v5
-  #       with:
-  #         node-version: 20
-  #         registry-url: 'https://registry.npmjs.org'
-  #         cache: npm
-  #         cache-dependency-path: "./js/package.json"
+      - name: Setup NodeJS
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: "./js/package.json"
 
-  #     - name: Build npm package
-  #       run: npm run pack
-  #       working-directory: ./js
+      - name: Build npm package
+        run: npm run pack
+        working-directory: ./js
 
-  #     - name: Upload tarball
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: nanopub_sign_npm
-  #         path: ./js/pkg
+      - name: Upload tarball
+        uses: actions/upload-artifact@v6
+        with:
+          name: nanopub_sign_npm
+          path: ./js/pkg
 
-  #     - run: npm run release
-  #       working-directory: ./js
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  #       if: startsWith(github.ref, 'refs/tags/')
+      - run: npm run release
+        working-directory: ./js
+        if: startsWith(github.ref, 'refs/tags/')

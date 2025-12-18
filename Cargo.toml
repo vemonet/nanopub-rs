@@ -24,15 +24,14 @@ nanopub = { version = "0.1.6", path = "./lib" }
 [profile.release]
 lto = true
 
-# # NOTE: not used yet because it creates changelog in each crate
-# # https://github.com/crate-ci/cargo-release/issues/925
-# [workspace.metadata.release]
-# shared-version = true
-# tag-prefix = "v"
-# tag-name = "v{{version}}"
-# sign-tag = false
-# push = true
-# publish = false  # Publishing lib to crates.io is done in gh workflow
-# pre-release-hook = ["git-cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
-# consolidate-commits = true
-# pre-release-commit-message = "chore: Bump version to {{version}}"
+# NOTE: not used yet because it creates changelog in each crate
+# https://github.com/crate-ci/cargo-release/issues/925
+[workspace.metadata.release]
+shared-version = true
+tag-prefix = "v"
+tag-name = "v{{version}}"
+sign-tag = false
+push = true
+publish = false  # Publishing lib to crates.io is done in gh workflow
+consolidate-commits = true
+pre-release-commit-message = "chore: Bump version to {{version}}"
