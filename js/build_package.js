@@ -21,6 +21,18 @@ pkg.main = "node.js";
 pkg.module = "bundler.js";
 pkg.browser = "web.js";
 pkg.types = "bundler.d.ts";
+pkg.exports = {
+    ".": {
+        "browser": {
+            "import": "./web.js",
+            "require": "./web.js"
+        },
+        "import": "./bundler.js",
+        "require": "./node.js",
+        "default": "./node.js"
+    }
+};
+pkg.unpkg = "web.js";
 pkg.files = ["*.{js,wasm,d.ts}"];
 pkg.homepage = "https://github.com/vemonet/nanopub-rs/tree/main/js";
 pkg.license = "MIT";

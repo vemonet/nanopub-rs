@@ -2,6 +2,8 @@
 
 It can be used from any JavaScript framework, or NodeJS.
 
+## On the client
+
 For example, to use it in a nextjs react app to publish a nanopub defined in JSON-LD:
 
 1. Create the project and `cd` into your new app folder
@@ -21,7 +23,7 @@ For example, to use it in a nextjs react app to publish a nanopub defined in JSO
     ```typescript title="src/app/page.tsx"
     'use client'
     import { useEffect, useState } from 'react';
-    import init, { Nanopub, NpProfile } from "@nanopub/sign";
+    import init, { Nanopub, NpProfile } from "@nanopub/sign/web.js";
 
     export default function Home() {
       const [rdfOutput, setRdfOutput] = useState('');
@@ -105,3 +107,14 @@ For example, to use it in a nextjs react app to publish a nanopub defined in JSO
     ```bash
     npm run dev
     ```
+
+## On the server
+
+When running on the server (e.g in a NextJS API route), you do not need to initialize the wasm binary, you can just import and use it directly:
+
+```ts
+import { Nanopub, NpProfile } from "@nanopub/sign";
+
+const profile = new NpProfile(privateKey, 'https://orcid.org/0000-0000-0000-0000', 'Server User', '');
+const np = await new Nanopub(rdf).publish(profile, "");
+```

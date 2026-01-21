@@ -14,8 +14,10 @@ You can import the NPM package from a CDN, and sign a Nanopublication from a sim
 
     <script type="module">
       // Import from a CDN
-      import init, { Nanopub, NpProfile } from "https://unpkg.com/@nanopub/sign";
-      // We recommend to use a compiler like vite:
+      import init, { Nanopub, NpProfile } from "https://unpkg.com/@nanopub/sign/web.js";
+      // Or with esm.sh
+      // import init, { Nanopub, NpProfile } from "https://esm.sh/@nanopub/sign";
+      // Or when using a compiler like vite:
       // import init, { Nanopub, NpProfile } from "@nanopub/sign";
 
       // Change the RDF and private key as you wish
