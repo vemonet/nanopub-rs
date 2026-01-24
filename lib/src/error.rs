@@ -3,7 +3,7 @@ use std::fmt;
 
 use sophia::api::source::StreamError;
 use sophia::inmem::index::TermIndexFullError;
-use sophia::iri::InvalidIri;
+use sophia::iri::{InvalidIri, resolve::IriParseError};
 
 #[derive(Debug)]
 pub struct TermError();
@@ -44,6 +44,11 @@ impl From<TermError> for NpError {
 }
 impl From<InvalidIri> for NpError {
     fn from(err: InvalidIri) -> Self {
+        NpError(format!("Invalid IRI error: {err}"))
+    }
+}
+impl From<IriParseError> for NpError {
+    fn from(err: IriParseError) -> Self {
         NpError(format!("Invalid IRI error: {err}"))
     }
 }
