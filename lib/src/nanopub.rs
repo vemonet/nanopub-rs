@@ -13,7 +13,7 @@ use chrono::Utc;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::{xsd, Namespace};
+use sophia::api::ns::xsd;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::{AsIriRef, Iri};
@@ -218,21 +218,21 @@ impl Nanopub {
 
         // Add triples about the signature in the pubinfo
         self.dataset.insert(
-            self.info.ns.get("sig")?,
+            Iri::new(format!("{}sig", &self.info.ns))?,
             npx::HAS_PUBLIC_KEY,
             &*profile.public_key,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
-            self.info.ns.get("sig")?,
+            Iri::new(format!("{}sig", &self.info.ns))?,
             npx::HAS_ALGORITHM,
             "RSA",
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
-            self.info.ns.get("sig")?,
+            Iri::new(format!("{}sig", &self.info.ns))?,
             npx::HAS_SIGNATURE_TARGET,
-            self.info.ns.get("")?,
+            &self.info.ns,
             Some(&self.info.pubinfo),
         )?;
 
@@ -242,7 +242,7 @@ impl Nanopub {
             .quads_matching(
                 [
                     &self.info.uri,
-                    &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
+                    &self.info.ns,
                 ],
                 [dct::CREATED],
                 Any,
@@ -267,7 +267,7 @@ impl Nanopub {
                 .quads_matching(
                     [
                         &self.info.uri,
-                        &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
+                        &self.info.ns,
                     ],
                     [
                         dct::CREATOR,
@@ -306,7 +306,7 @@ impl Nanopub {
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
         // Add the signature to the pubinfo graph
         self.dataset.insert(
-            self.info.ns.get("sig")?,
+            Iri::new(format!("{}sig", &self.info.ns))?,
             npx::HAS_SIGNATURE,
             &*signature_hash,
             Some(&self.info.pubinfo),
@@ -441,7 +441,7 @@ impl Nanopub {
             NP_TEMP_URI,
         )?;
         self.info.uri = Iri::new_unchecked(NP_TEMP_URI.to_string());
-        self.info.ns = Namespace::new_unchecked(NP_TEMP_URI.to_string());
+        self.info.ns = Iri::new_unchecked(NP_TEMP_URI.to_string());
         self.info = extract_np_info(&self.dataset)?;
         Ok(self)
     }
@@ -485,25 +485,25 @@ impl Nanopub {
             .as_str();
 
         let mut dataset = create_base_dataset()?;
-        let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
-        let assertion_graph = np_ns.get("assertion")?;
-        let prov_graph = np_ns.get("provenance")?;
+        let np_ns = NP_TEMP_URI;
+        let assertion_graph = Iri::new(format!("{}assertion", &np_ns))?;
+        let prov_graph = Iri::new(format!("{}provenance", &np_ns))?;
 
         // Assertion graph triples, add key declaration
         dataset.insert(
-            np_ns.get("keyDeclaration")?,
+            Iri::new(format!("{}keyDeclaration", &np_ns))?,
             npx::DECLARED_BY,
             Iri::new_unchecked(orcid),
             Some(&assertion_graph),
         )?;
         dataset.insert(
-            np_ns.get("keyDeclaration")?,
+            Iri::new(format!("{}keyDeclaration", &np_ns))?,
             npx::HAS_ALGORITHM,
             "RSA",
             Some(&assertion_graph),
         )?;
         dataset.insert(
-            np_ns.get("keyDeclaration")?,
+            Iri::new(format!("{}keyDeclaration", &np_ns))?,
             npx::HAS_PUBLIC_KEY,
             profile.public_key.as_str(),
             Some(&assertion_graph),
@@ -516,7 +516,7 @@ impl Nanopub {
         )?;
         // Provenance graph triples
         dataset.insert(
-            assertion_graph,
+            assertion_graph.clone(),
             prov::WAS_ATTRIBUTED_TO,
             assertion_graph,
             Some(&prov_graph),
@@ -576,8 +576,8 @@ impl Nanopub {
             .dataset
             .quads_matching(
                 [
-                    self.info.uri.clone(),
-                    Iri::new_unchecked(self.info.ns.get("")?.to_string()),
+                    &self.info.uri,
+                    &self.info.ns,
                 ],
                 Any,
                 Any,
@@ -615,25 +615,25 @@ impl Nanopub {
 pub fn create_base_dataset() -> Result<LightDataset, NpError> {
     let mut dataset = LightDataset::new();
     let np_iri = Iri::new_unchecked(NP_TEMP_URI);
-    let np_ns = Namespace::new_unchecked(NP_TEMP_URI);
-    let head_graph = np_ns.get("Head")?;
+    let np_ns = NP_TEMP_URI;
+    let head_graph = Iri::new(format!("{}Head", &np_ns))?;
     // Add Head graph triples
     dataset.insert(
         np_iri,
         np::HAS_ASSERTION,
-        np_ns.get("assertion")?,
-        Some(head_graph),
+        Iri::new(format!("{}assertion", &np_ns))?,
+        Some(head_graph.clone()),
     )?;
     dataset.insert(
         np_iri,
         np::HAS_PROVENANCE,
-        np_ns.get("provenance")?,
-        Some(head_graph),
+        Iri::new(format!("{}provenance", &np_ns))?,
+        Some(head_graph.clone()),
     )?;
     dataset.insert(
         np_iri,
         np::HAS_PUBLICATION_INFO,
-        np_ns.get("pubinfo")?,
+        Iri::new(format!("{}pubinfo", &np_ns))?,
         Some(&head_graph),
     )?;
     dataset.insert(

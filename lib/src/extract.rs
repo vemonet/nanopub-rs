@@ -3,9 +3,8 @@ use crate::error::{NpError, TermError};
 use crate::vocab::{dct, np, npx, pav, prov, rdf};
 
 use regex::Regex;
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 use sophia::api::dataset::Dataset;
-use sophia::api::ns::Namespace;
 use sophia::api::quad::Quad;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
@@ -16,8 +15,7 @@ use std::fmt;
 #[derive(Clone, Serialize, Debug)]
 pub struct NpInfo {
     pub uri: Iri<String>,
-    #[serde(serialize_with = "serialize_namespace")]
-    pub ns: Namespace<String>,
+    pub ns: Iri<String>,
     pub normalized_ns: String,
     pub head: Iri<String>,
     pub assertion: Iri<String>,
@@ -38,7 +36,7 @@ pub struct NpInfo {
 impl fmt::Display for NpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "\nNanopub URI: {}", self.uri)?;
-        writeln!(f, "Namespace: {}", *self.ns)?;
+        writeln!(f, "Namespace: {}", self.ns)?;
         writeln!(f, "Base URI: {}", self.base_uri)?;
         writeln!(f, "Trusty Hash: {}", self.trusty_hash)?;
         writeln!(f, "ORCID: {}", self.orcid)?;
@@ -138,7 +136,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     } else {
         &head_iri[..np_iri.len() + 1]
     };
-    let np_ns = Namespace::new_unchecked(original_ns.to_string());
+    let np_ns = Iri::new_unchecked(original_ns.to_string());
 
     // Remove last char if it is # or / to get the URI
     let np_iri: Iri<String> =
@@ -194,7 +192,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Extract signature and its subject URI
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
     let mut signature: String = "".to_string();
-    let mut signature_iri: Iri<String> = Iri::new_unchecked(np_ns.get("sig")?.to_string());
+    let mut signature_iri: Iri<String> = Iri::new_unchecked(format!("{}sig", np_ns));
     for q in dataset.quads_matching(
         Any,
         [npx::HAS_SIGNATURE],
@@ -264,12 +262,4 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         orcid: orcid.unwrap_or("".to_string()),
         published: None,
     })
-}
-
-// Custom serialize function for Namespace
-fn serialize_namespace<S>(ns: &Namespace<String>, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    serializer.serialize_str(ns.as_str())
 }
