@@ -5,23 +5,22 @@ use crate::network::{fetch_np, publish_np};
 use crate::profile::NpProfile;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
 use crate::utils::{parse_rdf, serialize_rdf};
-use crate::vocab::{dct, foaf, np, npx, pav, prov, rdf};
+use crate::vocab::{dct, foaf, np, npx, pav, prov};
 
-use base64;
 use base64::{engine, Engine as _};
 use chrono::Utc;
 use oxiri::Iri;
+use oxrdf::{
+    Dataset,
+    GraphNameRef, LiteralRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
+    vocab::{rdf, xsd},
+};
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
-use sophia::api::dataset::{Dataset as _, MutableDataset};
-use sophia::api::ns::xsd;
-use sophia::api::term::{matcher::Any, Term};
-use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::iri::IriRef as NamedNodeRef;
 use std::collections::HashSet;
-use std::{fmt, str};
+use std::fmt;
 
-/// Trait to provide the nanopub RDF as string or sophia dataset
+/// Trait to provide the nanopub RDF as string or dataset
 pub trait RdfSource {
     fn get_dataset(self) -> Result<Dataset, NpError>;
 }
@@ -139,20 +138,20 @@ impl Nanopub {
             }
             msg = format!("{msg}1 trusty");
         }
-        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
+        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
 
         // Check the signature is valid if found
         let mut unsigned_dataset = self.dataset.clone();
         if !self.info.signature.is_empty() {
-            let signature_node = NamedNodeRef::new_unchecked(self.info.signature_iri.as_str());
-            let signature_literal = self.info.signature.as_str();
+            let signature_node = NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
+            let signature_literal = LiteralRef::new_simple_literal(self.info.signature.as_str());
             // Remove the signature from the graph before re-generating it
-            unsigned_dataset.remove(
+            unsigned_dataset.remove(QuadRef::new(
                 signature_node,
                 npx::HAS_SIGNATURE,
                 signature_literal,
                 pubinfo_graph,
-            )?;
+            ));
             // Normalize nanopub nquads to a string
             let norm_quads = normalize_dataset(
                 &unsigned_dataset,
@@ -223,84 +222,80 @@ impl Nanopub {
         let sig_string = format!("{}sig", self.info.ns);
         let sig_node = NamedNodeRef::new(sig_string.as_str())?;
         let ns_node = NamedNodeRef::new_unchecked(self.info.ns.as_str());
-        let uri_subject_term = NamedNodeRef::new_unchecked(self.info.uri.as_str());
-        let ns_subject_term = NamedNodeRef::new_unchecked(self.info.uri.as_str());
-        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
+        let uri_subject_term = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
+        let ns_subject_term = NamedOrBlankNodeRef::NamedNode(ns_node);
+        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
 
         // Add triples about the signature in the pubinfo
-        let public_key_literal = profile.public_key.as_str();
-        let rsa_literal = "RSA";
-        self.dataset.insert(
+        let public_key_literal = LiteralRef::new_simple_literal(&profile.public_key.as_str());
+        let rsa_literal = LiteralRef::new_simple_literal("RSA");
+        self.dataset.insert(QuadRef::new(
             sig_node,
             npx::HAS_PUBLIC_KEY,
             public_key_literal,
             pubinfo_graph,
-        )?;
-        self.dataset.insert(
+        ));
+        self.dataset.insert(QuadRef::new(
             sig_node,
             npx::HAS_ALGORITHM,
             rsa_literal,
             pubinfo_graph,
-        )?;
-        self.dataset.insert(
+        ));
+        self.dataset.insert(QuadRef::new(
             sig_node,
             npx::HAS_SIGNATURE_TARGET,
             ns_node,
             pubinfo_graph,
-        )?;
+        ));
 
         // If not already set, automatically add the current date to pubinfo created
         if self
-            .dataset
-            .quads_matching(
-                [
-                    uri_subject_term,
-                    ns_subject_term,
-                ],
-                [dct::CREATED],
-                Any,
-                [pubinfo_graph],
+            .dataset.iter().filter(|x|
+                (
+                    x.subject == uri_subject_term
+                    || x.subject == ns_subject_term
+                )
+                && x.predicate == dct::CREATED
+                && x.graph_name == pubinfo_graph
             )
             .next()
             .is_none()
         {
             let datetime_now = Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
-            let datetime_now_literal = datetime_now.as_str() * xsd::dateTime;
-            self.dataset.insert(
+            let datetime_now_literal = LiteralRef::new_typed_literal(datetime_now.as_str(), xsd::DATE_TIME);
+            self.dataset.insert(QuadRef::new(
                 ns_node,
                 dct::CREATED,
                 datetime_now_literal,
                 pubinfo_graph,
-            )?;
+            ));
         }
 
         // If ORCID provided in profile, and not already defined in nanopub, add to pubinfo graph
         if let Some(orcid) = &profile.orcid_id {
             if self
-                .dataset
-                .quads_matching(
-                    [
-                        uri_subject_term,
-                        ns_subject_term,
-                    ],
-                    [
-                        dct::CREATOR,
-                        prov::WAS_ATTRIBUTED_TO,
-                        pav::CREATED_BY,
-                    ],
-                    Any,
-                    [pubinfo_graph],
+                .dataset.iter().filter(|x|
+                    (
+                        x.subject == uri_subject_term
+                        || x.subject == ns_subject_term
+                    )
+                    && (
+                        x.predicate == dct::CREATOR
+                        || x.predicate == prov::WAS_ATTRIBUTED_TO
+                        || x.predicate == pav::CREATED_BY
+                    )
+                    && x.graph_name == pubinfo_graph
                 )
                 .next()
                 .is_none()
             {
                 let orcid_node = NamedNodeRef::new_unchecked(orcid.as_str());
-                self.dataset.insert(
+                self.dataset.insert(QuadRef::new(
                     ns_node,
                     dct::CREATOR,
                     orcid_node,
                     pubinfo_graph,
-                )?;
+                ));
             }
         }
 
@@ -319,14 +314,14 @@ impl Nanopub {
             &Sha256::digest(norm_quads.as_bytes()),
         )?;
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
-        let signature_hash_literal = signature_hash.as_str();
+        let signature_hash_literal = LiteralRef::new_simple_literal(signature_hash.as_str());
         // Add the signature to the pubinfo graph
-        self.dataset.insert(
+        self.dataset.insert(QuadRef::new(
             sig_node,
             npx::HAS_SIGNATURE,
             signature_hash_literal,
             pubinfo_graph,
-        )?;
+        ));
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
         let trusty_hash = make_trusty(
@@ -425,40 +420,40 @@ impl Nanopub {
 
     /// Unsign a signed nanopub RDF. Remove signature triples and replace trusty URI with default temp URI
     pub fn unsign(mut self) -> Result<Self, NpError> {
-        let signature_node = NamedNodeRef::new_unchecked(self.info.signature_iri.as_str());
-        let uri_node = NamedNodeRef::new_unchecked(self.info.uri.as_str());
-        let public_key_literal = self.info.public_key.as_str();
-        let algo_literal = self.info.algo.as_str();
-        let signature_literal = self.info.signature.as_str();
-        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
-        self.dataset.remove(
+        let signature_node = NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
+        let uri_node = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
+        let public_key_literal = LiteralRef::new_simple_literal(self.info.public_key.as_str());
+        let algo_literal = LiteralRef::new_simple_literal(self.info.algo.as_str());
+        let signature_literal = LiteralRef::new_simple_literal(self.info.signature.as_str());
+        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
+        self.dataset.remove(QuadRef::new(
             signature_node,
             npx::HAS_PUBLIC_KEY,
             public_key_literal,
             pubinfo_graph,
-        )?;
-        self.dataset.remove(
+        ));
+        self.dataset.remove(QuadRef::new(
             signature_node,
             npx::HAS_ALGORITHM,
             algo_literal,
             pubinfo_graph,
-        )?;
-        self.dataset.remove(
+        ));
+        self.dataset.remove(QuadRef::new(
             signature_node,
             npx::HAS_SIGNATURE_TARGET,
             uri_node,
             pubinfo_graph,
-        )?;
-        self.dataset.remove(
+        ));
+        self.dataset.remove(QuadRef::new(
             signature_node,
             npx::HAS_SIGNATURE,
             signature_literal,
             pubinfo_graph,
-        )?;
+        ));
         self.dataset = replace_ns_in_quads(
             &self.dataset,
-            &self.info.ns,
-            &self.info.uri,
+            self.info.ns.as_str(),
+            self.info.uri.as_str(),
             NP_TEMP_URI,
             NP_TEMP_URI,
         )?;
@@ -511,48 +506,47 @@ impl Nanopub {
         let key_declaration_string = format!("{}keyDeclaration", np_ns);
         let assertion_string = format!("{}assertion", np_ns);
         let prov_string = format!("{}provenance", np_ns);
-        let assertion_iri = Iri::parse(assertion_string)?;
         let key_declaration_node = NamedNodeRef::new(key_declaration_string.as_str())?;
         let orcid_node = NamedNodeRef::new_unchecked(orcid);
-        let assertion_node = NamedNodeRef::new_unchecked(assertion_iri.as_str());
-        let assertion_graph = Some(assertion_node);
-        let prov_graph = Some(NamedNodeRef::new(prov_string.as_str())?);
+        let assertion_node = NamedNodeRef::new(assertion_string.as_str())?;
+        let assertion_graph = GraphNameRef::NamedNode(assertion_node);
+        let prov_graph = NamedNodeRef::new(prov_string.as_str())?;
 
         // Assertion graph triples, add key declaration
-        let rsa_literal = "RSA";
-        let public_key_literal = profile.public_key.as_str();
-        let name_literal = name;
-        dataset.insert(
+        let rsa_literal = LiteralRef::new_simple_literal("RSA");
+        let public_key_literal = LiteralRef::new_simple_literal(profile.public_key.as_str());
+        let name_literal = LiteralRef::new_simple_literal(name);
+        dataset.insert(QuadRef::new(
             key_declaration_node,
             npx::DECLARED_BY,
             orcid_node,
             assertion_graph,
-        )?;
-        dataset.insert(
+        ));
+        dataset.insert(QuadRef::new(
             key_declaration_node,
             npx::HAS_ALGORITHM,
             rsa_literal,
             assertion_graph,
-        )?;
-        dataset.insert(
+        ));
+        dataset.insert(QuadRef::new(
             key_declaration_node,
             npx::HAS_PUBLIC_KEY,
             public_key_literal,
             assertion_graph,
-        )?;
-        dataset.insert(
+        ));
+        dataset.insert(QuadRef::new(
             orcid_node,
             foaf::NAME,
             name_literal,
             assertion_graph,
-        )?;
+        ));
         // Provenance graph triples
-        dataset.insert(
+        dataset.insert(QuadRef::new(
             assertion_node,
             prov::WAS_ATTRIBUTED_TO,
             assertion_node,
             prov_graph,
-        )?;
+        ));
         Ok(Self {
             info: extract_np_info(&dataset)?,
             dataset,
@@ -561,15 +555,15 @@ impl Nanopub {
 
     /// Check if Nanopub is valid: minimal required triples in assertion, prov, pubinfo graphs
     pub fn is_valid(&self) -> Result<bool, NpError> {
-        let assertion_node = NamedNodeRef::new_unchecked(self.info.assertion.as_str());
-        let uri_subject_term = NamedNodeRef::new_unchecked(self.info.uri.as_str());
-        let ns_subject_term = NamedNodeRef::new_unchecked(self.info.ns.as_str());
-        let assertion_graph = Some(assertion_node);
-        let prov_graph = Some(NamedNodeRef::new_unchecked(self.info.prov.as_str()));
-        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
+        let assertion_node = NamedOrBlankNodeRef::NamedNode(self.info.assertion.as_ref().into());
+        let uri_subject_term = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
+        let ns_subject_term = NamedOrBlankNodeRef::NamedNode(self.info.ns.as_ref().into());
+        let assertion_graph = GraphNameRef::NamedNode(self.info.assertion.as_ref().into());
+        let prov_graph = GraphNameRef::NamedNode(self.info.prov.as_ref().into());
+        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
         if self
             .dataset
-            .quads_matching(Any, Any, Any, [assertion_graph])
+            .quads_for_graph_name(assertion_graph)
             .next()
             .is_none()
         {
@@ -579,7 +573,7 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_matching(Any, Any, Any, [prov_graph])
+            .quads_for_graph_name(prov_graph)
             .next()
             .is_none()
         {
@@ -589,12 +583,8 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_matching(
-                [assertion_node],
-                Any,
-                Any,
-                [prov_graph],
-            )
+            .graph(prov_graph)
+            .triples_for_subject(assertion_node)
             .next()
             .is_none()
         {
@@ -602,7 +592,7 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_matching(Any, Any, Any, [pubinfo_graph])
+            .quads_for_graph_name(pubinfo_graph)
             .next()
             .is_none()
         {
@@ -612,14 +602,12 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_matching(
-                [
-                    uri_subject_term,
-                    ns_subject_term,
-                ],
-                Any,
-                Any,
-                [pubinfo_graph],
+            .iter().filter(|x|
+                (
+                    x.subject == uri_subject_term
+                    || x.subject == ns_subject_term
+                )
+                && x.graph_name == pubinfo_graph
             )
             .next()
             .is_none()
@@ -630,10 +618,10 @@ impl Nanopub {
             ));
         }
         let mut graph_names = HashSet::new();
-        for g in self.dataset.graph_names() {
-            if let Some(graph_name) = g?.iri() {
-                graph_names.insert(graph_name.to_string());
-            }
+        for g in self.dataset.iter().filter(|x|
+            x.graph_name.is_named_node()
+        ) {
+            graph_names.insert(g.graph_name.to_string());
         }
         if graph_names.len() > 4 {
             return Err(NpError(
@@ -661,31 +649,32 @@ pub fn create_base_dataset() -> Result<Dataset, NpError> {
     let assertion_node = NamedNodeRef::new(assertion_string.as_str())?;
     let prov_node = NamedNodeRef::new(prov_string.as_str())?;
     let pubinfo_node = NamedNodeRef::new(pubinfo_string.as_str())?;
-    let head_graph = Some(NamedNodeRef::new(head_string.as_str())?);
+    let head_graph = NamedNodeRef::new(head_string.as_str())?;
     // Add Head graph triples
-    dataset.insert(
+    dataset.insert(QuadRef::new(
         np_node,
         np::HAS_ASSERTION,
         assertion_node,
         head_graph,
-    )?;
-    dataset.insert(
+    ));
+    dataset.insert(QuadRef::new(
         np_node,
         np::HAS_PROVENANCE,
         prov_node,
         head_graph,
-    )?;
-    dataset.insert(
+    ));
+    dataset.insert(QuadRef::new(
         np_node,
         np::HAS_PUBLICATION_INFO,
         pubinfo_node,
         head_graph,
-    )?;
-    dataset.insert(
+    ));
+    dataset.insert(QuadRef::new(
         np_node,
         rdf::TYPE,
         np::NANOPUBLICATION,
         head_graph,
-    )?;
+    ));
+
     Ok(dataset)
 }

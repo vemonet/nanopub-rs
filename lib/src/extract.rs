@@ -4,16 +4,16 @@ use crate::utils::{
     graph_iri_to_string, object_iri_to_string, object_literal_to_strings,
     subject_iri_to_string
 };
-use crate::vocab::{dct, np, npx, pav, prov, rdf};
+use crate::vocab::{dct, np, npx, pav, prov};
 
 use oxiri::Iri;
+use oxrdf::{
+    Dataset,
+    GraphNameRef, NamedOrBlankNodeRef, TermRef,
+    vocab::rdf,
+};
 use regex::Regex;
 use serde::Serialize;
-use sophia::api::dataset::Dataset as _;
-use sophia::api::quad::Quad;
-use sophia::api::term::matcher::Any;
-use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::iri::IriRef as NamedNodeRef;
 use std::fmt;
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
@@ -60,13 +60,13 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let mut pubinfo: String = "".to_string();
 
     // Extract nanopub URL and head graph
-    let nanopublication_object_term = np::NANOPUBLICATION;
-    for q in dataset.quads_matching(Any, [rdf::TYPE], [nanopublication_object_term], Any) {
+    let nanopublication_object_term = TermRef::NamedNode(np::NANOPUBLICATION);
+    for q in dataset.iter().filter(|x| x.predicate == rdf::TYPE && x.object == nanopublication_object_term) {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
-            np_url = subject_iri_to_string(q?.s())?;
-            head = graph_iri_to_string(q?.g())?;
+            np_url = subject_iri_to_string(q.subject)?;
+            head = graph_iri_to_string(q.graph_name)?;
         }
     }
     if np_url.is_empty() {
@@ -80,33 +80,30 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     let np_iri: Iri<String> = Iri::parse_unchecked(np_url);
     let head_iri: Iri<String> = Iri::parse_unchecked(head);
-    let mut np_subject_term = NamedNodeRef::new_unchecked(np_iri.as_str());
-    let head_graph = Some(NamedNodeRef::new_unchecked(head_iri.as_str()));
+    let mut np_subject_term = NamedOrBlankNodeRef::NamedNode(np_iri.as_ref().into());
+    let head_graph = GraphNameRef::NamedNode(head_iri.as_ref().into());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
-    for q in dataset.quads_matching(
-        [np_subject_term],
-        [np::HAS_ASSERTION],
-        Any,
-        [head_graph],
+    for q in dataset.iter().filter(|x|
+        x.subject == np_subject_term
+        && x.predicate == np::HAS_ASSERTION
+        && x.graph_name == head_graph
     ) {
-        assertion = object_iri_to_string(q?.o())?;
+        assertion = object_iri_to_string(q.object)?;
     }
-    for q in dataset.quads_matching(
-        [np_subject_term],
-        [np::HAS_PROVENANCE],
-        Any,
-        [head_graph],
+    for q in dataset.iter().filter(|x|
+        x.subject == np_subject_term
+        && x.predicate == np::HAS_PROVENANCE
+        && x.graph_name == head_graph
     ) {
-        prov = object_iri_to_string(q?.o())?;
+        prov = object_iri_to_string(q.object)?;
     }
-    for q in dataset.quads_matching(
-        [np_subject_term],
-        [np::HAS_PUBLICATION_INFO],
-        Any,
-        [head_graph],
+    for q in dataset.iter().filter(|x|
+        x.subject == np_subject_term
+        && x.predicate == np::HAS_PUBLICATION_INFO
+        && x.graph_name == head_graph
     ) {
-        pubinfo = object_iri_to_string(q?.o())?;
+        pubinfo = object_iri_to_string(q.object)?;
     }
 
     if assertion.is_empty() {
@@ -151,7 +148,7 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         } else {
             np_iri
         };
-    np_subject_term = NamedNodeRef::new_unchecked(np_iri.as_str());
+    np_subject_term = NamedOrBlankNodeRef::NamedNode(np_iri.as_ref().into());
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
@@ -196,60 +193,57 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     // Extract signature and its subject URI
     let signature_string = format!("{}sig", np_ns);
     let pubinfo_iri: Iri<String> = Iri::parse_unchecked(pubinfo);
-    let pubinfo_graph = Some(NamedNodeRef::new_unchecked(pubinfo_iri.as_str()));
+    let pubinfo_graph = GraphNameRef::NamedNode(pubinfo_iri.as_ref().into());
     let mut signature: String = "".to_string();
     let mut signature_iri: Iri<String> = Iri::parse_unchecked(signature_string);
-    for q in dataset.quads_matching(
-        Any,
-        [npx::HAS_SIGNATURE],
-        Any,
-        [pubinfo_graph],
+    for q in dataset.iter().filter(|x|
+        x.predicate == npx::HAS_SIGNATURE
+        && x.graph_name == pubinfo_graph
     ) {
-        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        let (val, _, _) = object_literal_to_strings(q.object)?;
         signature = val;
-        signature_iri = Iri::parse_unchecked(subject_iri_to_string(q?.s())?);
+        signature_iri = Iri::parse_unchecked(subject_iri_to_string(q.subject)?);
     }
-    let signature_node = NamedNodeRef::new_unchecked(signature_iri.as_str());
+    let signature_node = NamedOrBlankNodeRef::NamedNode(signature_iri.as_ref().into());
 
     // Extract public key
     let mut pubkey: Option<String> = None;
-    for q in dataset.quads_matching(
-        [signature_node],
-        [npx::HAS_PUBLIC_KEY],
-        Any,
-        [pubinfo_graph],
+    for q in dataset.iter().filter(|x|
+        x.subject == signature_node
+        && x.predicate == npx::HAS_PUBLIC_KEY
+        && x.graph_name == pubinfo_graph
     ) {
-        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        let (val, _, _) = object_literal_to_strings(q.object)?;
         pubkey = Some(val);
     }
 
     // Extract algo
     let mut algo: Option<String> = None;
-    for q in dataset.quads_matching(
-        [signature_node],
-        [npx::HAS_ALGORITHM],
-        Any,
-        [pubinfo_graph],
+    for q in dataset.iter().filter(|x|
+        x.subject == signature_node
+        && x.predicate == npx::HAS_ALGORITHM
+        && x.graph_name == pubinfo_graph
     ) {
-        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        let (val, _, _) = object_literal_to_strings(q.object)?;
         algo = Some(val);
     }
 
     // Extract ORCID
     let mut orcid: Option<String> = None;
     let original_ns_iri: Iri<String> = Iri::parse_unchecked(original_ns.to_string());
-    let original_ns_subject_term = NamedNodeRef::new_unchecked(original_ns_iri.as_str());
-    for q in dataset.quads_matching(
-        [np_subject_term, original_ns_subject_term],
-        [
-            dct::CREATOR,
-            prov::WAS_ATTRIBUTED_TO,
-            pav::CREATED_BY,
-        ],
-        Any,
-        [pubinfo_graph],
+    let original_ns_subject_term = NamedOrBlankNodeRef::NamedNode(original_ns_iri.as_ref().into());
+    for q in dataset.iter().filter(|x|
+        (
+            x.subject == np_subject_term
+            || x.subject == original_ns_subject_term
+        ) && (
+            x.predicate == dct::CREATOR
+            || x.predicate == prov::WAS_ATTRIBUTED_TO
+            || x.predicate == pav::CREATED_BY
+        )
+        && x.graph_name == pubinfo_graph
     ) {
-        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        let (val, _, _) = object_literal_to_strings(q.object)?;
         orcid = Some(val);
     }
 
@@ -276,3 +270,4 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         published: None,
     })
 }
+

@@ -1,71 +1,49 @@
 // use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
 use oxiri::Iri;
-use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
-use sophia::api::source::QuadSource as _;
-use sophia::api::{prelude::Term, term::SimpleTerm};
-use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::jsonld;
-use sophia::turtle::parser::trig;
-use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
+use oxrdf::{
+    Dataset,
+    GraphNameRef, NamedOrBlankNodeRef, NamedNodeRef, TermRef,
+};
+use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
+use oxjsonld::JsonLdProfileSet;
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
 
+// TODO: improve to collect document prefixes, for use in `serialize_rdf()`
 /// Parse RDF from various format to a `Dataset` (trig, nquads, JSON-LD)
 pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
-    let rdf = rdf.to_string();
+    let mut dataset = Dataset::new();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
-    let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
-        parse_jsonld(&rdf)?
+    let format = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
+        RdfFormat::JsonLd { profile: JsonLdProfileSet::empty() }
     } else {
-        // TODO: extract prefixes https://github.com/pchampin/sophia_rs/issues/45
         // The TriG parser handles nquads
-        trig::parse_str(&rdf)
-            .collect_quads()
-            .map_err(|e| NpError(format!("Error parsing TriG: {e}")))?
-        // NOTE: we can access the trig parser prefixes, but we always get an empty map, because it's not parsed yet
-        // let parser = trig::parse_str(&rdf);
-        // let prefixes = parser.0.prefixes();
-        // println!("PREFIXES: {:?}", prefixes);
-        // let dataset = parser.collect_quads()
-        //     .map_err(|e| NpError(format!("Error parsing TriG: {e}")))?;
-        // dataset
+        RdfFormat::TriG
     };
+
+    RdfParser::from_format(format)
+        .for_reader(rdf.as_bytes())
+        .try_for_each(|q| { dataset.insert(&q?); Ok::<_, NpError>(()) })?;
     Ok(dataset)
 }
 
-/// The JSON-LD parser uses futures::block_on which creates conflict
-/// when running in tokio runtime, so we need to spawn a separate thread
-#[cfg(not(target_arch = "wasm32"))]
-pub fn parse_jsonld(rdf: &str) -> Result<Dataset, NpError> {
-    let rdf = rdf.to_string();
-    let handle = std::thread::spawn(move || {
-        futures::executor::block_on(async { jsonld::parse_str(&rdf).collect_quads() })
-    });
-    let dataset = handle
-        .join()
-        .map_err(|_| NpError("Error retrieving JSON-LD from thread".to_string()))?
-        .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}")))?;
-    Ok(dataset)
-}
-
-/// Parse JSON-LD, in wasm we don't need to do the futures trick because we don't use tokio async runtime
-#[cfg(target_arch = "wasm32")]
-pub fn parse_jsonld(rdf: &str) -> Result<Dataset, NpError> {
-    Ok(jsonld::parse_str(rdf)
-        .collect_quads()
-        .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}")))?)
-}
-
+// TODO: improve to use prefixes from `parse_rdf()`, favored over default ones
 /// Serialize RDF dataset to Trig
 pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, NpError> {
     let prefixes = get_prefixes(uri, ns)?;
-    let trig_config = TrigConfig::new()
-        .with_pretty(true)
-        .with_prefix_map(&prefixes[..]);
-    let mut trig_stringifier = TrigSerializer::new_stringifier_with_config(trig_config);
-    Ok(trig_stringifier.serialize_dataset(&dataset)?.to_string())
+    let mut serializer = RdfSerializer::from_format(RdfFormat::TriG)
+        .with_base_iri(uri)?
+        .with_prefix("", ns)?;
+    for (prefix_name, prefix_iri) in prefixes {
+        serializer = serializer.with_prefix(prefix_name, prefix_iri.as_str())?;
+    }
+    let mut serializer = serializer.for_writer(Vec::new());
+    for quad in dataset.iter() {
+        serializer.serialize_quad(quad)?;
+    }
+    Ok(String::from_utf8(serializer.finish()?)?)
 }
 
 /// Return a Nanopub server, the main one or one picked randomly from the list of available servers
@@ -164,9 +142,9 @@ pub fn get_prefixes(
 }
 
 /// Extract IRI as `String` from subject term
-pub fn subject_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
+pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpError> {
     match node {
-        SimpleTerm::Iri(iri) => Ok(iri.as_ref().to_string()),
+        NamedOrBlankNodeRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str
@@ -180,9 +158,9 @@ pub fn subject_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
 }
 
 /// Extract blank node ID as `&str` from subject term
-pub fn subject_blank_to_str<'a>(node: &'a SimpleTerm<'a>) -> Result<&'a str, NpError> {
+pub fn subject_blank_to_str(node: NamedOrBlankNodeRef<'_>) -> Result<&str, NpError> {
     match node {
-        SimpleTerm::BlankNode(n) => Ok(n.as_str()),
+        NamedOrBlankNodeRef::BlankNode(id) => Ok(id.as_str()),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str
@@ -196,25 +174,14 @@ pub fn subject_blank_to_str<'a>(node: &'a SimpleTerm<'a>) -> Result<&'a str, NpE
 }
 
 /// Extract IRI as `String` from predicate term
-pub fn predicate_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
-    match node {
-        SimpleTerm::Iri(iri) => Ok(iri.as_ref().to_string()),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract IRI from predicate: Got {}", variant_name)))
-        },
-    }
+pub fn predicate_iri_to_string(node: NamedNodeRef) -> Result<String, NpError> {
+    Ok(node.into_owned().into_string())
 }
 
 /// Extract IRI as `String` from object term
-pub fn object_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
+pub fn object_iri_to_string(node: TermRef) -> Result<String, NpError> {
     match node {
-        SimpleTerm::Iri(iri) => Ok(iri.as_ref().to_string()),
+        TermRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str
@@ -228,9 +195,9 @@ pub fn object_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
 }
 
 /// Extract blank node ID as `&str` from object term
-pub fn object_blank_to_str<'a>(node: &'a SimpleTerm<'a>) -> Result<&'a str, NpError> {
+pub fn object_blank_to_str(node: TermRef<'_>) -> Result<&str, NpError> {
     match node {
-        SimpleTerm::BlankNode(n) => Ok(n.as_str()),
+        TermRef::BlankNode(id) => Ok(id.as_str()),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str
@@ -244,25 +211,14 @@ pub fn object_blank_to_str<'a>(node: &'a SimpleTerm<'a>) -> Result<&'a str, NpEr
 }
 
 /// Extract literal as `String` tuple from object term
-pub fn object_literal_to_strings(node: &SimpleTerm) -> Result<(String, String, String), NpError> {
+pub fn object_literal_to_strings(node: TermRef) -> Result<(String, String, String), NpError> {
     match node {
-        SimpleTerm::LiteralDatatype(value, datatype) => {
-            if node.is_literal() {
-                Ok((value.to_string(), datatype.to_string(), "".to_string()))
-            } else {
-                Err(NpError("foo".to_string()))
-            }
-        },
-        SimpleTerm::LiteralLanguage(value, tag) => {
-            if node.is_literal() {
-                Ok((value.to_string(), "".to_string(), tag.to_string()))
-            } else {
-                Err(NpError("bar".to_string()))
-            }
-        },
-        SimpleTerm::Iri(iri) => {
-            Ok((iri.as_ref().to_string(), "".to_string(), "".to_string()))
-        },
+        TermRef::Literal(literal) => Ok((
+            literal.value().to_string(),
+            literal.datatype().into_owned().into_string(),
+            literal.language().unwrap_or_default().to_owned(),
+        )),
+        TermRef::NamedNode(iri) => Ok((iri.into_owned().into_string(), "".to_string(), "".to_string())),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str
@@ -276,9 +232,9 @@ pub fn object_literal_to_strings(node: &SimpleTerm) -> Result<(String, String, S
 }
 
 /// Extract IRI as `String` from graph name
-pub fn graph_iri_to_string(node: Option<&SimpleTerm>) -> Result<String, NpError> {
+pub fn graph_iri_to_string(node: GraphNameRef) -> Result<String, NpError> {
     match node {
-        Some(SimpleTerm::Iri(iri)) => Ok(iri.as_ref().to_string()),
+        GraphNameRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str

@@ -1,9 +1,7 @@
 use std::error::Error;
 use std::fmt;
 
-use sophia::api::source::StreamError;
-use sophia::inmem::index::TermIndexFullError;
-use sophia::iri::{InvalidIri, resolve::IriParseError};
+use oxrdf::IriParseError;
 
 #[derive(Debug)]
 pub struct NpError(pub String);
@@ -23,29 +21,9 @@ impl fmt::Display for NpError {
 
 // Add handling for errors from external dependencies
 // to be able to use ? more to handle errors
-impl From<InvalidIri> for NpError {
-    fn from(err: InvalidIri) -> Self {
-        NpError(format!("Invalid IRI error: {err}"))
-    }
-}
 impl From<IriParseError> for NpError {
     fn from(err: IriParseError) -> Self {
         NpError(format!("Invalid IRI error: {err}"))
-    }
-}
-impl From<TermIndexFullError> for NpError {
-    fn from(err: TermIndexFullError) -> Self {
-        NpError(format!("RDF term index error: {err}"))
-    }
-}
-impl From<StreamError<TermIndexFullError, std::io::Error>> for NpError {
-    fn from(err: StreamError<TermIndexFullError, std::io::Error>) -> Self {
-        NpError(format!("RDF Trig serialization error: {err}"))
-    }
-}
-impl From<StreamError<sophia::jsonld::JsonLdError, TermIndexFullError>> for NpError {
-    fn from(err: StreamError<sophia::jsonld::JsonLdError, TermIndexFullError>) -> Self {
-        NpError(format!("JSON-LD parse error: {err}"))
     }
 }
 impl From<regex::Error> for NpError {
@@ -93,13 +71,14 @@ impl From<reqwest::Error> for NpError {
         NpError(format!("Error sendind the HTTP request: {err}"))
     }
 }
-// impl From<rio_turtle::error::TurtleError> for NpError {
-//     fn from(err: rio_turtle::error::TurtleError) -> Self {
-//         NpError(format!("Parse RDF Turtle error: {}", err))
-//     }
-// }
-// impl From<GenericLightDataset<SimpleTermIndex<u32>>> for NpError {
-//     fn from(err: GenericLightDataset<SimpleTermIndex<u32>>) -> Self {
-//         NpError(format!("RDF term error:"))
-//     }
-// }
+impl From<std::string::FromUtf8Error> for NpError {
+    fn from(err: std::string::FromUtf8Error) -> Self {
+        NpError(format!("UTF-8 conversion error: {err}"))
+    }
+}
+impl From<oxrdfio::RdfParseError> for NpError {
+    fn from(err: oxrdfio::RdfParseError) -> Self {
+        NpError(format!("RDF parse error: {err}"))
+    }
+}
+
