@@ -1,5 +1,4 @@
 #![doc = include_str!("../docs/docs/index.md")]
-// # extern crate sophia;
 // #![warn(missing_docs)]
 // #![doc(html_favicon_url = "https://raw.github.com/MaastrichtU-IDS/knowledge-collaboratory/main/frontend/app/assets/icon.png")]
 // #![doc(html_logo_url = "https://raw.github.com/MaastrichtU-IDS/knowledge-collaboratory/main/frontend/app/assets/icon.png")]
@@ -46,3 +45,4 @@ pub use error::NpError;
 pub use nanopub::{create_base_dataset, Nanopub};
 pub use profile::{NpProfile, ProfileBuilder};
 pub use utils::get_np_server;
+
