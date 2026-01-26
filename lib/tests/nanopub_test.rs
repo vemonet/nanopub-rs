@@ -6,7 +6,7 @@ use nanopub::{
     network::publish_np,
     profile::gen_keys,
     sign::normalize_dataset,
-    utils::{ns, parse_rdf},
+    utils::parse_rdf,
     Nanopub, ProfileBuilder,
 };
 use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset, iri::Iri};
@@ -220,12 +220,6 @@ fn default_profile_file() -> Result<(), Box<dyn Error>> {
 fn test_normalize() -> Result<(), Box<dyn Error>> {
     let dataset = LightDataset::new();
     let _norm = normalize_dataset(&dataset, "", "", "#");
-    Ok(())
-}
-
-#[test]
-fn test_get_ns_empty() -> Result<(), Box<dyn Error>> {
-    assert!(ns("not there").is_err());
     Ok(())
 }
 

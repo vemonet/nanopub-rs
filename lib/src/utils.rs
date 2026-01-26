@@ -2,7 +2,7 @@
 use getrandom::getrandom;
 use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
 use sophia::api::source::QuadSource as _;
-use sophia::api::{ns::Namespace, prefix::Prefix};
+use sophia::api::prefix::Prefix;
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::jsonld;
@@ -81,21 +81,6 @@ pub fn get_np_server(random: bool) -> &'static str {
     LIST_SERVERS[index]
 }
 
-/// Get a namespace commonly used in nanopub manipulation
-pub fn ns(ns: &str) -> Result<Namespace<String>, NpError> {
-    match ns {
-        "npx" => Ok(Namespace::new("http://purl.org/nanopub/x/".to_string())?),
-        "np" => Ok(Namespace::new(
-            "http://www.nanopub.org/nschema#".to_string(),
-        )?),
-        "dct" => Ok(Namespace::new("http://purl.org/dc/terms/".to_string())?),
-        "prov" => Ok(Namespace::new("http://www.w3.org/ns/prov#".to_string())?),
-        "pav" => Ok(Namespace::new("http://purl.org/pav/".to_string())?),
-        "foaf" => Ok(Namespace::new("http://xmlns.com/foaf/0.1/".to_string())?),
-        _ => Err(NpError(format!("Unknown namespace: {}", ns))),
-    }
-}
-
 // TODO: improve to extract prefixes from the input RDF
 /// Get the prefixes of a Nanopub
 pub fn get_prefixes(
@@ -133,11 +118,11 @@ pub fn get_prefixes(
         ),
         (
             Prefix::new_unchecked("np".to_string()),
-            Iri::new_unchecked(ns("np")?.to_string()),
+            Iri::new_unchecked("http://www.nanopub.org/nschema#".to_string()),
         ),
         (
             Prefix::new_unchecked("npx".to_string()),
-            Iri::new_unchecked(ns("npx")?.to_string()),
+            Iri::new_unchecked("http://purl.org/nanopub/x/".to_string()),
         ),
         (
             Prefix::new_unchecked("dc".to_string()),
