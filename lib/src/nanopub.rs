@@ -4,7 +4,8 @@ use crate::extract::{extract_np_info, NpInfo};
 use crate::network::{fetch_np, publish_np};
 use crate::profile::NpProfile;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{ns, parse_rdf, serialize_rdf};
+use crate::utils::{parse_rdf, serialize_rdf};
+use crate::vocab::{dct, foaf, np, npx, pav, prov, rdf};
 
 use base64;
 use base64::{engine, Engine as _};
@@ -12,7 +13,7 @@ use chrono::Utc;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset, MutableDataset};
-use sophia::api::ns::{rdf, xsd, Namespace};
+use sophia::api::ns::{xsd, Namespace};
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::{AsIriRef, Iri};
@@ -144,7 +145,7 @@ impl Nanopub {
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(
                 &self.info.signature_iri,
-                ns("npx")?.get("hasSignature")?,
+                npx::HAS_SIGNATURE,
                 self.info.signature.as_str(),
                 Some(&self.info.pubinfo),
             )?;
@@ -218,19 +219,19 @@ impl Nanopub {
         // Add triples about the signature in the pubinfo
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx")?.get("hasPublicKey")?,
+            npx::HAS_PUBLIC_KEY,
             &*profile.public_key,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx")?.get("hasAlgorithm")?,
+            npx::HAS_ALGORITHM,
             "RSA",
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx")?.get("hasSignatureTarget")?,
+            npx::HAS_SIGNATURE_TARGET,
             self.info.ns.get("")?,
             Some(&self.info.pubinfo),
         )?;
@@ -243,7 +244,7 @@ impl Nanopub {
                     &self.info.uri,
                     &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
                 ],
-                [ns("dct")?.get("created")?],
+                [dct::CREATED],
                 Any,
                 [Some(&self.info.pubinfo)],
             )
@@ -253,7 +254,7 @@ impl Nanopub {
             let datetime_now = Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
             self.dataset.insert(
                 self.info.ns.as_iri_ref(),
-                ns("dct")?.get("created")?,
+                dct::CREATED,
                 datetime_now.as_str() * xsd::dateTime,
                 Some(&self.info.pubinfo),
             )?;
@@ -269,9 +270,9 @@ impl Nanopub {
                         &Iri::new_unchecked(self.info.ns.get("")?.to_string()),
                     ],
                     [
-                        ns("dct")?.get("creator")?,
-                        ns("prov")?.get("wasAttributedTo")?,
-                        ns("pav")?.get("createdBy")?,
+                        dct::CREATOR,
+                        prov::WAS_ATTRIBUTED_TO,
+                        pav::CREATED_BY,
                     ],
                     Any,
                     [Some(&self.info.pubinfo)],
@@ -281,7 +282,7 @@ impl Nanopub {
             {
                 self.dataset.insert(
                     self.info.ns.as_iri_ref(),
-                    ns("dct")?.get("creator")?,
+                    dct::CREATOR,
                     Iri::new_unchecked(orcid.clone()),
                     Some(&self.info.pubinfo),
                 )?;
@@ -306,7 +307,7 @@ impl Nanopub {
         // Add the signature to the pubinfo graph
         self.dataset.insert(
             self.info.ns.get("sig")?,
-            ns("npx")?.get("hasSignature")?,
+            npx::HAS_SIGNATURE,
             &*signature_hash,
             Some(&self.info.pubinfo),
         )?;
@@ -410,25 +411,25 @@ impl Nanopub {
     pub fn unsign(mut self) -> Result<Self, NpError> {
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx")?.get("hasPublicKey")?,
+            npx::HAS_PUBLIC_KEY,
             &*self.info.public_key,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx")?.get("hasAlgorithm")?,
+            npx::HAS_ALGORITHM,
             &*self.info.algo,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx")?.get("hasSignatureTarget")?,
+            npx::HAS_SIGNATURE_TARGET,
             &self.info.uri,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             &self.info.signature_iri,
-            ns("npx")?.get("hasSignature")?,
+            npx::HAS_SIGNATURE,
             &*self.info.signature,
             Some(&self.info.pubinfo),
         )?;
@@ -491,32 +492,32 @@ impl Nanopub {
         // Assertion graph triples, add key declaration
         dataset.insert(
             np_ns.get("keyDeclaration")?,
-            ns("npx")?.get("declaredBy")?,
+            npx::DECLARED_BY,
             Iri::new_unchecked(orcid),
             Some(&assertion_graph),
         )?;
         dataset.insert(
             np_ns.get("keyDeclaration")?,
-            ns("npx")?.get("hasAlgorithm")?,
+            npx::HAS_ALGORITHM,
             "RSA",
             Some(&assertion_graph),
         )?;
         dataset.insert(
             np_ns.get("keyDeclaration")?,
-            ns("npx")?.get("hasPublicKey")?,
+            npx::HAS_PUBLIC_KEY,
             profile.public_key.as_str(),
             Some(&assertion_graph),
         )?;
         dataset.insert(
             Iri::new_unchecked(orcid),
-            ns("foaf")?.get("name")?,
+            foaf::NAME,
             name,
             Some(&assertion_graph),
         )?;
         // Provenance graph triples
         dataset.insert(
             assertion_graph,
-            ns("prov")?.get("wasAttributedTo")?,
+            prov::WAS_ATTRIBUTED_TO,
             assertion_graph,
             Some(&prov_graph),
         )?;
@@ -619,26 +620,26 @@ pub fn create_base_dataset() -> Result<LightDataset, NpError> {
     // Add Head graph triples
     dataset.insert(
         np_iri,
-        ns("np")?.get("hasAssertion")?,
+        np::HAS_ASSERTION,
         np_ns.get("assertion")?,
         Some(head_graph),
     )?;
     dataset.insert(
         np_iri,
-        ns("np")?.get("hasProvenance")?,
+        np::HAS_PROVENANCE,
         np_ns.get("provenance")?,
         Some(head_graph),
     )?;
     dataset.insert(
         np_iri,
-        ns("np")?.get("hasPublicationInfo")?,
+        np::HAS_PUBLICATION_INFO,
         np_ns.get("pubinfo")?,
         Some(&head_graph),
     )?;
     dataset.insert(
         np_iri,
-        rdf::type_,
-        ns("np")?.get("Nanopublication")?,
+        rdf::TYPE,
+        np::NANOPUBLICATION,
         Some(&head_graph),
     )?;
     Ok(dataset)

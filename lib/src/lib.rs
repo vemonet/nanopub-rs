@@ -18,6 +18,7 @@ pub mod network;
 pub mod profile;
 pub mod sign;
 pub mod utils;
+pub mod vocab;
 pub use error::NpError;
 /// A module to sign, publish, or check [Nanopublications](https://nanopub.net).
 ///
