@@ -1,4 +1,10 @@
-use crate::error::{NpError, TermError};
+use crate::error::NpError;
+use crate::utils::{
+    graph_iri_to_string,
+    object_blank_to_str, object_iri_to_string, object_literal_to_strings,
+    predicate_iri_to_string,
+    subject_blank_to_str, subject_iri_to_string,
+};
 
 use base64::{alphabet, engine, Engine as _};
 use regex::Regex;
@@ -48,17 +54,17 @@ pub fn replace_bnodes(
 
         // Replace bnode in subjects, and add 1 underscore for URI using already underscore
         let subject = if quad.s().is_blank_node() {
-            let bnode_id = quad.s().bnode_id().ok_or(TermError())?.to_string();
+            let bnode_id = subject_blank_to_str(quad.s())?;
             bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
                 let counter = bnode_counter;
                 bnode_counter += 1;
                 counter
             });
-            format!("{}_{}", base_ns, bnode_map[&bnode_id])
+            format!("{}_{}", base_ns, bnode_map[bnode_id])
         } else if let Some(caps) =
-            re_underscore_uri.captures(&quad.s().iri().ok_or(TermError())?.as_ref())
+            re_underscore_uri.captures(&subject_iri_to_string(quad.s())?)
         {
-            let mut subject_iri = quad.s().iri().ok_or(TermError())?.to_string();
+            let mut subject_iri = subject_iri_to_string(quad.s())?;
             let matching = caps
                 .get(1)
                 .ok_or(NpError("Error with regex".to_string()))?
@@ -68,23 +74,13 @@ pub fn replace_bnodes(
             subject_iri.push_str(&new_ending);
             subject_iri
         } else {
-            quad.s().iri().ok_or(TermError())?.to_string()
+            subject_iri_to_string(quad.s())?
         };
 
         let graph = if let Some(caps) = re_underscore_uri.captures(
-            &quad
-                .g()
-                .ok_or(TermError())?
-                .iri()
-                .ok_or(TermError())?
-                .as_ref(),
+            &graph_iri_to_string(quad.g())?,
         ) {
-            let mut graph_string = quad
-                .g()
-                .ok_or(TermError())?
-                .iri()
-                .ok_or(TermError())?
-                .to_string();
+            let mut graph_string = graph_iri_to_string(quad.g())?;
             let matching = caps
                 .get(1)
                 .ok_or(NpError("Error with regex".to_string()))?
@@ -95,23 +91,19 @@ pub fn replace_bnodes(
             Some(Iri::new_unchecked(graph_string))
         } else {
             Some(Iri::new_unchecked(
-                quad.g()
-                    .ok_or(TermError())?
-                    .iri()
-                    .ok_or(TermError())?
-                    .to_string(),
+                graph_iri_to_string(quad.g())?,
             ))
         };
 
         // Replace bnode in objects
         if quad.o().is_blank_node() {
-            let bnode_id = quad.o().bnode_id().ok_or(TermError())?.to_string();
+            let bnode_id = object_blank_to_str(quad.o())?;
             bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
                 let counter = bnode_counter;
                 bnode_counter += 1;
                 counter
             });
-            let object = format!("{}_{}", base_ns, bnode_map[&bnode_id]);
+            let object = format!("{}_{}", base_ns, bnode_map[bnode_id]);
             new_dataset.insert(
                 Iri::new_unchecked(subject),
                 quad.p(),
@@ -121,9 +113,9 @@ pub fn replace_bnodes(
         } else if quad.o().is_iri() {
             // Handle URI ending with #_ to double _
             if let Some(caps) =
-                re_underscore_uri.captures(&quad.o().iri().ok_or(TermError())?.as_ref())
+                re_underscore_uri.captures(&object_iri_to_string(quad.o())?)
             {
-                let mut object_string = quad.o().iri().ok_or(TermError())?.to_string();
+                let mut object_string = object_iri_to_string(quad.o())?;
                 let matching = caps
                     .get(1)
                     .ok_or(NpError("Error with regex".to_string()))?
@@ -158,7 +150,7 @@ pub fn replace_ns_in_quads(
     let mut new = LightDataset::new();
     for quad in dataset.quads() {
         let quad = quad?;
-        let s = quad.s().iri().ok_or(TermError())?.to_string();
+        let s = subject_iri_to_string(quad.s())?;
         // Replace URI in subjects
         let subject = if s == old_ns || s == old_uri {
             Iri::new_unchecked(new_uri.to_string())
@@ -167,17 +159,13 @@ pub fn replace_ns_in_quads(
         };
         // Replace URI in graphs
         let graph = Some(Iri::new_unchecked(
-            quad.g()
-                .ok_or(TermError())?
-                .iri()
-                .ok_or(TermError())?
-                .to_string()
+            graph_iri_to_string(quad.g())?
                 .replace(old_ns, new_ns),
         ));
 
         // Replace URI in objects
         if quad.o().is_iri() {
-            let o = quad.o().iri().ok_or(TermError())?.to_string();
+            let o = object_iri_to_string(quad.o())?;
             if o == old_ns || o == old_uri {
                 new.insert(
                     &subject,
@@ -255,71 +243,47 @@ pub fn normalize_dataset(
     // Convert dataset to a list of NormQuad struct
     for quad in dataset.quads() {
         let quad = quad?;
-        let graph = quad
-            .g()
-            .ok_or(TermError())?
-            .iri()
-            .ok_or(TermError())?
-            .to_string();
+        let graph = graph_iri_to_string(quad.g())?;
         // Extract components of the quad and convert them to strings. Replace the base URI if present
         let graph = fix_normed_uri(&graph.replace(base_ns, &norm_uri), separator);
 
-        let subject = if quad.s().iri().ok_or(TermError())?.to_string() == base_ns {
+        let mut datatype = "".to_string();
+        let mut lang = "".to_string();
+
+        let subject = if subject_iri_to_string(quad.s())? == base_ns {
             norm_uri.to_string()
         } else {
             fix_normed_uri(
-                &quad
-                    .s()
-                    .iri()
-                    .ok_or(TermError())?
-                    .to_string()
+                &subject_iri_to_string(quad.s())?
                     .replace(base_ns, &norm_uri),
                 separator,
             )
         };
 
-        let predicate = quad
-            .p()
-            .iri()
-            .ok_or(TermError())?
-            .to_string()
+        let predicate = predicate_iri_to_string(quad.p())?
             .replace(base_ns, &norm_uri);
 
         let object = if quad.o().is_iri() {
-            if quad.o().iri().ok_or(TermError())?.to_string() == base_ns {
+            if object_iri_to_string(quad.o())? == base_ns {
                 norm_uri.to_string()
             } else {
                 fix_normed_uri(
-                    &quad
-                        .o()
-                        .iri()
-                        .ok_or(TermError())?
-                        .to_string()
+                    &object_iri_to_string(quad.o())?
                         .replace(base_ns, &norm_uri),
                     separator,
                 )
             }
         } else {
+            // Extract datatype and language if available
+            let (val, dt, lng) = object_literal_to_strings(quad.o())?;
+            datatype = dt;
+            lang = lng;
             // Double the \\ to bypass rust escaping
-            quad.o()
-                .lexical_form()
-                .ok_or(TermError())?
-                .to_string()
+            val
                 .replace('\\', "\\\\")
                 .replace('\n', "\\n")
         };
 
-        // Extract datatype and language if available
-        let datatype = if quad.o().datatype().is_some() {
-            quad.o().datatype().ok_or(TermError())?.to_string()
-        } else {
-            "".to_string()
-        };
-        let lang = if quad.o().language_tag().is_some() {
-            quad.o().language_tag().ok_or(TermError())?.to_string()
-        } else {
-            "".to_string()
-        };
         // Create a NormQuad struct and push it to the vector
         quads_vec.push(NormQuad {
             graph,

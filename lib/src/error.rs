@@ -6,20 +6,6 @@ use sophia::inmem::index::TermIndexFullError;
 use sophia::iri::{InvalidIri, resolve::IriParseError};
 
 #[derive(Debug)]
-pub struct TermError();
-
-impl Error for TermError {}
-
-impl fmt::Display for TermError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "Error retrieving the Sophia RDF Term: graph, IRI, bnode, or literal"
-        )
-    }
-}
-
-#[derive(Debug)]
 pub struct NpError(pub String);
 
 impl Error for NpError {}
@@ -37,11 +23,6 @@ impl fmt::Display for NpError {
 
 // Add handling for errors from external dependencies
 // to be able to use ? more to handle errors
-impl From<TermError> for NpError {
-    fn from(err: TermError) -> Self {
-        NpError(format!("Invalid Quad error: {err}"))
-    }
-}
 impl From<InvalidIri> for NpError {
     fn from(err: InvalidIri) -> Self {
         NpError(format!("Invalid IRI error: {err}"))

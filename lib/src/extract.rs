@@ -1,12 +1,16 @@
 use crate::constants::{NP_PREF_NS, NP_TEMP_URI};
-use crate::error::{NpError, TermError};
+use crate::error::NpError;
+use crate::utils::{
+    graph_iri_to_string, object_iri_to_string, object_literal_to_strings,
+    subject_iri_to_string
+};
 use crate::vocab::{dct, np, npx, pav, prov, rdf};
 
 use regex::Regex;
 use serde::Serialize;
 use sophia::api::dataset::Dataset;
 use sophia::api::quad::Quad;
-use sophia::api::term::{matcher::Any, Term};
+use sophia::api::term::matcher::Any;
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use std::fmt;
@@ -59,13 +63,8 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
-            np_url = q?.s().iri().ok_or(TermError())?.to_string();
-            head = q?
-                .g()
-                .ok_or(TermError())?
-                .iri()
-                .ok_or(TermError())?
-                .to_string();
+            np_url = subject_iri_to_string(q?.s())?;
+            head = graph_iri_to_string(q?.g())?;
         }
     }
     if np_url.is_empty() {
@@ -87,7 +86,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        assertion = q?.o().iri().ok_or(TermError())?.to_string();
+        assertion = object_iri_to_string(q?.o())?;
     }
     for q in dataset.quads_matching(
         [&np_iri],
@@ -95,7 +94,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        prov = q?.o().iri().ok_or(TermError())?.to_string();
+        prov = object_iri_to_string(q?.o())?;
     }
     for q in dataset.quads_matching(
         [&np_iri],
@@ -103,7 +102,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&head_iri)],
     ) {
-        pubinfo = q?.o().iri().ok_or(TermError())?.to_string();
+        pubinfo = object_iri_to_string(q?.o())?;
     }
 
     if assertion.is_empty() {
@@ -199,8 +198,9 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        signature = q?.o().lexical_form().ok_or(TermError())?.to_string();
-        signature_iri = Iri::new_unchecked(q?.s().iri().ok_or(TermError())?.to_string());
+        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        signature = val;
+        signature_iri = Iri::new_unchecked(subject_iri_to_string(q?.s())?);
     }
 
     // Extract public key
@@ -211,7 +211,8 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        pubkey = Some(q?.o().lexical_form().ok_or(TermError())?.to_string());
+        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        pubkey = Some(val);
     }
 
     // Extract algo
@@ -222,7 +223,8 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        algo = Some(q?.o().lexical_form().ok_or(TermError())?.to_string());
+        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        algo = Some(val);
     }
 
     // Extract ORCID
@@ -237,7 +239,8 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         Any,
         [Some(&pubinfo_iri)],
     ) {
-        orcid = Some(q?.o().iri().ok_or(TermError())?.to_string());
+        let (val, _, _) = object_literal_to_strings(q?.o())?;
+        orcid = Some(val);
     }
 
     let assertion_iri = Iri::new_unchecked(assertion);
