@@ -3,6 +3,7 @@ use getrandom::getrandom;
 use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
 use sophia::api::source::QuadSource as _;
 use sophia::api::prefix::Prefix;
+use sophia::api::{prelude::Term, term::SimpleTerm};
 use sophia::inmem::dataset::LightDataset;
 use sophia::iri::Iri;
 use sophia::jsonld;
@@ -161,4 +162,132 @@ pub fn get_prefixes(
             Iri::new_unchecked("https://w3id.org/biolink/infores/".to_string()),
         ),
     ])
+}
+
+/// Extract IRI as `String` from subject term
+pub fn subject_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
+    match node {
+        SimpleTerm::Iri(iri) => Ok(iri.as_ref().to_string()),
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract IRI from subject: Got {}", variant_name)))
+        },
+    }
+}
+
+/// Extract blank node ID as `&str` from subject term
+pub fn subject_blank_to_str<'a>(node: &'a SimpleTerm<'a>) -> Result<&'a str, NpError> {
+    match node {
+        SimpleTerm::BlankNode(n) => Ok(n.as_str()),
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract blank node ID from subject: Got {}", variant_name)))
+        },
+    }
+}
+
+/// Extract IRI as `String` from predicate term
+pub fn predicate_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
+    match node {
+        SimpleTerm::Iri(iri) => Ok(iri.as_ref().to_string()),
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract IRI from predicate: Got {}", variant_name)))
+        },
+    }
+}
+
+/// Extract IRI as `String` from object term
+pub fn object_iri_to_string(node: &SimpleTerm) -> Result<String, NpError> {
+    match node {
+        SimpleTerm::Iri(iri) => Ok(iri.as_ref().to_string()),
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract IRI from object: Got {}", variant_name)))
+        },
+    }
+}
+
+/// Extract blank node ID as `&str` from object term
+pub fn object_blank_to_str<'a>(node: &'a SimpleTerm<'a>) -> Result<&'a str, NpError> {
+    match node {
+        SimpleTerm::BlankNode(n) => Ok(n.as_str()),
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract blank node ID from object: Got {}", variant_name)))
+        },
+    }
+}
+
+/// Extract literal as `String` tuple from object term
+pub fn object_literal_to_strings(node: &SimpleTerm) -> Result<(String, String, String), NpError> {
+    match node {
+        SimpleTerm::LiteralDatatype(value, datatype) => {
+            if node.is_literal() {
+                Ok((value.to_string(), datatype.to_string(), "".to_string()))
+            } else {
+                Err(NpError("foo".to_string()))
+            }
+        },
+        SimpleTerm::LiteralLanguage(value, tag) => {
+            if node.is_literal() {
+                Ok((value.to_string(), "".to_string(), tag.to_string()))
+            } else {
+                Err(NpError("bar".to_string()))
+            }
+        },
+        SimpleTerm::Iri(iri) => {
+            Ok((iri.as_ref().to_string(), "".to_string(), "".to_string()))
+        },
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract literal from object: Got {}", variant_name)))
+        },
+    }
+}
+
+/// Extract IRI as `String` from graph name
+pub fn graph_iri_to_string(node: Option<&SimpleTerm>) -> Result<String, NpError> {
+    match node {
+        Some(SimpleTerm::Iri(iri)) => Ok(iri.as_ref().to_string()),
+        other => {
+            let debug_str = format!("{:?}", other);
+            let variant_name = debug_str
+                .split('(')
+                .next()
+                .and_then(|s| s.split("::").last())
+                .unwrap_or("Unknown");
+            Err(NpError(format!("Failed to extract graph name IRI: Got {}", variant_name)))
+        },
+    }
 }
