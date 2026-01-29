@@ -486,8 +486,8 @@ impl Nanopub {
 
         let mut dataset = create_base_dataset()?;
         let np_ns = NP_TEMP_URI;
-        let assertion_graph = Iri::new(format!("{}assertion", &np_ns))?;
-        let prov_graph = Iri::new(format!("{}provenance", &np_ns))?;
+        let assertion_graph = Iri::new(format!("{}assertion", np_ns))?;
+        let prov_graph = Iri::new(format!("{}provenance", np_ns))?;
 
         // Assertion graph triples, add key declaration
         dataset.insert(
@@ -616,7 +616,7 @@ pub fn create_base_dataset() -> Result<LightDataset, NpError> {
     let mut dataset = LightDataset::new();
     let np_iri = Iri::new_unchecked(NP_TEMP_URI);
     let np_ns = NP_TEMP_URI;
-    let head_graph = Iri::new(format!("{}Head", &np_ns))?;
+    let head_graph = Iri::new(format!("{}Head", np_ns))?;
     // Add Head graph triples
     dataset.insert(
         np_iri,

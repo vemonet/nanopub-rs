@@ -55,7 +55,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut pubinfo: String = "".to_string();
 
     // Extract nanopub URL and head graph
-    for q in dataset.quads_matching(Any, [&rdf::TYPE], [np::NANOPUBLICATION], Any) {
+    for q in dataset.quads_matching(Any, [rdf::TYPE], [np::NANOPUBLICATION], Any) {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
@@ -125,7 +125,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Get just the Trusty hash from the URI
     let mut trusty_hash: String = "".to_string();
     let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
-    if let Some(caps) = re_trusty.captures(&np_iri.as_ref()) {
+    if let Some(caps) = re_trusty.captures(&np_iri) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
     }
@@ -142,7 +142,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let np_iri: Iri<String> =
         if np_iri.ends_with('#') || np_iri.ends_with('/') || np_iri.ends_with('.') {
             match np_iri.chars().last() {
-                Some(_) => Iri::new_unchecked(np_iri.to_string()[..np_iri.len() - 1].to_string()),
+                Some(_) => Iri::new_unchecked(np_iri[..np_iri.len() - 1].to_string()),
                 None => np_iri,
             }
         } else {
