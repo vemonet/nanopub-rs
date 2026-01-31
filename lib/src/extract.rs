@@ -80,13 +80,14 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let np_iri: Iri<String> = Iri::new_unchecked(np_url);
     let head_iri: Iri<String> = Iri::new_unchecked(head);
     let mut np_subject_term = np_iri.as_iri();
+    let head_graph = Some(head_iri.as_iri());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_matching(
         [np_subject_term],
         [np::HAS_ASSERTION],
         Any,
-        [Some(&head_iri)],
+        [head_graph],
     ) {
         assertion = object_iri_to_string(q?.o())?;
     }
@@ -94,7 +95,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         [np_subject_term],
         [np::HAS_PROVENANCE],
         Any,
-        [Some(&head_iri)],
+        [head_graph],
     ) {
         prov = object_iri_to_string(q?.o())?;
     }
@@ -102,7 +103,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         [np_subject_term],
         [np::HAS_PUBLICATION_INFO],
         Any,
-        [Some(&head_iri)],
+        [head_graph],
     ) {
         pubinfo = object_iri_to_string(q?.o())?;
     }
@@ -194,13 +195,14 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Extract signature and its subject URI
     let signature_string = format!("{}sig", np_ns);
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
+    let pubinfo_graph = Some(pubinfo_iri.as_iri());
     let mut signature: String = "".to_string();
     let mut signature_iri: Iri<String> = Iri::new_unchecked(signature_string);
     for q in dataset.quads_matching(
         Any,
         [npx::HAS_SIGNATURE],
         Any,
-        [Some(&pubinfo_iri)],
+        [pubinfo_graph],
     ) {
         let (val, _, _) = object_literal_to_strings(q?.o())?;
         signature = val;
@@ -214,7 +216,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         [signature_node],
         [npx::HAS_PUBLIC_KEY],
         Any,
-        [Some(&pubinfo_iri)],
+        [pubinfo_graph],
     ) {
         let (val, _, _) = object_literal_to_strings(q?.o())?;
         pubkey = Some(val);
@@ -226,7 +228,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         [signature_node],
         [npx::HAS_ALGORITHM],
         Any,
-        [Some(&pubinfo_iri)],
+        [pubinfo_graph],
     ) {
         let (val, _, _) = object_literal_to_strings(q?.o())?;
         algo = Some(val);
@@ -244,7 +246,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
             pav::CREATED_BY,
         ],
         Any,
-        [Some(&pubinfo_iri)],
+        [pubinfo_graph],
     ) {
         let (val, _, _) = object_literal_to_strings(q?.o())?;
         orcid = Some(val);
