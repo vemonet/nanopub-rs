@@ -96,6 +96,7 @@ pub fn replace_bnodes(
         };
 
         // Replace bnode in objects
+        let subject_node = Iri::new_unchecked(subject.as_str());
         if quad.o().is_blank_node() {
             let bnode_id = object_blank_to_str(quad.o())?;
             bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
@@ -103,11 +104,12 @@ pub fn replace_bnodes(
                 bnode_counter += 1;
                 counter
             });
-            let object = format!("{}_{}", base_ns, bnode_map[bnode_id]);
+            let object_string = format!("{}_{}", base_ns, bnode_map[bnode_id]);
+            let object_node = Iri::new_unchecked(object_string.as_str());
             new_dataset.insert(
-                Iri::new_unchecked(subject),
+                subject_node,
                 quad.p(),
-                Iri::new_unchecked(object),
+                object_node,
                 graph,
             )?;
         } else if quad.o().is_iri() {
@@ -123,17 +125,18 @@ pub fn replace_bnodes(
                 let new_ending = matching.replacen('_', "__", 1);
                 object_string.truncate(object_string.len() - matching.len()); // Remove the original ending
                 object_string.push_str(&new_ending);
+                let object_node = Iri::new_unchecked(object_string.as_str());
                 new_dataset.insert(
-                    Iri::new_unchecked(subject),
+                    subject_node,
                     quad.p(),
-                    Iri::new_unchecked(object_string),
+                    object_node,
                     graph,
                 )?;
             } else {
-                new_dataset.insert(Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
+                new_dataset.insert(subject_node, quad.p(), quad.o(), graph)?;
             }
         } else {
-            new_dataset.insert(Iri::new_unchecked(subject), quad.p(), quad.o(), graph)?;
+            new_dataset.insert(subject_node, quad.p(), quad.o(), graph)?;
         };
     }
     Ok(new_dataset)
@@ -152,10 +155,10 @@ pub fn replace_ns_in_quads(
         let quad = quad?;
         let s = subject_iri_to_string(quad.s())?;
         // Replace URI in subjects
-        let subject = if s == old_ns || s == old_uri {
-            Iri::new_unchecked(new_uri.to_string())
+        let subject_node = if s == old_ns || s == old_uri {
+            &Iri::new_unchecked(new_uri.to_string())
         } else {
-            Iri::new_unchecked(s.replace(old_ns, new_ns))
+            &Iri::new_unchecked(s.replace(old_ns, new_ns))
         };
         // Replace URI in graphs
         let graph = Some(Iri::new_unchecked(
@@ -166,23 +169,19 @@ pub fn replace_ns_in_quads(
         // Replace URI in objects
         if quad.o().is_iri() {
             let o = object_iri_to_string(quad.o())?;
-            if o == old_ns || o == old_uri {
-                new.insert(
-                    &subject,
-                    quad.p(),
-                    Iri::new_unchecked(new_uri.to_string()),
-                    graph,
-                )?;
+            let object_node = if o == old_ns || o == old_uri {
+                &Iri::new_unchecked(new_uri.to_string())
             } else {
-                new.insert(
-                    &subject,
-                    quad.p(),
-                    Iri::new_unchecked(o.replace(old_ns, new_ns)),
-                    graph,
-                )?;
-            }
+                &Iri::new_unchecked(o.replace(old_ns, new_ns))
+            };
+            new.insert(
+                subject_node,
+                quad.p(),
+                object_node,
+                graph,
+            )?;
         } else {
-            new.insert(&subject, quad.p(), quad.o(), graph)?;
+            new.insert(subject_node, quad.p(), quad.o(), graph)?;
         };
     }
     Ok(new)

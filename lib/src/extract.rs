@@ -192,9 +192,10 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     };
 
     // Extract signature and its subject URI
+    let signature_string = format!("{}sig", np_ns);
     let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
     let mut signature: String = "".to_string();
-    let mut signature_iri: Iri<String> = Iri::new_unchecked(format!("{}sig", np_ns));
+    let mut signature_iri: Iri<String> = Iri::new_unchecked(signature_string);
     for q in dataset.quads_matching(
         Any,
         [npx::HAS_SIGNATURE],
@@ -205,11 +206,12 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         signature = val;
         signature_iri = Iri::new_unchecked(subject_iri_to_string(q?.s())?);
     }
+    let signature_node = signature_iri.as_iri();
 
     // Extract public key
     let mut pubkey: Option<String> = None;
     for q in dataset.quads_matching(
-        [&signature_iri],
+        [signature_node],
         [npx::HAS_PUBLIC_KEY],
         Any,
         [Some(&pubinfo_iri)],
@@ -221,7 +223,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     // Extract algo
     let mut algo: Option<String> = None;
     for q in dataset.quads_matching(
-        [&signature_iri],
+        [signature_node],
         [npx::HAS_ALGORITHM],
         Any,
         [Some(&pubinfo_iri)],
