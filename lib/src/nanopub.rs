@@ -486,40 +486,40 @@ impl Nanopub {
 
         let mut dataset = create_base_dataset()?;
         let np_ns = NP_TEMP_URI;
-        let assertion_graph = Iri::new(format!("{}assertion", np_ns))?;
-        let prov_graph = Iri::new(format!("{}provenance", np_ns))?;
+        let assertion_iri = Iri::new(format!("{}assertion", np_ns))?;
+        let prov_iri = Iri::new(format!("{}provenance", np_ns))?;
 
         // Assertion graph triples, add key declaration
         dataset.insert(
             Iri::new(format!("{}keyDeclaration", &np_ns))?,
             npx::DECLARED_BY,
             Iri::new_unchecked(orcid),
-            Some(&assertion_graph),
+            Some(&assertion_iri),
         )?;
         dataset.insert(
             Iri::new(format!("{}keyDeclaration", &np_ns))?,
             npx::HAS_ALGORITHM,
             "RSA",
-            Some(&assertion_graph),
+            Some(&assertion_iri),
         )?;
         dataset.insert(
             Iri::new(format!("{}keyDeclaration", &np_ns))?,
             npx::HAS_PUBLIC_KEY,
             profile.public_key.as_str(),
-            Some(&assertion_graph),
+            Some(&assertion_iri),
         )?;
         dataset.insert(
             Iri::new_unchecked(orcid),
             foaf::NAME,
             name,
-            Some(&assertion_graph),
+            Some(&assertion_iri),
         )?;
         // Provenance graph triples
         dataset.insert(
-            assertion_graph.clone(),
+            assertion_iri.clone(),
             prov::WAS_ATTRIBUTED_TO,
-            assertion_graph,
-            Some(&prov_graph),
+            assertion_iri,
+            Some(&prov_iri),
         )?;
         Ok(Self {
             info: extract_np_info(&dataset)?,
@@ -616,31 +616,31 @@ pub fn create_base_dataset() -> Result<LightDataset, NpError> {
     let mut dataset = LightDataset::new();
     let np_iri = Iri::new_unchecked(NP_TEMP_URI);
     let np_ns = NP_TEMP_URI;
-    let head_graph = Iri::new(format!("{}Head", np_ns))?;
+    let head_iri = Iri::new(format!("{}Head", np_ns))?;
     // Add Head graph triples
     dataset.insert(
         np_iri,
         np::HAS_ASSERTION,
         Iri::new(format!("{}assertion", &np_ns))?,
-        Some(head_graph.clone()),
+        Some(head_iri.clone()),
     )?;
     dataset.insert(
         np_iri,
         np::HAS_PROVENANCE,
         Iri::new(format!("{}provenance", &np_ns))?,
-        Some(head_graph.clone()),
+        Some(head_iri.clone()),
     )?;
     dataset.insert(
         np_iri,
         np::HAS_PUBLICATION_INFO,
         Iri::new(format!("{}pubinfo", &np_ns))?,
-        Some(&head_graph),
+        Some(&head_iri),
     )?;
     dataset.insert(
         np_iri,
         rdf::TYPE,
         np::NANOPUBLICATION,
-        Some(&head_graph),
+        Some(&head_iri),
     )?;
     Ok(dataset)
 }

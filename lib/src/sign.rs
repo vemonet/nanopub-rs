@@ -79,7 +79,7 @@ pub fn replace_bnodes(
                 .ok_or(TermError())?
                 .as_ref(),
         ) {
-            let mut graph_iri = quad
+            let mut graph_string = quad
                 .g()
                 .ok_or(TermError())?
                 .iri()
@@ -90,9 +90,9 @@ pub fn replace_bnodes(
                 .ok_or(NpError("Error with regex".to_string()))?
                 .as_str();
             let new_ending = matching.replacen('_', "__", 1);
-            graph_iri.truncate(graph_iri.len() - matching.len()); // Remove the original ending
-            graph_iri.push_str(&new_ending);
-            Some(Iri::new_unchecked(graph_iri))
+            graph_string.truncate(graph_string.len() - matching.len()); // Remove the original ending
+            graph_string.push_str(&new_ending);
+            Some(Iri::new_unchecked(graph_string))
         } else {
             Some(Iri::new_unchecked(
                 quad.g()
@@ -123,18 +123,18 @@ pub fn replace_bnodes(
             if let Some(caps) =
                 re_underscore_uri.captures(&quad.o().iri().ok_or(TermError())?.as_ref())
             {
-                let mut object_iri = quad.o().iri().ok_or(TermError())?.to_string();
+                let mut object_string = quad.o().iri().ok_or(TermError())?.to_string();
                 let matching = caps
                     .get(1)
                     .ok_or(NpError("Error with regex".to_string()))?
                     .as_str();
                 let new_ending = matching.replacen('_', "__", 1);
-                object_iri.truncate(object_iri.len() - matching.len()); // Remove the original ending
-                object_iri.push_str(&new_ending);
+                object_string.truncate(object_string.len() - matching.len()); // Remove the original ending
+                object_string.push_str(&new_ending);
                 new_dataset.insert(
                     Iri::new_unchecked(subject),
                     quad.p(),
-                    Iri::new_unchecked(object_iri),
+                    Iri::new_unchecked(object_string),
                     graph,
                 )?;
             } else {
