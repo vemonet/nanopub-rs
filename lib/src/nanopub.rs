@@ -143,11 +143,12 @@ impl Nanopub {
         let mut unsigned_dataset = self.dataset.clone();
         if !self.info.signature.is_empty() {
             let signature_node = self.info.signature_iri.as_iri();
+            let signature_literal = self.info.signature.as_str();
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(
                 signature_node,
                 npx::HAS_SIGNATURE,
-                self.info.signature.as_str(),
+                signature_literal,
                 Some(&self.info.pubinfo),
             )?;
             // Normalize nanopub nquads to a string
@@ -224,16 +225,18 @@ impl Nanopub {
         let ns_subject_term = self.info.ns.as_iri();
 
         // Add triples about the signature in the pubinfo
+        let public_key_literal = profile.public_key.as_str();
+        let rsa_literal = "RSA";
         self.dataset.insert(
             sig_node,
             npx::HAS_PUBLIC_KEY,
-            &*profile.public_key,
+            public_key_literal,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
             sig_node,
             npx::HAS_ALGORITHM,
-            "RSA",
+            rsa_literal,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.insert(
@@ -259,10 +262,11 @@ impl Nanopub {
             .is_none()
         {
             let datetime_now = Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
+            let datetime_now_literal = datetime_now.as_str() * xsd::dateTime;
             self.dataset.insert(
                 ns_node,
                 dct::CREATED,
-                datetime_now.as_str() * xsd::dateTime,
+                datetime_now_literal,
                 Some(&self.info.pubinfo),
             )?;
         }
@@ -312,11 +316,12 @@ impl Nanopub {
             &Sha256::digest(norm_quads.as_bytes()),
         )?;
         let signature_hash = engine::general_purpose::STANDARD.encode(signature_vec);
+        let signature_hash_literal = signature_hash.as_str();
         // Add the signature to the pubinfo graph
         self.dataset.insert(
             sig_node,
             npx::HAS_SIGNATURE,
-            &*signature_hash,
+            signature_hash_literal,
             Some(&self.info.pubinfo),
         )?;
 
@@ -419,16 +424,19 @@ impl Nanopub {
     pub fn unsign(mut self) -> Result<Self, NpError> {
         let signature_node = self.info.signature_iri.as_iri();
         let uri_node = self.info.uri.as_iri();
+        let public_key_literal = self.info.public_key.as_str();
+        let algo_literal = self.info.algo.as_str();
+        let signature_literal = self.info.signature.as_str();
         self.dataset.remove(
             signature_node,
             npx::HAS_PUBLIC_KEY,
-            &*self.info.public_key,
+            public_key_literal,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
             signature_node,
             npx::HAS_ALGORITHM,
-            &*self.info.algo,
+            algo_literal,
             Some(&self.info.pubinfo),
         )?;
         self.dataset.remove(
@@ -440,7 +448,7 @@ impl Nanopub {
         self.dataset.remove(
             signature_node,
             npx::HAS_SIGNATURE,
-            &*self.info.signature,
+            signature_literal,
             Some(&self.info.pubinfo),
         )?;
         self.dataset = replace_ns_in_quads(
@@ -505,6 +513,9 @@ impl Nanopub {
         let prov_iri = Iri::new(format!("{}provenance", &np_ns))?;
 
         // Assertion graph triples, add key declaration
+        let rsa_literal = "RSA";
+        let public_key_literal = profile.public_key.as_str();
+        let name_literal = name;
         dataset.insert(
             key_declaration_node,
             npx::DECLARED_BY,
@@ -514,19 +525,19 @@ impl Nanopub {
         dataset.insert(
             key_declaration_node,
             npx::HAS_ALGORITHM,
-            "RSA",
+            rsa_literal,
             Some(&assertion_iri),
         )?;
         dataset.insert(
             key_declaration_node,
             npx::HAS_PUBLIC_KEY,
-            profile.public_key.as_str(),
+            public_key_literal,
             Some(&assertion_iri),
         )?;
         dataset.insert(
             orcid_node,
             foaf::NAME,
-            name,
+            name_literal,
             Some(&assertion_iri),
         )?;
         // Provenance graph triples
