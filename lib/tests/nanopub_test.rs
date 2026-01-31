@@ -9,7 +9,7 @@ use nanopub::{
     utils::parse_rdf,
     Nanopub, ProfileBuilder,
 };
-use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset, iri::Iri};
+use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset as Dataset, iri::Iri};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -218,7 +218,7 @@ fn default_profile_file() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn test_normalize() -> Result<(), Box<dyn Error>> {
-    let dataset = LightDataset::new();
+    let dataset = Dataset::new();
     let _norm = normalize_dataset(&dataset, "", "", "#");
     Ok(())
 }
