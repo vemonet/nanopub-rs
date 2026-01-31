@@ -4,7 +4,7 @@ use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
 use sophia::api::source::QuadSource as _;
 use sophia::api::prefix::Prefix;
 use sophia::api::{prelude::Term, term::SimpleTerm};
-use sophia::inmem::dataset::LightDataset;
+use sophia::inmem::dataset::LightDataset as Dataset;
 use sophia::iri::Iri;
 use sophia::jsonld;
 use sophia::turtle::parser::trig;
@@ -13,8 +13,8 @@ use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
 
-/// Parse RDF from various format to a `LightDataset` (trig, nquads, JSON-LD)
-pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
+/// Parse RDF from various format to a `Dataset` (trig, nquads, JSON-LD)
+pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
     let rdf = rdf.to_string();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
     let dataset = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
@@ -39,7 +39,7 @@ pub fn parse_rdf(rdf: &str) -> Result<LightDataset, NpError> {
 /// The JSON-LD parser uses futures::block_on which creates conflict
 /// when running in tokio runtime, so we need to spawn a separate thread
 #[cfg(not(target_arch = "wasm32"))]
-pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
+pub fn parse_jsonld(rdf: &str) -> Result<Dataset, NpError> {
     let rdf = rdf.to_string();
     let handle = std::thread::spawn(move || {
         futures::executor::block_on(async { jsonld::parse_str(&rdf).collect_quads() })
@@ -53,14 +53,14 @@ pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
 
 /// Parse JSON-LD, in wasm we don't need to do the futures trick because we don't use tokio async runtime
 #[cfg(target_arch = "wasm32")]
-pub fn parse_jsonld(rdf: &str) -> Result<LightDataset, NpError> {
+pub fn parse_jsonld(rdf: &str) -> Result<Dataset, NpError> {
     Ok(jsonld::parse_str(rdf)
         .collect_quads()
         .map_err(|e| NpError(format!("Error parsing JSON-LD: {e}")))?)
 }
 
 /// Serialize RDF dataset to Trig
-pub fn serialize_rdf(dataset: &LightDataset, uri: &str, ns: &str) -> Result<String, NpError> {
+pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, NpError> {
     let prefixes = get_prefixes(uri, ns)?;
     let trig_config = TrigConfig::new()
         .with_pretty(true)

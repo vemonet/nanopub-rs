@@ -12,30 +12,30 @@ use base64::{engine, Engine as _};
 use chrono::Utc;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
-use sophia::api::dataset::{Dataset, MutableDataset};
+use sophia::api::dataset::{Dataset as _, MutableDataset};
 use sophia::api::ns::xsd;
 use sophia::api::term::{matcher::Any, Term};
-use sophia::inmem::dataset::LightDataset;
+use sophia::inmem::dataset::LightDataset as Dataset;
 use sophia::iri::{AsIri, Iri};
 use std::collections::HashSet;
 use std::{fmt, str};
 
 /// Trait to provide the nanopub RDF as string or sophia dataset
 pub trait RdfSource {
-    fn get_dataset(self) -> Result<LightDataset, NpError>;
+    fn get_dataset(self) -> Result<Dataset, NpError>;
 }
-impl RdfSource for LightDataset {
-    fn get_dataset(self) -> Result<LightDataset, NpError> {
+impl RdfSource for Dataset {
+    fn get_dataset(self) -> Result<Dataset, NpError> {
         Ok(self)
     }
 }
 impl RdfSource for &str {
-    fn get_dataset(self) -> Result<LightDataset, NpError> {
+    fn get_dataset(self) -> Result<Dataset, NpError> {
         parse_rdf(self)
     }
 }
 impl RdfSource for &String {
-    fn get_dataset(self) -> Result<LightDataset, NpError> {
+    fn get_dataset(self) -> Result<Dataset, NpError> {
         parse_rdf(self)
     }
 }
@@ -44,7 +44,7 @@ impl RdfSource for &String {
 #[derive(Clone, Debug)]
 pub struct Nanopub {
     pub info: NpInfo,
-    pub dataset: LightDataset,
+    pub dataset: Dataset,
 }
 
 impl fmt::Display for Nanopub {
@@ -92,7 +92,7 @@ impl Nanopub {
     /// ```
     pub async fn fetch(url: &str) -> Result<Self, NpError> {
         let np_rdf = fetch_np(url).await?;
-        let dataset: LightDataset = parse_rdf(&np_rdf)?;
+        let dataset: Dataset = parse_rdf(&np_rdf)?;
         let mut np_info = extract_np_info(&dataset)?;
         np_info.published = Some(url.to_string());
         Ok(Self {
@@ -649,8 +649,8 @@ impl Nanopub {
 }
 
 /// Bootstrap a base nanopub dataset that can be edited later
-pub fn create_base_dataset() -> Result<LightDataset, NpError> {
-    let mut dataset = LightDataset::new();
+pub fn create_base_dataset() -> Result<Dataset, NpError> {
+    let mut dataset = Dataset::new();
     let np_ns = NP_TEMP_URI;
     let assertion_string = format!("{}assertion", np_ns);
     let prov_string = format!("{}provenance", np_ns);

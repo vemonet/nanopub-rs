@@ -9,17 +9,17 @@ use crate::utils::{
 use base64::{alphabet, engine, Engine as _};
 use regex::Regex;
 use rsa::{sha2::Digest, sha2::Sha256};
-use sophia::api::dataset::{Dataset, MutableDataset};
+use sophia::api::dataset::{Dataset as _, MutableDataset};
 use sophia::api::quad::Quad;
 use sophia::api::term::Term;
-use sophia::inmem::dataset::LightDataset;
+use sophia::inmem::dataset::LightDataset as Dataset;
 use sophia::iri::Iri;
 use std::collections::HashMap;
 use std::{cmp::Ordering, str};
 
 /// Generate TrustyURI using base64 encoding
 pub fn make_trusty(
-    dataset: &LightDataset,
+    dataset: &Dataset,
     base_ns: &str,
     norm_ns: &str,
     separator: &str,
@@ -40,11 +40,11 @@ pub fn make_trusty(
 
 /// Replace bnodes by URI ending with `_1` in the RDF dataset
 pub fn replace_bnodes(
-    dataset: &LightDataset,
+    dataset: &Dataset,
     base_ns: &str,
     base_uri: &str,
-) -> Result<LightDataset, NpError> {
-    let mut new_dataset = LightDataset::new();
+) -> Result<Dataset, NpError> {
+    let mut new_dataset = Dataset::new();
     let mut bnode_map: HashMap<String, usize> = HashMap::new();
     let mut bnode_counter = 1;
     let re_underscore_uri = Regex::new(&format!(r"{base_uri}.?(_+[a-zA-Z0-9^_]+)$"))?;
@@ -144,13 +144,13 @@ pub fn replace_bnodes(
 
 /// Replace the dummy nanopub URI by the new one in the RDF dataset
 pub fn replace_ns_in_quads(
-    dataset: &LightDataset,
+    dataset: &Dataset,
     old_ns: &str,
     old_uri: &str,
     new_ns: &str,
     new_uri: &str,
-) -> Result<LightDataset, NpError> {
-    let mut new = LightDataset::new();
+) -> Result<Dataset, NpError> {
+    let mut new = Dataset::new();
     for quad in dataset.quads() {
         let quad = quad?;
         let s = subject_iri_to_string(quad.s())?;
@@ -223,7 +223,7 @@ pub fn fix_normed_uri(uri: &str, separator: &str) -> String {
 
 /// Normalize the quads contained in the nanopub dataset to a string used for signing and generating trusty
 pub fn normalize_dataset(
-    dataset: &LightDataset,
+    dataset: &Dataset,
     base_ns: &str,
     norm_ns: &str,
     separator: &str,

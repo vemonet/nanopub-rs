@@ -8,10 +8,10 @@ use crate::vocab::{dct, np, npx, pav, prov, rdf};
 
 use regex::Regex;
 use serde::Serialize;
-use sophia::api::dataset::Dataset;
+use sophia::api::dataset::Dataset as _;
 use sophia::api::quad::Quad;
 use sophia::api::term::matcher::Any;
-use sophia::inmem::dataset::LightDataset;
+use sophia::inmem::dataset::LightDataset as Dataset;
 use sophia::iri::{AsIri, Iri};
 use std::fmt;
 
@@ -51,7 +51,7 @@ impl fmt::Display for NpInfo {
 }
 
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
-pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
+pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let mut np_url: String = "".to_string();
     let mut head: String = "".to_string();
     let mut assertion: String = "".to_string();
