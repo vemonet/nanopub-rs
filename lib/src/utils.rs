@@ -103,7 +103,7 @@ impl DatasetExt for Dataset {
 pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
     let mut dataset = Dataset::new();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
-    let format = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
+    let format = if rdf.trim_start().starts_with(['{', '[']) {
         RdfFormat::JsonLd {
             profile: JsonLdProfileSet::empty(),
         }

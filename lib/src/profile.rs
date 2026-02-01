@@ -252,7 +252,7 @@ pub fn gen_keys() -> Result<(String, String), NpError> {
 fn remove_quotes(value: &str) -> String {
     value
         .trim()
-        .trim_matches(|c| c == '"' || c == '\'')
+        .trim_matches(['"', '\''])
         .trim()
         .to_string()
 }
