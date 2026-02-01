@@ -9,7 +9,7 @@ use nanopub::{
     utils::parse_rdf,
     Nanopub, ProfileBuilder,
 };
-use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset as Dataset, iri::Iri};
+use sophia::{api::dataset::MutableDataset, inmem::dataset::LightDataset as Dataset, iri::Iri as NamedNodeRef};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -253,16 +253,16 @@ async fn publish_from_scratch() -> Result<(), Box<dyn Error>> {
     println!("DEBUG: SCRATCH {}", np.rdf()?);
     let profile = ProfileBuilder::new(get_test_key()).build()?;
     np.dataset.insert(
-        Iri::new_unchecked("http://example.org/mosquitoes"),
-        Iri::new_unchecked("http://example.org/transmits"),
-        Iri::new_unchecked("http://example.org/malaria"),
-        Some(&np.info.assertion),
+        NamedNodeRef::new_unchecked("http://example.org/mosquitoes"),
+        NamedNodeRef::new_unchecked("http://example.org/transmits"),
+        NamedNodeRef::new_unchecked("http://example.org/malaria"),
+        Some(NamedNodeRef::new_unchecked(np.info.assertion.as_str())),
     )?;
     np.dataset.insert(
-        &np.info.assertion,
-        Iri::new_unchecked("http://www.w3.org/ns/prov#hadPrimarySource"),
-        Iri::new_unchecked("http://dx.doi.org/10.3233/ISU-2010-0613"),
-        Some(&np.info.prov),
+        NamedNodeRef::new_unchecked(np.info.assertion.as_str()),
+        NamedNodeRef::new_unchecked("http://www.w3.org/ns/prov#hadPrimarySource"),
+        NamedNodeRef::new_unchecked("http://dx.doi.org/10.3233/ISU-2010-0613"),
+        Some(NamedNodeRef::new_unchecked(np.info.prov.as_str())),
     )?;
     let np = np.publish(Some(&profile), None).await?;
     println!("DEBUG: SCRATCH 2 {}", np.rdf()?);
