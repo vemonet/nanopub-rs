@@ -12,7 +12,7 @@ use sophia::api::dataset::Dataset;
 use sophia::api::quad::Quad;
 use sophia::api::term::matcher::Any;
 use sophia::inmem::dataset::LightDataset;
-use sophia::iri::Iri;
+use sophia::iri::{AsIri, Iri};
 use std::fmt;
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
@@ -59,7 +59,8 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
     let mut pubinfo: String = "".to_string();
 
     // Extract nanopub URL and head graph
-    for q in dataset.quads_matching(Any, [rdf::TYPE], [np::NANOPUBLICATION], Any) {
+    let nanopublication_object_term = np::NANOPUBLICATION;
+    for q in dataset.quads_matching(Any, [rdf::TYPE], [nanopublication_object_term], Any) {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
@@ -78,10 +79,11 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
 
     let np_iri: Iri<String> = Iri::new_unchecked(np_url);
     let head_iri: Iri<String> = Iri::new_unchecked(head);
+    let mut np_subject_term = np_iri.as_iri();
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_matching(
-        [&np_iri],
+        [np_subject_term],
         [np::HAS_ASSERTION],
         Any,
         [Some(&head_iri)],
@@ -89,7 +91,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         assertion = object_iri_to_string(q?.o())?;
     }
     for q in dataset.quads_matching(
-        [&np_iri],
+        [np_subject_term],
         [np::HAS_PROVENANCE],
         Any,
         [Some(&head_iri)],
@@ -97,7 +99,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         prov = object_iri_to_string(q?.o())?;
     }
     for q in dataset.quads_matching(
-        [&np_iri],
+        [np_subject_term],
         [np::HAS_PUBLICATION_INFO],
         Any,
         [Some(&head_iri)],
@@ -147,6 +149,7 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
         } else {
             np_iri
         };
+    np_subject_term = np_iri.as_iri();
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
@@ -229,8 +232,10 @@ pub fn extract_np_info(dataset: &LightDataset) -> Result<NpInfo, NpError> {
 
     // Extract ORCID
     let mut orcid: Option<String> = None;
+    let original_ns_iri: Iri<String> = Iri::new_unchecked(original_ns.to_string());
+    let original_ns_subject_term = original_ns_iri.as_iri();
     for q in dataset.quads_matching(
-        [&np_iri, &Iri::new_unchecked(original_ns.to_string())],
+        [np_subject_term, original_ns_subject_term],
         [
             dct::CREATOR,
             prov::WAS_ATTRIBUTED_TO,
