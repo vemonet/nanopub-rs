@@ -6,13 +6,14 @@ use crate::utils::{
 };
 use crate::vocab::{dct, np, npx, pav, prov, rdf};
 
+use oxiri::Iri;
 use regex::Regex;
 use serde::Serialize;
 use sophia::api::dataset::Dataset as _;
 use sophia::api::quad::Quad;
 use sophia::api::term::matcher::Any;
 use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::iri::{AsIri, Iri};
+use sophia::iri::IriRef as NamedNodeRef;
 use std::fmt;
 
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
@@ -77,10 +78,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         return Err(NpError("Invalid Nanopub: no Head graph found.".to_string()));
     }
 
-    let np_iri: Iri<String> = Iri::new_unchecked(np_url);
-    let head_iri: Iri<String> = Iri::new_unchecked(head);
-    let mut np_subject_term = np_iri.as_iri();
-    let head_graph = Some(head_iri.as_iri());
+    let np_iri: Iri<String> = Iri::parse_unchecked(np_url);
+    let head_iri: Iri<String> = Iri::parse_unchecked(head);
+    let mut np_subject_term = NamedNodeRef::new_unchecked(np_iri.as_str());
+    let head_graph = Some(NamedNodeRef::new_unchecked(head_iri.as_str()));
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_matching(
@@ -138,19 +139,19 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     } else {
         &head_iri[..np_iri.len() + 1]
     };
-    let np_ns = Iri::new_unchecked(original_ns.to_string());
+    let np_ns = Iri::parse_unchecked(original_ns.to_string());
 
     // Remove last char if it is # or / to get the URI
     let np_iri: Iri<String> =
         if np_iri.ends_with('#') || np_iri.ends_with('/') || np_iri.ends_with('.') {
             match np_iri.chars().last() {
-                Some(_) => Iri::new_unchecked(np_iri[..np_iri.len() - 1].to_string()),
+                Some(_) => Iri::parse_unchecked(np_iri[..np_iri.len() - 1].to_string()),
                 None => np_iri,
             }
         } else {
             np_iri
         };
-    np_subject_term = np_iri.as_iri();
+    np_subject_term = NamedNodeRef::new_unchecked(np_iri.as_str());
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
@@ -194,10 +195,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     // Extract signature and its subject URI
     let signature_string = format!("{}sig", np_ns);
-    let pubinfo_iri: Iri<String> = Iri::new_unchecked(pubinfo);
-    let pubinfo_graph = Some(pubinfo_iri.as_iri());
+    let pubinfo_iri: Iri<String> = Iri::parse_unchecked(pubinfo);
+    let pubinfo_graph = Some(NamedNodeRef::new_unchecked(pubinfo_iri.as_str()));
     let mut signature: String = "".to_string();
-    let mut signature_iri: Iri<String> = Iri::new_unchecked(signature_string);
+    let mut signature_iri: Iri<String> = Iri::parse_unchecked(signature_string);
     for q in dataset.quads_matching(
         Any,
         [npx::HAS_SIGNATURE],
@@ -206,9 +207,9 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     ) {
         let (val, _, _) = object_literal_to_strings(q?.o())?;
         signature = val;
-        signature_iri = Iri::new_unchecked(subject_iri_to_string(q?.s())?);
+        signature_iri = Iri::parse_unchecked(subject_iri_to_string(q?.s())?);
     }
-    let signature_node = signature_iri.as_iri();
+    let signature_node = NamedNodeRef::new_unchecked(signature_iri.as_str());
 
     // Extract public key
     let mut pubkey: Option<String> = None;
@@ -236,8 +237,8 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     // Extract ORCID
     let mut orcid: Option<String> = None;
-    let original_ns_iri: Iri<String> = Iri::new_unchecked(original_ns.to_string());
-    let original_ns_subject_term = original_ns_iri.as_iri();
+    let original_ns_iri: Iri<String> = Iri::parse_unchecked(original_ns.to_string());
+    let original_ns_subject_term = NamedNodeRef::new_unchecked(original_ns_iri.as_str());
     for q in dataset.quads_matching(
         [np_subject_term, original_ns_subject_term],
         [
@@ -252,8 +253,8 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         orcid = Some(val);
     }
 
-    let assertion_iri = Iri::new_unchecked(assertion);
-    let prov_iri = Iri::new_unchecked(prov);
+    let assertion_iri = Iri::parse_unchecked(assertion);
+    let prov_iri = Iri::parse_unchecked(prov);
 
     Ok(NpInfo {
         uri: np_iri,

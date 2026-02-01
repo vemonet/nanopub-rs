@@ -10,13 +10,14 @@ use crate::vocab::{dct, foaf, np, npx, pav, prov, rdf};
 use base64;
 use base64::{engine, Engine as _};
 use chrono::Utc;
+use oxiri::Iri;
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
 use sophia::api::dataset::{Dataset as _, MutableDataset};
 use sophia::api::ns::xsd;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::iri::{AsIri, Iri};
+use sophia::iri::IriRef as NamedNodeRef;
 use std::collections::HashSet;
 use std::{fmt, str};
 
@@ -138,12 +139,12 @@ impl Nanopub {
             }
             msg = format!("{msg}1 trusty");
         }
-        let pubinfo_graph = Some(self.info.pubinfo.as_iri());
+        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
 
         // Check the signature is valid if found
         let mut unsigned_dataset = self.dataset.clone();
         if !self.info.signature.is_empty() {
-            let signature_node = self.info.signature_iri.as_iri();
+            let signature_node = NamedNodeRef::new_unchecked(self.info.signature_iri.as_str());
             let signature_literal = self.info.signature.as_str();
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(
@@ -220,11 +221,11 @@ impl Nanopub {
         }
 
         let sig_string = format!("{}sig", self.info.ns);
-        let sig_node = Iri::new(sig_string.as_str())?;
-        let ns_node = self.info.ns.as_iri();
-        let uri_subject_term = self.info.uri.as_iri();
-        let ns_subject_term = self.info.ns.as_iri();
-        let pubinfo_graph = Some(self.info.pubinfo.as_iri());
+        let sig_node = NamedNodeRef::new(sig_string.as_str())?;
+        let ns_node = NamedNodeRef::new_unchecked(self.info.ns.as_str());
+        let uri_subject_term = NamedNodeRef::new_unchecked(self.info.uri.as_str());
+        let ns_subject_term = NamedNodeRef::new_unchecked(self.info.uri.as_str());
+        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
 
         // Add triples about the signature in the pubinfo
         let public_key_literal = profile.public_key.as_str();
@@ -293,7 +294,7 @@ impl Nanopub {
                 .next()
                 .is_none()
             {
-                let orcid_node = Iri::new_unchecked(orcid.as_str());
+                let orcid_node = NamedNodeRef::new_unchecked(orcid.as_str());
                 self.dataset.insert(
                     ns_node,
                     dct::CREATOR,
@@ -424,12 +425,12 @@ impl Nanopub {
 
     /// Unsign a signed nanopub RDF. Remove signature triples and replace trusty URI with default temp URI
     pub fn unsign(mut self) -> Result<Self, NpError> {
-        let signature_node = self.info.signature_iri.as_iri();
-        let uri_node = self.info.uri.as_iri();
+        let signature_node = NamedNodeRef::new_unchecked(self.info.signature_iri.as_str());
+        let uri_node = NamedNodeRef::new_unchecked(self.info.uri.as_str());
         let public_key_literal = self.info.public_key.as_str();
         let algo_literal = self.info.algo.as_str();
         let signature_literal = self.info.signature.as_str();
-        let pubinfo_graph = Some(self.info.pubinfo.as_iri());
+        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
         self.dataset.remove(
             signature_node,
             npx::HAS_PUBLIC_KEY,
@@ -461,8 +462,8 @@ impl Nanopub {
             NP_TEMP_URI,
             NP_TEMP_URI,
         )?;
-        self.info.uri = Iri::new_unchecked(NP_TEMP_URI.to_string());
-        self.info.ns = Iri::new_unchecked(NP_TEMP_URI.to_string());
+        self.info.uri = Iri::parse_unchecked(NP_TEMP_URI.to_string());
+        self.info.ns = Iri::parse_unchecked(NP_TEMP_URI.to_string());
         self.info = extract_np_info(&self.dataset)?;
         Ok(self)
     }
@@ -510,12 +511,12 @@ impl Nanopub {
         let key_declaration_string = format!("{}keyDeclaration", np_ns);
         let assertion_string = format!("{}assertion", np_ns);
         let prov_string = format!("{}provenance", np_ns);
-        let assertion_iri = Iri::new(assertion_string)?;
-        let key_declaration_node = Iri::new(key_declaration_string.as_str())?;
-        let orcid_node = Iri::new_unchecked(orcid);
-        let assertion_node = assertion_iri.as_iri();
+        let assertion_iri = Iri::parse(assertion_string)?;
+        let key_declaration_node = NamedNodeRef::new(key_declaration_string.as_str())?;
+        let orcid_node = NamedNodeRef::new_unchecked(orcid);
+        let assertion_node = NamedNodeRef::new_unchecked(assertion_iri.as_str());
         let assertion_graph = Some(assertion_node);
-        let prov_graph = Some(Iri::new(prov_string.as_str())?);
+        let prov_graph = Some(NamedNodeRef::new(prov_string.as_str())?);
 
         // Assertion graph triples, add key declaration
         let rsa_literal = "RSA";
@@ -560,12 +561,12 @@ impl Nanopub {
 
     /// Check if Nanopub is valid: minimal required triples in assertion, prov, pubinfo graphs
     pub fn is_valid(&self) -> Result<bool, NpError> {
-        let assertion_node = self.info.assertion.as_iri();
-        let uri_subject_term = self.info.uri.as_iri();
-        let ns_subject_term = self.info.ns.as_iri();
+        let assertion_node = NamedNodeRef::new_unchecked(self.info.assertion.as_str());
+        let uri_subject_term = NamedNodeRef::new_unchecked(self.info.uri.as_str());
+        let ns_subject_term = NamedNodeRef::new_unchecked(self.info.ns.as_str());
         let assertion_graph = Some(assertion_node);
-        let prov_graph = Some(self.info.prov.as_iri());
-        let pubinfo_graph = Some(self.info.pubinfo.as_iri());
+        let prov_graph = Some(NamedNodeRef::new_unchecked(self.info.prov.as_str()));
+        let pubinfo_graph = Some(NamedNodeRef::new_unchecked(self.info.pubinfo.as_str()));
         if self
             .dataset
             .quads_matching(Any, Any, Any, [assertion_graph])
@@ -656,11 +657,11 @@ pub fn create_base_dataset() -> Result<Dataset, NpError> {
     let prov_string = format!("{}provenance", np_ns);
     let pubinfo_string = format!("{}pubinfo", np_ns);
     let head_string = format!("{}Head", np_ns);
-    let np_node = Iri::new_unchecked(NP_TEMP_URI);
-    let assertion_node = Iri::new(assertion_string.as_str())?;
-    let prov_node = Iri::new(prov_string.as_str())?;
-    let pubinfo_node = Iri::new(pubinfo_string.as_str())?;
-    let head_graph = Some(Iri::new(head_string.as_str())?);
+    let np_node = NamedNodeRef::new_unchecked(NP_TEMP_URI);
+    let assertion_node = NamedNodeRef::new(assertion_string.as_str())?;
+    let prov_node = NamedNodeRef::new(prov_string.as_str())?;
+    let pubinfo_node = NamedNodeRef::new(pubinfo_string.as_str())?;
+    let head_graph = Some(NamedNodeRef::new(head_string.as_str())?);
     // Add Head graph triples
     dataset.insert(
         np_node,

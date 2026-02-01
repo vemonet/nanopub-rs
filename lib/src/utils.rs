@@ -1,11 +1,10 @@
 // use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
+use oxiri::Iri;
 use sophia::api::serializer::{QuadSerializer as _, Stringifier as _};
 use sophia::api::source::QuadSource as _;
-use sophia::api::prefix::Prefix;
 use sophia::api::{prelude::Term, term::SimpleTerm};
 use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::iri::Iri;
 use sophia::jsonld;
 use sophia::turtle::parser::trig;
 use sophia::turtle::serializer::trig::{TrigConfig, TrigSerializer};
@@ -87,79 +86,79 @@ pub fn get_np_server(random: bool) -> &'static str {
 pub fn get_prefixes(
     np_uri: &str,
     np_ns: &str,
-) -> Result<[(Prefix<String>, Iri<String>); 18], NpError> {
+) -> Result<[(String, Iri<String>); 18], NpError> {
     Ok([
         (
-            Prefix::new_unchecked("this".to_string()),
-            Iri::new_unchecked(np_uri.to_string()),
+            "this".to_string(),
+            Iri::parse_unchecked(np_uri.to_string()),
         ),
         (
-            Prefix::new_unchecked("sub".to_string()),
-            Iri::new_unchecked(np_ns.to_string()),
+            "sub".to_string(),
+            Iri::parse_unchecked(np_ns.to_string()),
         ),
         (
-            Prefix::new_unchecked("rdf".to_string()),
-            Iri::new_unchecked("http://www.w3.org/1999/02/22-rdf-syntax-ns#".to_string()),
+            "rdf".to_string(),
+            Iri::parse_unchecked("http://www.w3.org/1999/02/22-rdf-syntax-ns#".to_string()),
         ),
         (
-            Prefix::new_unchecked("rdfs".to_string()),
-            Iri::new_unchecked("http://www.w3.org/2000/01/rdf-schema#".to_string()),
+            "rdfs".to_string(),
+            Iri::parse_unchecked("http://www.w3.org/2000/01/rdf-schema#".to_string()),
         ),
         (
-            Prefix::new_unchecked("xsd".to_string()),
-            Iri::new_unchecked("http://www.w3.org/2001/XMLSchema#".to_string()),
+            "xsd".to_string(),
+            Iri::parse_unchecked("http://www.w3.org/2001/XMLSchema#".to_string()),
         ),
         (
-            Prefix::new_unchecked("owl".to_string()),
-            Iri::new_unchecked("http://www.w3.org/2002/07/owl#".to_string()),
+            "owl".to_string(),
+            Iri::parse_unchecked("http://www.w3.org/2002/07/owl#".to_string()),
         ),
         (
-            Prefix::new_unchecked("skos".to_string()),
-            Iri::new_unchecked("http://www.w3.org/2004/02/skos/core#".to_string()),
+            "skos".to_string(),
+            Iri::parse_unchecked("http://www.w3.org/2004/02/skos/core#".to_string()),
         ),
         (
-            Prefix::new_unchecked("np".to_string()),
-            Iri::new_unchecked("http://www.nanopub.org/nschema#".to_string()),
+            "np".to_string(),
+            Iri::parse_unchecked("http://www.nanopub.org/nschema#".to_string()),
         ),
         (
-            Prefix::new_unchecked("npx".to_string()),
-            Iri::new_unchecked("http://purl.org/nanopub/x/".to_string()),
+            "npx".to_string(),
+            Iri::parse_unchecked("http://purl.org/nanopub/x/".to_string()),
         ),
         (
-            Prefix::new_unchecked("dc".to_string()),
-            Iri::new_unchecked("http://purl.org/dc/elements/1.1/".to_string()),
+            "dc".to_string(),
+            Iri::parse_unchecked("http://purl.org/dc/elements/1.1/".to_string()),
         ),
         (
-            Prefix::new_unchecked("dcterms".to_string()),
-            Iri::new_unchecked("http://purl.org/dc/terms/".to_string()),
+            "dcterms".to_string(),
+            Iri::parse_unchecked("http://purl.org/dc/terms/".to_string()),
         ),
         (
-            Prefix::new_unchecked("prov".to_string()),
-            Iri::new_unchecked("http://www.w3.org/ns/prov#".to_string()),
+            "prov".to_string(),
+            Iri::parse_unchecked("http://www.w3.org/ns/prov#".to_string()),
         ),
         (
-            Prefix::new_unchecked("pav".to_string()),
-            Iri::new_unchecked("http://purl.org/pav/".to_string()),
+            "pav".to_string(),
+            Iri::parse_unchecked("http://purl.org/pav/".to_string()),
         ),
         (
-            Prefix::new_unchecked("schema".to_string()),
-            Iri::new_unchecked("https://schema.org/".to_string()),
+            "schema".to_string(),
+            Iri::parse_unchecked("https://schema.org/".to_string()),
         ),
         (
-            Prefix::new_unchecked("foaf".to_string()),
-            Iri::new_unchecked("http://xmlns.com/foaf/0.1/".to_string()),
+            "foaf".to_string(),
+            Iri::parse_unchecked("http://xmlns.com/foaf/0.1/".to_string()),
         ),
         (
-            Prefix::new_unchecked("orcid".to_string()),
-            Iri::new_unchecked("https://orcid.org/".to_string()),
+            "orcid".to_string(),
+            Iri::parse_unchecked("https://orcid.org/".to_string()),
         ),
         (
-            Prefix::new_unchecked("biolink".to_string()),
-            Iri::new_unchecked("https://w3id.org/biolink/vocab/".to_string()),
+            "biolink".to_string(),
+            Iri::parse_unchecked("https://w3id.org/biolink/vocab/".to_string()),
         ),
         (
-            Prefix::new_unchecked("infores".to_string()),
-            Iri::new_unchecked("https://w3id.org/biolink/infores/".to_string()),
+            "infores".to_string(),
+            Iri::parse_unchecked("https://w3id.org/biolink/infores/".to_string()),
         ),
     ])
 }

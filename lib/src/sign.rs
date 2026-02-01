@@ -13,7 +13,7 @@ use sophia::api::dataset::{Dataset as _, MutableDataset};
 use sophia::api::quad::Quad;
 use sophia::api::term::Term;
 use sophia::inmem::dataset::LightDataset as Dataset;
-use sophia::iri::Iri;
+use sophia::iri::IriRef as NamedNodeRef;
 use std::collections::HashMap;
 use std::{cmp::Ordering, str};
 
@@ -88,15 +88,15 @@ pub fn replace_bnodes(
             let new_ending = matching.replacen('_', "__", 1);
             graph_string.truncate(graph_string.len() - matching.len()); // Remove the original ending
             graph_string.push_str(&new_ending);
-            Some(Iri::new_unchecked(graph_string))
+            Some(NamedNodeRef::new_unchecked(graph_string))
         } else {
-            Some(Iri::new_unchecked(
+            Some(NamedNodeRef::new_unchecked(
                 graph_iri_to_string(quad.g())?,
             ))
         };
 
         // Replace bnode in objects
-        let subject_node = Iri::new_unchecked(subject.as_str());
+        let subject_node = NamedNodeRef::new_unchecked(subject.as_str());
         if quad.o().is_blank_node() {
             let bnode_id = object_blank_to_str(quad.o())?;
             bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
@@ -105,7 +105,7 @@ pub fn replace_bnodes(
                 counter
             });
             let object_string = format!("{}_{}", base_ns, bnode_map[bnode_id]);
-            let object_node = Iri::new_unchecked(object_string.as_str());
+            let object_node = NamedNodeRef::new_unchecked(object_string.as_str());
             new_dataset.insert(
                 subject_node,
                 quad.p(),
@@ -125,7 +125,7 @@ pub fn replace_bnodes(
                 let new_ending = matching.replacen('_', "__", 1);
                 object_string.truncate(object_string.len() - matching.len()); // Remove the original ending
                 object_string.push_str(&new_ending);
-                let object_node = Iri::new_unchecked(object_string.as_str());
+                let object_node = NamedNodeRef::new_unchecked(object_string.as_str());
                 new_dataset.insert(
                     subject_node,
                     quad.p(),
@@ -156,22 +156,22 @@ pub fn replace_ns_in_quads(
         let s = subject_iri_to_string(quad.s())?;
         // Replace URI in subjects
         let subject_node = if s == old_ns || s == old_uri {
-            &Iri::new_unchecked(new_uri.to_string())
+            &NamedNodeRef::new_unchecked(new_uri.to_string())
         } else {
-            &Iri::new_unchecked(s.replace(old_ns, new_ns))
+            &NamedNodeRef::new_unchecked(s.replace(old_ns, new_ns))
         };
         // Replace URI in graphs
         let graph_name = graph_iri_to_string(quad.g())?
                 .replace(old_ns, new_ns);
-        let graph = Some(Iri::new_unchecked(graph_name.as_str()));
+        let graph = Some(NamedNodeRef::new_unchecked(graph_name.as_str()));
 
         // Replace URI in objects
         if quad.o().is_iri() {
             let o = object_iri_to_string(quad.o())?;
             let object_node = if o == old_ns || o == old_uri {
-                &Iri::new_unchecked(new_uri.to_string())
+                &NamedNodeRef::new_unchecked(new_uri.to_string())
             } else {
-                &Iri::new_unchecked(o.replace(old_ns, new_ns))
+                &NamedNodeRef::new_unchecked(o.replace(old_ns, new_ns))
             };
             new.insert(
                 subject_node,
