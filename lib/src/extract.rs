@@ -133,7 +133,7 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     // Remove last char if it is # or / to get the URI
     let np_iri =
-        if np_iri.as_str().ends_with('#') || np_iri.as_str().ends_with('/') || np_iri.as_str().ends_with('.') {
+        if np_iri.as_str().ends_with(['#', '/', '.']) {
             match np_iri.as_str().chars().last() {
                 Some(_) => NamedNode::new_unchecked(np_iri.as_str()[..np_iri.as_str().len() - 1].to_string()),
                 None => np_iri,
@@ -174,9 +174,7 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         format!("{base_uri}{separator_before_trusty}")
     } else if original_ns.starts_with(NP_TEMP_URI) {
         NP_PREF_NS.to_string()
-    } else if !original_ns.ends_with('#')
-        && !original_ns.ends_with('/')
-        && !original_ns.ends_with('.')
+    } else if !original_ns.ends_with(['#', '/', '.'])
     {
         format!("{}.", &original_ns)
     } else {
