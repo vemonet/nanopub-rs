@@ -16,7 +16,7 @@ use sophia::api::dataset::{Dataset, MutableDataset};
 use sophia::api::ns::xsd;
 use sophia::api::term::{matcher::Any, Term};
 use sophia::inmem::dataset::LightDataset;
-use sophia::iri::{AsIriRef, Iri};
+use sophia::iri::{AsIri, AsIriRef, Iri};
 use std::collections::HashSet;
 use std::{fmt, str};
 
@@ -216,6 +216,9 @@ impl Nanopub {
             // println!("DEBUG: Unsigned: {}", self.rdf()?);
         }
 
+        let uri_subject_term = self.info.uri.as_iri();
+        let ns_subject_term = self.info.ns.as_iri();
+
         // Add triples about the signature in the pubinfo
         self.dataset.insert(
             Iri::new(format!("{}sig", &self.info.ns))?,
@@ -241,8 +244,8 @@ impl Nanopub {
             .dataset
             .quads_matching(
                 [
-                    &self.info.uri,
-                    &self.info.ns,
+                    uri_subject_term,
+                    ns_subject_term,
                 ],
                 [dct::CREATED],
                 Any,
@@ -266,8 +269,8 @@ impl Nanopub {
                 .dataset
                 .quads_matching(
                     [
-                        &self.info.uri,
-                        &self.info.ns,
+                        uri_subject_term,
+                        ns_subject_term,
                     ],
                     [
                         dct::CREATOR,
@@ -529,6 +532,8 @@ impl Nanopub {
 
     /// Check if Nanopub is valid: minimal required triples in assertion, prov, pubinfo graphs
     pub fn is_valid(&self) -> Result<bool, NpError> {
+        let uri_subject_term = self.info.uri.as_iri();
+        let ns_subject_term = self.info.ns.as_iri();
         if self
             .dataset
             .quads_matching(Any, Any, Any, [Some(self.info.assertion.clone())])
@@ -576,8 +581,8 @@ impl Nanopub {
             .dataset
             .quads_matching(
                 [
-                    &self.info.uri,
-                    &self.info.ns,
+                    uri_subject_term,
+                    ns_subject_term,
                 ],
                 Any,
                 Any,
