@@ -161,10 +161,9 @@ pub fn replace_ns_in_quads(
             &Iri::new_unchecked(s.replace(old_ns, new_ns))
         };
         // Replace URI in graphs
-        let graph = Some(Iri::new_unchecked(
-            graph_iri_to_string(quad.g())?
-                .replace(old_ns, new_ns),
-        ));
+        let graph_name = graph_iri_to_string(quad.g())?
+                .replace(old_ns, new_ns);
+        let graph = Some(Iri::new_unchecked(graph_name.as_str()));
 
         // Replace URI in objects
         if quad.o().is_iri() {
