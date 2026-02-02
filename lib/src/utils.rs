@@ -1,6 +1,5 @@
 // use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
-use oxiri::Iri;
 use oxrdf::{
     Dataset,
     GraphNameRef, NamedOrBlankNodeRef, NamedNodeRef, TermRef,
@@ -32,12 +31,11 @@ pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
 // TODO: improve to use prefixes from `parse_rdf()`, favored over default ones
 /// Serialize RDF dataset to Trig
 pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, NpError> {
-    let prefixes = get_prefixes(uri, ns)?;
     let mut serializer = RdfSerializer::from_format(RdfFormat::TriG)
         .with_base_iri(uri)?
         .with_prefix("", ns)?;
-    for (prefix_name, prefix_iri) in prefixes {
-        serializer = serializer.with_prefix(prefix_name, prefix_iri.as_str())?;
+    for (prefix_name, prefix_iri) in get_prefixes(uri, ns) {
+        serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }
     let mut serializer = serializer.for_writer(Vec::new());
     for quad in dataset.iter() {
@@ -61,84 +59,30 @@ pub fn get_np_server(random: bool) -> &'static str {
 
 // TODO: improve to extract prefixes from the input RDF
 /// Get the prefixes of a Nanopub
-pub fn get_prefixes(
-    np_uri: &str,
-    np_ns: &str,
-) -> Result<[(String, Iri<String>); 18], NpError> {
-    Ok([
-        (
-            "this".to_string(),
-            Iri::parse_unchecked(np_uri.to_string()),
-        ),
-        (
-            "sub".to_string(),
-            Iri::parse_unchecked(np_ns.to_string()),
-        ),
-        (
-            "rdf".to_string(),
-            Iri::parse_unchecked("http://www.w3.org/1999/02/22-rdf-syntax-ns#".to_string()),
-        ),
-        (
-            "rdfs".to_string(),
-            Iri::parse_unchecked("http://www.w3.org/2000/01/rdf-schema#".to_string()),
-        ),
-        (
-            "xsd".to_string(),
-            Iri::parse_unchecked("http://www.w3.org/2001/XMLSchema#".to_string()),
-        ),
-        (
-            "owl".to_string(),
-            Iri::parse_unchecked("http://www.w3.org/2002/07/owl#".to_string()),
-        ),
-        (
-            "skos".to_string(),
-            Iri::parse_unchecked("http://www.w3.org/2004/02/skos/core#".to_string()),
-        ),
-        (
-            "np".to_string(),
-            Iri::parse_unchecked("http://www.nanopub.org/nschema#".to_string()),
-        ),
-        (
-            "npx".to_string(),
-            Iri::parse_unchecked("http://purl.org/nanopub/x/".to_string()),
-        ),
-        (
-            "dc".to_string(),
-            Iri::parse_unchecked("http://purl.org/dc/elements/1.1/".to_string()),
-        ),
-        (
-            "dcterms".to_string(),
-            Iri::parse_unchecked("http://purl.org/dc/terms/".to_string()),
-        ),
-        (
-            "prov".to_string(),
-            Iri::parse_unchecked("http://www.w3.org/ns/prov#".to_string()),
-        ),
-        (
-            "pav".to_string(),
-            Iri::parse_unchecked("http://purl.org/pav/".to_string()),
-        ),
-        (
-            "schema".to_string(),
-            Iri::parse_unchecked("https://schema.org/".to_string()),
-        ),
-        (
-            "foaf".to_string(),
-            Iri::parse_unchecked("http://xmlns.com/foaf/0.1/".to_string()),
-        ),
-        (
-            "orcid".to_string(),
-            Iri::parse_unchecked("https://orcid.org/".to_string()),
-        ),
-        (
-            "biolink".to_string(),
-            Iri::parse_unchecked("https://w3id.org/biolink/vocab/".to_string()),
-        ),
-        (
-            "infores".to_string(),
-            Iri::parse_unchecked("https://w3id.org/biolink/infores/".to_string()),
-        ),
-    ])
+pub fn get_prefixes<'a>(
+    np_uri: &'a str,
+    np_ns: &'a str,
+) -> impl Iterator<Item = (&'static str, &'a str)> + 'a {
+    [
+        ("this", np_uri),
+        ("sub", np_ns),
+        ("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
+        ("rdfs", "http://www.w3.org/2000/01/rdf-schema#"),
+        ("xsd", "http://www.w3.org/2001/XMLSchema#"),
+        ("owl", "http://www.w3.org/2002/07/owl#"),
+        ("skos", "http://www.w3.org/2004/02/skos/core#"),
+        ("np", "http://www.nanopub.org/nschema#"),
+        ("npx", "http://purl.org/nanopub/x/"),
+        ("dc", "http://purl.org/dc/elements/1.1/"),
+        ("dcterms", "http://purl.org/dc/terms/"),
+        ("prov", "http://www.w3.org/ns/prov#"),
+        ("pav", "http://purl.org/pav/"),
+        ("schema", "https://schema.org/"),
+        ("foaf", "http://xmlns.com/foaf/0.1/"),
+        ("orcid", "https://orcid.org/"),
+        ("biolink", "https://w3id.org/biolink/vocab/"),
+        ("inforces", "https://w3id.org/biolink/infores/"),
+    ].into_iter()
 }
 
 /// Extract IRI as `String` from subject term
