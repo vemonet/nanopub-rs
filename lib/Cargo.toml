@@ -19,7 +19,6 @@ all-features = true
 
 [dependencies]
 base64 = "0.22"
-oxiri = { version = "0.2", features = ["serde"] }
 oxjsonld = "0.2"
 oxrdf = { version = "0.3", features = ["serde"] }
 oxrdfio = "0.2"
