@@ -48,69 +48,64 @@ impl fmt::Display for NpInfo {
 
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
 pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
-    let mut np_url: String = "".to_string();
-    let mut head: String = "".to_string();
-    let mut assertion: String = "".to_string();
-    let mut prov: String = "".to_string();
-    let mut pubinfo: String = "".to_string();
-
     // Extract nanopub URL and head graph
-    let nanopublication_object_term = TermRef::NamedNode(np::NANOPUBLICATION);
-    for q in dataset.quads_match(&[], &[rdf::TYPE], &[nanopublication_object_term], &[]) {
-        if !np_url.is_empty() {
-            return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
-        } else {
-            np_url = subject_iri_to_string(q.subject)?;
-            head = graph_iri_to_string(q.graph_name)?;
-        }
-    }
-    if np_url.is_empty() {
-        return Err(NpError(
+    let mut head_iterator = dataset.quads_match(
+        &[],
+        &[rdf::TYPE],
+        &[TermRef::NamedNode(np::NANOPUBLICATION)],
+        &[],
+    );
+    let (np_iri, head_iri) = match head_iterator.next() {
+        Some(q) => (
+            NamedNode::new_unchecked(subject_iri_to_string(q.subject)?),
+            NamedNode::new_unchecked(graph_iri_to_string(q.graph_name)?),
+        ),
+        None => return Err(NpError(
             "The provided RDF does not contain a Nanopublication.".to_string(),
+        )),
+    };
+    if head_iterator.next().is_some() {
+        return Err(NpError(
+            "The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string(),
         ));
-    }
+    };
 
-    let np_iri = NamedNode::new_unchecked(np_url);
-    let head_iri = NamedNode::new_unchecked(head);
     let mut np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
     let head_graph = GraphNameRef::from(head_iri.as_ref());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
-    for q in dataset.quads_match(&[np_subject_term], &[np::HAS_ASSERTION], &[], &[head_graph]) {
-        assertion = object_iri_to_string(q.object)?;
-    }
-    for q in dataset.quads_match(
+    let assertion_iri = match dataset.quads_match(
+        &[np_subject_term],
+        &[np::HAS_ASSERTION],
+        &[], &[head_graph],
+    ).next() {
+        Some(q) => NamedNode::new_unchecked(object_iri_to_string(q.object)?),
+        None => return Err(NpError(
+            "Invalid Nanopub: no Assertion graph found.".to_string(),
+        )),
+    };
+    let prov_iri = match dataset.quads_match(
         &[np_subject_term],
         &[np::HAS_PROVENANCE],
         &[],
         &[head_graph],
-    ) {
-        prov = object_iri_to_string(q.object)?;
-    }
-    for q in dataset.quads_match(
+    ).next() {
+        Some(q) => NamedNode::new_unchecked(object_iri_to_string(q.object)?),
+        None => return Err(NpError(
+            "Invalid Nanopub: no Provenance graph found.".to_string(),
+        )),
+    };
+    let pubinfo_iri =  match dataset.quads_match(
         &[np_subject_term],
         &[np::HAS_PUBLICATION_INFO],
         &[],
         &[head_graph],
-    ) {
-        pubinfo = object_iri_to_string(q.object)?;
-    }
-
-    if assertion.is_empty() {
-        return Err(NpError(
-            "Invalid Nanopub: no Assertion graph found.".to_string(),
-        ));
-    }
-    if prov.is_empty() {
-        return Err(NpError(
-            "Invalid Nanopub: no Provenance graph found.".to_string(),
-        ));
-    }
-    if pubinfo.is_empty() {
-        return Err(NpError(
+    ).next() {
+        Some(q) => NamedNode::new_unchecked(object_iri_to_string(q.object)?),
+        None => return Err(NpError(
             "Invalid Nanopub: no PubInfo graph found.".to_string(),
-        ));
-    }
+        )),
+    };
 
     // Get just the Trusty hash from the URI
     let mut trusty_hash: String = "".to_string();
@@ -179,58 +174,67 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     };
 
     // Extract signature and its subject URI
-    let signature_string = format!("{}sig", np_ns_str);
-    let pubinfo_iri = NamedNode::new_unchecked(pubinfo);
     let pubinfo_graph = GraphNameRef::from(pubinfo_iri.as_ref());
-    let mut signature: String = "".to_string();
-    let mut signature_iri = NamedNode::new_unchecked(signature_string);
-    for q in dataset.quads_match(&[], &[npx::HAS_SIGNATURE], &[], &[pubinfo_graph]) {
-        let (val, _, _) = object_literal_to_strings(q.object)?;
-        signature = val;
-        signature_iri = NamedNode::new_unchecked(subject_iri_to_string(q.subject)?);
-    }
+    let (signature, signature_iri) = match dataset.quads_match(
+        &[],
+        &[npx::HAS_SIGNATURE],
+        &[],
+        &[pubinfo_graph],
+    ).next() {
+        Some(q) => {
+            let (val, _, _) = object_literal_to_strings(q.object)?;
+            (val, NamedNode::new_unchecked(subject_iri_to_string(q.subject)?))
+        },
+        None => {
+            let signature_string = format!("{}sig", np_ns_str);
+            ("".to_string(), NamedNode::new_unchecked(signature_string))
+        },
+    };
     let signature_node = NamedOrBlankNodeRef::from(signature_iri.as_ref());
 
     // Extract public key
-    let mut pubkey: Option<String> = None;
-    for q in dataset.quads_match(
+    let pubkey = match dataset.quads_match(
         &[signature_node],
         &[npx::HAS_PUBLIC_KEY],
         &[],
         &[pubinfo_graph],
-    ) {
-        let (val, _, _) = object_literal_to_strings(q.object)?;
-        pubkey = Some(val);
-    }
+    ).next() {
+        Some(q) => {
+            let (val, _, _) = object_literal_to_strings(q.object)?;
+            Some(val)
+        },
+        None => None,
+    };
 
     // Extract algo
-    let mut algo: Option<String> = None;
-    for q in dataset.quads_match(
+    let algo = match dataset.quads_match(
         &[signature_node],
         &[npx::HAS_ALGORITHM],
         &[],
         &[pubinfo_graph],
-    ) {
-        let (val, _, _) = object_literal_to_strings(q.object)?;
-        algo = Some(val);
-    }
+    ).next() {
+        Some(q) => {
+            let (val, _, _) = object_literal_to_strings(q.object)?;
+            Some(val)
+        },
+        None => None,
+    };
 
     // Extract ORCID
-    let mut orcid: Option<String> = None;
     let original_ns_iri = NamedNode::new_unchecked(original_ns.to_string());
     let original_ns_subject_term = NamedOrBlankNodeRef::from(original_ns_iri.as_ref());
-    for q in dataset.quads_match(
+    let orcid = match dataset.quads_match(
         &[np_subject_term, original_ns_subject_term],
         &[dct::CREATOR, prov::WAS_ATTRIBUTED_TO, pav::CREATED_BY],
         &[],
         &[pubinfo_graph],
-    ) {
-        let (val, _, _) = object_literal_to_strings(q.object)?;
-        orcid = Some(val);
-    }
-
-    let assertion_iri = NamedNode::new_unchecked(assertion);
-    let prov_iri = NamedNode::new_unchecked(prov);
+    ).next() {
+        Some(q) => {
+            let (val, _, _) = object_literal_to_strings(q.object)?;
+            Some(val)
+        },
+        None => None,
+    };
 
     Ok(NpInfo {
         uri: np_iri,
