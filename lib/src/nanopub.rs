@@ -9,10 +9,9 @@ use crate::vocab::{dct, foaf, np, npx, pav, prov};
 
 use base64::{engine, Engine as _};
 use chrono::Utc;
-use oxiri::Iri;
 use oxrdf::{
     vocab::{rdf, xsd},
-    Dataset, GraphNameRef, LiteralRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
+    Dataset, GraphNameRef, LiteralRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
 };
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
@@ -49,7 +48,7 @@ pub struct Nanopub {
 impl fmt::Display for Nanopub {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "\n{:?}", self.rdf())?;
-        writeln!(f, "URI: {}", self.info.uri)?;
+        writeln!(f, "URI: {}", self.info.uri.as_str())?;
         writeln!(f, "Trusty hash: {}", self.info.trusty_hash)?;
         writeln!(f, "Signature hash: {}", self.info.signature)?;
         writeln!(f, "Public key: {}", self.info.public_key)?;
@@ -128,7 +127,7 @@ impl Nanopub {
             // Check Trusty hash if found
             let expected_hash = make_trusty(
                 &self.dataset,
-                &self.info.uri,
+                &self.info.uri.as_str(),
                 &self.info.normalized_ns,
                 &self.info.separator_after_trusty,
             )?;
@@ -137,13 +136,13 @@ impl Nanopub {
             }
             msg = format!("{msg}1 trusty");
         }
-        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
+        let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
 
         // Check the signature is valid if found
         let mut unsigned_dataset = self.dataset.clone();
         if !self.info.signature.is_empty() {
             let signature_node =
-                NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
+                NamedOrBlankNodeRef::from(self.info.signature_iri.as_ref());
             let signature_literal = LiteralRef::new_simple_literal(self.info.signature.as_str());
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(QuadRef::new(
@@ -155,7 +154,7 @@ impl Nanopub {
             // Normalize nanopub nquads to a string
             let norm_quads = normalize_dataset(
                 &unsigned_dataset,
-                &self.info.uri,
+                &self.info.uri.as_str(),
                 &self.info.normalized_ns,
                 &self.info.separator_after_trusty,
             )?;
@@ -179,7 +178,7 @@ impl Nanopub {
 
         println!(
             "\n✅ Nanopub {}{}{} is valid: {}",
-            BOLD, self.info.uri, END, msg
+            BOLD, self.info.uri.as_str(), END, msg
         );
         // let rdf = serialize_rdf(&self.dataset, &self.info.uri.as_ref(), &self.info.ns.as_ref())?;
         // TODO: should check return a string or a Nanopub? A string is not easy to process by machines
@@ -211,7 +210,7 @@ impl Nanopub {
         // unsafe {
         //     openssl_probe::init_openssl_env_vars();
         // }
-        self.dataset = replace_bnodes(&self.dataset, &self.info.ns, &self.info.uri)?;
+        self.dataset = replace_bnodes(&self.dataset, &self.info.ns.as_str(), &self.info.uri.as_str())?;
         self.info = extract_np_info(&self.dataset)?;
         if !self.info.signature.is_empty() {
             println!("Nanopub already signed, unsigning it before re-signing");
@@ -219,12 +218,12 @@ impl Nanopub {
             // println!("DEBUG: Unsigned: {}", self.rdf()?);
         }
 
-        let sig_string = format!("{}sig", self.info.ns);
+        let sig_string = format!("{}sig", self.info.ns.as_str());
         let sig_node = NamedNodeRef::new(sig_string.as_str())?;
-        let ns_node = NamedNodeRef::new_unchecked(self.info.ns.as_str());
-        let uri_subject_term = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
-        let ns_subject_term = NamedOrBlankNodeRef::NamedNode(ns_node);
-        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
+        let ns_node = self.info.ns.as_ref();
+        let uri_subject_term = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
+        let ns_subject_term = NamedOrBlankNodeRef::from(ns_node);
+        let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
 
         // Add triples about the signature in the pubinfo
         let public_key_literal = LiteralRef::new_simple_literal(profile.public_key.as_str());
@@ -321,7 +320,7 @@ impl Nanopub {
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
         let trusty_hash = make_trusty(
             &self.dataset,
-            &self.info.ns,
+            &self.info.ns.as_str(),
             &self.info.normalized_ns,
             &self.info.separator_after_trusty,
         )?;
@@ -329,8 +328,8 @@ impl Nanopub {
         let trusty_ns = format!("{trusty_uri}/");
         self.dataset = replace_ns_in_quads(
             &self.dataset,
-            &self.info.ns,
-            &self.info.uri,
+            &self.info.ns.as_str(),
+            &self.info.uri.as_str(),
             &trusty_ns,
             &trusty_uri,
         )?;
@@ -416,12 +415,12 @@ impl Nanopub {
     /// Unsign a signed nanopub RDF. Remove signature triples and replace trusty URI with default temp URI
     pub fn unsign(mut self) -> Result<Self, NpError> {
         let signature_node =
-            NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
-        let uri_node = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
+            NamedOrBlankNodeRef::from(self.info.signature_iri.as_ref());
+        let uri_node = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
         let public_key_literal = LiteralRef::new_simple_literal(self.info.public_key.as_str());
         let algo_literal = LiteralRef::new_simple_literal(self.info.algo.as_str());
         let signature_literal = LiteralRef::new_simple_literal(self.info.signature.as_str());
-        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
+        let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
         self.dataset.remove(QuadRef::new(
             signature_node,
             npx::HAS_PUBLIC_KEY,
@@ -453,8 +452,8 @@ impl Nanopub {
             NP_TEMP_URI,
             NP_TEMP_URI,
         )?;
-        self.info.uri = Iri::parse_unchecked(NP_TEMP_URI.to_string());
-        self.info.ns = Iri::parse_unchecked(NP_TEMP_URI.to_string());
+        self.info.uri = NamedNode::new_unchecked(NP_TEMP_URI.to_string());
+        self.info.ns = NamedNode::new_unchecked(NP_TEMP_URI.to_string());
         self.info = extract_np_info(&self.dataset)?;
         Ok(self)
     }
@@ -505,7 +504,7 @@ impl Nanopub {
         let key_declaration_node = NamedNodeRef::new(key_declaration_string.as_str())?;
         let orcid_node = NamedNodeRef::new_unchecked(orcid);
         let assertion_node = NamedNodeRef::new(assertion_string.as_str())?;
-        let assertion_graph = GraphNameRef::NamedNode(assertion_node);
+        let assertion_graph = GraphNameRef::from(assertion_node);
         let prov_graph = NamedNodeRef::new(prov_string.as_str())?;
 
         // Assertion graph triples, add key declaration
@@ -551,12 +550,12 @@ impl Nanopub {
 
     /// Check if Nanopub is valid: minimal required triples in assertion, prov, pubinfo graphs
     pub fn is_valid(&self) -> Result<bool, NpError> {
-        let assertion_node = NamedOrBlankNodeRef::NamedNode(self.info.assertion.as_ref().into());
-        let uri_subject_term = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
-        let ns_subject_term = NamedOrBlankNodeRef::NamedNode(self.info.ns.as_ref().into());
-        let assertion_graph = GraphNameRef::NamedNode(self.info.assertion.as_ref().into());
-        let prov_graph = GraphNameRef::NamedNode(self.info.prov.as_ref().into());
-        let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
+        let assertion_node = NamedOrBlankNodeRef::from(self.info.assertion.as_ref());
+        let uri_subject_term = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
+        let ns_subject_term = NamedOrBlankNodeRef::from(self.info.ns.as_ref());
+        let assertion_graph = GraphNameRef::from(self.info.assertion.as_ref());
+        let prov_graph = GraphNameRef::from(self.info.prov.as_ref());
+        let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
         if self
             .dataset
             .quads_for_graph_name(assertion_graph)

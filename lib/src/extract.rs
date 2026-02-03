@@ -6,8 +6,7 @@ use crate::utils::{
 };
 use crate::vocab::{dct, np, npx, pav, prov};
 
-use oxiri::Iri;
-use oxrdf::{vocab::rdf, Dataset, GraphNameRef, NamedOrBlankNodeRef, TermRef};
+use oxrdf::{vocab::rdf, Dataset, GraphNameRef, NamedNode, NamedOrBlankNodeRef, TermRef};
 use regex::Regex;
 use serde::Serialize;
 use std::fmt;
@@ -15,19 +14,19 @@ use std::fmt;
 /// Infos extracted from a nanopublication: graphs URLs, signature, trusty hash...
 #[derive(Clone, Serialize, Debug)]
 pub struct NpInfo {
-    pub uri: Iri<String>,
-    pub ns: Iri<String>,
+    pub uri: NamedNode,
+    pub ns: NamedNode,
     pub normalized_ns: String,
-    pub head: Iri<String>,
-    pub assertion: Iri<String>,
-    pub prov: Iri<String>,
-    pub pubinfo: Iri<String>,
+    pub head: NamedNode,
+    pub assertion: NamedNode,
+    pub prov: NamedNode,
+    pub pubinfo: NamedNode,
     pub base_uri: String,
     pub separator_before_trusty: String,
     pub separator_after_trusty: String,
     pub trusty_hash: String,
     pub signature: String,
-    pub signature_iri: Iri<String>,
+    pub signature_iri: NamedNode,
     pub algo: String,
     pub public_key: String,
     pub orcid: String,
@@ -36,13 +35,13 @@ pub struct NpInfo {
 
 impl fmt::Display for NpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "\nNanopub URI: {}", self.uri)?;
-        writeln!(f, "Namespace: {}", self.ns)?;
+        writeln!(f, "\nNanopub URI: {}", self.uri.as_str())?;
+        writeln!(f, "Namespace: {}", self.ns.as_str())?;
         writeln!(f, "Base URI: {}", self.base_uri)?;
         writeln!(f, "Trusty Hash: {}", self.trusty_hash)?;
         writeln!(f, "ORCID: {}", self.orcid)?;
-        writeln!(f, "Head Graph: {}", self.head)?;
-        writeln!(f, "Assertion Graph: {}", self.assertion)?;
+        writeln!(f, "Head Graph: {}", self.head.as_str())?;
+        writeln!(f, "Assertion Graph: {}", self.assertion.as_str())?;
         Ok(())
     }
 }
@@ -74,10 +73,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         return Err(NpError("Invalid Nanopub: no Head graph found.".to_string()));
     }
 
-    let np_iri: Iri<String> = Iri::parse_unchecked(np_url);
-    let head_iri: Iri<String> = Iri::parse_unchecked(head);
-    let mut np_subject_term = NamedOrBlankNodeRef::NamedNode(np_iri.as_ref().into());
-    let head_graph = GraphNameRef::NamedNode(head_iri.as_ref().into());
+    let np_iri = NamedNode::new_unchecked(np_url);
+    let head_iri = NamedNode::new_unchecked(head);
+    let mut np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
+    let head_graph = GraphNameRef::from(head_iri.as_ref());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
     for q in dataset.quads_match(&[np_subject_term], &[np::HAS_ASSERTION], &[], &[head_graph]) {
@@ -119,30 +118,30 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     // Get just the Trusty hash from the URI
     let mut trusty_hash: String = "".to_string();
     let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
-    if let Some(caps) = re_trusty.captures(&np_iri) {
+    if let Some(caps) = re_trusty.captures(&np_iri.as_str()) {
         // The first group captures everything up to a '/' or '#', non-greedy.
         trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
     }
 
     // Getting potential ns from head graph (removing the last frag from head)
     let original_ns = if trusty_hash.is_empty() {
-        &head_iri[..np_iri.len()]
+        &head_iri.as_str()[..np_iri.as_str().len()]
     } else {
-        &head_iri[..np_iri.len() + 1]
+        &head_iri.as_str()[..np_iri.as_str().len() + 1]
     };
-    let np_ns = Iri::parse_unchecked(original_ns.to_string());
+    let np_ns_str = original_ns;
 
     // Remove last char if it is # or / to get the URI
-    let np_iri: Iri<String> =
-        if np_iri.ends_with('#') || np_iri.ends_with('/') || np_iri.ends_with('.') {
-            match np_iri.chars().last() {
-                Some(_) => Iri::parse_unchecked(np_iri[..np_iri.len() - 1].to_string()),
+    let np_iri =
+        if np_iri.as_str().ends_with('#') || np_iri.as_str().ends_with('/') || np_iri.as_str().ends_with('.') {
+            match np_iri.as_str().chars().last() {
+                Some(_) => NamedNode::new_unchecked(np_iri.as_str()[..np_iri.as_str().len() - 1].to_string()),
                 None => np_iri,
             }
         } else {
             np_iri
         };
-    np_subject_term = NamedOrBlankNodeRef::NamedNode(np_iri.as_ref().into());
+    np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
@@ -185,17 +184,17 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     };
 
     // Extract signature and its subject URI
-    let signature_string = format!("{}sig", np_ns);
-    let pubinfo_iri: Iri<String> = Iri::parse_unchecked(pubinfo);
-    let pubinfo_graph = GraphNameRef::NamedNode(pubinfo_iri.as_ref().into());
+    let signature_string = format!("{}sig", np_ns_str);
+    let pubinfo_iri = NamedNode::new_unchecked(pubinfo);
+    let pubinfo_graph = GraphNameRef::from(pubinfo_iri.as_ref());
     let mut signature: String = "".to_string();
-    let mut signature_iri: Iri<String> = Iri::parse_unchecked(signature_string);
+    let mut signature_iri = NamedNode::new_unchecked(signature_string);
     for q in dataset.quads_match(&[], &[npx::HAS_SIGNATURE], &[], &[pubinfo_graph]) {
         let (val, _, _) = object_literal_to_strings(q.object)?;
         signature = val;
-        signature_iri = Iri::parse_unchecked(subject_iri_to_string(q.subject)?);
+        signature_iri = NamedNode::new_unchecked(subject_iri_to_string(q.subject)?);
     }
-    let signature_node = NamedOrBlankNodeRef::NamedNode(signature_iri.as_ref().into());
+    let signature_node = NamedOrBlankNodeRef::from(signature_iri.as_ref());
 
     // Extract public key
     let mut pubkey: Option<String> = None;
@@ -223,8 +222,8 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     // Extract ORCID
     let mut orcid: Option<String> = None;
-    let original_ns_iri: Iri<String> = Iri::parse_unchecked(original_ns.to_string());
-    let original_ns_subject_term = NamedOrBlankNodeRef::NamedNode(original_ns_iri.as_ref().into());
+    let original_ns_iri = NamedNode::new_unchecked(original_ns.to_string());
+    let original_ns_subject_term = NamedOrBlankNodeRef::from(original_ns_iri.as_ref());
     for q in dataset.quads_match(
         &[np_subject_term, original_ns_subject_term],
         &[dct::CREATOR, prov::WAS_ATTRIBUTED_TO, pav::CREATED_BY],
@@ -235,12 +234,12 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         orcid = Some(val);
     }
 
-    let assertion_iri = Iri::parse_unchecked(assertion);
-    let prov_iri = Iri::parse_unchecked(prov);
+    let assertion_iri = NamedNode::new_unchecked(assertion);
+    let prov_iri = NamedNode::new_unchecked(prov);
 
     Ok(NpInfo {
         uri: np_iri,
-        ns: np_ns,
+        ns: NamedNode::new_unchecked(np_ns_str),
         normalized_ns: norm_ns,
         head: head_iri,
         assertion: assertion_iri,
