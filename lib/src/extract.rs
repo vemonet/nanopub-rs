@@ -69,9 +69,6 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
             "The provided RDF does not contain a Nanopublication.".to_string(),
         ));
     }
-    if head.is_empty() {
-        return Err(NpError("Invalid Nanopub: no Head graph found.".to_string()));
-    }
 
     let np_iri = NamedNode::new_unchecked(np_url);
     let head_iri = NamedNode::new_unchecked(head);
