@@ -611,10 +611,12 @@ impl Nanopub {
                     .to_string(),
             ));
         }
-        let mut graph_names = HashSet::new();
-        for g in self.dataset.iter().filter(|x| x.graph_name.is_named_node()) {
-            graph_names.insert(g.graph_name.to_string());
-        }
+        let graph_names: HashSet<GraphNameRef> = self
+            .dataset
+            .into_iter()
+            .filter(|x| x.graph_name.is_named_node())
+            .map(|g| g.graph_name)
+            .collect();
         if graph_names.len() > 4 {
             return Err(NpError(
                 format!("Invalid Nanopub: it should have 4 graphs (head, assertion, provenance, pubinfo), but the given nanopub has {} graphs.", graph_names.len())
