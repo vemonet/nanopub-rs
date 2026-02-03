@@ -1,9 +1,6 @@
 use crate::constants::{NP_PREF_NS, NP_TEMP_URI};
 use crate::error::NpError;
-use crate::utils::{
-    graph_iri_to_string, object_iri_to_string, object_literal_to_strings, subject_iri_to_string,
-    DatasetExt,
-};
+use crate::utils::DatasetExt;
 use crate::vocab::{dct, np, npx, pav, prov};
 
 use oxrdf::{vocab::rdf, Dataset, GraphNameRef, NamedNode, NamedOrBlankNodeRef, TermRef};
@@ -56,10 +53,15 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[],
     );
     let (np_iri, head_iri) = match head_iterator.next() {
-        Some(q) => (
-            NamedNode::new_unchecked(subject_iri_to_string(q.subject)?),
-            NamedNode::new_unchecked(graph_iri_to_string(q.graph_name)?),
-        ),
+        Some(q) => {
+            let NamedOrBlankNodeRef::NamedNode(np) = q.subject else {
+                return Err(NpError("Subject must be a named node.".to_string()));
+            };
+            let GraphNameRef::NamedNode(head) = q.graph_name else {
+                return Err(NpError("Graph name must be a named node.".to_string()));
+            };
+            (NamedNode::from(np), NamedNode::from(head))
+        },
         None => return Err(NpError(
             "The provided RDF does not contain a Nanopublication.".to_string(),
         )),
@@ -79,7 +81,12 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[np::HAS_ASSERTION],
         &[], &[head_graph],
     ).next() {
-        Some(q) => NamedNode::new_unchecked(object_iri_to_string(q.object)?),
+        Some(q) => {
+            let TermRef::NamedNode(assertion) = q.object else {
+                return Err(NpError("Object must be a named node.".to_string()));
+            };
+            NamedNode::from(assertion)
+        },
         None => return Err(NpError(
             "Invalid Nanopub: no Assertion graph found.".to_string(),
         )),
@@ -90,7 +97,12 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[],
         &[head_graph],
     ).next() {
-        Some(q) => NamedNode::new_unchecked(object_iri_to_string(q.object)?),
+        Some(q) => {
+            let TermRef::NamedNode(prov) = q.object else {
+                return Err(NpError("Object must be a named node.".to_string()));
+            };
+            NamedNode::from(prov)
+        },
         None => return Err(NpError(
             "Invalid Nanopub: no Provenance graph found.".to_string(),
         )),
@@ -101,19 +113,25 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[],
         &[head_graph],
     ).next() {
-        Some(q) => NamedNode::new_unchecked(object_iri_to_string(q.object)?),
+        Some(q) => {
+            let TermRef::NamedNode(pubinfo) = q.object else {
+                return Err(NpError("Object must be a named node.".to_string()));
+            };
+            NamedNode::from(pubinfo)
+        },
         None => return Err(NpError(
             "Invalid Nanopub: no PubInfo graph found.".to_string(),
         )),
     };
 
     // Get just the Trusty hash from the URI
-    let mut trusty_hash: String = "".to_string();
     let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
-    if let Some(caps) = re_trusty.captures(&np_iri.as_str()) {
+    let trusty_hash = if let Some(caps) = re_trusty.captures(&np_iri.as_str()) {
         // The first group captures everything up to a '/' or '#', non-greedy.
-        trusty_hash = caps.get(1).map_or("", |m| m.as_str()).to_string();
-    }
+        caps.get(1).map_or("", |m| m.as_str()).to_string()
+    } else {
+        "".to_string()
+    };
 
     // Getting potential ns from head graph (removing the last frag from head)
     let original_ns = if trusty_hash.is_empty() {
@@ -182,12 +200,19 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[pubinfo_graph],
     ).next() {
         Some(q) => {
-            let (val, _, _) = object_literal_to_strings(q.object)?;
-            (val, NamedNode::new_unchecked(subject_iri_to_string(q.subject)?))
+            let TermRef::Literal(literal) = q.object else {
+                return Err(NpError("Object must be a literal.".to_string()));
+            };
+            let NamedOrBlankNodeRef::NamedNode(sig_iri) = q.subject else {
+                return Err(NpError("Subject must be a named node.".to_string()));
+            };
+            (
+                literal.value().to_string(),
+                NamedNode::from(sig_iri),
+            )
         },
         None => {
-            let signature_string = format!("{}sig", np_ns_str);
-            ("".to_string(), NamedNode::new_unchecked(signature_string))
+            ("".to_string(), NamedNode::new_unchecked(format!("{}sig", np_ns_str)))
         },
     };
     let signature_node = NamedOrBlankNodeRef::from(signature_iri.as_ref());
@@ -200,8 +225,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[pubinfo_graph],
     ).next() {
         Some(q) => {
-            let (val, _, _) = object_literal_to_strings(q.object)?;
-            Some(val)
+            let TermRef::Literal(literal) = q.object else {
+                return Err(NpError("Object must be a literal.".to_string()));
+            };
+            Some(literal.value().to_string())
         },
         None => None,
     };
@@ -214,8 +241,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[pubinfo_graph],
     ).next() {
         Some(q) => {
-            let (val, _, _) = object_literal_to_strings(q.object)?;
-            Some(val)
+            let TermRef::Literal(literal) = q.object else {
+                return Err(NpError("Object must be a literal.".to_string()));
+            };
+            Some(literal.value().to_string())
         },
         None => None,
     };
@@ -230,8 +259,16 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[pubinfo_graph],
     ).next() {
         Some(q) => {
-            let (val, _, _) = object_literal_to_strings(q.object)?;
-            Some(val)
+            let orcid = match q.object {
+                TermRef::Literal(literal) => literal.value().to_string(),
+                TermRef::NamedNode(literal) => literal.into_owned().into_string(),
+                TermRef::BlankNode(_) => {
+                    return Err(NpError(
+                        "Object must be a literal or a named node, not a blank node.".to_string(),
+                    ))
+                }
+            };
+            Some(orcid)
         },
         None => None,
     };
