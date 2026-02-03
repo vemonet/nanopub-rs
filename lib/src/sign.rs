@@ -5,7 +5,7 @@ use crate::utils::{
 };
 
 use base64::{alphabet, engine, Engine as _};
-use oxrdf::{Dataset, NamedNode, NamedNodeRef, NamedOrBlankNode, QuadRef};
+use oxrdf::{Dataset, GraphNameRef, NamedNode, NamedNodeRef, NamedOrBlankNode, QuadRef};
 use regex::Regex;
 use rsa::{sha2::Digest, sha2::Sha256};
 use std::cmp::Ordering;
@@ -68,10 +68,13 @@ pub fn replace_bnodes(
             subject_iri_to_string(quad.subject)?
         };
 
+        let GraphNameRef::NamedNode(graph_iri) = quad.graph_name else {
+            return Err(NpError("Failed to extract graph name IRI.".to_string()));
+        };
         let graph = if let Some(caps) =
-            re_underscore_uri.captures(&graph_iri_to_string(quad.graph_name)?)
+            re_underscore_uri.captures(&graph_iri.as_str())
         {
-            let mut graph_string = graph_iri_to_string(quad.graph_name)?;
+            let mut graph_string = graph_iri.into_owned().into_string();
             let matching = caps
                 .get(1)
                 .ok_or(NpError("Error with regex".to_string()))?
@@ -81,7 +84,7 @@ pub fn replace_bnodes(
             graph_string.push_str(&new_ending);
             &NamedNode::new_unchecked(graph_string)
         } else {
-            &NamedNode::new_unchecked(graph_iri_to_string(quad.graph_name)?)
+            &graph_iri.into_owned()
         };
 
         // Replace bnode in objects

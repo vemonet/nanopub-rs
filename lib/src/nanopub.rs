@@ -498,14 +498,14 @@ impl Nanopub {
 
         let mut dataset = create_base_dataset()?;
         let np_ns = NP_TEMP_URI;
-        let key_declaration_string = format!("{}keyDeclaration", np_ns);
-        let assertion_string = format!("{}assertion", np_ns);
-        let prov_string = format!("{}provenance", np_ns);
-        let key_declaration_node = NamedNodeRef::new(key_declaration_string.as_str())?;
+        let key_declaration_iri = NamedNode::new(format!("{}keyDeclaration", np_ns))?;
+        let assertion_iri = NamedNode::new(format!("{}assertion", np_ns))?;
+        let prov_iri = NamedNode::new(format!("{}provenance", np_ns))?;
+        let key_declaration_node = key_declaration_iri.as_ref();
         let orcid_node = NamedNodeRef::new_unchecked(orcid);
-        let assertion_node = NamedNodeRef::new(assertion_string.as_str())?;
+        let assertion_node = assertion_iri.as_ref();
         let assertion_graph = GraphNameRef::from(assertion_node);
-        let prov_graph = NamedNodeRef::new(prov_string.as_str())?;
+        let prov_node = prov_iri.as_ref();
 
         // Assertion graph triples, add key declaration
         let rsa_literal = LiteralRef::new_simple_literal("RSA");
@@ -540,7 +540,7 @@ impl Nanopub {
             assertion_node,
             prov::WAS_ATTRIBUTED_TO,
             assertion_node,
-            prov_graph,
+            prov_node,
         ));
         Ok(Self {
             info: extract_np_info(&dataset)?,
@@ -554,8 +554,8 @@ impl Nanopub {
         let uri_subject_term = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
         let ns_subject_term = NamedOrBlankNodeRef::from(self.info.ns.as_ref());
         let assertion_graph = GraphNameRef::from(self.info.assertion.as_ref());
-        let prov_graph = GraphNameRef::from(self.info.prov.as_ref());
-        let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
+        let prov_node = self.info.prov.as_ref();
+        let pubinfo_node = self.info.pubinfo.as_ref();
         if self
             .dataset
             .quads_for_graph_name(assertion_graph)
@@ -568,7 +568,7 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_for_graph_name(prov_graph)
+            .quads_for_graph_name(prov_node)
             .next()
             .is_none()
         {
@@ -578,7 +578,7 @@ impl Nanopub {
         }
         if self
             .dataset
-            .graph(prov_graph)
+            .graph(prov_node)
             .triples_for_subject(assertion_node)
             .next()
             .is_none()
@@ -587,7 +587,7 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_for_graph_name(pubinfo_graph)
+            .quads_for_graph_name(pubinfo_node)
             .next()
             .is_none()
         {
@@ -601,7 +601,7 @@ impl Nanopub {
                 &[uri_subject_term, ns_subject_term],
                 &[],
                 &[],
-                &[pubinfo_graph],
+                &[GraphNameRef::from(pubinfo_node)],
             )
             .next()
             .is_none()
@@ -633,15 +633,13 @@ impl Nanopub {
 pub fn create_base_dataset() -> Result<Dataset, NpError> {
     let mut dataset = Dataset::new();
     let np_ns = NP_TEMP_URI;
-    let assertion_string = format!("{}assertion", np_ns);
-    let prov_string = format!("{}provenance", np_ns);
-    let pubinfo_string = format!("{}pubinfo", np_ns);
-    let head_string = format!("{}Head", np_ns);
+    let assertion_iri = NamedNode::new(format!("{}assertion", np_ns))?;
+    let prov_iri = NamedNode::new(format!("{}provenance", np_ns))?;
+    let pubinfo_iri = NamedNode::new(format!("{}pubinfo", np_ns))?;
+    let head_iri = NamedNode::new(format!("{}Head", np_ns))?;
     let np_node = NamedNodeRef::new_unchecked(NP_TEMP_URI);
-    let assertion_node = NamedNodeRef::new(assertion_string.as_str())?;
-    let prov_node = NamedNodeRef::new(prov_string.as_str())?;
-    let pubinfo_node = NamedNodeRef::new(pubinfo_string.as_str())?;
-    let head_graph = NamedNodeRef::new(head_string.as_str())?;
+    let assertion_node = assertion_iri.as_ref();
+    let head_graph = GraphNameRef::from(head_iri.as_ref());
     // Add Head graph triples
     dataset.insert(QuadRef::new(
         np_node,
@@ -652,13 +650,13 @@ pub fn create_base_dataset() -> Result<Dataset, NpError> {
     dataset.insert(QuadRef::new(
         np_node,
         np::HAS_PROVENANCE,
-        prov_node,
+        prov_iri.as_ref(),
         head_graph,
     ));
     dataset.insert(QuadRef::new(
         np_node,
         np::HAS_PUBLICATION_INFO,
-        pubinfo_node,
+        pubinfo_iri.as_ref(),
         head_graph,
     ));
     dataset.insert(QuadRef::new(
