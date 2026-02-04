@@ -1,17 +1,12 @@
 use crate::constants::{NP_PREF_NS, NP_TEMP_URI};
 use crate::error::NpError;
 use crate::utils::{
-    graph_iri_to_string, object_iri_to_string, object_literal_to_strings,
-    subject_iri_to_string
+    graph_iri_to_string, object_iri_to_string, object_literal_to_strings, subject_iri_to_string,
 };
 use crate::vocab::{dct, np, npx, pav, prov};
 
 use oxiri::Iri;
-use oxrdf::{
-    Dataset,
-    GraphNameRef, NamedOrBlankNodeRef, TermRef,
-    vocab::rdf,
-};
+use oxrdf::{vocab::rdf, Dataset, GraphNameRef, NamedOrBlankNodeRef, TermRef};
 use regex::Regex;
 use serde::Serialize;
 use std::fmt;
@@ -61,7 +56,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     // Extract nanopub URL and head graph
     let nanopublication_object_term = TermRef::NamedNode(np::NANOPUBLICATION);
-    for q in dataset.iter().filter(|x| x.predicate == rdf::TYPE && x.object == nanopublication_object_term) {
+    for q in dataset
+        .iter()
+        .filter(|x| x.predicate == rdf::TYPE && x.object == nanopublication_object_term)
+    {
         if !np_url.is_empty() {
             return Err(NpError("The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string()));
         } else {
@@ -84,25 +82,25 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let head_graph = GraphNameRef::NamedNode(head_iri.as_ref().into());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
-    for q in dataset.iter().filter(|x|
+    for q in dataset.iter().filter(|x| {
         x.subject == np_subject_term
-        && x.predicate == np::HAS_ASSERTION
-        && x.graph_name == head_graph
-    ) {
+            && x.predicate == np::HAS_ASSERTION
+            && x.graph_name == head_graph
+    }) {
         assertion = object_iri_to_string(q.object)?;
     }
-    for q in dataset.iter().filter(|x|
+    for q in dataset.iter().filter(|x| {
         x.subject == np_subject_term
-        && x.predicate == np::HAS_PROVENANCE
-        && x.graph_name == head_graph
-    ) {
+            && x.predicate == np::HAS_PROVENANCE
+            && x.graph_name == head_graph
+    }) {
         prov = object_iri_to_string(q.object)?;
     }
-    for q in dataset.iter().filter(|x|
+    for q in dataset.iter().filter(|x| {
         x.subject == np_subject_term
-        && x.predicate == np::HAS_PUBLICATION_INFO
-        && x.graph_name == head_graph
-    ) {
+            && x.predicate == np::HAS_PUBLICATION_INFO
+            && x.graph_name == head_graph
+    }) {
         pubinfo = object_iri_to_string(q.object)?;
     }
 
@@ -196,10 +194,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let pubinfo_graph = GraphNameRef::NamedNode(pubinfo_iri.as_ref().into());
     let mut signature: String = "".to_string();
     let mut signature_iri: Iri<String> = Iri::parse_unchecked(signature_string);
-    for q in dataset.iter().filter(|x|
-        x.predicate == npx::HAS_SIGNATURE
-        && x.graph_name == pubinfo_graph
-    ) {
+    for q in dataset
+        .iter()
+        .filter(|x| x.predicate == npx::HAS_SIGNATURE && x.graph_name == pubinfo_graph)
+    {
         let (val, _, _) = object_literal_to_strings(q.object)?;
         signature = val;
         signature_iri = Iri::parse_unchecked(subject_iri_to_string(q.subject)?);
@@ -208,22 +206,22 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
 
     // Extract public key
     let mut pubkey: Option<String> = None;
-    for q in dataset.iter().filter(|x|
+    for q in dataset.iter().filter(|x| {
         x.subject == signature_node
-        && x.predicate == npx::HAS_PUBLIC_KEY
-        && x.graph_name == pubinfo_graph
-    ) {
+            && x.predicate == npx::HAS_PUBLIC_KEY
+            && x.graph_name == pubinfo_graph
+    }) {
         let (val, _, _) = object_literal_to_strings(q.object)?;
         pubkey = Some(val);
     }
 
     // Extract algo
     let mut algo: Option<String> = None;
-    for q in dataset.iter().filter(|x|
+    for q in dataset.iter().filter(|x| {
         x.subject == signature_node
-        && x.predicate == npx::HAS_ALGORITHM
-        && x.graph_name == pubinfo_graph
-    ) {
+            && x.predicate == npx::HAS_ALGORITHM
+            && x.graph_name == pubinfo_graph
+    }) {
         let (val, _, _) = object_literal_to_strings(q.object)?;
         algo = Some(val);
     }
@@ -232,17 +230,13 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let mut orcid: Option<String> = None;
     let original_ns_iri: Iri<String> = Iri::parse_unchecked(original_ns.to_string());
     let original_ns_subject_term = NamedOrBlankNodeRef::NamedNode(original_ns_iri.as_ref().into());
-    for q in dataset.iter().filter(|x|
-        (
-            x.subject == np_subject_term
-            || x.subject == original_ns_subject_term
-        ) && (
-            x.predicate == dct::CREATOR
-            || x.predicate == prov::WAS_ATTRIBUTED_TO
-            || x.predicate == pav::CREATED_BY
-        )
-        && x.graph_name == pubinfo_graph
-    ) {
+    for q in dataset.iter().filter(|x| {
+        (x.subject == np_subject_term || x.subject == original_ns_subject_term)
+            && (x.predicate == dct::CREATOR
+                || x.predicate == prov::WAS_ATTRIBUTED_TO
+                || x.predicate == pav::CREATED_BY)
+            && x.graph_name == pubinfo_graph
+    }) {
         let (val, _, _) = object_literal_to_strings(q.object)?;
         orcid = Some(val);
     }
@@ -270,4 +264,3 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         published: None,
     })
 }
-

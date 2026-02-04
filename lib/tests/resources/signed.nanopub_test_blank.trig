@@ -1,59 +1,69 @@
-@prefix this: <https://w3id.org/np/RANUwFgJ2onO89byLuR_U_4ADqWGityl4cdoU6S7Hyv28> .
-@prefix sub: <https://w3id.org/np/RANUwFgJ2onO89byLuR_U_4ADqWGityl4cdoU6S7Hyv28#> .
-@prefix drugbank: <http://identifiers.org/drugbank/> .
-@prefix np: <http://www.nanopub.org/nschema#> .
+@base <https://w3id.org/np/RAWRKkBBLJaBXXxIl1mJ-oNqHUsiZaUzCay384h2Dr8M8> .
+@prefix : <RAWRKkBBLJaBXXxIl1mJ-oNqHUsiZaUzCay384h2Dr8M8/> .
+@prefix sub: <RAWRKkBBLJaBXXxIl1mJ-oNqHUsiZaUzCay384h2Dr8M8/> .
+@prefix this: <> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix inforces: </biolink/infores/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix biolink: </biolink/vocab/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix biolink: <https://w3id.org/biolink/vocab/> .
-
-sub:Head {
-  this: a np:Nanopublication;
-    np:hasAssertion sub:assertion;
-    np:hasProvenance sub:provenance;
-    np:hasPublicationInfo sub:pubInfo .
+@prefix pav: <http://purl.org/pav/> .
+@prefix schema: <//schema.org/> .
+@prefix orcid: <//orcid.org/> .
+:assertion {
+	<http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
+	:_5 a biolink:Date .
+	:_4 a biolink:Thing .
 }
-
-sub:assertion {
-  drugbank:DB10771 a biolink:Drug .
-
-  <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
-
-  sub:_1 a biolink:Context .
-
-  sub:_2 a biolink:Target .
-
-  sub:_3 a biolink:Date .
-
-  sub:_4 a biolink:Thing .
-
-  sub:_5 a biolink:Date .
-
-  sub:_6 a biolink:Context .
-
-  sub:__1 a biolink:Thing .
-
-  sub:___2 a biolink:Thing .
-
-  sub:association a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation;
-    rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
-    rdf:predicate biolink:treats;
-    rdf:subject drugbank:DB10771;
-    biolink:context sub:_1;
-    biolink:date sub:_3;
-    biolink:target sub:_2 .
+:pubInfo {
+	this: a npx:ExampleNanopub .
 }
-
-sub:provenance {
-  sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
+:Head {
+	this: a np:Nanopublication ;
+		np:hasProvenance :provenance ;
+		np:hasPublicationInfo :pubInfo .
 }
-
-sub:pubInfo {
-  sub:sig npx:hasAlgorithm "RSA";
-    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "1NTjNSJThh0vC7TXz0AkL4ZfSv1q10bLEAqgxegCdZ5nwNyOpJ6lwKky1//x7dPbjtdRszCJ73TyiQigqLy+wfK+PsFpenz8dNcjqbxdsTQPFt2V3JBJPyNLWlsWipku9bQGH2++k/6+yW9/6WmpivYVCb4Erm9xpGoM+jRWetU=";
-    npx:hasSignatureTarget this: .
-
-  this: a npx:ExampleNanopub .
+:pubInfo {
+	this: dcterms:creator orcid:0000-0002-1501-1082 .
+}
+:Head {
+	this: np:hasAssertion :assertion .
+}
+:pubInfo {
+	this: dcterms:created "2026-02-04T14:27:53.343Z"^^xsd:dateTime .
+}
+:assertion {
+	:_6 a biolink:Context .
+}
+:pubInfo {
+	:sig npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB" ;
+		npx:hasAlgorithm "RSA" ;
+		npx:hasSignature "kbSmaMgzHL/9Hh4xnqcxjJUll7E17oFARs2toN1TPBpGc8X9wxqnJiRLbBUmWBMY7v52MyHhxoKgiRJsvWgSV2q8qAJPr6HeN34Bxn2FGPdasGwveJUS4eOj7JVehc6YiX/5vRPUrsCPE1pJ4lq2v/EOUG69lCMHEJdMvf9UG70=" ;
+		npx:hasSignatureTarget this: .
+}
+:assertion {
+	:___2 a biolink:Thing .
+	:_3 a biolink:Date .
+	<http://identifiers.org/drugbank/DB10771> a biolink:Drug .
+	:association a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation ;
+		biolink:target :_2 ;
+		biolink:context :_1 ;
+		rdf:subject <http://identifiers.org/drugbank/DB10771> ;
+		rdf:object <http://purl.obolibrary.org/obo/OMIM_130000> ;
+		biolink:date :_3 ;
+		rdf:predicate biolink:treats .
+	:__1 a biolink:Thing .
+	:_2 a biolink:Target .
+	:_1 a biolink:Context .
+}
+:provenance {
+	:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
 }

@@ -110,6 +110,10 @@ cd cli
 cargo run -- sign ../lib/tests/resources/nanopub_test_blank.trig
 ```
 
+> [!NOTE]
+>
+> Make sure your `profile.yml` and public/private keys are properly set in `~/.nanopub`
+
 ### 🌈 Run all tests
 
 ```bash

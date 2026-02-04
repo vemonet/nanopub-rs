@@ -1,6 +1,6 @@
 use base64::{engine, Engine as _};
-use getrandom::getrandom;
-use rand_core::{impls, CryptoRng, RngCore};
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 use rsa::pkcs1::{DecodeRsaPrivateKey, DecodeRsaPublicKey};
 use rsa::pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePrivateKey, EncodePublicKey};
 use rsa::{RsaPrivateKey, RsaPublicKey};
@@ -103,7 +103,8 @@ impl ProfileBuilder {
         } else {
             filepath.to_string()
         };
-        let file = fs::File::open(filepath)?;
+        let file = fs::File::open(&filepath)
+            .map_err(|_| NpError(format!("No profile found at: {}", filepath)))?;
         let reader = BufReader::new(file);
         let mut privkey_path = None;
         // let mut pubkey_path = None;
@@ -237,7 +238,7 @@ pub fn get_pubkey_str(pubkey: &RsaPublicKey) -> Result<String, NpError> {
 
 /// Generate private/public key pair
 pub fn gen_keys() -> Result<(String, String), NpError> {
-    let mut rng = WasmRng;
+    let mut rng = StdRng::from_entropy();
     let bits = 2048;
     let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
     let pub_key = RsaPublicKey::from(&priv_key);
@@ -255,21 +256,3 @@ fn remove_quotes(value: &str) -> String {
         .trim()
         .to_string()
 }
-
-// Because of wasm we can't use the rand crate
-struct WasmRng;
-impl RngCore for WasmRng {
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
-        getrandom(dest).expect("Error generating random bytes");
-    }
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
-        getrandom(dest).map_err(rand_core::Error::new)
-    }
-    fn next_u32(&mut self) -> u32 {
-        impls::next_u32_via_fill(self)
-    }
-    fn next_u64(&mut self) -> u64 {
-        impls::next_u64_via_fill(self)
-    }
-}
-impl CryptoRng for WasmRng {}

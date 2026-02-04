@@ -81,4 +81,3 @@ impl From<oxrdfio::RdfParseError> for NpError {
         NpError(format!("RDF parse error: {err}"))
     }
 }
-

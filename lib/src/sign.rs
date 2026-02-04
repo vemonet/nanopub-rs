@@ -1,20 +1,15 @@
 use crate::error::NpError;
 use crate::utils::{
-    graph_iri_to_string,
-    object_blank_to_str, object_iri_to_string, object_literal_to_strings,
-    predicate_iri_to_string,
-    subject_blank_to_str, subject_iri_to_string,
+    graph_iri_to_string, object_blank_to_str, object_iri_to_string, object_literal_to_strings,
+    predicate_iri_to_string, subject_blank_to_str, subject_iri_to_string,
 };
 
 use base64::{alphabet, engine, Engine as _};
-use oxrdf::{
-    Dataset, NamedNode, NamedOrBlankNode,
-    NamedNodeRef, QuadRef,
-};
+use oxrdf::{Dataset, NamedNode, NamedNodeRef, NamedOrBlankNode, QuadRef};
 use regex::Regex;
 use rsa::{sha2::Digest, sha2::Sha256};
-use std::collections::HashMap;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 
 /// Generate TrustyURI using base64 encoding
 pub fn make_trusty(
@@ -49,7 +44,6 @@ pub fn replace_bnodes(
     let re_underscore_uri = Regex::new(&format!(r"{base_uri}.?(_+[a-zA-Z0-9^_]+)$"))?;
 
     for quad in dataset.iter() {
-
         // Replace bnode in subjects, and add 1 underscore for URI using already underscore
         let subject = if quad.subject.is_blank_node() {
             let bnode_id = subject_blank_to_str(quad.subject)?;
@@ -59,8 +53,7 @@ pub fn replace_bnodes(
                 counter
             });
             format!("{}_{}", base_ns, bnode_map[bnode_id])
-        } else if let Some(caps) =
-            re_underscore_uri.captures(&subject_iri_to_string(quad.subject)?)
+        } else if let Some(caps) = re_underscore_uri.captures(&subject_iri_to_string(quad.subject)?)
         {
             let mut subject_iri = subject_iri_to_string(quad.subject)?;
             let matching = caps
@@ -75,9 +68,9 @@ pub fn replace_bnodes(
             subject_iri_to_string(quad.subject)?
         };
 
-        let graph = if let Some(caps) = re_underscore_uri.captures(
-            &graph_iri_to_string(quad.graph_name)?,
-        ) {
+        let graph = if let Some(caps) =
+            re_underscore_uri.captures(&graph_iri_to_string(quad.graph_name)?)
+        {
             let mut graph_string = graph_iri_to_string(quad.graph_name)?;
             let matching = caps
                 .get(1)
@@ -88,9 +81,7 @@ pub fn replace_bnodes(
             graph_string.push_str(&new_ending);
             &NamedNode::new_unchecked(graph_string)
         } else {
-            &NamedNode::new_unchecked(
-                graph_iri_to_string(quad.graph_name)?,
-            )
+            &NamedNode::new_unchecked(graph_iri_to_string(quad.graph_name)?)
         };
 
         // Replace bnode in objects
@@ -112,9 +103,7 @@ pub fn replace_bnodes(
             ));
         } else if quad.object.is_named_node() {
             // Handle URI ending with #_ to double _
-            if let Some(caps) =
-                re_underscore_uri.captures(&object_iri_to_string(quad.object)?)
-            {
+            if let Some(caps) = re_underscore_uri.captures(&object_iri_to_string(quad.object)?) {
                 let mut object_string = object_iri_to_string(quad.object)?;
                 let matching = caps
                     .get(1)
@@ -131,10 +120,20 @@ pub fn replace_bnodes(
                     graph,
                 ));
             } else {
-                new_dataset.insert(QuadRef::new(subject_node, quad.predicate, quad.object, graph));
+                new_dataset.insert(QuadRef::new(
+                    subject_node,
+                    quad.predicate,
+                    quad.object,
+                    graph,
+                ));
             }
         } else {
-            new_dataset.insert(QuadRef::new(subject_node, quad.predicate, quad.object, graph));
+            new_dataset.insert(QuadRef::new(
+                subject_node,
+                quad.predicate,
+                quad.object,
+                graph,
+            ));
         };
     }
     Ok(new_dataset)
@@ -160,8 +159,7 @@ pub fn replace_ns_in_quads(
             NamedOrBlankNode::NamedNode(subject_iri.as_ref().into())
         };
         // Replace URI in graphs
-        let graph_name = graph_iri_to_string(quad.graph_name)?
-                .replace(old_ns, new_ns);
+        let graph_name = graph_iri_to_string(quad.graph_name)?.replace(old_ns, new_ns);
         let graph = NamedNodeRef::new_unchecked(graph_name.as_str());
 
         // Replace URI in objects
@@ -180,7 +178,12 @@ pub fn replace_ns_in_quads(
                 graph,
             ));
         } else {
-            new.insert(QuadRef::new(&subject_node, quad.predicate, quad.object, graph));
+            new.insert(QuadRef::new(
+                &subject_node,
+                quad.predicate,
+                quad.object,
+                graph,
+            ));
         };
     }
     Ok(new)
@@ -251,22 +254,19 @@ pub fn normalize_dataset(
             norm_uri.to_string()
         } else {
             fix_normed_uri(
-                &subject_iri_to_string(quad.subject)?
-                    .replace(base_ns, &norm_uri),
+                &subject_iri_to_string(quad.subject)?.replace(base_ns, &norm_uri),
                 separator,
             )
         };
 
-        let predicate = predicate_iri_to_string(quad.predicate)?
-            .replace(base_ns, &norm_uri);
+        let predicate = predicate_iri_to_string(quad.predicate)?.replace(base_ns, &norm_uri);
 
         let object = if quad.object.is_named_node() {
             if object_iri_to_string(quad.object)? == base_ns {
                 norm_uri.to_string()
             } else {
                 fix_normed_uri(
-                    &object_iri_to_string(quad.object)?
-                        .replace(base_ns, &norm_uri),
+                    &object_iri_to_string(quad.object)?.replace(base_ns, &norm_uri),
                     separator,
                 )
             }
@@ -276,9 +276,7 @@ pub fn normalize_dataset(
             datatype = dt;
             lang = lng;
             // Double the \\ to bypass rust escaping
-            val
-                .replace('\\', "\\\\")
-                .replace('\n', "\\n")
+            val.replace('\\', "\\\\").replace('\n', "\\n")
         };
 
         // Create a NormQuad struct and push it to the vector
@@ -327,4 +325,3 @@ pub fn normalize_dataset(
     }
     Ok(normed_quads)
 }
-

@@ -1,11 +1,8 @@
 // use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
-use oxrdf::{
-    Dataset,
-    GraphNameRef, NamedOrBlankNodeRef, NamedNodeRef, TermRef,
-};
-use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
 use oxjsonld::JsonLdProfileSet;
+use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, NamedOrBlankNodeRef, TermRef};
+use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
@@ -16,7 +13,9 @@ pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
     let mut dataset = Dataset::new();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
     let format = if rdf.trim().starts_with('{') || rdf.trim().starts_with('[') {
-        RdfFormat::JsonLd { profile: JsonLdProfileSet::empty() }
+        RdfFormat::JsonLd {
+            profile: JsonLdProfileSet::empty(),
+        }
     } else {
         // The TriG parser handles nquads
         RdfFormat::TriG
@@ -24,7 +23,10 @@ pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
 
     RdfParser::from_format(format)
         .for_reader(rdf.as_bytes())
-        .try_for_each(|q| { dataset.insert(&q?); Ok::<_, NpError>(()) })?;
+        .try_for_each(|q| {
+            dataset.insert(&q?);
+            Ok::<_, NpError>(())
+        })?;
     Ok(dataset)
 }
 
@@ -82,7 +84,8 @@ pub fn get_prefixes<'a>(
         ("orcid", "https://orcid.org/"),
         ("biolink", "https://w3id.org/biolink/vocab/"),
         ("inforces", "https://w3id.org/biolink/infores/"),
-    ].into_iter()
+    ]
+    .into_iter()
 }
 
 /// Extract IRI as `String` from subject term
@@ -96,8 +99,11 @@ pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpErro
                 .next()
                 .and_then(|s| s.split("::").last())
                 .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract IRI from subject: Got {}", variant_name)))
-        },
+            Err(NpError(format!(
+                "Failed to extract IRI from subject: Got {}",
+                variant_name
+            )))
+        }
     }
 }
 
@@ -112,8 +118,11 @@ pub fn subject_blank_to_str(node: NamedOrBlankNodeRef<'_>) -> Result<&str, NpErr
                 .next()
                 .and_then(|s| s.split("::").last())
                 .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract blank node ID from subject: Got {}", variant_name)))
-        },
+            Err(NpError(format!(
+                "Failed to extract blank node ID from subject: Got {}",
+                variant_name
+            )))
+        }
     }
 }
 
@@ -133,8 +142,11 @@ pub fn object_iri_to_string(node: TermRef) -> Result<String, NpError> {
                 .next()
                 .and_then(|s| s.split("::").last())
                 .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract IRI from object: Got {}", variant_name)))
-        },
+            Err(NpError(format!(
+                "Failed to extract IRI from object: Got {}",
+                variant_name
+            )))
+        }
     }
 }
 
@@ -149,8 +161,11 @@ pub fn object_blank_to_str(node: TermRef<'_>) -> Result<&str, NpError> {
                 .next()
                 .and_then(|s| s.split("::").last())
                 .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract blank node ID from object: Got {}", variant_name)))
-        },
+            Err(NpError(format!(
+                "Failed to extract blank node ID from object: Got {}",
+                variant_name
+            )))
+        }
     }
 }
 
@@ -162,7 +177,11 @@ pub fn object_literal_to_strings(node: TermRef) -> Result<(String, String, Strin
             literal.datatype().into_owned().into_string(),
             literal.language().unwrap_or_default().to_owned(),
         )),
-        TermRef::NamedNode(iri) => Ok((iri.into_owned().into_string(), "".to_string(), "".to_string())),
+        TermRef::NamedNode(iri) => Ok((
+            iri.into_owned().into_string(),
+            "".to_string(),
+            "".to_string(),
+        )),
         other => {
             let debug_str = format!("{:?}", other);
             let variant_name = debug_str
@@ -170,8 +189,11 @@ pub fn object_literal_to_strings(node: TermRef) -> Result<(String, String, Strin
                 .next()
                 .and_then(|s| s.split("::").last())
                 .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract literal from object: Got {}", variant_name)))
-        },
+            Err(NpError(format!(
+                "Failed to extract literal from object: Got {}",
+                variant_name
+            )))
+        }
     }
 }
 
@@ -186,7 +208,10 @@ pub fn graph_iri_to_string(node: GraphNameRef) -> Result<String, NpError> {
                 .next()
                 .and_then(|s| s.split("::").last())
                 .unwrap_or("Unknown");
-            Err(NpError(format!("Failed to extract graph name IRI: Got {}", variant_name)))
-        },
+            Err(NpError(format!(
+                "Failed to extract graph name IRI: Got {}",
+                variant_name
+            )))
+        }
     }
 }

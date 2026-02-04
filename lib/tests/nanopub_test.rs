@@ -1,13 +1,7 @@
 use nanopub::{
-    constants::TEST_SERVER,
-    extract::extract_np_info,
-    get_np_server,
-    nanopub::create_base_dataset,
-    network::publish_np,
-    profile::gen_keys,
-    sign::normalize_dataset,
-    utils::parse_rdf,
-    Nanopub, ProfileBuilder,
+    constants::TEST_SERVER, extract::extract_np_info, get_np_server, nanopub::create_base_dataset,
+    network::publish_np, profile::gen_keys, sign::normalize_dataset, utils::parse_rdf, Nanopub,
+    ProfileBuilder,
 };
 use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, QuadRef};
 use std::{error::Error, fs};
