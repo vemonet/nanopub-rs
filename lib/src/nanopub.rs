@@ -11,9 +11,8 @@ use base64::{engine, Engine as _};
 use chrono::Utc;
 use oxiri::Iri;
 use oxrdf::{
-    Dataset,
-    GraphNameRef, LiteralRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
     vocab::{rdf, xsd},
+    Dataset, GraphNameRef, LiteralRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
 };
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
@@ -143,7 +142,8 @@ impl Nanopub {
         // Check the signature is valid if found
         let mut unsigned_dataset = self.dataset.clone();
         if !self.info.signature.is_empty() {
-            let signature_node = NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
+            let signature_node =
+                NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
             let signature_literal = LiteralRef::new_simple_literal(self.info.signature.as_str());
             // Remove the signature from the graph before re-generating it
             unsigned_dataset.remove(QuadRef::new(
@@ -250,19 +250,19 @@ impl Nanopub {
 
         // If not already set, automatically add the current date to pubinfo created
         if self
-            .dataset.iter().filter(|x|
-                (
-                    x.subject == uri_subject_term
-                    || x.subject == ns_subject_term
-                )
-                && x.predicate == dct::CREATED
-                && x.graph_name == pubinfo_graph
-            )
+            .dataset
+            .iter()
+            .filter(|x| {
+                (x.subject == uri_subject_term || x.subject == ns_subject_term)
+                    && x.predicate == dct::CREATED
+                    && x.graph_name == pubinfo_graph
+            })
             .next()
             .is_none()
         {
             let datetime_now = Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string();
-            let datetime_now_literal = LiteralRef::new_typed_literal(datetime_now.as_str(), xsd::DATE_TIME);
+            let datetime_now_literal =
+                LiteralRef::new_typed_literal(datetime_now.as_str(), xsd::DATE_TIME);
             self.dataset.insert(QuadRef::new(
                 ns_node,
                 dct::CREATED,
@@ -274,18 +274,15 @@ impl Nanopub {
         // If ORCID provided in profile, and not already defined in nanopub, add to pubinfo graph
         if let Some(orcid) = &profile.orcid_id {
             if self
-                .dataset.iter().filter(|x|
-                    (
-                        x.subject == uri_subject_term
-                        || x.subject == ns_subject_term
-                    )
-                    && (
-                        x.predicate == dct::CREATOR
-                        || x.predicate == prov::WAS_ATTRIBUTED_TO
-                        || x.predicate == pav::CREATED_BY
-                    )
-                    && x.graph_name == pubinfo_graph
-                )
+                .dataset
+                .iter()
+                .filter(|x| {
+                    (x.subject == uri_subject_term || x.subject == ns_subject_term)
+                        && (x.predicate == dct::CREATOR
+                            || x.predicate == prov::WAS_ATTRIBUTED_TO
+                            || x.predicate == pav::CREATED_BY)
+                        && x.graph_name == pubinfo_graph
+                })
                 .next()
                 .is_none()
             {
@@ -420,7 +417,8 @@ impl Nanopub {
 
     /// Unsign a signed nanopub RDF. Remove signature triples and replace trusty URI with default temp URI
     pub fn unsign(mut self) -> Result<Self, NpError> {
-        let signature_node = NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
+        let signature_node =
+            NamedOrBlankNodeRef::NamedNode(self.info.signature_iri.as_ref().into());
         let uri_node = NamedOrBlankNodeRef::NamedNode(self.info.uri.as_ref().into());
         let public_key_literal = LiteralRef::new_simple_literal(self.info.public_key.as_str());
         let algo_literal = LiteralRef::new_simple_literal(self.info.algo.as_str());
@@ -602,13 +600,11 @@ impl Nanopub {
         }
         if self
             .dataset
-            .iter().filter(|x|
-                (
-                    x.subject == uri_subject_term
-                    || x.subject == ns_subject_term
-                )
-                && x.graph_name == pubinfo_graph
-            )
+            .iter()
+            .filter(|x| {
+                (x.subject == uri_subject_term || x.subject == ns_subject_term)
+                    && x.graph_name == pubinfo_graph
+            })
             .next()
             .is_none()
         {
@@ -618,9 +614,7 @@ impl Nanopub {
             ));
         }
         let mut graph_names = HashSet::new();
-        for g in self.dataset.iter().filter(|x|
-            x.graph_name.is_named_node()
-        ) {
+        for g in self.dataset.iter().filter(|x| x.graph_name.is_named_node()) {
             graph_names.insert(g.graph_name.to_string());
         }
         if graph_names.len() > 4 {

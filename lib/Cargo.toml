@@ -23,13 +23,13 @@ oxiri = { version = "0.2", features = ["serde"] }
 oxjsonld = "0.2"
 oxrdf = { version = "0.3", features = ["serde"] }
 oxrdfio = "0.2"
-rsa = { version = "0.9.9", default-features = false, features = ["pem", "sha2"] }
+rsa = { version = "0.9.10", default-features = false, features = ["pem", "sha2"] }
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
 chrono = "0.4.35"
 reqwest = { version = "0.12", default-features = false }
+rand = { version = "0.8", features = ["std", "std_rng"], default-features = false }
 getrandom = { version = "0.2", features = ["js"] }
-rand_core = { version = "0.6", features = ["std"] }
 # openssl-probe = "0.1"
 
 # reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
