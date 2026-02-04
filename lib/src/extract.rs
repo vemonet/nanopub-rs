@@ -3,7 +3,7 @@ use crate::error::NpError;
 use crate::utils::DatasetExt;
 use crate::vocab::{dct, np, npx, pav, prov};
 
-use oxrdf::{vocab::rdf, Dataset, GraphNameRef, NamedNode, NamedOrBlankNodeRef, TermRef};
+use oxrdf::{vocab::rdf, Dataset, GraphNameRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, TermRef};
 use regex::Regex;
 use serde::Serialize;
 use std::fmt;
@@ -250,10 +250,8 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     };
 
     // Extract ORCID
-    let original_ns_iri = NamedNode::new_unchecked(original_ns.to_string());
-    let original_ns_subject_term = NamedOrBlankNodeRef::from(original_ns_iri.as_ref());
     let orcid = match dataset.quads_match(
-        &[np_subject_term, original_ns_subject_term],
+        &[np_subject_term, NamedOrBlankNodeRef::from(NamedNodeRef::new_unchecked(original_ns))],
         &[dct::CREATOR, prov::WAS_ATTRIBUTED_TO, pav::CREATED_BY],
         &[],
         &[pubinfo_graph],
