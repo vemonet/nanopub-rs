@@ -4,14 +4,14 @@ use crate::extract::{extract_np_info, NpInfo};
 use crate::network::{fetch_np, publish_np};
 use crate::profile::NpProfile;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{parse_rdf, serialize_rdf, DatasetExt};
+use crate::utils::{parse_rdf, serialize_rdf};
 use crate::vocab::{dct, foaf, np, npx, pav, prov};
 
 use base64::{engine, Engine as _};
 use chrono::Utc;
 use oxrdf::{
     vocab::{rdf, xsd},
-    Dataset, GraphNameRef, LiteralRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
+    Dataset, GraphNameRef, LiteralRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TripleRef,
 };
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
@@ -216,69 +216,67 @@ impl Nanopub {
         let uri_subject_term = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
         let ns_subject_term = NamedOrBlankNodeRef::from(ns_node);
         let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
+        let mut pubinfo_graph_view = self.dataset.graph_mut(pubinfo_graph);
 
         // Add triples about the signature in the pubinfo
-        self.dataset.insert(QuadRef::new(
+        pubinfo_graph_view.insert(TripleRef::new(
             sig_node,
             npx::HAS_PUBLIC_KEY,
             LiteralRef::new_simple_literal(&profile.public_key.as_str()),
-            pubinfo_graph,
         ));
-        self.dataset.insert(QuadRef::new(
+        pubinfo_graph_view.insert(TripleRef::new(
             sig_node,
             npx::HAS_ALGORITHM,
             LiteralRef::new_simple_literal("RSA"),
-            pubinfo_graph,
         ));
-        self.dataset.insert(QuadRef::new(
+        pubinfo_graph_view.insert(TripleRef::new(
             sig_node,
             npx::HAS_SIGNATURE_TARGET,
             ns_node,
-            pubinfo_graph,
         ));
 
         // If not already set, automatically add the current date to pubinfo created
-        if self
-            .dataset
-            .quads_match(
-                &[uri_subject_term, ns_subject_term],
-                &[dct::CREATED],
-                &[],
-                &[pubinfo_graph],
+        if pubinfo_graph_view
+            .triples_for_predicate(dct::CREATED)
+            .filter(|x|
+                x.subject == uri_subject_term
+                || x.subject == ns_subject_term
             )
             .next()
             .is_none()
         {
-            self.dataset.insert(QuadRef::new(
+            pubinfo_graph_view.insert(TripleRef::new(
                 ns_node,
                 dct::CREATED,
                 LiteralRef::new_typed_literal(
                     Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string().as_str(),
                     xsd::DATE_TIME,
                 ),
-                pubinfo_graph,
             ));
         }
 
         // If ORCID provided in profile, and not already defined in nanopub, add to pubinfo graph
         if let Some(orcid) = &profile.orcid_id {
-            if self
-                .dataset
-                .quads_match(
-                    &[uri_subject_term, ns_subject_term],
-                    &[dct::CREATOR, prov::WAS_ATTRIBUTED_TO, pav::CREATED_BY],
-                    &[],
-                    &[pubinfo_graph],
+            if pubinfo_graph_view
+                .iter().filter(|x|
+                    (
+                        x.subject == uri_subject_term
+                        || x.subject == ns_subject_term
+                    )
+                    && (
+                        x.predicate == dct::CREATOR
+                        || x.predicate == prov::WAS_ATTRIBUTED_TO
+                        || x.predicate == pav::CREATED_BY
+                    )
                 )
                 .next()
                 .is_none()
             {
                 let orcid_node = NamedNodeRef::new_unchecked(orcid.as_str());
-                self.dataset.insert(QuadRef::new(
+                pubinfo_graph_view.insert(TripleRef::new(
                     ns_node,
                     dct::CREATOR,
                     orcid_node,
-                    pubinfo_graph,
                 ));
             }
         }
@@ -576,14 +574,10 @@ impl Nanopub {
         }
         if self
             .dataset
-            .quads_match(
-                &[
-                    NamedOrBlankNodeRef::from(self.info.uri.as_ref()),
-                    NamedOrBlankNodeRef::from(self.info.ns.as_ref()),
-                ],
-                &[],
-                &[],
-                &[GraphNameRef::from(pubinfo_node)],
+            .quads_for_graph_name(pubinfo_node)
+            .filter(|x|
+                x.subject == NamedOrBlankNodeRef::from(self.info.uri.as_ref())
+                || x.subject == NamedOrBlankNodeRef::from(self.info.ns.as_ref())
             )
             .next()
             .is_none()
