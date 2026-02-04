@@ -52,7 +52,7 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         &[TermRef::NamedNode(np::NANOPUBLICATION)],
         &[],
     );
-    let (np_iri, head_iri) = match head_iterator.next() {
+    let (mut np_iri, head_iri) = match head_iterator.next() {
         Some(q) => {
             let NamedOrBlankNodeRef::NamedNode(np) = q.subject else {
                 return Err(NpError("Subject must be a named node.".to_string()));
@@ -71,7 +71,6 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
             "The provided RDF contains multiple Nanopublications. Only one can be provided at a time.".to_string(),
         ));
     };
-
     let mut np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
     let head_graph = GraphNameRef::from(head_iri.as_ref());
 
@@ -142,16 +141,10 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let np_ns_str = original_ns;
 
     // Remove last char if it is # or / to get the URI
-    let np_iri =
-        if np_iri.as_str().ends_with(['#', '/', '.']) {
-            match np_iri.as_str().chars().last() {
-                Some(_) => NamedNode::new_unchecked(np_iri.as_str()[..np_iri.as_str().len() - 1].to_string()),
-                None => np_iri,
-            }
-        } else {
-            np_iri
-        };
-    np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
+    if np_iri.as_str().ends_with(['#', '/', '.']) {
+        np_iri = NamedNode::new_unchecked(np_iri.as_str()[..np_iri.as_str().len() - 1].to_string());
+        np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
+    };
 
     // Extract base URI, separator character (# or / or _), and trusty hash (if present) from the np URL
     // Default to empty strings when nothing found
