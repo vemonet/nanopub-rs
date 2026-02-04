@@ -7,38 +7,66 @@ use std::cmp::Ordering;
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
 
-// TODO: improve to collect document prefixes, for use in `serialize_rdf()`
 /// Parse RDF from various format to a `Dataset` (trig, nquads, JSON-LD)
-pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
+pub fn parse_rdf(rdf: &str) -> Result<(Dataset, Vec<(String, String)>), NpError> {
     let mut dataset = Dataset::new();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
-    if rdf.trim_start().starts_with(['{', '[']) {
-        JsonLdParser::new()
-            .for_reader(rdf.as_bytes())
+    let prefixes: Vec<(String, String)> = if rdf.trim_start().starts_with(['{', '[']) {
+        let mut parser = JsonLdParser::new()
+            .for_reader(rdf.as_bytes());
+        parser
             .try_for_each(|q| {
                 dataset.insert(&q?);
                 Ok::<_, NpError>(())
             })?;
+        parser.prefixes()
+            .map(|(prefix, iri)| (prefix.to_owned(), iri.to_owned()))
+            .collect()
     } else {
         // The TriG parser handles nquads
-        TriGParser::new()
-            .for_reader(rdf.as_bytes())
+        let mut parser = TriGParser::new()
+            .for_reader(rdf.as_bytes());
+        parser
             .try_for_each(|q| {
                 dataset.insert(&q?);
                 Ok::<_, NpError>(())
             })?;
+        parser.prefixes()
+            .map(|(prefix, iri)| (prefix.to_owned(), iri.to_owned()))
+            .collect()
     };
-
-    Ok(dataset)
+    Ok((dataset, prefixes))
 }
 
-// TODO: improve to use prefixes from `parse_rdf()`, favored over default ones
 /// Serialize RDF dataset to Trig
-pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, NpError> {
+pub fn serialize_rdf(
+    dataset: &Dataset,
+    uri: &str,
+    ns: &str,
+    prefixes: &Vec<(String, String)>,
+) -> Result<String, NpError> {
     let mut serializer = TriGSerializer::new();
-    for (prefix_name, prefix_iri) in get_prefixes(uri, ns) {
+    // Add a set of default prefixes
+    for (prefix_name, prefix_iri) in [
+        ("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
+        ("rdfs", "http://www.w3.org/2000/01/rdf-schema#"),
+        ("xsd", "http://www.w3.org/2001/XMLSchema#"),
+        ("owl", "http://www.w3.org/2002/07/owl#"),
+        ("skos", "http://www.w3.org/2004/02/skos/core#"),
+        ("np", "http://www.nanopub.org/nschema#"),
+        ("npx", "http://purl.org/nanopub/x/"),
+        ("orcid", "https://orcid.org/"),
+    ] {
         serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }
+    // Add or override prefixes from parsed source document
+    for (prefix_name, prefix_iri) in prefixes {
+        serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
+    }
+    // Add or override core prefixes
+    serializer = serializer
+        .with_prefix("this", uri)?
+        .with_prefix("sub", ns)?;
     let mut serializer = serializer.for_writer(Vec::new());
     // NOTE: we need to sort ourself the quads
     let mut quads: Vec<QuadRef<'_>> = dataset.iter().collect();
@@ -60,35 +88,6 @@ pub fn get_np_server(random: bool) -> &'static str {
     let num = u32::from_ne_bytes(buf);
     let index = num as usize % LIST_SERVERS.len();
     LIST_SERVERS[index]
-}
-
-// TODO: improve to extract prefixes from the input RDF
-/// Get the prefixes of a Nanopub
-pub fn get_prefixes<'a>(
-    np_uri: &'a str,
-    np_ns: &'a str,
-) -> impl Iterator<Item = (&'static str, &'a str)> + 'a {
-    [
-        ("this", np_uri),
-        ("sub", np_ns),
-        ("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
-        ("rdfs", "http://www.w3.org/2000/01/rdf-schema#"),
-        ("xsd", "http://www.w3.org/2001/XMLSchema#"),
-        ("owl", "http://www.w3.org/2002/07/owl#"),
-        ("skos", "http://www.w3.org/2004/02/skos/core#"),
-        ("np", "http://www.nanopub.org/nschema#"),
-        ("npx", "http://purl.org/nanopub/x/"),
-        ("dc", "http://purl.org/dc/elements/1.1/"),
-        ("dcterms", "http://purl.org/dc/terms/"),
-        ("prov", "http://www.w3.org/ns/prov#"),
-        ("pav", "http://purl.org/pav/"),
-        ("schema", "https://schema.org/"),
-        ("foaf", "http://xmlns.com/foaf/0.1/"),
-        ("orcid", "https://orcid.org/"),
-        ("biolink", "https://w3id.org/biolink/vocab/"),
-        ("inforces", "https://w3id.org/biolink/infores/"),
-    ]
-    .into_iter()
 }
 
 /// Extract IRI as `String` from subject term, or error if blank node
