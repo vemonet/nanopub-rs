@@ -21,20 +21,20 @@ use std::fmt;
 
 /// Trait to provide the nanopub RDF as string or dataset
 pub trait RdfSource {
-    fn get_dataset(self) -> Result<Dataset, NpError>;
+    fn get_dataset(self) -> Result<(Dataset, Vec<(String, String)>), NpError>;
 }
 impl RdfSource for Dataset {
-    fn get_dataset(self) -> Result<Dataset, NpError> {
-        Ok(self)
+    fn get_dataset(self) -> Result<(Dataset, Vec<(String, String)>), NpError> {
+        Ok((self, [].to_vec()))
     }
 }
 impl RdfSource for &str {
-    fn get_dataset(self) -> Result<Dataset, NpError> {
+    fn get_dataset(self) -> Result<(Dataset, Vec<(String, String)>), NpError> {
         parse_rdf(self)
     }
 }
 impl RdfSource for &String {
-    fn get_dataset(self) -> Result<Dataset, NpError> {
+    fn get_dataset(self) -> Result<(Dataset, Vec<(String, String)>), NpError> {
         parse_rdf(self)
     }
 }
@@ -62,8 +62,8 @@ impl fmt::Display for Nanopub {
 
 impl Nanopub {
     pub fn new<T: RdfSource>(rdf: T) -> Result<Self, NpError> {
-        let dataset = rdf.get_dataset()?;
-        let np_info = extract_np_info(&dataset)?;
+        let (dataset, prefixes) = rdf.get_dataset()?;
+        let np_info = extract_np_info(&dataset, prefixes)?;
         Ok(Self {
             info: np_info,
             dataset,
@@ -91,8 +91,8 @@ impl Nanopub {
     /// ```
     pub async fn fetch(url: &str) -> Result<Self, NpError> {
         let np_rdf = fetch_np(url).await?;
-        let dataset: Dataset = parse_rdf(&np_rdf)?;
-        let mut np_info = extract_np_info(&dataset)?;
+        let (dataset, prefixes) = parse_rdf(&np_rdf)?;
+        let mut np_info = extract_np_info(&dataset, prefixes)?;
         np_info.published = Some(url.to_string());
         Ok(Self {
             info: np_info,
@@ -209,7 +209,7 @@ impl Nanopub {
         // }
         self.dataset =
             replace_bnodes(&self.dataset, self.info.ns.as_str(), self.info.uri.as_str())?;
-        self.info = extract_np_info(&self.dataset)?;
+        self.info = extract_np_info(&self.dataset, self.info.prefixes)?;
         if !self.info.signature.is_empty() {
             println!("Nanopub already signed, unsigning it before re-signing");
             self = self.unsign()?;
@@ -308,7 +308,7 @@ impl Nanopub {
             &trusty_uri,
         )?;
         // TODO: it would be more efficient to assign the self.info field directly in the code above
-        self.info = extract_np_info(&self.dataset)?;
+        self.info = extract_np_info(&self.dataset, self.info.prefixes)?;
         let _ = self.is_valid()?;
         // Return the signed Nanopub object
         Ok(self)
@@ -423,7 +423,7 @@ impl Nanopub {
         )?;
         self.info.uri = NamedNode::new_unchecked(NP_TEMP_URI.to_string());
         self.info.ns = NamedNode::new_unchecked(NP_TEMP_URI.to_string());
-        self.info = extract_np_info(&self.dataset)?;
+        self.info = extract_np_info(&self.dataset, self.info.prefixes)?;
         Ok(self)
     }
 
@@ -509,7 +509,7 @@ impl Nanopub {
             prov_node,
         ));
         Ok(Self {
-            info: extract_np_info(&dataset)?,
+            info: extract_np_info(&dataset, [].to_vec())?,
             dataset,
         })
     }
@@ -582,7 +582,7 @@ impl Nanopub {
 
     /// Returns the RDF of the nanopub
     pub fn rdf(&self) -> Result<String, NpError> {
-        serialize_rdf(&self.dataset, self.info.uri.as_str(), self.info.ns.as_str())
+        serialize_rdf(&self.dataset, self.info.uri.as_str(), self.info.ns.as_str(), &self.info.prefixes)
     }
 }
 

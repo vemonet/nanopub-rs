@@ -14,6 +14,7 @@ use std::fmt;
 pub struct NpInfo {
     pub uri: NamedNode,
     pub ns: NamedNode,
+    pub prefixes: Vec<(String, String)>,
     pub normalized_ns: String,
     pub head: NamedNode,
     pub assertion: NamedNode,
@@ -45,7 +46,10 @@ impl fmt::Display for NpInfo {
 }
 
 /// Extract graphs URLs from a nanopub: nanopub URL, head, assertion, prov, pubinfo
-pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
+pub fn extract_np_info(
+    dataset: &Dataset,
+    prefixes: Vec<(String, String)>,
+) -> Result<NpInfo, NpError> {
     // Extract nanopub URL and head graph
     let mut head_iterator = dataset
         .quads_for_predicate(rdf::TYPE)
@@ -250,6 +254,7 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     Ok(NpInfo {
         uri: np_iri,
         ns: NamedNode::new_unchecked(np_ns_str),
+        prefixes,
         normalized_ns: norm_ns,
         head: head_iri,
         assertion: assertion_iri,

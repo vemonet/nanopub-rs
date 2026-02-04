@@ -39,7 +39,7 @@ async fn publish_proteinatlas() -> Result<(), Box<dyn Error>> {
     let profile = ProfileBuilder::new(get_test_key()).build()?;
 
     let np = Nanopub::new(&np_rdf)?.sign(&profile)?;
-    // println!("{}", np.rdf()?);
+    println!("{}", np.rdf()?);
     println!("{}", np.check()?);
 
     let np = Nanopub::new(&np_rdf)?
@@ -198,8 +198,8 @@ async fn publish_np_intro() -> Result<(), Box<dyn Error>> {
 #[test]
 fn test_np_info() -> Result<(), Box<dyn Error>> {
     let rdf_str = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
-    let dataset = parse_rdf(&rdf_str)?;
-    let np_info = extract_np_info(&dataset)?;
+    let (dataset, prefixes) = parse_rdf(&rdf_str)?;
+    let np_info = extract_np_info(&dataset, prefixes)?;
     println!("{np_info}"); // Required for coverage
     Ok(())
 }
