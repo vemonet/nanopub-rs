@@ -1,11 +1,118 @@
 // use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
 use oxjsonld::JsonLdProfileSet;
-use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, NamedOrBlankNodeRef, TermRef};
+use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TermRef};
 use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
+
+/// Extension trait for `Dataset` providing efficient quad matching with optional filters.
+///
+/// This trait adds a `quads_match` method that efficiently queries quads by
+/// selecting the best internal index based on which parameters are provided.
+pub trait DatasetExt {
+    /// Returns an iterator over quads matching the given subjects, predicates, objects, and graphs.
+    ///
+    /// Pass an empty slice `&[]` for any parameter to match all values for that position.
+    /// Pass a non-empty slice to match any of the values in the slice.
+    /// The implementation chooses the most efficient index based on which slices are non-empty.
+    ///
+    /// # Example
+    /// ```ignore
+    /// use oxrdf::{Dataset, NamedNodeRef, GraphNameRef};
+    /// use nanopub::utils::DatasetExt;
+    ///
+    /// let dataset = Dataset::new();
+    /// let subject = NamedNodeRef::new("http://example.org/s").unwrap();
+    /// let pred1 = NamedNodeRef::new("http://example.org/p1").unwrap();
+    /// let pred2 = NamedNodeRef::new("http://example.org/p2").unwrap();
+    /// let graph = NamedNodeRef::new("http://example.org/g").unwrap();
+    ///
+    /// // Find all quads with specific subject, either predicate, and graph (any object)
+    /// for quad in dataset.quads_match(&[subject.into()], &[pred1, pred2], &[], &[graph.into()]) {
+    ///     println!("{:?}", quad);
+    /// }
+    /// ```
+    fn quads_match<'a>(
+        &'a self,
+        subjects: &'a [NamedOrBlankNodeRef<'a>],
+        predicates: &'a [NamedNodeRef<'a>],
+        objects: &'a [TermRef<'a>],
+        graph_names: &'a [GraphNameRef<'a>],
+    ) -> Box<dyn Iterator<Item = QuadRef<'a>> + 'a>;
+}
+
+impl DatasetExt for Dataset {
+    fn quads_match<'a>(
+        &'a self,
+        subjects: &'a [NamedOrBlankNodeRef<'a>],
+        predicates: &'a [NamedNodeRef<'a>],
+        objects: &'a [TermRef<'a>],
+        graph_names: &'a [GraphNameRef<'a>],
+    ) -> Box<dyn Iterator<Item = QuadRef<'a>> + 'a> {
+        // Strategy: Use the most selective index based on which slices are non-empty.
+        // Priority order: subject > predicate > object > graph
+        // (graphs typically contain many triples, so they're least selective)
+        //
+        // Indexes used:
+        // - quads_for_subject uses spog index
+        // - quads_for_predicate uses posg index
+        // - quads_for_object uses ospg index
+        // - quads_for_graph_name uses gspo index
+        //
+        // Empty slice = wildcard (match all), non-empty = match any value in the slice
+
+        if subjects.is_empty()
+            && predicates.is_empty()
+            && objects.is_empty()
+            && graph_names.is_empty()
+        {
+            // Nothing specified - iterate all
+            return Box::new(self.iter());
+        }
+
+        if !subjects.is_empty() {
+            // Subject(s) specified - use spog index, filter remaining
+            Box::new(
+                subjects
+                    .iter()
+                    .flat_map(|s| self.quads_for_subject(*s))
+                    .filter(move |q| {
+                        (predicates.is_empty() || predicates.contains(&q.predicate))
+                            && (objects.is_empty() || objects.contains(&q.object))
+                            && (graph_names.is_empty() || graph_names.contains(&q.graph_name))
+                    }),
+            )
+        } else if !predicates.is_empty() {
+            // Predicate(s) specified (no subject) - use posg index, filter remaining
+            Box::new(
+                predicates
+                    .iter()
+                    .flat_map(|p| self.quads_for_predicate(*p))
+                    .filter(move |q| {
+                        (objects.is_empty() || objects.contains(&q.object))
+                            && (graph_names.is_empty() || graph_names.contains(&q.graph_name))
+                    }),
+            )
+        } else if !objects.is_empty() {
+            // Object(s) specified (no subject/predicate) - use ospg index, filter remaining
+            Box::new(
+                objects
+                    .iter()
+                    .flat_map(|o| self.quads_for_object(*o))
+                    .filter(move |q| graph_names.is_empty() || graph_names.contains(&q.graph_name)),
+            )
+        } else {
+            // Only graph(s) specified - use gspo index
+            Box::new(
+                graph_names
+                    .iter()
+                    .flat_map(|g| self.quads_for_graph_name(*g)),
+            )
+        }
+    }
+}
 
 // TODO: improve to collect document prefixes, for use in `serialize_rdf()`
 /// Parse RDF from various format to a `Dataset` (trig, nquads, JSON-LD)
