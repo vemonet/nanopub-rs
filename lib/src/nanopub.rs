@@ -4,7 +4,7 @@ use crate::extract::{extract_np_info, NpInfo};
 use crate::network::{fetch_np, publish_np};
 use crate::profile::NpProfile;
 use crate::sign::{make_trusty, normalize_dataset, replace_bnodes, replace_ns_in_quads};
-use crate::utils::{parse_rdf, serialize_rdf};
+use crate::utils::{parse_rdf, serialize_rdf, DatasetExt};
 use crate::vocab::{dct, foaf, np, npx, pav, prov};
 
 use base64::{engine, Engine as _};
@@ -227,7 +227,7 @@ impl Nanopub {
         let pubinfo_graph = GraphNameRef::NamedNode(self.info.pubinfo.as_ref().into());
 
         // Add triples about the signature in the pubinfo
-        let public_key_literal = LiteralRef::new_simple_literal(&profile.public_key.as_str());
+        let public_key_literal = LiteralRef::new_simple_literal(profile.public_key.as_str());
         let rsa_literal = LiteralRef::new_simple_literal("RSA");
         self.dataset.insert(QuadRef::new(
             sig_node,
@@ -251,12 +251,12 @@ impl Nanopub {
         // If not already set, automatically add the current date to pubinfo created
         if self
             .dataset
-            .iter()
-            .filter(|x| {
-                (x.subject == uri_subject_term || x.subject == ns_subject_term)
-                    && x.predicate == dct::CREATED
-                    && x.graph_name == pubinfo_graph
-            })
+            .quads_match(
+                &[uri_subject_term, ns_subject_term],
+                &[dct::CREATED],
+                &[],
+                &[pubinfo_graph],
+            )
             .next()
             .is_none()
         {
@@ -275,14 +275,12 @@ impl Nanopub {
         if let Some(orcid) = &profile.orcid_id {
             if self
                 .dataset
-                .iter()
-                .filter(|x| {
-                    (x.subject == uri_subject_term || x.subject == ns_subject_term)
-                        && (x.predicate == dct::CREATOR
-                            || x.predicate == prov::WAS_ATTRIBUTED_TO
-                            || x.predicate == pav::CREATED_BY)
-                        && x.graph_name == pubinfo_graph
-                })
+                .quads_match(
+                    &[uri_subject_term, ns_subject_term],
+                    &[dct::CREATOR, prov::WAS_ATTRIBUTED_TO, pav::CREATED_BY],
+                    &[],
+                    &[pubinfo_graph],
+                )
                 .next()
                 .is_none()
             {
@@ -600,11 +598,12 @@ impl Nanopub {
         }
         if self
             .dataset
-            .iter()
-            .filter(|x| {
-                (x.subject == uri_subject_term || x.subject == ns_subject_term)
-                    && x.graph_name == pubinfo_graph
-            })
+            .quads_match(
+                &[uri_subject_term, ns_subject_term],
+                &[],
+                &[],
+                &[pubinfo_graph],
+            )
             .next()
             .is_none()
         {
