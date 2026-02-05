@@ -16,30 +16,41 @@ pub trait DatasetExt {
     ///
     /// Pass an empty slice `&[]` for any parameter to match all values for that position.
     /// Pass a non-empty slice to match any of the values in the slice.
-    /// The implementation chooses the most efficient index based on which slices are non-empty.
     ///
     /// # Example
-    /// ```ignore
-    /// use oxrdf::{Dataset, NamedNodeRef, GraphNameRef};
-    /// use nanopub::utils::DatasetExt;
     ///
-    /// let dataset = Dataset::new();
-    /// let subject = NamedNodeRef::new("http://example.org/s").unwrap();
-    /// let pred1 = NamedNodeRef::new("http://example.org/p1").unwrap();
-    /// let pred2 = NamedNodeRef::new("http://example.org/p2").unwrap();
-    /// let graph = NamedNodeRef::new("http://example.org/g").unwrap();
-    ///
-    /// // Find all quads with specific subject, either predicate, and graph (any object)
-    /// for quad in dataset.quads_match(&[subject.into()], &[pred1, pred2], &[], &[graph.into()]) {
-    ///     println!("{:?}", quad);
+    /// ```
+    /// use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, QuadRef, TermRef};
+    /// use nanopub::DatasetExt;
+    /// use nanopub::vocab::{dct, pav, prov};
+    /// let mut dataset = Dataset::new();
+    /// let s = NamedNodeRef::new_unchecked("http://ex.org/s");
+    /// let other = NamedNodeRef::new_unchecked("http://ex.org/other");
+    /// let o1 = NamedNodeRef::new_unchecked("http://ex.org/o1");
+    /// let o2 = NamedNodeRef::new_unchecked("http://ex.org/o2");
+    /// dataset.insert(QuadRef::new(s, dct::CREATOR, o1, GraphNameRef::DefaultGraph));
+    /// dataset.insert(QuadRef::new(s, pav::CREATED_BY, o2, GraphNameRef::DefaultGraph));
+    /// dataset.insert(QuadRef::new(other, dct::CREATOR, o1, GraphNameRef::DefaultGraph));
+    /// dataset.insert(QuadRef::new(other, prov::WAS_ATTRIBUTED_TO, o2, GraphNameRef::DefaultGraph));
+    /// let subjects = [s.into()];
+    /// let mut count = 0;
+    /// for q in dataset.quads_match(&subjects, &[dct::CREATOR, pav::CREATED_BY], &[], &[]) {
+    ///     match q.object {
+    ///         TermRef::NamedNode(iri) => {
+    ///             assert!(iri == o1 || iri == o2, "unexpected object: {iri:?}");
+    ///         }
+    ///         _ => panic!("unexpected non-named object in test"),
+    ///     }
+    ///     count += 1;
     /// }
+    /// assert_eq!(count, 2);
     /// ```
     fn quads_match<'a>(
         &'a self,
         subjects: &'a [NamedOrBlankNodeRef<'a>],
         predicates: &'a [NamedNodeRef<'a>],
         objects: &'a [TermRef<'a>],
-        graph_names: &'a [GraphNameRef<'a>],
+        graphs: &'a [GraphNameRef<'a>],
     ) -> Box<dyn Iterator<Item = QuadRef<'a>> + 'a>;
 }
 
@@ -49,31 +60,9 @@ impl DatasetExt for Dataset {
         subjects: &'a [NamedOrBlankNodeRef<'a>],
         predicates: &'a [NamedNodeRef<'a>],
         objects: &'a [TermRef<'a>],
-        graph_names: &'a [GraphNameRef<'a>],
+        graphs: &'a [GraphNameRef<'a>],
     ) -> Box<dyn Iterator<Item = QuadRef<'a>> + 'a> {
-        // Strategy: Use the most selective index based on which slices are non-empty.
-        // Priority order: subject > predicate > object > graph
-        // (graphs typically contain many triples, so they're least selective)
-        //
-        // Indexes used:
-        // - quads_for_subject uses spog index
-        // - quads_for_predicate uses posg index
-        // - quads_for_object uses ospg index
-        // - quads_for_graph_name uses gspo index
-        //
-        // Empty slice = wildcard (match all), non-empty = match any value in the slice
-
-        if subjects.is_empty()
-            && predicates.is_empty()
-            && objects.is_empty()
-            && graph_names.is_empty()
-        {
-            // Nothing specified - iterate all
-            return Box::new(self.iter());
-        }
-
         if !subjects.is_empty() {
-            // Subject(s) specified - use spog index, filter remaining
             Box::new(
                 subjects
                     .iter()
@@ -81,35 +70,30 @@ impl DatasetExt for Dataset {
                     .filter(move |q| {
                         (predicates.is_empty() || predicates.contains(&q.predicate))
                             && (objects.is_empty() || objects.contains(&q.object))
-                            && (graph_names.is_empty() || graph_names.contains(&q.graph_name))
+                            && (graphs.is_empty() || graphs.contains(&q.graph_name))
                     }),
             )
         } else if !predicates.is_empty() {
-            // Predicate(s) specified (no subject) - use posg index, filter remaining
             Box::new(
                 predicates
                     .iter()
                     .flat_map(|p| self.quads_for_predicate(*p))
                     .filter(move |q| {
                         (objects.is_empty() || objects.contains(&q.object))
-                            && (graph_names.is_empty() || graph_names.contains(&q.graph_name))
+                            && (graphs.is_empty() || graphs.contains(&q.graph_name))
                     }),
             )
         } else if !objects.is_empty() {
-            // Object(s) specified (no subject/predicate) - use ospg index, filter remaining
             Box::new(
                 objects
                     .iter()
                     .flat_map(|o| self.quads_for_object(*o))
-                    .filter(move |q| graph_names.is_empty() || graph_names.contains(&q.graph_name)),
+                    .filter(move |q| graphs.is_empty() || graphs.contains(&q.graph_name)),
             )
+        } else if !graphs.is_empty() {
+            Box::new(graphs.iter().flat_map(|g| self.quads_for_graph_name(*g)))
         } else {
-            // Only graph(s) specified - use gspo index
-            Box::new(
-                graph_names
-                    .iter()
-                    .flat_map(|g| self.quads_for_graph_name(*g)),
-            )
+            Box::new(self.iter())
         }
     }
 }
