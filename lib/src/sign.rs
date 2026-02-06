@@ -71,9 +71,7 @@ pub fn replace_bnodes(
         let GraphNameRef::NamedNode(graph_iri) = quad.graph_name else {
             return Err(NpError("Failed to extract graph name IRI.".to_string()));
         };
-        let graph = if let Some(caps) =
-            re_underscore_uri.captures(&graph_iri.as_str())
-        {
+        let graph = if let Some(caps) = re_underscore_uri.captures(graph_iri.as_str()) {
             let mut graph_string = graph_iri.into_owned().into_string();
             let matching = caps
                 .get(1)

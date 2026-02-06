@@ -63,8 +63,6 @@ allow = [
     "Apache-2.0",
     "Apache-2.0 WITH LLVM-exception",
     "BSD-3-Clause",
-    "MPL-2.0",
-    "CECILL-B",
     "ISC",
     "Unicode-3.0",
     "CDLA-Permissive-2.0",
