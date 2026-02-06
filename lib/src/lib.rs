@@ -44,4 +44,4 @@ pub use error::NpError;
 /// ```
 pub use nanopub::{create_base_dataset, Nanopub};
 pub use profile::{NpProfile, ProfileBuilder};
-pub use utils::{get_np_server, DatasetExt};
+pub use utils::get_np_server;
