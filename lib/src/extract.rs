@@ -72,11 +72,11 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         ));
     };
     let mut np_subject_term = NamedOrBlankNodeRef::from(np_iri.as_ref());
-    let head_graph_view = dataset.graph(head_iri.as_ref());
+    let head_graph = dataset.graph(head_iri.as_ref());
 
     // Extract assertion, prov, pubinfo, and head graphs URLs
     let assertion_iri =
-        match head_graph_view.object_for_subject_predicate(np_subject_term, np::HAS_ASSERTION) {
+        match head_graph.object_for_subject_predicate(np_subject_term, np::HAS_ASSERTION) {
             Some(object) => {
                 let TermRef::NamedNode(assertion) = object else {
                     return Err(NpError("Object must be a named node.".to_string()));
@@ -90,7 +90,7 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
             }
         };
     let prov_iri =
-        match head_graph_view.object_for_subject_predicate(np_subject_term, np::HAS_PROVENANCE) {
+        match head_graph.object_for_subject_predicate(np_subject_term, np::HAS_PROVENANCE) {
             Some(object) => {
                 let TermRef::NamedNode(prov) = object else {
                     return Err(NpError("Object must be a named node.".to_string()));
@@ -103,21 +103,20 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
                 ))
             }
         };
-    let pubinfo_iri = match head_graph_view
-        .object_for_subject_predicate(np_subject_term, np::HAS_PUBLICATION_INFO)
-    {
-        Some(object) => {
-            let TermRef::NamedNode(pubinfo) = object else {
-                return Err(NpError("Object must be a named node.".to_string()));
-            };
-            NamedNode::from(pubinfo)
-        }
-        None => {
-            return Err(NpError(
-                "Invalid Nanopub: no PubInfo graph found.".to_string(),
-            ))
-        }
-    };
+    let pubinfo_iri =
+        match head_graph.object_for_subject_predicate(np_subject_term, np::HAS_PUBLICATION_INFO) {
+            Some(object) => {
+                let TermRef::NamedNode(pubinfo) = object else {
+                    return Err(NpError("Object must be a named node.".to_string()));
+                };
+                NamedNode::from(pubinfo)
+            }
+            None => {
+                return Err(NpError(
+                    "Invalid Nanopub: no PubInfo graph found.".to_string(),
+                ))
+            }
+        };
 
     // Get just the Trusty hash from the URI
     let re_trusty = Regex::new(r"^.*?[/#\.]?(RA[a-zA-Z0-9-_]*)$")?;
@@ -180,8 +179,8 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     };
 
     // Extract signature and its subject URI
-    let pubinfo_graph_view = dataset.graph(pubinfo_iri.as_ref());
-    let (signature, signature_iri) = match pubinfo_graph_view
+    let pubinfo_graph = dataset.graph(pubinfo_iri.as_ref());
+    let (signature, signature_iri) = match pubinfo_graph
         .triples_for_predicate(npx::HAS_SIGNATURE)
         .next()
     {
@@ -202,8 +201,19 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
     let signature_node = NamedOrBlankNodeRef::from(signature_iri.as_ref());
 
     // Extract public key
-    let pubkey = match pubinfo_graph_view
-        .object_for_subject_predicate(signature_node, npx::HAS_PUBLIC_KEY)
+    let pubkey =
+        match pubinfo_graph.object_for_subject_predicate(signature_node, npx::HAS_PUBLIC_KEY) {
+            Some(object) => {
+                let TermRef::Literal(literal) = object else {
+                    return Err(NpError("Object must be a literal.".to_string()));
+                };
+                Some(literal.value().to_string())
+            }
+            None => None,
+        };
+
+    // Extract algo
+    let algo = match pubinfo_graph.object_for_subject_predicate(signature_node, npx::HAS_ALGORITHM)
     {
         Some(object) => {
             let TermRef::Literal(literal) = object else {
@@ -214,20 +224,8 @@ pub fn extract_np_info(dataset: &Dataset) -> Result<NpInfo, NpError> {
         None => None,
     };
 
-    // Extract algo
-    let algo =
-        match pubinfo_graph_view.object_for_subject_predicate(signature_node, npx::HAS_ALGORITHM) {
-            Some(object) => {
-                let TermRef::Literal(literal) = object else {
-                    return Err(NpError("Object must be a literal.".to_string()));
-                };
-                Some(literal.value().to_string())
-            }
-            None => None,
-        };
-
     // Extract ORCID
-    let orcid = match pubinfo_graph_view.iter().find(|x| {
+    let orcid = match pubinfo_graph.iter().find(|x| {
         (x.subject == np_subject_term
             || x.subject == NamedOrBlankNodeRef::from(NamedNodeRef::new_unchecked(original_ns)))
             && (x.predicate == dct::CREATOR
