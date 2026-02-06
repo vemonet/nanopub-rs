@@ -23,3 +23,5 @@ lib/docs/dist
 # Build scripts
 .github/workflows/manylinux_build_script.sh
 .github/workflows/musllinux_build_script.sh
+
+signed.np-large.trig

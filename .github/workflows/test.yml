@@ -122,7 +122,7 @@ jobs:
     name: ⏱️ Compare speed with java and python implementations
     runs-on: ubuntu-latest
     env:
-      HYPERFINE_VERSION: '1.12.0'
+      HYPERFINE_VERSION: '1.20.0'
       STABLE_PYTHON_VERSION: '3.12'
     steps:
     - uses: actions/checkout@v6
@@ -156,9 +156,9 @@ jobs:
     - name: Benchmark
       run: |
         hyperfine -m 100 --warmup 10 --export-markdown benchmark.md \
-          'java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa' \
-          'np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa' \
-          'target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+          'java -jar nanopub.jar sign lib/tests/resources/np-large.trig -k lib/tests/resources/id_rsa' \
+          'np sign lib/tests/resources/np-large.trig -k lib/tests/resources/id_rsa' \
+          'target/release/nanopub-cli sign lib/tests/resources/np-large.trig -k lib/tests/resources/id_rsa'
 
     - name: Upload benchmark markdown
       uses: actions/upload-artifact@v4

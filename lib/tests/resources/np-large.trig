@@ -1,0 +1,1123 @@
+@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix drugbank: <http://identifiers.org/drugbank/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix infores: <https://w3id.org/biolink/infores/> .
+@prefix orcid: <https://orcid.org/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix pmid: <http://www.ncbi.nlm.nih.gov/pubmed/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+:Head {
+    : a np:Nanopublication ;
+        np:hasAssertion :assertion;
+        np:hasProvenance :provenance;
+        np:hasPublicationInfo :pubInfo .
+}
+
+:assertion {
+    drugbank:DB10771 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
+
+    :association rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB10771;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00001 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000001> a biolink:Disease .
+
+    :association1 rdf:object <http://purl.obolibrary.org/obo/OMIM_000001>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00001;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00002 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000002> a biolink:Disease .
+
+    :association2 rdf:object <http://purl.obolibrary.org/obo/OMIM_000002>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00002;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00003 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000003> a biolink:Disease .
+
+    :association3 rdf:object <http://purl.obolibrary.org/obo/OMIM_000003>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00003;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00004 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000004> a biolink:Disease .
+
+    :association4 rdf:object <http://purl.obolibrary.org/obo/OMIM_000004>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00004;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00005 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000005> a biolink:Disease .
+
+    :association5 rdf:object <http://purl.obolibrary.org/obo/OMIM_000005>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00005;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00006 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000006> a biolink:Disease .
+
+    :association6 rdf:object <http://purl.obolibrary.org/obo/OMIM_000006>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00006;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00007 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000007> a biolink:Disease .
+
+    :association7 rdf:object <http://purl.obolibrary.org/obo/OMIM_000007>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00007;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00008 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000008> a biolink:Disease .
+
+    :association8 rdf:object <http://purl.obolibrary.org/obo/OMIM_000008>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00008;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00009 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000009> a biolink:Disease .
+
+    :association9 rdf:object <http://purl.obolibrary.org/obo/OMIM_000009>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00009;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00010 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000010> a biolink:Disease .
+
+    :association10 rdf:object <http://purl.obolibrary.org/obo/OMIM_000010>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00010;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00011 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000011> a biolink:Disease .
+
+    :association11 rdf:object <http://purl.obolibrary.org/obo/OMIM_000011>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00011;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00012 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000012> a biolink:Disease .
+
+    :association12 rdf:object <http://purl.obolibrary.org/obo/OMIM_000012>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00012;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00013 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000013> a biolink:Disease .
+
+    :association13 rdf:object <http://purl.obolibrary.org/obo/OMIM_000013>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00013;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00014 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000014> a biolink:Disease .
+
+    :association14 rdf:object <http://purl.obolibrary.org/obo/OMIM_000014>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00014;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00015 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000015> a biolink:Disease .
+
+    :association15 rdf:object <http://purl.obolibrary.org/obo/OMIM_000015>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00015;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00016 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000016> a biolink:Disease .
+
+    :association16 rdf:object <http://purl.obolibrary.org/obo/OMIM_000016>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00016;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00017 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000017> a biolink:Disease .
+
+    :association17 rdf:object <http://purl.obolibrary.org/obo/OMIM_000017>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00017;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00018 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000018> a biolink:Disease .
+
+    :association18 rdf:object <http://purl.obolibrary.org/obo/OMIM_000018>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00018;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00019 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000019> a biolink:Disease .
+
+    :association19 rdf:object <http://purl.obolibrary.org/obo/OMIM_000019>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00019;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00020 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000020> a biolink:Disease .
+
+    :association20 rdf:object <http://purl.obolibrary.org/obo/OMIM_000020>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00020;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00021 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000021> a biolink:Disease .
+
+    :association21 rdf:object <http://purl.obolibrary.org/obo/OMIM_000021>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00021;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00022 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000022> a biolink:Disease .
+
+    :association22 rdf:object <http://purl.obolibrary.org/obo/OMIM_000022>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00022;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00023 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000023> a biolink:Disease .
+
+    :association23 rdf:object <http://purl.obolibrary.org/obo/OMIM_000023>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00023;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00024 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000024> a biolink:Disease .
+
+    :association24 rdf:object <http://purl.obolibrary.org/obo/OMIM_000024>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00024;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00025 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000025> a biolink:Disease .
+
+    :association25 rdf:object <http://purl.obolibrary.org/obo/OMIM_000025>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00025;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00026 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000026> a biolink:Disease .
+
+    :association26 rdf:object <http://purl.obolibrary.org/obo/OMIM_000026>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00026;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00027 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000027> a biolink:Disease .
+
+    :association27 rdf:object <http://purl.obolibrary.org/obo/OMIM_000027>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00027;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00028 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000028> a biolink:Disease .
+
+    :association28 rdf:object <http://purl.obolibrary.org/obo/OMIM_000028>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00028;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00029 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000029> a biolink:Disease .
+
+    :association29 rdf:object <http://purl.obolibrary.org/obo/OMIM_000029>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00029;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00030 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000030> a biolink:Disease .
+
+    :association30 rdf:object <http://purl.obolibrary.org/obo/OMIM_000030>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00030;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00031 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000031> a biolink:Disease .
+
+    :association31 rdf:object <http://purl.obolibrary.org/obo/OMIM_000031>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00031;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00032 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000032> a biolink:Disease .
+
+    :association32 rdf:object <http://purl.obolibrary.org/obo/OMIM_000032>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00032;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00033 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000033> a biolink:Disease .
+
+    :association33 rdf:object <http://purl.obolibrary.org/obo/OMIM_000033>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00033;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00034 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000034> a biolink:Disease .
+
+    :association34 rdf:object <http://purl.obolibrary.org/obo/OMIM_000034>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00034;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00035 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000035> a biolink:Disease .
+
+    :association35 rdf:object <http://purl.obolibrary.org/obo/OMIM_000035>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00035;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00036 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000036> a biolink:Disease .
+
+    :association36 rdf:object <http://purl.obolibrary.org/obo/OMIM_000036>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00036;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00037 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000037> a biolink:Disease .
+
+    :association37 rdf:object <http://purl.obolibrary.org/obo/OMIM_000037>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00037;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00038 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000038> a biolink:Disease .
+
+    :association38 rdf:object <http://purl.obolibrary.org/obo/OMIM_000038>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00038;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00039 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000039> a biolink:Disease .
+
+    :association39 rdf:object <http://purl.obolibrary.org/obo/OMIM_000039>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00039;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00040 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000040> a biolink:Disease .
+
+    :association40 rdf:object <http://purl.obolibrary.org/obo/OMIM_000040>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00040;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00041 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000041> a biolink:Disease .
+
+    :association41 rdf:object <http://purl.obolibrary.org/obo/OMIM_000041>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00041;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00042 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000042> a biolink:Disease .
+
+    :association42 rdf:object <http://purl.obolibrary.org/obo/OMIM_000042>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00042;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00043 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000043> a biolink:Disease .
+
+    :association43 rdf:object <http://purl.obolibrary.org/obo/OMIM_000043>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00043;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00044 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000044> a biolink:Disease .
+
+    :association44 rdf:object <http://purl.obolibrary.org/obo/OMIM_000044>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00044;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00045 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000045> a biolink:Disease .
+
+    :association45 rdf:object <http://purl.obolibrary.org/obo/OMIM_000045>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00045;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00046 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000046> a biolink:Disease .
+
+    :association46 rdf:object <http://purl.obolibrary.org/obo/OMIM_000046>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00046;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00047 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000047> a biolink:Disease .
+
+    :association47 rdf:object <http://purl.obolibrary.org/obo/OMIM_000047>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00047;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00048 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000048> a biolink:Disease .
+
+    :association48 rdf:object <http://purl.obolibrary.org/obo/OMIM_000048>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00048;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00049 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000049> a biolink:Disease .
+
+    :association49 rdf:object <http://purl.obolibrary.org/obo/OMIM_000049>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00049;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00050 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000050> a biolink:Disease .
+
+    :association50 rdf:object <http://purl.obolibrary.org/obo/OMIM_000050>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00050;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00051 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000051> a biolink:Disease .
+
+    :association51 rdf:object <http://purl.obolibrary.org/obo/OMIM_000051>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00051;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00052 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000052> a biolink:Disease .
+
+    :association52 rdf:object <http://purl.obolibrary.org/obo/OMIM_000052>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00052;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00053 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000053> a biolink:Disease .
+
+    :association53 rdf:object <http://purl.obolibrary.org/obo/OMIM_000053>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00053;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00054 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000054> a biolink:Disease .
+
+    :association54 rdf:object <http://purl.obolibrary.org/obo/OMIM_000054>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00054;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00055 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000055> a biolink:Disease .
+
+    :association55 rdf:object <http://purl.obolibrary.org/obo/OMIM_000055>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00055;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00056 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000056> a biolink:Disease .
+
+    :association56 rdf:object <http://purl.obolibrary.org/obo/OMIM_000056>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00056;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00057 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000057> a biolink:Disease .
+
+    :association57 rdf:object <http://purl.obolibrary.org/obo/OMIM_000057>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00057;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00058 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000058> a biolink:Disease .
+
+    :association58 rdf:object <http://purl.obolibrary.org/obo/OMIM_000058>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00058;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00059 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000059> a biolink:Disease .
+
+    :association59 rdf:object <http://purl.obolibrary.org/obo/OMIM_000059>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00059;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00060 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000060> a biolink:Disease .
+
+    :association60 rdf:object <http://purl.obolibrary.org/obo/OMIM_000060>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00060;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00061 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000061> a biolink:Disease .
+
+    :association61 rdf:object <http://purl.obolibrary.org/obo/OMIM_000061>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00061;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00062 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000062> a biolink:Disease .
+
+    :association62 rdf:object <http://purl.obolibrary.org/obo/OMIM_000062>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00062;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00063 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000063> a biolink:Disease .
+
+    :association63 rdf:object <http://purl.obolibrary.org/obo/OMIM_000063>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00063;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00064 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000064> a biolink:Disease .
+
+    :association64 rdf:object <http://purl.obolibrary.org/obo/OMIM_000064>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00064;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00065 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000065> a biolink:Disease .
+
+    :association65 rdf:object <http://purl.obolibrary.org/obo/OMIM_000065>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00065;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00066 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000066> a biolink:Disease .
+
+    :association66 rdf:object <http://purl.obolibrary.org/obo/OMIM_000066>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00066;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00067 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000067> a biolink:Disease .
+
+    :association67 rdf:object <http://purl.obolibrary.org/obo/OMIM_000067>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00067;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00068 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000068> a biolink:Disease .
+
+    :association68 rdf:object <http://purl.obolibrary.org/obo/OMIM_000068>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00068;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00069 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000069> a biolink:Disease .
+
+    :association69 rdf:object <http://purl.obolibrary.org/obo/OMIM_000069>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00069;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00070 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000070> a biolink:Disease .
+
+    :association70 rdf:object <http://purl.obolibrary.org/obo/OMIM_000070>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00070;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00071 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000071> a biolink:Disease .
+
+    :association71 rdf:object <http://purl.obolibrary.org/obo/OMIM_000071>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00071;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00072 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000072> a biolink:Disease .
+
+    :association72 rdf:object <http://purl.obolibrary.org/obo/OMIM_000072>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00072;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00073 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000073> a biolink:Disease .
+
+    :association73 rdf:object <http://purl.obolibrary.org/obo/OMIM_000073>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00073;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00074 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000074> a biolink:Disease .
+
+    :association74 rdf:object <http://purl.obolibrary.org/obo/OMIM_000074>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00074;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00075 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000075> a biolink:Disease .
+
+    :association75 rdf:object <http://purl.obolibrary.org/obo/OMIM_000075>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00075;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00076 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000076> a biolink:Disease .
+
+    :association76 rdf:object <http://purl.obolibrary.org/obo/OMIM_000076>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00076;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00077 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000077> a biolink:Disease .
+
+    :association77 rdf:object <http://purl.obolibrary.org/obo/OMIM_000077>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00077;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00078 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000078> a biolink:Disease .
+
+    :association78 rdf:object <http://purl.obolibrary.org/obo/OMIM_000078>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00078;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00079 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000079> a biolink:Disease .
+
+    :association79 rdf:object <http://purl.obolibrary.org/obo/OMIM_000079>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00079;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00080 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000080> a biolink:Disease .
+
+    :association80 rdf:object <http://purl.obolibrary.org/obo/OMIM_000080>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00080;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00081 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000081> a biolink:Disease .
+
+    :association81 rdf:object <http://purl.obolibrary.org/obo/OMIM_000081>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00081;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00082 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000082> a biolink:Disease .
+
+    :association82 rdf:object <http://purl.obolibrary.org/obo/OMIM_000082>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00082;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00083 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000083> a biolink:Disease .
+
+    :association83 rdf:object <http://purl.obolibrary.org/obo/OMIM_000083>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00083;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00084 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000084> a biolink:Disease .
+
+    :association84 rdf:object <http://purl.obolibrary.org/obo/OMIM_000084>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00084;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00085 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000085> a biolink:Disease .
+
+    :association85 rdf:object <http://purl.obolibrary.org/obo/OMIM_000085>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00085;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00086 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000086> a biolink:Disease .
+
+    :association86 rdf:object <http://purl.obolibrary.org/obo/OMIM_000086>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00086;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00087 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000087> a biolink:Disease .
+
+    :association87 rdf:object <http://purl.obolibrary.org/obo/OMIM_000087>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00087;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00088 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000088> a biolink:Disease .
+
+    :association88 rdf:object <http://purl.obolibrary.org/obo/OMIM_000088>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00088;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00089 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000089> a biolink:Disease .
+
+    :association89 rdf:object <http://purl.obolibrary.org/obo/OMIM_000089>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00089;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00090 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000090> a biolink:Disease .
+
+    :association90 rdf:object <http://purl.obolibrary.org/obo/OMIM_000090>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00090;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00091 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000091> a biolink:Disease .
+
+    :association91 rdf:object <http://purl.obolibrary.org/obo/OMIM_000091>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00091;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00092 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000092> a biolink:Disease .
+
+    :association92 rdf:object <http://purl.obolibrary.org/obo/OMIM_000092>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00092;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00093 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000093> a biolink:Disease .
+
+    :association93 rdf:object <http://purl.obolibrary.org/obo/OMIM_000093>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00093;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00094 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000094> a biolink:Disease .
+
+    :association94 rdf:object <http://purl.obolibrary.org/obo/OMIM_000094>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00094;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00095 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000095> a biolink:Disease .
+
+    :association95 rdf:object <http://purl.obolibrary.org/obo/OMIM_000095>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00095;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00096 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000096> a biolink:Disease .
+
+    :association96 rdf:object <http://purl.obolibrary.org/obo/OMIM_000096>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00096;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00097 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000097> a biolink:Disease .
+
+    :association97 rdf:object <http://purl.obolibrary.org/obo/OMIM_000097>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00097;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+    drugbank:DB00098 a biolink:Drug .
+    <http://purl.obolibrary.org/obo/OMIM_000098> a biolink:Disease .
+
+    :association98 rdf:object <http://purl.obolibrary.org/obo/OMIM_000098>;
+        rdf:predicate biolink:treats;
+        rdf:subject drugbank:DB00098;
+        biolink:context [a biolink:Context];
+        biolink:target [a biolink:Target];
+        biolink:date [a biolink:Date];
+        a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation .
+
+}
+
+:provenance {
+    :assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime ;
+        prov:wasAttributedTo orcid:0000-0000-0000-0000 .
+}
+
+:pubInfo {
+    : a npx:ExampleNanopub ;
+        dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime ;
+        dcterms:creator orcid:0000-0000-0000-0000 .
+}
