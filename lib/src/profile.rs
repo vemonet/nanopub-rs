@@ -250,9 +250,5 @@ pub fn gen_keys() -> Result<(String, String), NpError> {
 
 /// Removes leading and trailing quotes from a string slice, e.g. YAML value
 fn remove_quotes(value: &str) -> String {
-    value
-        .trim()
-        .trim_matches(['"', '\''])
-        .trim()
-        .to_string()
+    value.trim().trim_matches(['"', '\'']).trim().to_string()
 }

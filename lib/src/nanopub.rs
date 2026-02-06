@@ -11,7 +11,8 @@ use base64::{engine, Engine as _};
 use chrono::Utc;
 use oxrdf::{
     vocab::{rdf, xsd},
-    Dataset, GraphNameRef, LiteralRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TripleRef,
+    Dataset, GraphNameRef, LiteralRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef,
+    TripleRef,
 };
 use rsa::pkcs8::DecodePublicKey;
 use rsa::{sha2::Digest, sha2::Sha256, Pkcs1v15Sign, RsaPublicKey};
@@ -127,7 +128,7 @@ impl Nanopub {
             // Check Trusty hash if found
             let expected_hash = make_trusty(
                 &self.dataset,
-                &self.info.uri.as_str(),
+                self.info.uri.as_str(),
                 &self.info.normalized_ns,
                 &self.info.separator_after_trusty,
             )?;
@@ -149,7 +150,7 @@ impl Nanopub {
             // Normalize nanopub nquads to a string
             let norm_quads = normalize_dataset(
                 &self.dataset,
-                &self.info.uri.as_str(),
+                self.info.uri.as_str(),
                 &self.info.normalized_ns,
                 &self.info.separator_after_trusty,
             )?;
@@ -158,7 +159,8 @@ impl Nanopub {
             // Load public key, and regenerate and check the signature hash
             RsaPublicKey::from_public_key_der(
                 &engine::general_purpose::STANDARD.decode(&self.info.public_key)?,
-            )?.verify(
+            )?
+            .verify(
                 Pkcs1v15Sign::new::<Sha256>(),
                 &Sha256::digest(norm_quads.as_bytes()),
                 &engine::general_purpose::STANDARD.decode(self.info.signature.as_bytes())?,
@@ -170,7 +172,10 @@ impl Nanopub {
 
         println!(
             "\n✅ Nanopub {}{}{} is valid: {}",
-            BOLD, self.info.uri.as_str(), END, msg
+            BOLD,
+            self.info.uri.as_str(),
+            END,
+            msg
         );
         // let rdf = serialize_rdf(&self.dataset, &self.info.uri.as_ref(), &self.info.ns.as_ref())?;
         // TODO: should check return a string or a Nanopub? A string is not easy to process by machines
@@ -202,7 +207,8 @@ impl Nanopub {
         // unsafe {
         //     openssl_probe::init_openssl_env_vars();
         // }
-        self.dataset = replace_bnodes(&self.dataset, &self.info.ns.as_str(), &self.info.uri.as_str())?;
+        self.dataset =
+            replace_bnodes(&self.dataset, self.info.ns.as_str(), self.info.uri.as_str())?;
         self.info = extract_np_info(&self.dataset)?;
         if !self.info.signature.is_empty() {
             println!("Nanopub already signed, unsigning it before re-signing");
@@ -222,34 +228,28 @@ impl Nanopub {
         pubinfo_graph_view.insert(TripleRef::new(
             sig_node,
             npx::HAS_PUBLIC_KEY,
-            LiteralRef::new_simple_literal(&profile.public_key.as_str()),
+            LiteralRef::new_simple_literal(profile.public_key.as_str()),
         ));
         pubinfo_graph_view.insert(TripleRef::new(
             sig_node,
             npx::HAS_ALGORITHM,
             LiteralRef::new_simple_literal("RSA"),
         ));
-        pubinfo_graph_view.insert(TripleRef::new(
-            sig_node,
-            npx::HAS_SIGNATURE_TARGET,
-            ns_node,
-        ));
+        pubinfo_graph_view.insert(TripleRef::new(sig_node, npx::HAS_SIGNATURE_TARGET, ns_node));
 
         // If not already set, automatically add the current date to pubinfo created
-        if pubinfo_graph_view
+        if !pubinfo_graph_view
             .triples_for_predicate(dct::CREATED)
-            .filter(|x|
-                x.subject == uri_subject_term
-                || x.subject == ns_subject_term
-            )
-            .next()
-            .is_none()
+            .any(|x| x.subject == uri_subject_term || x.subject == ns_subject_term)
         {
             pubinfo_graph_view.insert(TripleRef::new(
                 ns_node,
                 dct::CREATED,
                 LiteralRef::new_typed_literal(
-                    Utc::now().format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string().as_str(),
+                    Utc::now()
+                        .format("%Y-%m-%dT%H:%M:%S%.3fZ")
+                        .to_string()
+                        .as_str(),
                     xsd::DATE_TIME,
                 ),
             ));
@@ -257,27 +257,14 @@ impl Nanopub {
 
         // If ORCID provided in profile, and not already defined in nanopub, add to pubinfo graph
         if let Some(orcid) = &profile.orcid_id {
-            if pubinfo_graph_view
-                .iter().filter(|x|
-                    (
-                        x.subject == uri_subject_term
-                        || x.subject == ns_subject_term
-                    )
-                    && (
-                        x.predicate == dct::CREATOR
+            if !pubinfo_graph_view.iter().any(|x| {
+                (x.subject == uri_subject_term || x.subject == ns_subject_term)
+                    && (x.predicate == dct::CREATOR
                         || x.predicate == prov::WAS_ATTRIBUTED_TO
-                        || x.predicate == pav::CREATED_BY
-                    )
-                )
-                .next()
-                .is_none()
-            {
+                        || x.predicate == pav::CREATED_BY)
+            }) {
                 let orcid_node = NamedNodeRef::new_unchecked(orcid.as_str());
-                pubinfo_graph_view.insert(TripleRef::new(
-                    ns_node,
-                    dct::CREATOR,
-                    orcid_node,
-                ));
+                pubinfo_graph_view.insert(TripleRef::new(ns_node, dct::CREATOR, orcid_node));
             }
         }
 
@@ -291,12 +278,11 @@ impl Nanopub {
         // println!("NORMED QUADS sign before add signature\n{}", norm_quads);
 
         // Generate signature using the private key and normalized RDF
-        let signature_hash = engine::general_purpose::STANDARD.encode(
-            profile.get_private_key()?.sign(
+        let signature_hash =
+            engine::general_purpose::STANDARD.encode(profile.get_private_key()?.sign(
                 Pkcs1v15Sign::new::<Sha256>(),
                 &Sha256::digest(norm_quads.as_bytes()),
-            )?
-        );
+            )?);
         // Add the signature to the pubinfo graph
         self.dataset.insert(QuadRef::new(
             sig_node,
@@ -308,7 +294,7 @@ impl Nanopub {
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
         let trusty_hash = make_trusty(
             &self.dataset,
-            &self.info.ns.as_str(),
+            self.info.ns.as_str(),
             &self.info.normalized_ns,
             &self.info.separator_after_trusty,
         )?;
@@ -316,8 +302,8 @@ impl Nanopub {
         let trusty_ns = format!("{trusty_uri}/");
         self.dataset = replace_ns_in_quads(
             &self.dataset,
-            &self.info.ns.as_str(),
-            &self.info.uri.as_str(),
+            self.info.ns.as_str(),
+            self.info.uri.as_str(),
             &trusty_ns,
             &trusty_uri,
         )?;
@@ -402,8 +388,7 @@ impl Nanopub {
 
     /// Unsign a signed nanopub RDF. Remove signature triples and replace trusty URI with default temp URI
     pub fn unsign(mut self) -> Result<Self, NpError> {
-        let signature_node =
-            NamedOrBlankNodeRef::from(self.info.signature_iri.as_ref());
+        let signature_node = NamedOrBlankNodeRef::from(self.info.signature_iri.as_ref());
         let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
         self.dataset.remove(QuadRef::new(
             signature_node,
@@ -572,16 +557,10 @@ impl Nanopub {
                 "Invalid Nanopub: no triples in the pubinfo graph.".to_string(),
             ));
         }
-        if self
-            .dataset
-            .quads_for_graph_name(pubinfo_node)
-            .filter(|x|
-                x.subject == NamedOrBlankNodeRef::from(self.info.uri.as_ref())
+        if !self.dataset.quads_for_graph_name(pubinfo_node).any(|x| {
+            x.subject == NamedOrBlankNodeRef::from(self.info.uri.as_ref())
                 || x.subject == NamedOrBlankNodeRef::from(self.info.ns.as_ref())
-            )
-            .next()
-            .is_none()
-        {
+        }) {
             return Err(NpError(
                 "Invalid Nanopub: no triples with the nanopub URI as subject in the pubinfo graph."
                     .to_string(),
