@@ -1,102 +1,11 @@
 // use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
 use oxjsonld::JsonLdProfileSet;
-use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TermRef};
+use oxrdf::{Dataset, GraphNameRef, NamedOrBlankNodeRef};
 use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
-
-/// Extension trait for `Dataset` providing efficient quad matching with optional filters.
-///
-/// This trait adds a `quads_match` method that efficiently queries quads by
-/// selecting the best internal index based on which parameters are provided.
-pub trait DatasetExt {
-    /// Returns an iterator over quads matching the given subjects, predicates, objects, and graphs.
-    ///
-    /// Pass an empty slice `&[]` for any parameter to match all values for that position.
-    /// Pass a non-empty slice to match any of the values in the slice.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, QuadRef, TermRef};
-    /// use nanopub::DatasetExt;
-    /// use nanopub::vocab::{dct, pav, prov};
-    /// let mut dataset = Dataset::new();
-    /// let s = NamedNodeRef::new_unchecked("http://ex.org/s");
-    /// let other = NamedNodeRef::new_unchecked("http://ex.org/other");
-    /// let o1 = NamedNodeRef::new_unchecked("http://ex.org/o1");
-    /// let o2 = NamedNodeRef::new_unchecked("http://ex.org/o2");
-    /// dataset.insert(QuadRef::new(s, dct::CREATOR, o1, GraphNameRef::DefaultGraph));
-    /// dataset.insert(QuadRef::new(s, pav::CREATED_BY, o2, GraphNameRef::DefaultGraph));
-    /// dataset.insert(QuadRef::new(other, dct::CREATOR, o1, GraphNameRef::DefaultGraph));
-    /// dataset.insert(QuadRef::new(other, prov::WAS_ATTRIBUTED_TO, o2, GraphNameRef::DefaultGraph));
-    /// let subjects = [s.into()];
-    /// let mut count = 0;
-    /// for q in dataset.quads_match(&subjects, &[dct::CREATOR, pav::CREATED_BY], &[], &[]) {
-    ///     match q.object {
-    ///         TermRef::NamedNode(iri) => {
-    ///             assert!(iri == o1 || iri == o2, "unexpected object: {iri:?}");
-    ///         }
-    ///         _ => panic!("unexpected non-named object in test"),
-    ///     }
-    ///     count += 1;
-    /// }
-    /// assert_eq!(count, 2);
-    /// ```
-    fn quads_match<'a>(
-        &'a self,
-        subjects: &'a [NamedOrBlankNodeRef<'a>],
-        predicates: &'a [NamedNodeRef<'a>],
-        objects: &'a [TermRef<'a>],
-        graphs: &'a [GraphNameRef<'a>],
-    ) -> Box<dyn Iterator<Item = QuadRef<'a>> + 'a>;
-}
-
-impl DatasetExt for Dataset {
-    fn quads_match<'a>(
-        &'a self,
-        subjects: &'a [NamedOrBlankNodeRef<'a>],
-        predicates: &'a [NamedNodeRef<'a>],
-        objects: &'a [TermRef<'a>],
-        graphs: &'a [GraphNameRef<'a>],
-    ) -> Box<dyn Iterator<Item = QuadRef<'a>> + 'a> {
-        if !subjects.is_empty() {
-            Box::new(
-                subjects
-                    .iter()
-                    .flat_map(|s| self.quads_for_subject(*s))
-                    .filter(move |q| {
-                        (predicates.is_empty() || predicates.contains(&q.predicate))
-                            && (objects.is_empty() || objects.contains(&q.object))
-                            && (graphs.is_empty() || graphs.contains(&q.graph_name))
-                    }),
-            )
-        } else if !predicates.is_empty() {
-            Box::new(
-                predicates
-                    .iter()
-                    .flat_map(|p| self.quads_for_predicate(*p))
-                    .filter(move |q| {
-                        (objects.is_empty() || objects.contains(&q.object))
-                            && (graphs.is_empty() || graphs.contains(&q.graph_name))
-                    }),
-            )
-        } else if !objects.is_empty() {
-            Box::new(
-                objects
-                    .iter()
-                    .flat_map(|o| self.quads_for_object(*o))
-                    .filter(move |q| graphs.is_empty() || graphs.contains(&q.graph_name)),
-            )
-        } else if !graphs.is_empty() {
-            Box::new(graphs.iter().flat_map(|g| self.quads_for_graph_name(*g)))
-        } else {
-            Box::new(self.iter())
-        }
-    }
-}
 
 // TODO: improve to collect document prefixes, for use in `serialize_rdf()`
 /// Parse RDF from various format to a `Dataset` (trig, nquads, JSON-LD)
@@ -181,18 +90,9 @@ pub fn get_prefixes<'a>(
 pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpError> {
     match node {
         NamedOrBlankNodeRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!(
-                "Failed to extract IRI from subject: Got {}",
-                variant_name
-            )))
-        }
+        other => Err(NpError(format!(
+            "Failed to extract IRI from subject: Got {other:?}"
+        ))),
     }
 }
 
@@ -200,17 +100,8 @@ pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpErro
 pub fn graph_iri_to_string(node: GraphNameRef) -> Result<String, NpError> {
     match node {
         GraphNameRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!(
-                "Failed to extract graph name IRI: Got {}",
-                variant_name
-            )))
-        }
+        other => Err(NpError(format!(
+            "Failed to extract graph name IRI: Got {other:?}"
+        ))),
     }
 }
