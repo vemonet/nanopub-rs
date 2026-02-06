@@ -21,7 +21,7 @@ all-features = true
 base64 = "0.22"
 oxjsonld = "0.2"
 oxrdf = { version = "0.3", features = ["serde"] }
-oxrdfio = "0.2"
+oxttl = "0.2"
 rsa = { version = "0.9.10", default-features = false, features = ["pem", "sha2"] }
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
