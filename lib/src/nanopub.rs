@@ -221,28 +221,28 @@ impl Nanopub {
         let ns_node = self.info.ns.as_ref();
         let uri_subject_term = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
         let ns_subject_term = NamedOrBlankNodeRef::from(ns_node);
-        let pubinfo_graph = GraphNameRef::from(self.info.pubinfo.as_ref());
-        let mut pubinfo_graph_view = self.dataset.graph_mut(pubinfo_graph);
+        let pubinfo_graph_iri = GraphNameRef::from(self.info.pubinfo.as_ref());
+        let mut pubinfo_graph = self.dataset.graph_mut(pubinfo_graph_iri);
 
         // Add triples about the signature in the pubinfo
-        pubinfo_graph_view.insert(TripleRef::new(
+        pubinfo_graph.insert(TripleRef::new(
             sig_node,
             npx::HAS_PUBLIC_KEY,
             LiteralRef::new_simple_literal(profile.public_key.as_str()),
         ));
-        pubinfo_graph_view.insert(TripleRef::new(
+        pubinfo_graph.insert(TripleRef::new(
             sig_node,
             npx::HAS_ALGORITHM,
             LiteralRef::new_simple_literal("RSA"),
         ));
-        pubinfo_graph_view.insert(TripleRef::new(sig_node, npx::HAS_SIGNATURE_TARGET, ns_node));
+        pubinfo_graph.insert(TripleRef::new(sig_node, npx::HAS_SIGNATURE_TARGET, ns_node));
 
         // If not already set, automatically add the current date to pubinfo created
-        if !pubinfo_graph_view
+        if !pubinfo_graph
             .triples_for_predicate(dct::CREATED)
             .any(|x| x.subject == uri_subject_term || x.subject == ns_subject_term)
         {
-            pubinfo_graph_view.insert(TripleRef::new(
+            pubinfo_graph.insert(TripleRef::new(
                 ns_node,
                 dct::CREATED,
                 LiteralRef::new_typed_literal(
@@ -257,14 +257,14 @@ impl Nanopub {
 
         // If ORCID provided in profile, and not already defined in nanopub, add to pubinfo graph
         if let Some(orcid) = &profile.orcid_id {
-            if !pubinfo_graph_view.iter().any(|x| {
+            if !pubinfo_graph.iter().any(|x| {
                 (x.subject == uri_subject_term || x.subject == ns_subject_term)
                     && (x.predicate == dct::CREATOR
                         || x.predicate == prov::WAS_ATTRIBUTED_TO
                         || x.predicate == pav::CREATED_BY)
             }) {
                 let orcid_node = NamedNodeRef::new_unchecked(orcid.as_str());
-                pubinfo_graph_view.insert(TripleRef::new(ns_node, dct::CREATOR, orcid_node));
+                pubinfo_graph.insert(TripleRef::new(ns_node, dct::CREATOR, orcid_node));
             }
         }
 
@@ -288,7 +288,7 @@ impl Nanopub {
             sig_node,
             npx::HAS_SIGNATURE,
             LiteralRef::new_simple_literal(signature_hash.as_str()),
-            pubinfo_graph,
+            pubinfo_graph_iri,
         ));
 
         // Generate Trusty URI, and replace the old URI with the trusty URI in the dataset
@@ -467,9 +467,9 @@ impl Nanopub {
 
         let mut dataset = create_base_dataset()?;
         let np_ns = NP_TEMP_URI;
-        let key_declaration_iri = NamedNode::new(format!("{}keyDeclaration", np_ns))?;
-        let assertion_iri = NamedNode::new(format!("{}assertion", np_ns))?;
-        let prov_iri = NamedNode::new(format!("{}provenance", np_ns))?;
+        let key_declaration_iri = NamedNode::new(format!("{np_ns}keyDeclaration"))?;
+        let assertion_iri = NamedNode::new(format!("{np_ns}assertion"))?;
+        let prov_iri = NamedNode::new(format!("{np_ns}provenance"))?;
         let key_declaration_node = key_declaration_iri.as_ref();
         let orcid_node = NamedNodeRef::new_unchecked(orcid);
         let assertion_node = assertion_iri.as_ref();

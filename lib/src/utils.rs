@@ -33,7 +33,7 @@ pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
 // TODO: improve to use prefixes from `parse_rdf()`, favored over default ones
 /// Serialize RDF dataset to Trig
 pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, NpError> {
-    let mut serializer = RdfSerializer::from_format(RdfFormat::TriG).with_prefix("", ns)?;
+    let mut serializer = RdfSerializer::from_format(RdfFormat::TriG);
     for (prefix_name, prefix_iri) in get_prefixes(uri, ns) {
         serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }
