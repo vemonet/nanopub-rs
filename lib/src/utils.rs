@@ -177,7 +177,7 @@ pub fn get_prefixes<'a>(
     .into_iter()
 }
 
-/// Extract IRI as `String` from subject term
+/// Extract IRI as `String` from subject term, or error if blank node
 pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpError> {
     match node {
         NamedOrBlankNodeRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
@@ -196,73 +196,7 @@ pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpErro
     }
 }
 
-/// Extract IRI as `String` from object term
-pub fn object_iri_to_string(node: TermRef) -> Result<String, NpError> {
-    match node {
-        TermRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!(
-                "Failed to extract IRI from object: Got {}",
-                variant_name
-            )))
-        }
-    }
-}
-
-/// Extract blank node ID as `&str` from object term
-pub fn object_blank_to_str(node: TermRef<'_>) -> Result<&str, NpError> {
-    match node {
-        TermRef::BlankNode(id) => Ok(id.as_str()),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!(
-                "Failed to extract blank node ID from object: Got {}",
-                variant_name
-            )))
-        }
-    }
-}
-
-/// Extract literal as `String` tuple from object term
-pub fn object_literal_to_strings(node: TermRef) -> Result<(String, String, String), NpError> {
-    match node {
-        TermRef::Literal(literal) => Ok((
-            literal.value().to_string(),
-            literal.datatype().into_owned().into_string(),
-            literal.language().unwrap_or_default().to_owned(),
-        )),
-        TermRef::NamedNode(iri) => Ok((
-            iri.into_owned().into_string(),
-            "".to_string(),
-            "".to_string(),
-        )),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!(
-                "Failed to extract literal from object: Got {}",
-                variant_name
-            )))
-        }
-    }
-}
-
-/// Extract IRI as `String` from graph name
+/// Extract IRI as `String` from graph name, or error if not a named node
 pub fn graph_iri_to_string(node: GraphNameRef) -> Result<String, NpError> {
     match node {
         GraphNameRef::NamedNode(iri) => Ok(iri.into_owned().into_string()),
