@@ -196,30 +196,6 @@ pub fn subject_iri_to_string(node: NamedOrBlankNodeRef) -> Result<String, NpErro
     }
 }
 
-/// Extract blank node ID as `&str` from subject term
-pub fn subject_blank_to_str(node: NamedOrBlankNodeRef<'_>) -> Result<&str, NpError> {
-    match node {
-        NamedOrBlankNodeRef::BlankNode(id) => Ok(id.as_str()),
-        other => {
-            let debug_str = format!("{:?}", other);
-            let variant_name = debug_str
-                .split('(')
-                .next()
-                .and_then(|s| s.split("::").last())
-                .unwrap_or("Unknown");
-            Err(NpError(format!(
-                "Failed to extract blank node ID from subject: Got {}",
-                variant_name
-            )))
-        }
-    }
-}
-
-/// Extract IRI as `String` from predicate term
-pub fn predicate_iri_to_string(node: NamedNodeRef) -> Result<String, NpError> {
-    Ok(node.into_owned().into_string())
-}
-
 /// Extract IRI as `String` from object term
 pub fn object_iri_to_string(node: TermRef) -> Result<String, NpError> {
     match node {
