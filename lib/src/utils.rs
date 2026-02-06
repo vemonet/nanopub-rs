@@ -1,9 +1,8 @@
 use getrandom::getrandom;
-use oxjsonld::JsonLdProfileSet;
-use std::cmp::Ordering;
-
+use oxjsonld::JsonLdParser;
 use oxrdf::{Dataset, GraphNameRef, NamedOrBlankNodeRef, QuadRef, TermRef};
-use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
+use oxttl::{TriGParser, TriGSerializer};
+use std::cmp::Ordering;
 
 use crate::constants::LIST_SERVERS;
 use crate::error::NpError;
@@ -13,28 +12,30 @@ use crate::error::NpError;
 pub fn parse_rdf(rdf: &str) -> Result<Dataset, NpError> {
     let mut dataset = Dataset::new();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
-    let format = if rdf.trim_start().starts_with(['{', '[']) {
-        RdfFormat::JsonLd {
-            profile: JsonLdProfileSet::empty(),
-        }
+    if rdf.trim_start().starts_with(['{', '[']) {
+        JsonLdParser::new()
+            .for_reader(rdf.as_bytes())
+            .try_for_each(|q| {
+                dataset.insert(&q?);
+                Ok::<_, NpError>(())
+            })?;
     } else {
         // The TriG parser handles nquads
-        RdfFormat::TriG
+        TriGParser::new()
+            .for_reader(rdf.as_bytes())
+            .try_for_each(|q| {
+                dataset.insert(&q?);
+                Ok::<_, NpError>(())
+            })?;
     };
 
-    RdfParser::from_format(format)
-        .for_reader(rdf.as_bytes())
-        .try_for_each(|q| {
-            dataset.insert(&q?);
-            Ok::<_, NpError>(())
-        })?;
     Ok(dataset)
 }
 
 // TODO: improve to use prefixes from `parse_rdf()`, favored over default ones
 /// Serialize RDF dataset to Trig
 pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, NpError> {
-    let mut serializer = RdfSerializer::from_format(RdfFormat::TriG);
+    let mut serializer = TriGSerializer::new();
     for (prefix_name, prefix_iri) in get_prefixes(uri, ns) {
         serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }

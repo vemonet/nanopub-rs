@@ -1358,7 +1358,7 @@ dependencies = [
  "getrandom 0.2.17",
  "oxjsonld",
  "oxrdf",
- "oxrdfio",
+ "oxttl",
  "rand 0.8.5",
  "regex",
  "reqwest",
@@ -1781,32 +1781,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "oxrdfio"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7d7fe02334223d57b3ade38c06532e3d63a2d9e4995f8ff7d5a8cfe0cbb7720"
-dependencies = [
- "oxjsonld",
- "oxrdf",
- "oxrdfxml",
- "oxttl",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "oxrdfxml"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6b0befe85eeba41a2dc4507742486d287a9fca366add4626778697189c5e648"
-dependencies = [
- "oxilangtag",
- "oxiri",
- "oxrdf",
- "quick-xml",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "oxttl"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2020,15 +1994,6 @@ checksum = "a3a8f29db331e28c332c63496cfcbb822aca3d7320bc08b655d7fd0c29c50ede"
 dependencies = [
  "pyo3",
  "serde",
-]
-
-[[package]]
-name = "quick-xml"
-version = "0.37.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "331e97a1af0bf59823e6eadffe373d7b27f485be8748f71471c662c1f269b7fb"
-dependencies = [
- "memchr",
 ]
 
 [[package]]

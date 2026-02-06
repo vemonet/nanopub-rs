@@ -1,7 +1,9 @@
 use std::error::Error;
 use std::fmt;
 
+use oxjsonld::JsonLdParseError;
 use oxrdf::IriParseError;
+use oxttl::TurtleParseError;
 
 #[derive(Debug)]
 pub struct NpError(pub String);
@@ -76,8 +78,13 @@ impl From<std::string::FromUtf8Error> for NpError {
         NpError(format!("UTF-8 conversion error: {err}"))
     }
 }
-impl From<oxrdfio::RdfParseError> for NpError {
-    fn from(err: oxrdfio::RdfParseError) -> Self {
+impl From<TurtleParseError> for NpError {
+    fn from(err: TurtleParseError) -> Self {
+        NpError(format!("RDF parse error: {err}"))
+    }
+}
+impl From<JsonLdParseError> for NpError {
+    fn from(err: JsonLdParseError) -> Self {
         NpError(format!("RDF parse error: {err}"))
     }
 }
