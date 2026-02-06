@@ -1,11 +1,13 @@
 use crate::error::NpError;
 use crate::utils::{
     graph_iri_to_string, object_blank_to_str, object_iri_to_string, object_literal_to_strings,
-    predicate_iri_to_string, subject_blank_to_str, subject_iri_to_string,
+    subject_iri_to_string,
 };
 
 use base64::{alphabet, engine, Engine as _};
-use oxrdf::{Dataset, GraphNameRef, NamedNode, NamedNodeRef, NamedOrBlankNode, QuadRef};
+use oxrdf::{
+    Dataset, GraphNameRef, NamedNode, NamedNodeRef, NamedOrBlankNode, NamedOrBlankNodeRef, QuadRef,
+};
 use regex::Regex;
 use rsa::{sha2::Digest, sha2::Sha256};
 use std::cmp::Ordering;
@@ -45,27 +47,30 @@ pub fn replace_bnodes(
 
     for quad in dataset.iter() {
         // Replace bnode in subjects, and add 1 underscore for URI using already underscore
-        let subject = if quad.subject.is_blank_node() {
-            let bnode_id = subject_blank_to_str(quad.subject)?;
+        let subject = if let NamedOrBlankNodeRef::BlankNode(bnode) = quad.subject {
+            let bnode_id = bnode.as_str();
             bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
                 let counter = bnode_counter;
                 bnode_counter += 1;
                 counter
             });
             format!("{}_{}", base_ns, bnode_map[bnode_id])
-        } else if let Some(caps) = re_underscore_uri.captures(&subject_iri_to_string(quad.subject)?)
-        {
-            let mut subject_iri = subject_iri_to_string(quad.subject)?;
-            let matching = caps
-                .get(1)
-                .ok_or(NpError("Error with regex".to_string()))?
-                .as_str();
-            let new_ending = matching.replacen('_', "__", 1);
-            subject_iri.truncate(subject_iri.len() - matching.len()); // Remove the original ending
-            subject_iri.push_str(&new_ending);
+        } else if let NamedOrBlankNodeRef::NamedNode(named) = quad.subject {
+            let mut subject_iri = named.as_str().to_owned();
+            if let Some(caps) = re_underscore_uri.captures(&subject_iri) {
+                let matching = caps
+                    .get(1)
+                    .ok_or(NpError("Error with regex".to_string()))?
+                    .as_str();
+                let new_ending = matching.replacen('_', "__", 1);
+                subject_iri.truncate(subject_iri.len() - matching.len()); // Remove the original ending
+                subject_iri.push_str(&new_ending);
+            }
             subject_iri
         } else {
-            subject_iri_to_string(quad.subject)?
+            return Err(NpError(
+                "Failed to extract IRI from subject: Got blank node in else branch".to_string(),
+            ));
         };
 
         let GraphNameRef::NamedNode(graph_iri) = quad.graph_name else {
@@ -260,7 +265,11 @@ pub fn normalize_dataset(
             )
         };
 
-        let predicate = predicate_iri_to_string(quad.predicate)?.replace(base_ns, &norm_uri);
+        let predicate = quad
+            .predicate
+            .into_owned()
+            .into_string()
+            .replace(base_ns, &norm_uri);
 
         let object = if quad.object.is_named_node() {
             if object_iri_to_string(quad.object)? == base_ns {
