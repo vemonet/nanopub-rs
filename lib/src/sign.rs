@@ -45,7 +45,7 @@ pub fn replace_bnodes(
 
     for quad in dataset.iter() {
         // Replace bnode in subjects, and add 1 underscore for URI using already underscore
-        let subject_str = match quad.subject {
+        let subject_string = match quad.subject {
             NamedOrBlankNodeRef::BlankNode(bnode) => {
                 let bnode_id = bnode.as_str();
                 bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
@@ -88,7 +88,7 @@ pub fn replace_bnodes(
         };
 
         // Replace bnode in objects
-        let subject_node = NamedNodeRef::new_unchecked(subject_str.as_str());
+        let subject_node = NamedNodeRef::new_unchecked(subject_string.as_str());
         // let object = quad.object;
         match quad.object {
             TermRef::BlankNode(bnode) => {
