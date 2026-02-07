@@ -155,10 +155,22 @@ jobs:
 
     - name: Benchmark
       run: |
-        hyperfine -m 100 --warmup 10 --export-markdown benchmark.md \
+        hyperfine -m 100 --warmup 10 --export-markdown benchmark-simple.md \
+          'java -jar nanopub.jar sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa' \
+          'np sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa' \
+          'target/release/nanopub-cli sign lib/tests/resources/simple1-rsa.trig -k lib/tests/resources/id_rsa'
+        hyperfine -m 100 --warmup 10 --export-markdown benchmark-large.md \
           'java -jar nanopub.jar sign lib/tests/resources/np-large.trig -k lib/tests/resources/id_rsa' \
           'np sign lib/tests/resources/np-large.trig -k lib/tests/resources/id_rsa' \
           'target/release/nanopub-cli sign lib/tests/resources/np-large.trig -k lib/tests/resources/id_rsa'
+
+    - name: Combine benchmarks
+      run: |
+        echo "# Small nanopub benchmark" > benchmark.md
+        cat benchmark-simple.md >> benchmark.md
+        echo "" >> benchmark.md
+        echo "# Large nanopub benchmark" >> benchmark.md
+        cat benchmark-large.md >> benchmark.md
 
     - name: Upload benchmark markdown
       uses: actions/upload-artifact@v4
