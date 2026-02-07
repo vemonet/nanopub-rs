@@ -40,40 +40,40 @@ pub fn replace_bnodes(
 ) -> Result<Dataset, NpError> {
     let mut new_dataset = Dataset::new();
     let mut bnode_map: HashMap<String, usize> = HashMap::new();
-    let mut bnode_counter = 1;
+    let mut bnode_count = 1;
     let re_underscore_uri = Regex::new(&format!(r"{base_uri}.?(_+[a-zA-Z0-9^_]+)$"))?;
 
     for quad in dataset.iter() {
         // Replace bnode in subjects, and add 1 underscore for URI using already underscore
-        let subject = match quad.subject {
+        let subject_str = match quad.subject {
             NamedOrBlankNodeRef::BlankNode(bnode) => {
                 let bnode_id = bnode.as_str();
                 bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
-                    let counter = bnode_counter;
-                    bnode_counter += 1;
+                    let counter = bnode_count;
+                    bnode_count += 1;
                     counter
                 });
                 format!("{}_{}", base_ns, bnode_map[bnode_id])
             }
             NamedOrBlankNodeRef::NamedNode(named) => {
-                let mut subject_iri = named.as_str().to_owned();
-                if let Some(caps) = re_underscore_uri.captures(&subject_iri) {
+                let mut subject_iri_str = named.as_str().to_owned();
+                if let Some(caps) = re_underscore_uri.captures(&subject_iri_str) {
                     let matching = caps
                         .get(1)
                         .ok_or(NpError("Error with regex".to_string()))?
                         .as_str();
                     let new_ending = matching.replacen('_', "__", 1);
-                    subject_iri.truncate(subject_iri.len() - matching.len()); // Remove the original ending
-                    subject_iri.push_str(&new_ending);
+                    subject_iri_str.truncate(subject_iri_str.len() - matching.len()); // Remove the original ending
+                    subject_iri_str.push_str(&new_ending);
                 }
-                subject_iri
+                subject_iri_str
             }
         };
 
         let GraphNameRef::NamedNode(graph_iri) = quad.graph_name else {
             return Err(NpError("Failed to extract graph name IRI.".to_string()));
         };
-        let graph = if let Some(caps) = re_underscore_uri.captures(graph_iri.as_str()) {
+        let graph_node = if let Some(caps) = re_underscore_uri.captures(graph_iri.as_str()) {
             let mut graph_string = graph_iri.into_owned().into_string();
             let matching = caps
                 .get(1)
@@ -88,14 +88,14 @@ pub fn replace_bnodes(
         };
 
         // Replace bnode in objects
-        let subject_node = NamedNodeRef::new_unchecked(subject.as_str());
+        let subject_node = NamedNodeRef::new_unchecked(subject_str.as_str());
         // let object = quad.object;
         match quad.object {
             TermRef::BlankNode(bnode) => {
                 let bnode_id = bnode.as_str();
                 bnode_map.entry(bnode_id.to_string()).or_insert_with(|| {
-                    let counter = bnode_counter;
-                    bnode_counter += 1;
+                    let counter = bnode_count;
+                    bnode_count += 1;
                     counter
                 });
                 let object_string = format!("{}_{}", base_ns, bnode_map[bnode_id]);
@@ -104,7 +104,7 @@ pub fn replace_bnodes(
                     subject_node,
                     quad.predicate,
                     object_node,
-                    graph,
+                    graph_node,
                 ));
             }
             TermRef::NamedNode(named) => {
@@ -124,10 +124,15 @@ pub fn replace_bnodes(
                         subject_node,
                         quad.predicate,
                         object_node,
-                        graph,
+                        graph_node,
                     ));
                 } else {
-                    new_dataset.insert(QuadRef::new(subject_node, quad.predicate, named, graph));
+                    new_dataset.insert(QuadRef::new(
+                        subject_node,
+                        quad.predicate,
+                        named,
+                        graph_node,
+                    ));
                 }
             }
             _ => {
@@ -135,7 +140,7 @@ pub fn replace_bnodes(
                     subject_node,
                     quad.predicate,
                     quad.object,
-                    graph,
+                    graph_node,
                 ));
             }
         };
@@ -156,11 +161,11 @@ pub fn replace_ns_in_quads(
         let s = subject_iri_to_string(quad.subject)?;
         // Replace URI in subjects
         let subject_node = if s == old_ns || s == old_uri {
-            NamedOrBlankNode::NamedNode(NamedNodeRef::new_unchecked(new_uri).into())
+            NamedOrBlankNode::from(NamedNodeRef::new_unchecked(new_uri))
         } else {
-            NamedOrBlankNode::NamedNode(
-                NamedNodeRef::new_unchecked(&s.replace(old_ns, new_ns)).into(),
-            )
+            NamedOrBlankNode::from(NamedNodeRef::new_unchecked(
+                s.replace(old_ns, new_ns).as_str(),
+            ))
         };
         // Replace URI in graphs
         let graph_name = graph_iri_to_string(quad.graph_name)?.replace(old_ns, new_ns);

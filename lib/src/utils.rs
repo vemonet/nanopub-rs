@@ -1,7 +1,8 @@
-// use rand::{thread_rng, Rng as _};
 use getrandom::getrandom;
 use oxjsonld::JsonLdProfileSet;
-use oxrdf::{Dataset, GraphNameRef, NamedOrBlankNodeRef};
+use std::cmp::Ordering;
+
+use oxrdf::{Dataset, GraphNameRef, NamedOrBlankNodeRef, QuadRef, TermRef};
 use oxrdfio::{RdfFormat, RdfParser, RdfSerializer};
 
 use crate::constants::LIST_SERVERS;
@@ -38,8 +39,11 @@ pub fn serialize_rdf(dataset: &Dataset, uri: &str, ns: &str) -> Result<String, N
         serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }
     let mut serializer = serializer.for_writer(Vec::new());
-    for quad in dataset.iter() {
-        serializer.serialize_quad(quad)?;
+    // NOTE: we need to sort ourself the quads
+    let mut quads: Vec<QuadRef<'_>> = dataset.iter().collect();
+    quads.sort_by(quad_compare);
+    for quad in &quads {
+        serializer.serialize_quad(*quad)?;
     }
     Ok(String::from_utf8(serializer.finish()?)?)
 }
@@ -104,4 +108,84 @@ pub fn graph_iri_to_string(node: GraphNameRef) -> Result<String, NpError> {
             "Failed to extract graph name IRI: Got {other:?}"
         ))),
     }
+}
+
+/// Compare two quads for sorting: by graph, subject, predicate (rdf:type first), object
+fn quad_compare(a: &QuadRef<'_>, b: &QuadRef<'_>) -> Ordering {
+    graph_compare(a.graph_name, b.graph_name)
+        .then_with(|| subject_compare(a.subject, b.subject))
+        .then_with(|| predicate_compare(a.predicate, b.predicate))
+        .then_with(|| term_compare(a.object, b.object))
+}
+
+/// Sort RDF graphs: default graph first, then named graphs by IRI, then blank nodes
+fn graph_compare(a: GraphNameRef<'_>, b: GraphNameRef<'_>) -> Ordering {
+    fn graph_rank(g: GraphNameRef<'_>) -> u8 {
+        match g {
+            GraphNameRef::DefaultGraph => 0,
+            GraphNameRef::NamedNode(_) => 1,
+            GraphNameRef::BlankNode(_) => 2,
+        }
+    }
+    fn graph_str<'a>(g: GraphNameRef<'a>) -> &'a str {
+        match g {
+            GraphNameRef::DefaultGraph => "",
+            GraphNameRef::NamedNode(n) => n.as_str(),
+            GraphNameRef::BlankNode(b) => b.as_str(),
+        }
+    }
+    graph_rank(a)
+        .cmp(&graph_rank(b))
+        .then_with(|| graph_str(a).cmp(graph_str(b)))
+}
+
+/// Compare subjects: named nodes first (by IRI), then blank nodes (by id)
+fn subject_compare(a: NamedOrBlankNodeRef<'_>, b: NamedOrBlankNodeRef<'_>) -> Ordering {
+    fn rank(n: NamedOrBlankNodeRef<'_>) -> u8 {
+        match n {
+            NamedOrBlankNodeRef::NamedNode(_) => 0,
+            NamedOrBlankNodeRef::BlankNode(_) => 1,
+        }
+    }
+    fn as_str<'a>(n: NamedOrBlankNodeRef<'a>) -> &'a str {
+        match n {
+            NamedOrBlankNodeRef::NamedNode(n) => n.as_str(),
+            NamedOrBlankNodeRef::BlankNode(b) => b.as_str(),
+        }
+    }
+    rank(a).cmp(&rank(b)).then_with(|| as_str(a).cmp(as_str(b)))
+}
+
+/// Compare predicates: rdf:type first, then by IRI
+fn predicate_compare(a: oxrdf::NamedNodeRef<'_>, b: oxrdf::NamedNodeRef<'_>) -> Ordering {
+    const RDF_TYPE: &str = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+    fn rank(p: oxrdf::NamedNodeRef<'_>) -> u8 {
+        if p.as_str() == RDF_TYPE {
+            0
+        } else {
+            1
+        }
+    }
+    rank(a)
+        .cmp(&rank(b))
+        .then_with(|| a.as_str().cmp(b.as_str()))
+}
+
+/// Compare object terms: named nodes, blank nodes, then literals; within each kind compare by string content
+fn term_compare(a: TermRef<'_>, b: TermRef<'_>) -> Ordering {
+    fn rank(t: TermRef<'_>) -> u8 {
+        match t {
+            TermRef::NamedNode(_) => 0,
+            TermRef::BlankNode(_) => 1,
+            TermRef::Literal(_) => 2,
+        }
+    }
+    fn as_str<'a>(t: TermRef<'a>) -> &'a str {
+        match t {
+            TermRef::NamedNode(n) => n.as_str(),
+            TermRef::BlankNode(b) => b.as_str(),
+            TermRef::Literal(l) => l.value(),
+        }
+    }
+    rank(a).cmp(&rank(b)).then_with(|| as_str(a).cmp(as_str(b)))
 }

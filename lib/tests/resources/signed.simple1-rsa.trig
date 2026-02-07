@@ -1,42 +1,39 @@
-PREFIX this: <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o>
-PREFIX sub: <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX schema: <http://schema.org/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX biolink: <https://w3id.org/biolink/vocab/>
-PREFIX np: <http://www.nanopub.org/nschema#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX orcid: <https://orcid.org/>
-PREFIX npx: <http://purl.org/nanopub/x/>
-
-GRAPH sub:Head {
-  <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o> a np:Nanopublication;
-    np:hasAssertion sub:assertion;
-    np:hasProvenance sub:provenance;
-    np:hasPublicationInfo sub:pubinfo.
+@prefix sub: <https://w3id.org/np/RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4/> .
+@prefix this: <https://w3id.org/np/RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix inforces: <https://w3id.org/biolink/infores/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix biolink: <https://w3id.org/biolink/vocab/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix schema: <https://schema.org/> .
+@prefix orcid: <https://orcid.org/> .
+sub:Head {
+	this: a np:Nanopublication ;
+		np:hasAssertion sub:assertion ;
+		np:hasProvenance sub:provenance ;
+		np:hasPublicationInfo sub:pubinfo .
 }
-
-GRAPH sub:assertion {
-  <http://example.org/mosquito>
-    <http://example.org/transmits> <http://example.org/malaria>.
+sub:assertion {
+	<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .
 }
-
-GRAPH sub:provenance {
-  sub:assertion
-    prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613>.
+sub:provenance {
+	sub:assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
 }
-
-GRAPH sub:pubinfo {
-  <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o> a npx:ExampleNanopub;
-    dcterms:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime;
-    <http://purl.org/pav/createdBy> <http://orcid.org/0000-0002-1267-0234>.
-
-  sub:sig
-    npx:hasAlgorithm "RSA";
-    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "aG7rda/gmsu8hx1fTds9oqvogs4gv8xxkc/SJCtqJjUfgbtH6P3QMafIBdRApFI1WT7qrkYqg3Qs9ugTkOjwq2EJ+IoTJq1lgeo+66th3y2LnSdsI/Lsoa/mE6TIVbjpXvwYAqPGUI4BISISJhAslFFlP54obeBarh2nsiELdf4=";
-    npx:hasSignatureTarget <https://w3id.org/np/RAoNJUYtqPuzxfCgi0ZJughw221g1qIhRDGE5EbRTNJ4o>.
+sub:pubinfo {
+	this: a npx:ExampleNanopub ;
+		dcterms:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
+		pav:createdBy <http://orcid.org/0000-0002-1267-0234> .
+	sub:sig npx:hasAlgorithm "RSA" ;
+		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB" ;
+		npx:hasSignature "qVMrjzQs3lXZqIDU58JqKGO1TgXH4pNDsIxij7pZuwjFHBRzCSfg9J/ijBnkMtEVJBuXpQ5KnqKtdoUx/5cYcu6yxiuNB8rOn4IyVH4MJDoHYLHsJrzo/77+1NEXR+K2oEh9kRPPZg/vT46uKO818j/2GqIvtCrKFbFXJX2leac=" ;
+		npx:hasSignatureTarget this: .
 }
