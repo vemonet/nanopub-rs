@@ -1,20 +1,16 @@
-@prefix sub: <https://w3id.org/np/RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4/> .
-@prefix this: <https://w3id.org/np/RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4> .
+@prefix sub: <https://w3id.org/np/RAx5s5dNbxJW0sT_8eUdSIAilY8kzg64z0IgZjtKWt5Pw/> .
+@prefix this: <https://w3id.org/np/RAx5s5dNbxJW0sT_8eUdSIAilY8kzg64z0IgZjtKWt5Pw> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix inforces: <https://w3id.org/biolink/infores/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix biolink: <https://w3id.org/biolink/vocab/> .
 @prefix np: <http://www.nanopub.org/nschema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix npx: <http://purl.org/nanopub/x/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dc: <http://purl.org/dc/terms/> .
 @prefix pav: <http://purl.org/pav/> .
-@prefix schema: <https://schema.org/> .
+@prefix ex: <http://example.org/> .
 @prefix orcid: <https://orcid.org/> .
 sub:Head {
 	this: a np:Nanopublication ;
@@ -23,17 +19,17 @@ sub:Head {
 		np:hasPublicationInfo sub:pubinfo .
 }
 sub:assertion {
-	<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> .
+	ex:mosquito ex:transmits ex:malaria .
 }
 sub:provenance {
 	sub:assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
 }
 sub:pubinfo {
 	this: a npx:ExampleNanopub ;
-		dcterms:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
+		dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
 		pav:createdBy <http://orcid.org/0000-0002-1267-0234> .
 	sub:sig npx:hasAlgorithm "RSA" ;
-		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB" ;
-		npx:hasSignature "qVMrjzQs3lXZqIDU58JqKGO1TgXH4pNDsIxij7pZuwjFHBRzCSfg9J/ijBnkMtEVJBuXpQ5KnqKtdoUx/5cYcu6yxiuNB8rOn4IyVH4MJDoHYLHsJrzo/77+1NEXR+K2oEh9kRPPZg/vT46uKO818j/2GqIvtCrKFbFXJX2leac=" ;
+		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB" ;
+		npx:hasSignature "AcNz/IAPUafJsJAo6LeLf0sOV1PAQmV0w1VBFrt/dTuXllzGKXoEfYb0zoNhUp8dliK3FzSjQY4c/XcxmzNcTdb8RnpojRm+uyANBEbzOVbblzy/wKsuE1agd4fnHZ1Wqf/Y43Qx4UFyG8Y6gcCf31gOc3EqjNPkSNk2hYVqHJE=" ;
 		npx:hasSignatureTarget this: .
 }

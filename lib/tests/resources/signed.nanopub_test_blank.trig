@@ -1,59 +1,54 @@
-@prefix this: <https://w3id.org/np/RANUwFgJ2onO89byLuR_U_4ADqWGityl4cdoU6S7Hyv28> .
-@prefix sub: <https://w3id.org/np/RANUwFgJ2onO89byLuR_U_4ADqWGityl4cdoU6S7Hyv28#> .
-@prefix drugbank: <http://identifiers.org/drugbank/> .
-@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix sub: <https://w3id.org/np/RAGuF6KlkPqO-o-s-Dybk2AqGgWy4IJf7QehttBaavKHg/> .
+@prefix this: <https://w3id.org/np/RAGuF6KlkPqO-o-s-Dybk2AqGgWy4IJf7QehttBaavKHg> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix pmid: <http://www.ncbi.nlm.nih.gov/pubmed/> .
+@prefix infores: <https://w3id.org/biolink/infores/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix drugbank: <http://identifiers.org/drugbank/> .
 @prefix biolink: <https://w3id.org/biolink/vocab/> .
-
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix orcid: <https://orcid.org/> .
 sub:Head {
-  this: a np:Nanopublication;
-    np:hasAssertion sub:assertion;
-    np:hasProvenance sub:provenance;
-    np:hasPublicationInfo sub:pubInfo .
+	this: a np:Nanopublication ;
+		np:hasAssertion sub:assertion ;
+		np:hasProvenance sub:provenance ;
+		np:hasPublicationInfo sub:pubInfo .
 }
-
 sub:assertion {
-  drugbank:DB10771 a biolink:Drug .
-
-  <http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
-
-  sub:_1 a biolink:Context .
-
-  sub:_2 a biolink:Target .
-
-  sub:_3 a biolink:Date .
-
-  sub:_4 a biolink:Thing .
-
-  sub:_5 a biolink:Date .
-
-  sub:_6 a biolink:Context .
-
-  sub:__1 a biolink:Thing .
-
-  sub:___2 a biolink:Thing .
-
-  sub:association a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation;
-    rdf:object <http://purl.obolibrary.org/obo/OMIM_130000>;
-    rdf:predicate biolink:treats;
-    rdf:subject drugbank:DB10771;
-    biolink:context sub:_1;
-    biolink:date sub:_3;
-    biolink:target sub:_2 .
+	drugbank:DB10771 a biolink:Drug .
+	<http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
+	sub:_1 a biolink:Context .
+	sub:_2 a biolink:Target .
+	sub:_3 a biolink:Date .
+	sub:_4 a biolink:Thing .
+	sub:_5 a biolink:Context .
+	sub:_6 a biolink:Date .
+	sub:__1 a biolink:Thing .
+	sub:___2 a biolink:Thing .
+	sub:association a biolink:ChemicalToDiseaseOrPhenotypicFeatureAssociation ;
+		rdf:object <http://purl.obolibrary.org/obo/OMIM_130000> ;
+		rdf:predicate biolink:treats ;
+		rdf:subject drugbank:DB10771 ;
+		biolink:context sub:_1 ;
+		biolink:date sub:_3 ;
+		biolink:target sub:_2 .
 }
-
 sub:provenance {
-  sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
+	sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
 }
-
 sub:pubInfo {
-  sub:sig npx:hasAlgorithm "RSA";
-    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB";
-    npx:hasSignature "1NTjNSJThh0vC7TXz0AkL4ZfSv1q10bLEAqgxegCdZ5nwNyOpJ6lwKky1//x7dPbjtdRszCJ73TyiQigqLy+wfK+PsFpenz8dNcjqbxdsTQPFt2V3JBJPyNLWlsWipku9bQGH2++k/6+yW9/6WmpivYVCb4Erm9xpGoM+jRWetU=";
-    npx:hasSignatureTarget this: .
-
-  this: a npx:ExampleNanopub .
+	this: a npx:ExampleNanopub ;
+		dcterms:created "2026-02-09T15:40:18.685Z"^^xsd:dateTime ;
+		dcterms:creator orcid:0000-0002-1501-1082 .
+	sub:sig npx:hasAlgorithm "RSA" ;
+		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB" ;
+		npx:hasSignature "ZL2ysm8Cm2K29nolRnKV5cOgmgFxxTelRpp5MEbE7mZ9kSTl2ePaRjvrelf8DanPaWoi9bNayGqaOcoYuejfRdHEk166TPMX1JX+8aO1dobG9JLSkRAPfYbcYSMjaDgUM+2LWyK238vuYLD1ZfDcKLQb/0qKxIhiFeylm0D0H28=" ;
+		npx:hasSignatureTarget this: .
 }

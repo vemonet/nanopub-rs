@@ -200,7 +200,9 @@ fn test_np_info() -> Result<(), Box<dyn Error>> {
     let rdf_str = fs::read_to_string("./tests/resources/nanopub.jsonld")?;
     let (dataset, prefixes) = parse_rdf(&rdf_str)?;
     let np_info = extract_np_info(&dataset, prefixes)?;
-    println!("{np_info}"); // Required for coverage
+    assert!(np_info.uri == "http://purl.org/nanopub/temp/mynanopub");
+    assert!(np_info.orcid == "http://orcid.org/0000-0002-1267-0234");
+    println!("{np_info}"); // Required for coverage of display
     Ok(())
 }
 
