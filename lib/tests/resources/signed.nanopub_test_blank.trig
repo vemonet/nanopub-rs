@@ -1,5 +1,5 @@
-@prefix sub: <https://w3id.org/np/RAGuF6KlkPqO-o-s-Dybk2AqGgWy4IJf7QehttBaavKHg/> .
-@prefix this: <https://w3id.org/np/RAGuF6KlkPqO-o-s-Dybk2AqGgWy4IJf7QehttBaavKHg> .
+@prefix sub: <https://w3id.org/np/RA0Jb90oaXjMUIKsciEX0-JxxnRrQlmlLJFMyzUefe0yA/> .
+@prefix this: <https://w3id.org/np/RA0Jb90oaXjMUIKsciEX0-JxxnRrQlmlLJFMyzUefe0yA> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -24,9 +24,9 @@ sub:Head {
 sub:assertion {
 	drugbank:DB10771 a biolink:Drug .
 	<http://purl.obolibrary.org/obo/OMIM_130000> a biolink:Disease .
-	sub:_1 a biolink:Context .
-	sub:_2 a biolink:Target .
-	sub:_3 a biolink:Date .
+	sub:_1 a biolink:Date .
+	sub:_2 a biolink:Context .
+	sub:_3 a biolink:Target .
 	sub:_4 a biolink:Thing .
 	sub:_5 a biolink:Context .
 	sub:_6 a biolink:Date .
@@ -36,19 +36,18 @@ sub:assertion {
 		rdf:object <http://purl.obolibrary.org/obo/OMIM_130000> ;
 		rdf:predicate biolink:treats ;
 		rdf:subject drugbank:DB10771 ;
-		biolink:context sub:_1 ;
-		biolink:date sub:_3 ;
-		biolink:target sub:_2 .
+		biolink:context sub:_2 ;
+		biolink:date sub:_1 ;
+		biolink:target sub:_3 .
 }
 sub:provenance {
 	sub:assertion dcterms:created "2020-09-21T00:00:00"^^xsd:dateTime .
 }
 sub:pubInfo {
 	this: a npx:ExampleNanopub ;
-		dcterms:created "2026-02-09T15:40:18.685Z"^^xsd:dateTime ;
-		dcterms:creator orcid:0000-0002-1501-1082 .
+		dcterms:created "2026-02-09T16:06:24.774Z"^^xsd:dateTime .
 	sub:sig npx:hasAlgorithm "RSA" ;
-		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB" ;
-		npx:hasSignature "ZL2ysm8Cm2K29nolRnKV5cOgmgFxxTelRpp5MEbE7mZ9kSTl2ePaRjvrelf8DanPaWoi9bNayGqaOcoYuejfRdHEk166TPMX1JX+8aO1dobG9JLSkRAPfYbcYSMjaDgUM+2LWyK238vuYLD1ZfDcKLQb/0qKxIhiFeylm0D0H28=" ;
+		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB" ;
+		npx:hasSignature "tSW+ndcg0bYV01zKIAJBZy0BC+92ABz62i0uAjAZhZf3AGSGzaOvQ73xO6CZsQB23qq+VZntcF79m8JoxIiWMXi0udDAg+WgTDVcc1ernE6ZIect3Jaa+qwm9DH8J2DtDCYy9Deze49z+66NoC/WqhqFdJZDHnC/4si9uZDflNg=" ;
 		npx:hasSignatureTarget this: .
 }

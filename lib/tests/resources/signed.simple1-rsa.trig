@@ -1,5 +1,5 @@
-@prefix sub: <https://w3id.org/np/RAx5s5dNbxJW0sT_8eUdSIAilY8kzg64z0IgZjtKWt5Pw/> .
-@prefix this: <https://w3id.org/np/RAx5s5dNbxJW0sT_8eUdSIAilY8kzg64z0IgZjtKWt5Pw> .
+@prefix sub: <https://w3id.org/np/RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4/> .
+@prefix this: <https://w3id.org/np/RAe_LF_8hl-wFdzgbxnLS2T3zNWwic2jFiF-tjuWCdkr4> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -29,7 +29,7 @@ sub:pubinfo {
 		dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
 		pav:createdBy <http://orcid.org/0000-0002-1267-0234> .
 	sub:sig npx:hasAlgorithm "RSA" ;
-		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCR9fz0fKCdWOWC+pxhkQhEM/ppbdIYe5TLSdj+lJzSlv9mYBaPgrzVezSwwbmhlHBPDZa4/vHycU315BdmUGq+pXllp9+rWFfrb+kBJwhZjpG6BeyyXBsRFz4jmQVxl/ZYHilQTh/XalYzKkEAyTiEMPee4Kz61PaWOKH24CsnOQIDAQAB" ;
-		npx:hasSignature "AcNz/IAPUafJsJAo6LeLf0sOV1PAQmV0w1VBFrt/dTuXllzGKXoEfYb0zoNhUp8dliK3FzSjQY4c/XcxmzNcTdb8RnpojRm+uyANBEbzOVbblzy/wKsuE1agd4fnHZ1Wqf/Y43Qx4UFyG8Y6gcCf31gOc3EqjNPkSNk2hYVqHJE=" ;
+		npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB" ;
+		npx:hasSignature "qVMrjzQs3lXZqIDU58JqKGO1TgXH4pNDsIxij7pZuwjFHBRzCSfg9J/ijBnkMtEVJBuXpQ5KnqKtdoUx/5cYcu6yxiuNB8rOn4IyVH4MJDoHYLHsJrzo/77+1NEXR+K2oEh9kRPPZg/vT46uKO818j/2GqIvtCrKFbFXJX2leac=" ;
 		npx:hasSignatureTarget this: .
 }
