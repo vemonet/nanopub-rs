@@ -12,26 +12,24 @@ pub fn parse_rdf(rdf: &str) -> Result<(Dataset, Vec<(String, String)>), NpError>
     let mut dataset = Dataset::new();
     // NOTE: an efficient way to differentiate between JSON-LD and TriG is to check if the string starts with '{' or '['
     let prefixes: Vec<(String, String)> = if rdf.trim_start().starts_with(['{', '[']) {
-        let mut parser = JsonLdParser::new()
-            .for_reader(rdf.as_bytes());
+        let mut parser = JsonLdParser::new().for_reader(rdf.as_bytes());
+        parser.try_for_each(|q| {
+            dataset.insert(&q?);
+            Ok::<_, NpError>(())
+        })?;
         parser
-            .try_for_each(|q| {
-                dataset.insert(&q?);
-                Ok::<_, NpError>(())
-            })?;
-        parser.prefixes()
+            .prefixes()
             .map(|(prefix, iri)| (prefix.to_owned(), iri.to_owned()))
             .collect()
     } else {
         // The TriG parser handles nquads
-        let mut parser = TriGParser::new()
-            .for_reader(rdf.as_bytes());
+        let mut parser = TriGParser::new().for_reader(rdf.as_bytes());
+        parser.try_for_each(|q| {
+            dataset.insert(&q?);
+            Ok::<_, NpError>(())
+        })?;
         parser
-            .try_for_each(|q| {
-                dataset.insert(&q?);
-                Ok::<_, NpError>(())
-            })?;
-        parser.prefixes()
+            .prefixes()
             .map(|(prefix, iri)| (prefix.to_owned(), iri.to_owned()))
             .collect()
     };
@@ -43,7 +41,7 @@ pub fn serialize_rdf(
     dataset: &Dataset,
     uri: &str,
     ns: &str,
-    prefixes: &Vec<(String, String)>,
+    prefixes: &[(String, String)],
 ) -> Result<String, NpError> {
     let mut serializer = TriGSerializer::new();
     // Add a set of default prefixes
@@ -59,8 +57,8 @@ pub fn serialize_rdf(
     ] {
         serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }
-    // Add or override prefixes from parsed source document
-    for (prefix_name, prefix_iri) in prefixes {
+    // Add or override prefixes from parsed source document (removing empty prefix which would be used as base)
+    for (prefix_name, prefix_iri) in prefixes.iter().filter(|(name, _)| !name.is_empty()) {
         serializer = serializer.with_prefix(prefix_name, prefix_iri)?;
     }
     // Add or override core prefixes

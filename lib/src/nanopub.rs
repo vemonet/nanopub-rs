@@ -582,7 +582,12 @@ impl Nanopub {
 
     /// Returns the RDF of the nanopub
     pub fn rdf(&self) -> Result<String, NpError> {
-        serialize_rdf(&self.dataset, self.info.uri.as_str(), self.info.ns.as_str(), &self.info.prefixes)
+        serialize_rdf(
+            &self.dataset,
+            self.info.uri.as_str(),
+            self.info.ns.as_str(),
+            &self.info.prefixes,
+        )
     }
 }
 
