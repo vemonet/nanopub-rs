@@ -1,5 +1,6 @@
 use crate::constants::{NP_PREF_NS, NP_TEMP_URI};
 use crate::error::NpError;
+use crate::utils::Namespace;
 use crate::vocab::{dct, np, npx, pav, prov};
 
 use oxrdf::{
@@ -13,7 +14,7 @@ use std::fmt;
 #[derive(Clone, Serialize, Debug)]
 pub struct NpInfo {
     pub uri: NamedNode,
-    pub ns: NamedNode,
+    pub ns: Namespace<String>,
     pub prefixes: Vec<(String, String)>,
     pub normalized_ns: String,
     pub head: NamedNode,
@@ -137,7 +138,7 @@ pub fn extract_np_info(
     } else {
         &head_iri.as_str()[..np_iri.as_str().len() + 1]
     };
-    let np_ns_str = original_ns;
+    let np_ns = Namespace::new_unchecked(original_ns.to_string());
 
     // Remove last char if it is # or / to get the URI
     if np_iri.as_str().ends_with(['#', '/', '.']) {
@@ -199,7 +200,7 @@ pub fn extract_np_info(
         }
         None => (
             "".to_string(),
-            NamedNode::new_unchecked(format!("{}sig", np_ns_str)),
+            np_ns.get("sig")?,
         ),
     };
     let signature_node = NamedOrBlankNodeRef::from(signature_iri.as_ref());
@@ -253,7 +254,7 @@ pub fn extract_np_info(
 
     Ok(NpInfo {
         uri: np_iri,
-        ns: NamedNode::new_unchecked(np_ns_str),
+        ns: np_ns,
         prefixes,
         normalized_ns: norm_ns,
         head: head_iri,
