@@ -1,6 +1,8 @@
 use getrandom::getrandom;
 use oxjsonld::JsonLdParser;
-use oxrdf::{Dataset, IriParseError, GraphNameRef, NamedOrBlankNodeRef, NamedNode, NamedNodeRef, QuadRef, TermRef};
+use oxrdf::{
+    Dataset, GraphNameRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TermRef,
+};
 use oxttl::{TriGParser, TriGSerializer};
 use serde::Serialize;
 use std::cmp::Ordering;
@@ -190,29 +192,16 @@ fn term_compare(a: TermRef<'_>, b: TermRef<'_>) -> Ordering {
 }
 
 #[derive(Clone, Serialize, Debug)]
-pub struct Namespace<String> {
-    base: String,
-}
+pub struct Namespace(pub String);
 
-impl Namespace<String> {
-    pub fn new(base: String) -> Result<Self, IriParseError> {
-        Ok(Namespace {
-            base
-        })
-    }
-    pub fn new_unchecked(base: String) -> Self {
-        Namespace {
-            base
-        }
-    }
+impl Namespace {
     pub fn as_str(&self) -> &str {
-        self.base.as_str()
+        &self.0
     }
     pub fn as_iri_ref(&self) -> NamedNodeRef<'_> {
-        NamedNodeRef::new_unchecked(self.base.as_str())
+        NamedNodeRef::new_unchecked(&self.0)
     }
-    pub fn get(&self, local_name: &str) -> Result<NamedNode, IriParseError> {
-        let iri_string = format!("{}{}", self.base, local_name);
-        NamedNode::new(iri_string)
+    pub fn get(&self, local_name: &str) -> NamedNode {
+        NamedNode::new_unchecked(format!("{}{}", self.0, local_name))
     }
 }

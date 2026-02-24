@@ -14,7 +14,7 @@ use std::fmt;
 #[derive(Clone, Serialize, Debug)]
 pub struct NpInfo {
     pub uri: NamedNode,
-    pub ns: Namespace<String>,
+    pub ns: Namespace,
     pub prefixes: Vec<(String, String)>,
     pub normalized_ns: String,
     pub head: NamedNode,
@@ -138,7 +138,7 @@ pub fn extract_np_info(
     } else {
         &head_iri.as_str()[..np_iri.as_str().len() + 1]
     };
-    let np_ns = Namespace::new_unchecked(original_ns.to_string());
+    let np_ns = Namespace(original_ns.to_string());
 
     // Remove last char if it is # or / to get the URI
     if np_iri.as_str().ends_with(['#', '/', '.']) {
@@ -198,10 +198,7 @@ pub fn extract_np_info(
             };
             (literal.value().to_string(), NamedNode::from(sig_iri))
         }
-        None => (
-            "".to_string(),
-            np_ns.get("sig")?,
-        ),
+        None => ("".to_string(), np_ns.get("sig")),
     };
     let signature_node = NamedOrBlankNodeRef::from(signature_iri.as_ref());
 
