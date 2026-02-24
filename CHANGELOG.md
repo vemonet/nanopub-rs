@@ -2,11 +2,52 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.10](https://github.com/vemonet/nanopub-rs/compare/v0.1.9..0.1.10) - 2025-12-18
+## [0.2.0](https://github.com/vemonet/nanopub-rs/compare/v0.1.10..0.2.0) - 2026-02-24
+
+### ⛰️ Features
+
+- Introduce `dataset.quads_match()` to oxrdf `Dataset` to enable cleaner matching of quads - ([9a4ee78](https://github.com/vemonet/nanopub-rs/commit/9a4ee784c36d9cbbef9e9ecd090da110431f39a3))
+- Order the quads before serialization to have a smaller and more readable trig, improve variable names - ([bda77b9](https://github.com/vemonet/nanopub-rs/commit/bda77b9e11a149d8132b71a9ea9783be24c90311))
+
+### 🐛 Bug Fixes
+
+- Use `rand` crate instead of `rand_core`, and add wasm_js feature for getrandom 0.3 to fix issues with wasm compilation (0.3 is required by reqwest and some dependencies, 0.2 required by the `rsa` and `ring` crates). Improve error message when no profile.yml file found. Run fmt - ([66bfadf](https://github.com/vemonet/nanopub-rs/commit/66bfadfdf347d41454639defa781453419676681))
+
+### 📚 Documentation
+
+- Fix docs to import `web.js` since `bundler.js` does not work well on client, improve exports in package.json - ([4089bb9](https://github.com/vemonet/nanopub-rs/commit/4089bb94503f48c1ea7d0d2b116541f07e7fff26))
+
+### 🚜 Refactor
+
+- Improve nodes matching in `sign.rs` to use `match quad.object` instead of `.is_named_node`/`.is_blank_node`, remove `object_literal_to_strings`, `object_blank_to_str`, `object_iri_to_string` - ([bf524c8](https://github.com/vemonet/nanopub-rs/commit/bf524c8ce2baa0656944c3f49f66561baadfbcd5))
+- Simplify error message in `subject_iri_to_string` and `graph_iri_to_string`, and remove now unused `DatasetExt.quads_match` - ([a69e760](https://github.com/vemonet/nanopub-rs/commit/a69e760d9b9a917ab02ca3c272c21a8b796eec42))
+- Remove `:` prefix from serializer (nanopubs usually use just this and sub), rename `_graph_view` variables to `_graph` - ([c389259](https://github.com/vemonet/nanopub-rs/commit/c3892593c4869e8791aaf505f52bd4618d65a5e8))
+- Rename variable - ([fc63ba0](https://github.com/vemonet/nanopub-rs/commit/fc63ba018106ca46ae25afd2f55ccf74ec248ce2))
+- Run fmt, and remove empty string prefix from prefixes used for serialization (this triggers the definition of a base iri) - ([f3ae110](https://github.com/vemonet/nanopub-rs/commit/f3ae11039697476296f78b286ae0df12c99a1e8a))
+- Improve the `Namespace` struct - ([0d4c387](https://github.com/vemonet/nanopub-rs/commit/0d4c38729755bd45d8231ccbc55a64b808c4f8e2))
+
+### 🛠️ Miscellaneous Tasks
+
+- Update `release.sh` script and revert unwanted changes to signed.nanopub_test_blank.trig - ([eee9ffb](https://github.com/vemonet/nanopub-rs/commit/eee9ffbaf4912e4b1afd023c030226144510bcbe))
+- Improve `quads_match` method and add doctest for it - ([f0ae226](https://github.com/vemonet/nanopub-rs/commit/f0ae2263d6fd70c76ea17d3460961a4e151698d7))
+- Resolve clippy warnings and run fmt - ([538af1b](https://github.com/vemonet/nanopub-rs/commit/538af1b39385d333d42ca942625a0d5821017fe8))
+- Remove `with_base_iri` from serializer to keep older serialization format, add large nanopub with ~1k triples for benchmarking - ([fe01ce0](https://github.com/vemonet/nanopub-rs/commit/fe01ce01bc55d568b5710a51328f0180709e6b63))
+- Improve how iri/bnode match is handled in sign.rs `replace_bnode`, remove `subject_blank_to_str` and `predicate_iri_to_string` - ([8451e24](https://github.com/vemonet/nanopub-rs/commit/8451e24f2839e58ca02a9f745a18157ff75a03b6))
+
+### 🧪 Testing
+
+- Run benchmark on small and large nanopubs in the test workflow - ([07e79e6](https://github.com/vemonet/nanopub-rs/commit/07e79e6c57509081a6de0375146220a7b202ea77))
+- Regenerate signed nanopubs used in testing with proper test private key and prefixes - ([ee1fec8](https://github.com/vemonet/nanopub-rs/commit/ee1fec86628f1db8e083935fec586c3339e9fa13))
+
+## [0.1.10](https://github.com/vemonet/nanopub-rs/compare/v0.1.9..v0.1.10) - 2025-12-18
 
 ### ⚙️ Continuous Integration
 
 - Fix npm trusted publishing through gh workflow - ([23776bc](https://github.com/vemonet/nanopub-rs/commit/23776bc32f64d6155663ccad7683eff892308952))
+
+### 🛠️ Miscellaneous Tasks
+
+- Bump version to 0.1.10 - ([ad7bcc0](https://github.com/vemonet/nanopub-rs/commit/ad7bcc0ca2f033da4464630034b537ef3e742363))
 
 ## [0.1.9](https://github.com/vemonet/nanopub-rs/compare/v0.1.8..v0.1.9) - 2025-12-18
 
