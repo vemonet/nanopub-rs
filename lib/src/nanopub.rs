@@ -216,7 +216,7 @@ impl Nanopub {
             // println!("DEBUG: Unsigned: {}", self.rdf()?);
         }
 
-        let sig_iri = self.info.ns.get("sig")?;
+        let sig_iri = self.info.ns.get("sig");
         let sig_node = sig_iri.as_ref();
         let ns_node = self.info.ns.as_iri_ref();
         let uri_subject_term = NamedOrBlankNodeRef::from(self.info.uri.as_ref());
@@ -422,7 +422,7 @@ impl Nanopub {
             NP_TEMP_URI,
         )?;
         self.info.uri = NamedNode::new_unchecked(NP_TEMP_URI.to_string());
-        self.info.ns = Namespace::new_unchecked(NP_TEMP_URI.to_string());
+        self.info.ns = Namespace(NP_TEMP_URI.to_string());
         self.info = extract_np_info(&self.dataset, self.info.prefixes)?;
         Ok(self)
     }
@@ -466,10 +466,10 @@ impl Nanopub {
             .as_str();
 
         let mut dataset = create_base_dataset()?;
-        let np_ns = Namespace::new_unchecked(NP_TEMP_URI.to_string());
-        let key_declaration_iri = np_ns.get("keyDeclaration")?;
-        let assertion_iri = np_ns.get("assertion")?;
-        let prov_iri = np_ns.get("provenance")?;
+        let np_ns = Namespace(NP_TEMP_URI.to_string());
+        let key_declaration_iri = np_ns.get("keyDeclaration");
+        let assertion_iri = np_ns.get("assertion");
+        let prov_iri = np_ns.get("provenance");
         let key_declaration_node = key_declaration_iri.as_ref();
         let orcid_node = NamedNodeRef::new_unchecked(orcid);
         let assertion_node = assertion_iri.as_ref();
@@ -594,11 +594,11 @@ impl Nanopub {
 /// Bootstrap a base nanopub dataset that can be edited later
 pub fn create_base_dataset() -> Result<Dataset, NpError> {
     let mut dataset = Dataset::new();
-    let np_ns = Namespace::new_unchecked(NP_TEMP_URI.to_string());
-    let assertion_iri = np_ns.get("assertion")?;
-    let prov_iri = np_ns.get("provenance")?;
-    let pubinfo_iri = np_ns.get("pubinfo")?;
-    let head_iri = np_ns.get("Head")?;
+    let np_ns = Namespace(NP_TEMP_URI.to_string());
+    let assertion_iri = np_ns.get("assertion");
+    let prov_iri = np_ns.get("provenance");
+    let pubinfo_iri = np_ns.get("pubinfo");
+    let head_iri = np_ns.get("Head");
     let np_node = NamedNodeRef::new_unchecked(NP_TEMP_URI);
     let assertion_node = assertion_iri.as_ref();
     let head_graph = GraphNameRef::from(head_iri.as_ref());
