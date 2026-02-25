@@ -1,6 +1,4 @@
 use base64::{engine, Engine as _};
-use rand::rngs::StdRng;
-use rand::SeedableRng;
 use rsa::pkcs1::{DecodeRsaPrivateKey, DecodeRsaPublicKey};
 use rsa::pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePrivateKey, EncodePublicKey};
 use rsa::{RsaPrivateKey, RsaPublicKey};
@@ -238,9 +236,36 @@ pub fn get_pubkey_str(pubkey: &RsaPublicKey) -> Result<String, NpError> {
 
 /// Generate private/public key pair
 pub fn gen_keys() -> Result<(String, String), NpError> {
-    let mut rng = StdRng::from_entropy();
-    let bits = 2048;
-    let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+    // rsa 0.9 requires rand_core 0.6 traits; rand 0.9 uses rand_core 0.9, so we can't use rand directly
+    // Bridge: implement rand_core 0.6's RngCore+CryptoRng on a wrapper backed by getrandom::fill.
+    struct GetrandomRng;
+    impl rsa::rand_core::RngCore for GetrandomRng {
+        fn next_u32(&mut self) -> u32 {
+            let mut b = [0u8; 4];
+            getrandom::fill(&mut b).expect("getrandom failed");
+            u32::from_le_bytes(b)
+        }
+        fn next_u64(&mut self) -> u64 {
+            let mut b = [0u8; 8];
+            getrandom::fill(&mut b).expect("getrandom failed");
+            u64::from_le_bytes(b)
+        }
+        fn fill_bytes(&mut self, dest: &mut [u8]) {
+            getrandom::fill(dest).expect("getrandom failed");
+        }
+        fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rsa::rand_core::Error> {
+            getrandom::fill(dest).expect("getrandom failed");
+            Ok(())
+        }
+    }
+    impl rsa::rand_core::CryptoRng for GetrandomRng {}
+    // TODO: waiting for rsa v0.10
+    // use rand::rngs::{StdRng, SysRng};
+    // use rand::SeedableRng;
+    // let mut rng = StdRng::try_from_rng(&mut SysRng).expect("failed to seed RNG");
+    // let priv_key = RsaPrivateKey::new(&mut rng, 2048).expect("failed to generate a key");
+
+    let priv_key = RsaPrivateKey::new(&mut GetrandomRng, 2048).expect("failed to generate a key");
     let pub_key = RsaPublicKey::from(&priv_key);
     Ok((
         normalize_key(&priv_key.to_pkcs8_pem(rsa::pkcs8::LineEnding::LF)?)?,

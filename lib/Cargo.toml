@@ -1,7 +1,7 @@
 [package]
 name = "nanopub"
 description = """
-A cross-platform Rust library to sign Nanopublications, with bindings to Python and JS (wasm)
+A cross-platform library to sign, publish, and verify Nanopublications
 """
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/lib"
 version.workspace = true
@@ -19,42 +19,41 @@ all-features = true
 
 [dependencies]
 base64 = "0.22"
-oxjsonld = "0.2"
 oxrdf = { version = "0.3", features = ["serde"] }
 oxttl = "0.2"
-rsa = { version = "0.9.10", default-features = false, features = ["pem", "sha2"] }
+oxjsonld = "0.2"
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
-chrono = "0.4.35"
-reqwest = { version = "0.12", default-features = false }
-rand = { version = "0.8", features = ["std", "std_rng"], default-features = false }
-getrandom = { version = "0.2", features = ["js"] }
-# openssl-probe = "0.1"
+chrono = "0.4"
+rsa = { version = "0.9", default-features = false, features = ["pem", "sha2"] }
+getrandom = { version = "0.3", default-features = false }
 
-# reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
-# rand = { version = "0.8", features = ["std_rng"], default-features = false }
-# log = { version = "0.0.2", features = ["std"] }
-# futures = "0.3"
+# TODO: use rsa 0.10 when out
+# rsa = { version = "0.10.0-rc.15", default-features = false, features = ["encoding", "sha2" ] }
+# rand = { version = "0.10", features = ["std", "std_rng", "sys_rng"], default-features = false }
+# getrandom = { version = "0.4", features = ["wasm_js"] }
+
+# openssl-probe = "0.1"
 # sophia = { version = "0.8.0-alpha.3", git = "https://github.com/pchampin/sophia_rs.git", rev = "ec13628", features = ["jsonld"] }
 
-[dev-dependencies]
-wasm-pack = "0.13"
-tokio = { version = "1.36", features = ["full"] }
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-futures = "0.3"
-# The JSON-LD parser uses futures::block_on which creates conflict when running in tokio runtime
-
-# Do not use rustls-tls on Windows aarch64 due to Ring dependency https://github.com/briansmith/ring/issues/1167
+# Do not use default-tls on Windows aarch64 due to Ring dependency https://github.com/briansmith/ring/issues/1167
 [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies.reqwest]
-version = "0.12"
+version = "0.13"
 default-features = false
 features = ["native-tls"]
 
 [target.'cfg(not(all(windows, target_arch = "aarch64")))'.dependencies.reqwest]
-version = "0.12"
+version = "0.13"
 default-features = false
-features = ["rustls-tls"]
+features = ["default-tls"]
+
+[dev-dependencies]
+tokio = { version = "1.36", features = ["macros", "rt"] }
+
+
+# # The sophia JSON-LD parser uses futures::block_on which created conflict when running in tokio runtime
+# [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+# futures = "0.3"
 
 
 [package.metadata.release]

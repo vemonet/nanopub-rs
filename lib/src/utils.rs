@@ -1,4 +1,4 @@
-use getrandom::getrandom;
+use getrandom::fill;
 use oxjsonld::JsonLdParser;
 use oxrdf::{
     Dataset, GraphNameRef, NamedNode, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TermRef,
@@ -85,7 +85,7 @@ pub fn get_np_server(random: bool) -> &'static str {
     }
     // Generate a random number
     let mut buf = [0u8; 4];
-    getrandom(&mut buf).expect("Failed to generate random number");
+    fill(&mut buf).expect("Failed to generate random number");
     let num = u32::from_ne_bytes(buf);
     let index = num as usize % LIST_SERVERS.len();
     LIST_SERVERS[index]

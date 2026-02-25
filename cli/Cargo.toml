@@ -1,8 +1,6 @@
 [package]
 name = "nanopub-cli"
-description = """
-A cross-platform CLI tool written in Rust to sign Nanopublications.
-"""
+description = "A cross-platform CLI tool to sign, publish, and verify Nanopublications."
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/cli"
 version.workspace = true
 authors.workspace = true

@@ -1,6 +1,6 @@
 [package]
 name = "nanopub-js"
-description = "JavaScript bindings for the Nanopub rust toolkit"
+description = "JavaScript bindings for the Nanopub rust toolkit to sign, publish, and verify Nanopublications."
 repository = "https://github.com/vemonet/nanopub-rs/tree/main/js"
 version.workspace = true
 authors.workspace = true
@@ -20,14 +20,14 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 wasm-bindgen-derive = "0.3"
 js-sys = "0.3"
-console_error_panic_hook = { version = "0.1", optional = true }
 serde = { version = "1.0" }
 serde-wasm-bindgen = "0.6"
-# Required to make sure getrandom dep from ring compiles to wasm
-getrandom = { version = "0.3.4", features = ["wasm_js"] }
+getrandom = { version = "0.3", default-features = false, features = ["wasm_js"] }
+console_error_panic_hook = { version = "0.1", optional = true }
 
 [features]
 default = ["console_error_panic_hook"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
+# wasm-pack = "0.14"
