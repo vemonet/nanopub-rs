@@ -5,7 +5,7 @@ use pythonize::pythonize;
 // use pyo3_asyncio::generic::future_into_py;
 use tokio::runtime::Runtime;
 
-#[pyclass(name = "Nanopub", module = "nanopub_sign")]
+#[pyclass(name = "Nanopub", module = "nanopub_sign", from_py_object)]
 #[derive(Clone)]
 pub struct NanopubPy {
     np: Nanopub,
@@ -123,7 +123,7 @@ impl NanopubPy {
     }
 
     #[pyo3()]
-    fn info(&self, py: Python<'_>) -> PyResult<PyObject> {
+    fn info(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
         pythonize(py, &self.np.info)
             .map(|bound| bound.into())
             .map_err(|e| {
@@ -191,7 +191,7 @@ impl NanopubPy {
     // }
 }
 
-#[pyclass(name = "NpProfile", module = "nanopub_sign")]
+#[pyclass(name = "NpProfile", module = "nanopub_sign", from_py_object)]
 #[derive(Clone)]
 pub struct NpProfilePy {
     profile: NpProfile,
@@ -227,7 +227,7 @@ impl NpProfilePy {
     }
 }
 
-#[pyclass(name = "KeyPair", module = "nanopub_sign")]
+#[pyclass(name = "KeyPair", module = "nanopub_sign", from_py_object)]
 #[derive(Clone)]
 pub struct KeyPair {
     #[pyo3(get)]
