@@ -48,7 +48,7 @@ default-features = false
 features = ["default-tls"]
 
 [dev-dependencies]
-tokio = { version = "1.36", features = ["macros", "rt"] }
+tokio = { workspace = true, features = ["macros"] }
 
 
 # # The sophia JSON-LD parser uses futures::block_on which created conflict when running in tokio runtime

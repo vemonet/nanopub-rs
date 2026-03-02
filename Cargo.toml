@@ -20,6 +20,7 @@ categories = ["science", "encoding", "cryptography"]
 
 [workspace.dependencies]
 nanopub = { version = "0.2.0", path = "./lib" }
+tokio = { version = "1.36", features = ["rt-multi-thread"] }
 
 [profile.release]
 lto = true
