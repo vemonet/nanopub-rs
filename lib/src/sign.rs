@@ -167,6 +167,12 @@ pub fn replace_ns_in_quads(
                 s.replace(old_ns, new_ns).as_str(),
             ))
         };
+        let p = quad.predicate.as_str();
+        let predicate_node = if p == old_ns || p == old_uri {
+            NamedNode::new_unchecked(new_uri)
+        } else {
+            NamedNode::new_unchecked(p.replace(old_ns, new_ns))
+        };
         // Replace URI in graphs
         let graph_name = graph_iri_to_string(quad.graph_name)?.replace(old_ns, new_ns);
         let graph = NamedNodeRef::new_unchecked(graph_name.as_str());
@@ -178,12 +184,11 @@ pub fn replace_ns_in_quads(
                 let object_node = if o == old_ns || o == old_uri {
                     NamedNode::new_unchecked(new_uri)
                 } else {
-                    let new_uri_string = o.replace(old_ns, new_ns);
-                    NamedNode::new_unchecked(new_uri_string.to_string())
+                    NamedNode::new_unchecked(o.replace(old_ns, new_ns))
                 };
                 new.insert(QuadRef::new(
                     &subject_node,
-                    quad.predicate,
+                    &predicate_node,
                     &object_node,
                     graph,
                 ));
@@ -191,7 +196,7 @@ pub fn replace_ns_in_quads(
             _ => {
                 new.insert(QuadRef::new(
                     &subject_node,
-                    quad.predicate,
+                    &predicate_node,
                     quad.object,
                     graph,
                 ));
