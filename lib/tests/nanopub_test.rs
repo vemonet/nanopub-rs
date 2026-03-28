@@ -1,9 +1,15 @@
 use nanopub::{
-    constants::TEST_SERVER, extract::extract_np_info, get_np_server, nanopub::create_base_dataset,
-    network::publish_np, profile::gen_keys, sign::normalize_dataset, utils::parse_rdf, Nanopub,
-    ProfileBuilder,
+    constants::TEST_SERVER,
+    extract::extract_np_info,
+    get_np_server,
+    nanopub::create_base_dataset,
+    network::publish_np,
+    profile::gen_keys,
+    sign::{normalize_dataset, replace_ns_in_quads},
+    utils::parse_rdf,
+    Nanopub, ProfileBuilder,
 };
-use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, QuadRef};
+use oxrdf::{Dataset, GraphNameRef, NamedNodeRef, NamedOrBlankNodeRef, QuadRef, TermRef};
 use std::{error::Error, fs};
 
 fn get_test_key() -> String {
@@ -216,6 +222,105 @@ fn default_profile_file() -> Result<(), Box<dyn Error>> {
 fn test_normalize() -> Result<(), Box<dyn Error>> {
     let dataset = Dataset::new();
     let _norm = normalize_dataset(&dataset, "", "", "#");
+    Ok(())
+}
+
+#[test]
+fn replace_ns_in_quads_rewrites_temp_predicates() -> Result<(), Box<dyn Error>> {
+    let rdf = r#"
+@prefix this: <http://purl.org/nanopub/temp/np/> .
+
+this:graph {
+    this:subject this:canUseInterface this:object .
+    this:subject2 <http://purl.org/nanopub/temp/np> this:object2 .
+}
+"#;
+    let (dataset, _) = parse_rdf(rdf)?;
+    let new_uri = "https://w3id.org/np/RAExample";
+    let new_ns = "https://w3id.org/np/RAExample/";
+    let rewritten = replace_ns_in_quads(
+        &dataset,
+        "http://purl.org/nanopub/temp/np/",
+        "http://purl.org/nanopub/temp/np",
+        new_ns,
+        new_uri,
+    )?;
+
+    assert_eq!(rewritten.len(), 2);
+    assert!(rewritten.iter().any(|quad| {
+        quad.subject
+            == NamedOrBlankNodeRef::NamedNode(NamedNodeRef::new_unchecked(&format!(
+                "{new_ns}subject"
+            )))
+            && quad.predicate.as_str() == format!("{new_ns}canUseInterface")
+            && quad.object
+                == TermRef::NamedNode(NamedNodeRef::new_unchecked(&format!("{new_ns}object")))
+            && quad.graph_name
+                == GraphNameRef::NamedNode(NamedNodeRef::new_unchecked(&format!("{new_ns}graph")))
+    }));
+    assert!(rewritten.iter().any(|quad| {
+        quad.subject
+            == NamedOrBlankNodeRef::NamedNode(NamedNodeRef::new_unchecked(&format!(
+                "{new_ns}subject2"
+            )))
+            && quad.predicate.as_str() == new_uri
+            && quad.object
+                == TermRef::NamedNode(NamedNodeRef::new_unchecked(&format!("{new_ns}object2")))
+            && quad.graph_name
+                == GraphNameRef::NamedNode(NamedNodeRef::new_unchecked(&format!("{new_ns}graph")))
+    }));
+    Ok(())
+}
+
+#[test]
+fn sign_nanopub_rewrites_temp_predicates() -> Result<(), Box<dyn Error>> {
+    let np_rdf = r#"
+@prefix : <http://purl.org/nanopub/temp/mynanopub#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+
+:Head {
+    : np:hasAssertion :assertion ;
+        np:hasProvenance :provenance ;
+        np:hasPublicationInfo :pubinfo ;
+        a np:Nanopublication .
+}
+
+:assertion {
+    :M2 :canUseInterface :SATA .
+}
+
+:provenance {
+    :assertion prov:hadPrimarySource <http://dx.doi.org/10.3233/ISU-2010-0613> .
+}
+
+:pubinfo {
+    : dc:created "2014-07-24T18:05:11+01:00"^^xsd:dateTime ;
+        pav:createdBy <http://orcid.org/0000-0000-0000-0000> ;
+        a npx:ExampleNanopub .
+}
+"#;
+    let profile = ProfileBuilder::new(get_test_key()).build()?;
+    let np = Nanopub::new(np_rdf)?.sign(&profile)?;
+    let predicate = format!("{}canUseInterface", np.info.ns.as_str());
+
+    assert!(np
+        .dataset
+        .iter()
+        .any(|quad| quad.predicate.as_str() == predicate));
+    assert!(np
+        .dataset
+        .iter()
+        .all(|quad| quad.predicate.as_str()
+            != "http://purl.org/nanopub/temp/mynanopub#canUseInterface"));
+
+    let signed_rdf = np.rdf()?;
+    assert!(!signed_rdf.contains("http://purl.org/nanopub/temp/mynanopub#canUseInterface"));
+    assert!(signed_rdf.contains("canUseInterface"));
     Ok(())
 }
 
